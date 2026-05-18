@@ -171,11 +171,23 @@ def version() -> None:
 
 @app.command()
 def init(
-    name: str = typer.Argument(..., help="Project name for the new workspace."),
+    name: Optional[str] = typer.Argument(None, help="Project name. Omit for global install."),
     skill: Optional[str] = typer.Option(None, "--skill", "-s", help="Skill to associate with this workspace."),
-    force: bool = typer.Option(False, "--force", "-f", help="Re-initialise an existing workspace."),
+    force: bool = typer.Option(False, "--force", "-f", help="Re-run setup even if already configured."),
 ) -> None:
-    """Create a new DesignOS workspace in ./<name>."""
+    """Initialize DesignOS.
+
+    Without arguments: runs global setup (detect IDE, configure API key, install IDE configs).
+    With <name>: creates a project workspace in ./<name>.
+    """
+    if name is None:
+        # Global install mode
+        from designos.cli.installer import run_global_install
+
+        run_global_install(force=force)
+        return
+
+    # Project workspace mode (existing logic)
     from kernel.contracts.errors import DesignOSError
     from kernel.workspace.initializer import WorkspaceInitializer
 

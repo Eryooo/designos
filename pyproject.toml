@@ -11,9 +11,12 @@ classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
 dependencies = [
     "pydantic>=2.0",
@@ -37,6 +40,15 @@ trace = [
     "opentelemetry-sdk",
     "opentelemetry-exporter-otlp",
 ]
+uxeval = [
+    "pdfplumber>=0.11",
+    "openpyxl>=3.1",
+    "Pillow>=10.0",
+]
+all = [
+    "designos[uxeval]",
+    "designos[trace]",
+]
 
 [project.scripts]
 designos = "designos.cli.main:app"
@@ -47,6 +59,31 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["designos", "kernel"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"skills" = "designos/_bundled/skills"
+"mcp-servers" = "designos/_bundled/mcp-servers"
+"AGENTS.md" = "designos/_bundled/AGENTS.md"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/kernel",
+    "/designos",
+    "/skills",
+    "/mcp-servers",
+    "/AGENTS.md",
+    "/docs",
+    "/README.md",
+    "/LICENSE",
+    "/CHANGELOG.md",
+    "/pyproject.toml",
+]
+exclude = [
+    "/tests",
+    "/legacy",
+    "*__pycache__*",
+    "*.pyc",
+]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

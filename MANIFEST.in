@@ -1,0 +1,13 @@
+include README.md
+include LICENSE
+include CHANGELOG.md
+include AGENTS.md
+recursive-include skills *
+recursive-include mcp-servers *
+recursive-include kernel *.py
+recursive-include designos *.py
+global-exclude *.pyc
+global-exclude __pycache__
+prune tests
+prune legacy
+prune .venv
