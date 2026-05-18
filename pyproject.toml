@@ -1,6 +1,6 @@
 [project]
 name = "designos"
-version = "0.1.0"
+version = "0.1.1"
 requires-python = ">=3.11"
 license = {text = "Apache-2.0"}
 description = "DesignOS — AI-native 设计能力包，封装高级设计专家方法论为可共享 Skill 矩阵"

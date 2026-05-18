@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import shutil
 from pathlib import Path
 from typing import Any
@@ -13,7 +14,37 @@ from designos.cli.ide_detector import IDE, detect_ide, ide_config_path
 
 _log: structlog.stdlib.BoundLogger = structlog.get_logger("designos.cli.installer")
 
-_DESIGNOS_HOME: Path = Path.home() / ".designos"
+
+def _resolve_designos_home() -> Path:
+    """Locate the DesignOS config directory.
+
+    Priority:
+    1. ``DESIGNOS_HOME`` env var (explicit override)
+    2. ``~/.designos`` if writable
+    3. ``./.designos`` (project-local fallback for sandboxes / restricted envs)
+    """
+    env_home = os.environ.get("DESIGNOS_HOME")
+    if env_home:
+        return Path(env_home).expanduser().resolve()
+
+    home_candidate = Path.home() / ".designos"
+    try:
+        home_candidate.mkdir(parents=True, exist_ok=True)
+        # Probe write permission
+        probe = home_candidate / ".write_probe"
+        probe.touch()
+        probe.unlink()
+        return home_candidate
+    except (OSError, PermissionError):
+        pass
+
+    # Sandbox / restricted environment fallback: project-local config
+    cwd_candidate = Path.cwd() / ".designos"
+    cwd_candidate.mkdir(parents=True, exist_ok=True)
+    return cwd_candidate
+
+
+_DESIGNOS_HOME: Path = _resolve_designos_home()
 _ENV_FILE: Path = _DESIGNOS_HOME / ".env.local"
 
 _DEFAULT_MODEL: str = "claude-opus-4-7"
@@ -201,6 +232,8 @@ def run_global_install(force: bool = False) -> None:
     6. Print success summary
     """
     typer.echo(typer.style("DesignOS Global Setup", bold=True))
+    typer.echo("")
+    typer.echo(f"  Config directory: {_DESIGNOS_HOME}")
     typer.echo("")
 
     # Step 1: Detect IDE
