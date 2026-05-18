@@ -147,20 +147,24 @@ class TestOtherCommands:
         result = _run_designos("run", "--help")
         assert result.returncode == 0
 
-    def test_resume_exits_zero(self) -> None:
-        """designos resume exits with code 0 (placeholder)."""
+    def test_resume_exits_with_error_outside_workspace(self) -> None:
+        """designos resume returns non-zero outside a workspace (correct behavior)."""
         result = _run_designos("resume")
-        assert result.returncode == 0
+        assert result.returncode != 0
+        assert "workspace" in result.stderr.lower() or "workspace" in result.stdout.lower()
 
-    def test_config_exits_zero(self) -> None:
-        """designos config exits with code 0 (placeholder)."""
+    def test_config_runs_or_prompts(self) -> None:
+        """designos config either prompts (and times out via empty stdin) or completes."""
+        # config is interactive; in non-interactive mode it should fail gracefully (not crash)
         result = _run_designos("config")
-        assert result.returncode == 0
+        # Accept either successful no-op or graceful exit; just ensure no traceback
+        assert "Traceback" not in result.stderr
 
-    def test_history_exits_zero(self) -> None:
-        """designos history exits with code 0 (placeholder)."""
+    def test_history_exits_with_error_outside_workspace(self) -> None:
+        """designos history returns non-zero outside a workspace (correct behavior)."""
         result = _run_designos("history")
-        assert result.returncode == 0
+        assert result.returncode != 0
+        assert "workspace" in result.stderr.lower() or "workspace" in result.stdout.lower()
 
     def test_preflight_exits_zero(self) -> None:
         """designos preflight uxeval exits with code 0 (placeholder)."""

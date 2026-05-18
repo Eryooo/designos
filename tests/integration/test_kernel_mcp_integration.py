@@ -30,6 +30,43 @@ def _add_mcp_path(p: Path) -> None:
         sys.path.insert(0, s)
 
 
+def _isolate_mcp_path(p: Path) -> None:
+    """Switch sys.path to a single MCP dir and evict cached core/schemas modules.
+
+    Each MCP server has its own ``core.py`` / ``schemas.py``; without isolation
+    the second test class would get the first one's cached modules.
+    """
+    # Remove any other mcp-servers/* dir from sys.path
+    other_mcp_dirs = [
+        str(d)
+        for d in (_PDF_PARSER_DIR, _EXCEL_BUILDER_DIR, _HEURISTIC_ENGINE_DIR)
+        if d != p
+    ]
+    sys.path[:] = [s for s in sys.path if s not in other_mcp_dirs]
+    _add_mcp_path(p)
+    # Evict cached modules so importlib re-imports from the new sys.path
+    for name in ("core", "schemas", "server", "rules", "principles_library", "llm_judge"):
+        sys.modules.pop(name, None)
+
+
+@pytest.fixture
+def pdf_parser_env() -> None:
+    """Test fixture: isolate sys.path to pdf-parser MCP."""
+    _isolate_mcp_path(_PDF_PARSER_DIR)
+
+
+@pytest.fixture
+def excel_builder_env() -> None:
+    """Test fixture: isolate sys.path to excel-builder MCP."""
+    _isolate_mcp_path(_EXCEL_BUILDER_DIR)
+
+
+@pytest.fixture
+def heuristic_engine_env() -> None:
+    """Test fixture: isolate sys.path to heuristic-engine MCP."""
+    _isolate_mcp_path(_HEURISTIC_ENGINE_DIR)
+
+
 # ---------------------------------------------------------------------------
 # pdf-parser integration
 # ---------------------------------------------------------------------------
@@ -41,7 +78,7 @@ class TestPdfParserIntegration:
 
     def test_pdf_parser_core_importable(self) -> None:
         """pdf-parser core module is importable from the MCP server directory."""
-        _add_mcp_path(_PDF_PARSER_DIR)
+        _isolate_mcp_path(_PDF_PARSER_DIR)
         import importlib
 
         core = importlib.import_module("core")
@@ -50,7 +87,7 @@ class TestPdfParserIntegration:
 
     def test_pdf_parser_schemas_importable(self) -> None:
         """pdf-parser schemas module is importable and contains expected models."""
-        _add_mcp_path(_PDF_PARSER_DIR)
+        _isolate_mcp_path(_PDF_PARSER_DIR)
         import importlib
 
         schemas = importlib.import_module("schemas")
@@ -60,7 +97,7 @@ class TestPdfParserIntegration:
 
     def test_pdf_parser_missing_file_raises(self) -> None:
         """parse_pdf raises FileNotFoundError for a non-existent path."""
-        _add_mcp_path(_PDF_PARSER_DIR)
+        _isolate_mcp_path(_PDF_PARSER_DIR)
         import importlib
 
         core = importlib.import_module("core")
@@ -69,7 +106,7 @@ class TestPdfParserIntegration:
 
     def test_pdf_parser_section_heading_detection(self) -> None:
         """_is_section_heading correctly identifies numbered headings."""
-        _add_mcp_path(_PDF_PARSER_DIR)
+        _isolate_mcp_path(_PDF_PARSER_DIR)
         import importlib
 
         core = importlib.import_module("core")
@@ -133,7 +170,7 @@ class TestExcelBuilderIntegration:
 
     def test_excel_builder_core_importable(self) -> None:
         """excel-builder core module is importable."""
-        _add_mcp_path(_EXCEL_BUILDER_DIR)
+        _isolate_mcp_path(_EXCEL_BUILDER_DIR)
         import importlib
 
         core = importlib.import_module("core")
@@ -142,7 +179,7 @@ class TestExcelBuilderIntegration:
 
     def test_build_issue_report_uxeval_template(self, tmp_path: Path) -> None:
         """build_issue_report creates a valid Excel file with uxeval template."""
-        _add_mcp_path(_EXCEL_BUILDER_DIR)
+        _isolate_mcp_path(_EXCEL_BUILDER_DIR)
         import importlib
 
         core = importlib.import_module("core")
@@ -167,7 +204,7 @@ class TestExcelBuilderIntegration:
 
     def test_build_issue_report_unknown_template_raises(self, tmp_path: Path) -> None:
         """build_issue_report raises ExcelBuilderError for unknown template."""
-        _add_mcp_path(_EXCEL_BUILDER_DIR)
+        _isolate_mcp_path(_EXCEL_BUILDER_DIR)
         import importlib
 
         core = importlib.import_module("core")
@@ -225,7 +262,7 @@ class TestHeuristicEngineIntegration:
 
     def test_heuristic_engine_core_importable(self) -> None:
         """heuristic-engine core module is importable."""
-        _add_mcp_path(_HEURISTIC_ENGINE_DIR)
+        _isolate_mcp_path(_HEURISTIC_ENGINE_DIR)
         import importlib
 
         core = importlib.import_module("core")
@@ -233,7 +270,7 @@ class TestHeuristicEngineIntegration:
 
     def test_heuristic_engine_schemas_importable(self) -> None:
         """heuristic-engine schemas module contains expected models."""
-        _add_mcp_path(_HEURISTIC_ENGINE_DIR)
+        _isolate_mcp_path(_HEURISTIC_ENGINE_DIR)
         import importlib
 
         schemas = importlib.import_module("schemas")
@@ -245,7 +282,7 @@ class TestHeuristicEngineIntegration:
 
     def test_detect_with_mock_judge(self, tmp_path: Path) -> None:
         """detect() returns DetectionResult with mocked LLM judge."""
-        _add_mcp_path(_HEURISTIC_ENGINE_DIR)
+        _isolate_mcp_path(_HEURISTIC_ENGINE_DIR)
         import importlib
 
         schemas = importlib.import_module("schemas")
