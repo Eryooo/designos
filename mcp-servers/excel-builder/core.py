@@ -213,15 +213,20 @@ def _build_competitor_template(wb: Workbook, issues: list[dict[str, Any]]) -> No
 
 def build_issue_report(
     issues: list[dict[str, Any]],
-    output_path: str,
-    template: str,
+    output_path: str | None = None,
+    template: str = "uxeval",
+    journey_map: Any = None,  # noqa: ARG001 — reserved for M2
+    principles: Any = None,  # noqa: ARG001 — reserved for M2
 ) -> dict[str, Any]:
     """Build an Excel report from a list of issues.
 
     Args:
         issues: List of Issue objects serialized as dicts.
         output_path: Absolute path where the Excel file should be written.
+            If None, generates a timestamped path in /tmp.
         template: Report template name ('uxeval', 'design-acceptance', 'competitor').
+        journey_map: Journey map context (reserved for M2).
+        principles: Principles list (reserved for M2).
 
     Returns:
         Dict with 'path' (str) and 'sheet_count' (int).
@@ -232,6 +237,12 @@ def build_issue_report(
     # Validate template
     if template not in ["uxeval", "design-acceptance", "competitor"]:
         raise ExcelBuilderError(f"Unknown template: {template}")
+
+    # Generate default output path if not provided
+    if output_path is None:
+        import datetime
+        timestamp = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d_%H%M%S")
+        output_path = f"/tmp/issue_report_{timestamp}.xlsx"
 
     # Validate output path
     output_file = Path(output_path)
