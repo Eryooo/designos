@@ -339,13 +339,20 @@ class LLMJudge:
         valid_principle_ids = {p.id for p in request.principles}
         out: list[RawIssue] = []
         for screenshot in request.screenshots:
-            response = self._invoke(client, request, screenshot)
-            text = _extract_text(response)
-            payloads = self._parse_json(text)
-            for payload in payloads:
-                issue = _validate_issue_dict(payload, valid_screenshot_ids, valid_principle_ids)
-                if issue is not None:
-                    out.append(issue)
+            try:
+                response = self._invoke(client, request, screenshot)
+                text = _extract_text(response)
+                payloads = self._parse_json(text)
+                for payload in payloads:
+                    issue = _validate_issue_dict(payload, valid_screenshot_ids, valid_principle_ids)
+                    if issue is not None:
+                        out.append(issue)
+            except (LLMJudgeError, Exception) as exc:  # noqa: BLE001
+                import logging
+                logging.getLogger(__name__).warning(
+                    "LLM judge failed for %s: %s", screenshot.id, str(exc)[:200]
+                )
+                continue
         return out
 
     # -- internals ----------------------------------------------------------
@@ -371,7 +378,6 @@ class LLMJudge:
     ) -> Any:
         """Send a single screenshot evaluation request to the LLM."""
 
-        media_type, data = _encode_image(Path(screenshot.path))
         system = _render_system_prompt(request.constitution)
         user_text = (
             "Principles in scope:\n"
@@ -383,6 +389,31 @@ class LLMJudge:
             f"Now evaluate screenshot id={screenshot.id} (flow={screenshot.flow or '-'},"
             f" region={screenshot.region or '-'}). Output JSON array only."
         )
+
+        # Build content blocks: use image for real screenshots, text for .md descriptions.
+        screenshot_path = Path(screenshot.path)
+        content_blocks: list[dict[str, Any]] = []
+        if screenshot_path.suffix.lower() in (".md", ".txt"):
+            try:
+                text_content = screenshot_path.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                text_content = "(unable to read file)"
+            content_blocks.append({
+                "type": "text",
+                "text": f"[Screenshot {screenshot.id} — text description]:\n{text_content[:2000]}",
+            })
+        else:
+            media_type, data = _encode_image(screenshot_path)
+            content_blocks.append({
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": media_type,
+                    "data": data,
+                },
+            })
+        content_blocks.append({"type": "text", "text": user_text})
+
         return client.messages.create(
             model=self._model,
             max_tokens=self._max_tokens,
@@ -390,17 +421,7 @@ class LLMJudge:
             messages=[
                 {
                     "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": media_type,
-                                "data": data,
-                            },
-                        },
-                        {"type": "text", "text": user_text},
-                    ],
+                    "content": content_blocks,
                 }
             ],
         )

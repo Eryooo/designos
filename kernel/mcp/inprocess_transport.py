@@ -39,8 +39,6 @@ _ARG_ALIASES: dict[str, str] = {
     # Pipeline state name → tool argument name. Lets skills export richer
     # state keys (e.g. ``task_checklist_lite``) while tools accept a single
     # canonical name (``task_checklist``).
-    "task_checklist_lite": "task_checklist",
-    "task_checklist_full": "task_checklist_full",  # keep as-is
     "screens_description": "screenshots_description",
     "prd_text": "prd",
 }
@@ -160,11 +158,18 @@ class InProcessTransport:
              values to ``Path`` when annotated as such.
         """
         import inspect
+        import typing
 
         try:
             sig = inspect.signature(fn)
         except (TypeError, ValueError):
             return args
+
+        # Resolve string annotations (from __future__ import annotations).
+        try:
+            hints = typing.get_type_hints(fn)
+        except Exception:  # noqa: BLE001
+            hints = {}
 
         params = list(sig.parameters.values())
 
@@ -184,7 +189,7 @@ class InProcessTransport:
             and p.default is inspect.Parameter.empty
         ]
         if len(required_positional) == 1:
-            ann: Any = required_positional[0].annotation
+            ann: Any = hints.get(required_positional[0].name, required_positional[0].annotation)
             if hasattr(ann, "model_validate"):
                 cleaned = _drop_none_recursive(args)
                 try:
@@ -203,7 +208,7 @@ class InProcessTransport:
         for k, v in args.items():
             if k not in accepted:
                 continue
-            ann = sig.parameters[k].annotation
+            ann = hints.get(k, sig.parameters[k].annotation)
             if ann is Path and isinstance(v, str):
                 out[k] = Path(v)
             else:

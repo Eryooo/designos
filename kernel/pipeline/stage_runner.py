@@ -121,7 +121,7 @@ class StageRunner:
         outputs: dict[str, Any] = {}
         data: dict[str, Any] = result.data or {}
         for name in stage.outputs:
-            outputs[name] = data.get(name, data)
+            outputs[name] = data.get(name)
         return outputs
 
     def _render_prompt(self, stage: StageConfig, ctx: SkillContext) -> str:
