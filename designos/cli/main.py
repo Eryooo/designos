@@ -65,7 +65,29 @@ def _skill_search_paths() -> list[Path]:
     repo_skills = Path.cwd() / "skills"
     if repo_skills.exists():
         paths.append(repo_skills)
+    # Walk up from cwd to find a sibling `skills/` (dev convenience).
+    for parent in Path.cwd().parents:
+        candidate = parent / "skills"
+        if candidate.is_dir() and (parent / "kernel").exists():
+            if candidate not in paths:
+                paths.append(candidate)
+            break
     return paths
+
+
+def _detect_repo_root() -> Path | None:
+    """Locate the DesignOS repo root (the dir containing ``mcp-servers/``)."""
+    # Walk up from this file's location.
+    here = Path(__file__).resolve()
+    for ancestor in (here, *here.parents):
+        if (ancestor / "mcp-servers").is_dir() and (ancestor / "kernel").is_dir():
+            return ancestor
+    # Fallback: cwd ancestors.
+    cwd = Path.cwd().resolve()
+    for ancestor in (cwd, *cwd.parents):
+        if (ancestor / "mcp-servers").is_dir() and (ancestor / "kernel").is_dir():
+            return ancestor
+    return None
 
 
 def _load_workspace_inputs(ws_root: Path) -> dict[str, Any]:
@@ -186,6 +208,8 @@ def run(
     from kernel.contracts.errors import DesignOSError
     from kernel.contracts.schemas import SkillContext
     from kernel.llm.client import LLMClient
+    from kernel.mcp.client import MCPClient
+    from kernel.mcp.registry import MCPRegistry
     from kernel.pipeline.engine import make_engine
     from kernel.skill_loader.loader import SkillLoader
     from kernel.workspace.run_manager import RunManager
@@ -220,7 +244,14 @@ def run(
         )
 
         llm_client = LLMClient.from_global_config(cfg.global_config)
-        engine = make_engine(workspace=ws, llm=llm_client)
+
+        # Wire MCP client. Builtin servers are auto-discovered from the repo's
+        # ``mcp-servers/`` directory via the in-process transport.
+        repo_root = _detect_repo_root()
+        registry = MCPRegistry.from_skill_config(loaded_skill.config)  # type: ignore[attr-defined]
+        mcp_client = MCPClient(registry, repo_root=repo_root) if repo_root else None
+
+        engine = make_engine(workspace=ws, llm=llm_client, mcp=mcp_client)
 
         _info(f"Running skill '{skill}' (run_id={resolved_run_id}) …")
 

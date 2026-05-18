@@ -20,6 +20,7 @@ from kernel.contracts.interfaces import (
     IPipelineSkill,
 )
 from kernel.contracts.schemas import (
+    MCPServerConfig,
     SkillConfig,
     SkillContext,
     SkillResult,
@@ -119,12 +120,27 @@ def _config_from_frontmatter(fm: dict[str, Any]) -> SkillConfig:
     modes_raw: Any = fm.get("modes", []) or []
     modes: list[str] = [str(m.get("id", "")) for m in modes_raw if isinstance(m, dict)]
     requires: dict[str, Any] = fm.get("requires", {}) or {}
+    mcp_raw: Any = requires.get("mcp_servers", []) or []
+    mcp_servers: list[MCPServerConfig] = []
+    for entry in mcp_raw:
+        if not isinstance(entry, dict):
+            continue
+        name: str = str(entry.get("name", "")).strip()
+        if not name:
+            continue
+        mcp_servers.append(
+            MCPServerConfig(
+                name=name,
+                builtin=bool(entry.get("builtin", False)),
+            )
+        )
     return SkillConfig(
         name=str(fm.get("name", "")),
         version=str(fm.get("version", "0.0.0")),
         skill_type=SkillType.PIPELINE,
         supported_modes=[m for m in modes if m],
         requires_kernel=str(requires.get("kernel", ">=1.0.0,<2.0.0")),
+        mcp_servers=mcp_servers,
     )
 
 
