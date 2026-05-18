@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import os
+import platform
 import shutil
+import subprocess
+import sys
 from pathlib import Path
 from typing import Any
 
@@ -220,6 +223,105 @@ def _write_env_file(env: dict[str, str]) -> None:
     _ENV_FILE.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
+def _get_user_bin_dir() -> Path:
+    """Return the directory where pip installs user scripts."""
+    if platform.system() == "Darwin":
+        py_ver = f"{sys.version_info.major}.{sys.version_info.minor}"
+        return Path.home() / "Library" / "Python" / py_ver / "bin"
+    return Path.home() / ".local" / "bin"
+
+
+def _get_shell_rc() -> Path | None:
+    """Return the user's shell rc file path."""
+    shell = os.environ.get("SHELL", "")
+    home = Path.home()
+    if "zsh" in shell:
+        return home / ".zshrc"
+    elif "bash" in shell:
+        # macOS uses .bash_profile for login shells
+        if platform.system() == "Darwin":
+            profile = home / ".bash_profile"
+            if profile.exists():
+                return profile
+        bashrc = home / ".bashrc"
+        return bashrc
+    elif "fish" in shell:
+        return home / ".config" / "fish" / "config.fish"
+    return None
+
+
+def _path_contains(bin_dir: Path) -> bool:
+    """Check if bin_dir is already in PATH."""
+    path_dirs = os.environ.get("PATH", "").split(os.pathsep)
+    bin_str = str(bin_dir)
+    return any(os.path.realpath(d) == os.path.realpath(bin_str) for d in path_dirs)
+
+
+def _designos_on_path() -> bool:
+    """Check if `designos` command is reachable."""
+    return shutil.which("designos") is not None
+
+
+def ensure_path_configured() -> bool:
+    """Ensure the designos binary is on PATH. Returns True if PATH was modified.
+
+    Strategy:
+    1. If `designos` is already on PATH → do nothing.
+    2. Find the user-base bin dir (where pip --user installs scripts).
+    3. If that dir is not in PATH → append export to shell rc file.
+    4. Also add ~/.local/bin as a fallback (pipx location).
+    """
+    if _designos_on_path():
+        return False
+
+    bin_dir = _get_user_bin_dir()
+    local_bin = Path.home() / ".local" / "bin"
+    rc_file = _get_shell_rc()
+
+    if rc_file is None:
+        typer.echo(
+            typer.style(
+                f"  Could not detect shell rc file. "
+                f"Add this to your shell config manually:\n"
+                f'    export PATH="{bin_dir}:$PATH"',
+                fg=typer.colors.YELLOW,
+            )
+        )
+        return False
+
+    lines_to_add: list[str] = []
+    marker = "# Added by DesignOS installer"
+
+    if not _path_contains(bin_dir):
+        lines_to_add.append(f'export PATH="{bin_dir}:$PATH"  {marker}')
+    if local_bin != bin_dir and not _path_contains(local_bin):
+        lines_to_add.append(f'export PATH="{local_bin}:$PATH"  {marker}')
+
+    if not lines_to_add:
+        return False
+
+    # Check if we already wrote these lines before
+    existing_content = ""
+    if rc_file.exists():
+        existing_content = rc_file.read_text(encoding="utf-8")
+    if marker in existing_content:
+        return False
+
+    # Append to rc file
+    with rc_file.open("a", encoding="utf-8") as f:
+        f.write("\n")
+        for line in lines_to_add:
+            f.write(f"{line}\n")
+
+    _log.info("path.configured", rc_file=str(rc_file), dirs=lines_to_add)
+    typer.echo(
+        typer.style(f"  PATH updated in {rc_file}", fg=typer.colors.GREEN)
+    )
+    typer.echo(f"  Run: source {rc_file}")
+    typer.echo(f"  Or open a new terminal window.")
+    return True
+
+
 def run_global_install(force: bool = False) -> None:
     """Interactive global setup for DesignOS.
 
@@ -314,7 +416,16 @@ def run_global_install(force: bool = False) -> None:
         else:
             typer.echo("  No IDE configs to install.")
 
-    # Step 6: Success summary
+    # Step 6: Ensure PATH is configured
+    typer.echo("")
+    typer.echo(typer.style("Checking PATH...", bold=True))
+    path_modified = ensure_path_configured()
+    if not path_modified and _designos_on_path():
+        typer.echo(typer.style("  designos command is on PATH.", fg=typer.colors.GREEN))
+    elif not path_modified:
+        typer.echo("  Fallback: use  python -m designos  if command not found.")
+
+    # Step 7: Success summary
     typer.echo("")
     typer.echo(typer.style("Setup complete!", fg=typer.colors.GREEN, bold=True))
     typer.echo("")
