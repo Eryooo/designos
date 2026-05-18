@@ -166,7 +166,8 @@ def test_condition_only_when_dsl(tmp_path: Path) -> None:
 
 
 @pytest.mark.asyncio
-async def test_pipeline_fails_on_missing_input(tmp_path: Path) -> None:
+async def test_pipeline_defaults_missing_input_to_empty(tmp_path: Path) -> None:
+    """M1: missing inputs default to empty so optional upstream fields don't break the pipeline."""
     prompt = tmp_path / "p.md"
     prompt.write_text("x", encoding="utf-8")
     stage = StageConfig(
@@ -178,7 +179,7 @@ async def test_pipeline_fails_on_missing_input(tmp_path: Path) -> None:
     )
     engine = PipelineEngine(llm=FakeLLM())
     events = [ev async for ev in engine.execute(StubPipelineSkill([stage]), _ctx(tmp_path))]
-    assert events[-1].kind == "stage_failed"
+    assert events[-1].kind == "stage_completed"
 
 
 @pytest.mark.asyncio

@@ -10,8 +10,9 @@ Commands are organised into three layers:
 from __future__ import annotations
 
 import asyncio
+import json
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 import typer
 
@@ -65,6 +66,48 @@ def _skill_search_paths() -> list[Path]:
     if repo_skills.exists():
         paths.append(repo_skills)
     return paths
+
+
+def _load_workspace_inputs(ws_root: Path) -> dict[str, Any]:
+    """Read every file under ``<workspace>/inputs/`` into a state dict.
+
+    Mapping convention (state key ← file basename):
+      - ``prd.md``  → keys ``prd_text``, ``prd_file`` (file path), ``prd``
+      - ``scope.md`` → keys ``scope_md``, ``scope``
+      - ``screens-description.md`` → ``screens_description``, ``screenshots``
+      - ``raw_issues.json`` → ``raw_issues`` (parsed as list/dict)
+      - other ``.md`` → key = file stem with ``-`` → ``_``
+      - other ``.json`` → key = file stem, parsed
+      - other ``.txt`` / ``.yaml`` → key = file stem, raw text
+
+    Always sets ``screenshots_dir`` to ``inputs/`` for skills that need it.
+    """
+    inputs_dir = ws_root / "inputs"
+    state: dict[str, Any] = {"screenshots_dir": inputs_dir}
+    if not inputs_dir.is_dir():
+        return state
+    for f in sorted(inputs_dir.iterdir()):
+        if not f.is_file() or f.name.startswith("."):
+            continue
+        stem_key = f.stem.replace("-", "_")
+        suffix = f.suffix.lower()
+        try:
+            if suffix == ".json":
+                state[stem_key] = json.loads(f.read_text(encoding="utf-8"))
+            else:
+                state[stem_key] = f.read_text(encoding="utf-8")
+        except Exception:
+            state[stem_key] = f.read_text(encoding="utf-8", errors="ignore")
+        # Common aliases used by uxeval skill.
+        if f.name == "prd.md":
+            state["prd_text"] = state[stem_key]
+            state["prd_file"] = str(f)
+        if f.name == "scope.md":
+            state["scope_md"] = state[stem_key]
+        if f.name == "screens-description.md":
+            state["screens_description"] = state[stem_key]
+            state.setdefault("screenshots", state[stem_key])
+    return state
 
 
 def _find_workspace() -> Path | None:
@@ -142,6 +185,7 @@ def run(
     from kernel.config.loader import load_config
     from kernel.contracts.errors import DesignOSError
     from kernel.contracts.schemas import SkillContext
+    from kernel.llm.client import LLMClient
     from kernel.pipeline.engine import make_engine
     from kernel.skill_loader.loader import SkillLoader
     from kernel.workspace.run_manager import RunManager
@@ -162,6 +206,9 @@ def run(
         rm.run_dir(resolved_run_id, create=True)
 
         cfg = load_config(workspace=ws_root)
+
+        initial_state: dict[str, Any] = _load_workspace_inputs(ws_root)
+
         ctx = SkillContext(
             run_id=resolved_run_id,
             workspace=ws_root,
@@ -169,14 +216,17 @@ def run(
             skill_version=getattr(loaded_skill, "version", "0.0.0"),
             mode=mode,  # type: ignore[arg-type]
             config=cfg,
-            state={},
+            state=initial_state,
         )
 
-        engine = make_engine(workspace=ws)
+        llm_client = LLMClient.from_global_config(cfg.global_config)
+        engine = make_engine(workspace=ws, llm=llm_client)
 
         _info(f"Running skill '{skill}' (run_id={resolved_run_id}) …")
 
-        async def _drive() -> None:
+        async def _drive_once() -> bool:
+            """Drive engine.execute once, returning True if a checkpoint paused the run."""
+            paused = False
             async for event in engine.execute(loaded_skill, ctx):  # type: ignore[arg-type]
                 kind: str = event.kind
                 stage: str = event.stage_id
@@ -191,6 +241,15 @@ def run(
                     _info(typer.style(f"\nCheckpoint: {msg}", fg=typer.colors.YELLOW))
                     if not auto_confirm:
                         typer.confirm("Continue?", default=True, abort=True)
+                    paused = True
+            return paused
+
+        async def _drive() -> None:
+            # With ``--auto-confirm``, automatically resume past every checkpoint.
+            while True:
+                paused = await _drive_once()
+                if not paused or not auto_confirm:
+                    break
 
         asyncio.run(_drive())
         _ok("Run complete.")

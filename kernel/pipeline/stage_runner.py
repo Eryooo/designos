@@ -88,11 +88,7 @@ class StageRunner:
             )
         prompt: str = self._render_prompt(stage, ctx)
         resp = await self._llm.call(prompt, max_tokens=4096)
-        outputs: dict[str, Any] = {}
-        if stage.outputs:
-            outputs[stage.outputs[0]] = resp.text
-            for extra in stage.outputs[1:]:
-                outputs[extra] = ""
+        outputs: dict[str, Any] = _parse_llm_outputs(resp.text, stage.outputs)
         outputs["__llm_meta__"] = {
             "model": resp.model,
             "input_tokens": resp.input_tokens,
@@ -156,11 +152,11 @@ class StageRunner:
             elif name in ctx.upstream_data:
                 inputs[name] = ctx.upstream_data[name]
             else:
-                raise PipelineError(
-                    ErrorCode.E2002,
-                    f"missing stage input: {name}",
-                    context={"stage": stage.id, "input": name},
-                )
+                # M1 pragmatic default: missing inputs become empty so optional
+                # upstream-injected fields (e.g. existing_personas from
+                # ai-analytics) don't break the pipeline. M2 will introduce
+                # explicit ``required: bool`` markers per input.
+                inputs[name] = ""
         return inputs
 
 
@@ -170,6 +166,56 @@ def _stringify(value: Any) -> str:
     if hasattr(value, "model_dump_json"):
         return value.model_dump_json()  # type: ignore[no-any-return]
     return str(value)
+
+
+def _parse_llm_outputs(text: str, output_names: list[str]) -> dict[str, Any]:
+    """Map LLM ``text`` to the declared ``output_names``.
+
+    Tries three strategies:
+      1. If the response contains a JSON block whose top-level keys match the
+         declared outputs, split the JSON into per-output values.
+      2. If only one output is declared, assign the full text.
+      3. Otherwise put the full text in the first output and empty strings in
+         the rest (legacy behaviour, kept as a safety net for non-JSON skills).
+    """
+    import json
+    import re
+
+    if not output_names:
+        return {}
+
+    # Strategy 1: extract a fenced JSON block or the first top-level JSON object.
+    candidate: str | None = None
+    fence = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+    if fence:
+        candidate = fence.group(1)
+    else:
+        brace = re.search(r"\{.*\}", text, re.DOTALL)
+        if brace:
+            candidate = brace.group(0)
+    if candidate is not None:
+        try:
+            parsed = json.loads(candidate)
+        except json.JSONDecodeError:
+            parsed = None
+        if isinstance(parsed, dict):
+            mapped: dict[str, Any] = {}
+            for name in output_names:
+                if name in parsed:
+                    mapped[name] = parsed[name]
+                else:
+                    mapped[name] = ""
+            # Treat as a successful split only if at least one declared output
+            # appeared in the JSON; otherwise fall through to legacy behaviour.
+            if any(mapped[n] != "" for n in output_names):
+                return mapped
+
+    # Strategy 2/3: single output gets full text; multi-output keeps legacy
+    # behaviour of putting full text in the first slot.
+    outputs: dict[str, Any] = {output_names[0]: text}
+    for extra in output_names[1:]:
+        outputs[extra] = ""
+    return outputs
 
 
 __all__ = ["StageRunner"]
