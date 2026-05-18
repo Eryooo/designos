@@ -72,11 +72,11 @@ def sample_issues() -> list[Issue]:
         Issue(
             id="I-005",
             title="帮助文档链接文字不具描述性",
-            description="帮助链接文字为"点击这里"，缺乏上下文",
+            description='帮助链接文字为"点击这里"，缺乏上下文',
             severity=SeverityLevel.SUGGESTION,
             principle_ids=["H6"],
             evidence_refs=["E-005"],
             user_impact="屏幕阅读器用户无法从链接文字判断目标内容",
-            suggestion="将链接文字改为"查看注册帮助文档"等描述性文字",
+            suggestion='将链接文字改为"查看注册帮助文档"等描述性文字',
         ),
     ]
