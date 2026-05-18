@@ -1,0 +1,1271 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI-native 产研交付机制</title>
+  <style>
+    :root {
+      --paper: #ffffff;
+      --paper-2: #ffffff;
+      --ink: #16211f;
+      --muted: #5d6763;
+      --line: rgba(22, 33, 31, 0.16);
+      --teal: #106b6f;
+      --blue: #255ea8;
+      --red: #cf4636;
+      --amber: #b77b16;
+      --green: #2e7b4f;
+      --violet: #6b4aa5;
+      --shadow: 0 28px 70px rgba(29, 38, 35, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #ffffff;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      letter-spacing: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .site-nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      width: min(1600px, calc(100vw - 48px));
+      height: 72px;
+      margin: 0 auto;
+    }
+
+    .site-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .site-brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      color: #fff;
+      background: var(--ink);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .site-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .site-links a {
+      padding: 10px 12px;
+      border: 1px solid transparent;
+    }
+
+    .site-links a:hover,
+    .site-links a.active {
+      color: var(--ink);
+      border-color: var(--line);
+      background: rgba(22, 33, 31, 0.045);
+    }
+
+    .poster {
+      width: 1600px;
+      min-height: 2360px;
+      margin: 0 auto;
+      padding: 74px 78px 70px;
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .poster > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .poster::before {
+      content: "";
+      position: absolute;
+      inset: 28px;
+      border: 1px solid rgba(22, 33, 31, 0.18);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .poster::after {
+      content: "";
+      position: absolute;
+      right: -120px;
+      bottom: -180px;
+      width: 520px;
+      height: 520px;
+      border: 88px solid rgba(37, 94, 168, 0.08);
+      transform: rotate(18deg);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .topbar {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 44px;
+      padding-bottom: 36px;
+      border-bottom: 5px solid var(--ink);
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      height: 36px;
+      padding: 0 14px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.88);
+    }
+
+    .kicker .dot {
+      width: 46px;
+      height: 10px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle 5px at 5px 5px, var(--red) 98%, transparent),
+        radial-gradient(circle 5px at 23px 5px, var(--teal) 98%, transparent),
+        radial-gradient(circle 5px at 41px 5px, var(--amber) 98%, transparent);
+    }
+
+    h1 {
+      width: 920px;
+      margin: 24px 0 0;
+      font-size: 78px;
+      line-height: 1.03;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      width: 850px;
+      margin: 28px 0 0;
+      color: #2c3734;
+      font-size: 28px;
+      line-height: 1.52;
+      font-weight: 500;
+    }
+
+    .executive-note {
+      width: 425px;
+      padding: 30px;
+      background: var(--ink);
+      color: #fff9ec;
+      box-shadow: var(--shadow);
+    }
+
+    .executive-note .label {
+      color: #e3c87c;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .executive-note .sentence {
+      margin-top: 18px;
+      font-size: 31px;
+      line-height: 1.28;
+      font-weight: 900;
+    }
+
+    .executive-note .small {
+      margin-top: 22px;
+      color: rgba(255, 249, 236, 0.76);
+      font-size: 20px;
+      line-height: 1.5;
+    }
+
+    .value-strip {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 34px;
+    }
+
+    .value {
+      min-height: 140px;
+      padding: 22px 22px 20px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 36px rgba(29, 38, 35, 0.08);
+    }
+
+    .value strong {
+      display: block;
+      font-size: 30px;
+      line-height: 1.12;
+      font-weight: 900;
+    }
+
+    .value span {
+      display: block;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.45;
+      font-weight: 600;
+    }
+
+    .value:nth-child(1) { border-top: 8px solid var(--red); }
+    .value:nth-child(2) { border-top: 8px solid var(--teal); }
+    .value:nth-child(3) { border-top: 8px solid var(--blue); }
+    .value:nth-child(4) { border-top: 8px solid var(--green); }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin: 54px 0 22px;
+    }
+
+    .section-title .index {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      color: #fff;
+      background: var(--ink);
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 37px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .section-title p {
+      margin: 0 0 0 auto;
+      max-width: 620px;
+      color: var(--muted);
+      text-align: right;
+      font-size: 19px;
+      line-height: 1.42;
+      font-weight: 600;
+    }
+
+    .flow {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 12px;
+      padding: 30px 24px 42px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .flow::before {
+      content: "";
+      position: absolute;
+      left: 86px;
+      right: 86px;
+      top: 85px;
+      height: 6px;
+      background: linear-gradient(90deg, var(--red), var(--amber), var(--teal), var(--blue), var(--green), var(--violet));
+      opacity: 0.7;
+    }
+
+    .step {
+      position: relative;
+      min-height: 292px;
+      padding: 68px 15px 18px;
+      text-align: center;
+    }
+
+    .step .num {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      display: grid;
+      place-items: center;
+      width: 68px;
+      height: 68px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      color: #fff;
+      background: var(--ink);
+      border: 7px solid var(--paper-2);
+      font-size: 23px;
+      font-weight: 900;
+      z-index: 2;
+    }
+
+    .step h3 {
+      margin: 36px 0 12px;
+      font-size: 25px;
+      line-height: 1.18;
+      font-weight: 900;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .step b {
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .agent-loop {
+      display: grid;
+      grid-template-columns: 0.95fr 1.1fr 0.95fr;
+      align-items: stretch;
+      gap: 20px;
+      margin-top: 22px;
+    }
+
+    .loop-panel {
+      min-height: 214px;
+      padding: 26px 28px;
+      background: #15211f;
+      color: #fff9ec;
+      box-shadow: var(--shadow);
+    }
+
+    .loop-panel h3 {
+      margin: 0;
+      font-size: 29px;
+      line-height: 1.14;
+      font-weight: 900;
+    }
+
+    .loop-panel p {
+      margin: 18px 0 0;
+      color: rgba(255, 249, 236, 0.76);
+      font-size: 19px;
+      line-height: 1.52;
+      font-weight: 600;
+    }
+
+    .loop-panel:nth-child(2) {
+      background: var(--teal);
+    }
+
+    .loop-panel:nth-child(3) {
+      background: var(--red);
+    }
+
+    .feedback-loop {
+      display: grid;
+      grid-template-columns: 0.72fr repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+      padding: 20px;
+      background: rgba(21, 33, 31, 0.055);
+      border: 1px solid rgba(22, 33, 31, 0.12);
+      box-shadow: 0 18px 45px rgba(29, 38, 35, 0.08);
+    }
+
+    .feedback-title {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 150px;
+      padding: 20px;
+      color: #fff9ec;
+      background: var(--ink);
+    }
+
+    .feedback-title strong {
+      display: block;
+      font-size: 29px;
+      line-height: 1.14;
+      font-weight: 900;
+    }
+
+    .feedback-title span {
+      display: block;
+      margin-top: 12px;
+      color: rgba(255, 249, 236, 0.76);
+      font-size: 17px;
+      line-height: 1.36;
+      font-weight: 650;
+    }
+
+    .feedback-card {
+      min-height: 150px;
+      padding: 20px 20px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(22, 33, 31, 0.12);
+    }
+
+    .feedback-card h3 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.16;
+      font-weight: 900;
+    }
+
+    .feedback-card p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.48;
+      font-weight: 650;
+    }
+
+    .roles {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .role {
+      position: relative;
+      min-height: 330px;
+      padding: 26px 24px 24px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 45px rgba(29, 38, 35, 0.1);
+    }
+
+    .role::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 9px;
+      background: var(--teal);
+    }
+
+    .role:nth-child(1)::before { background: var(--red); }
+    .role:nth-child(2)::before { background: var(--blue); }
+    .role:nth-child(3)::before { background: var(--green); }
+    .role:nth-child(4)::before { background: var(--amber); }
+
+    .role .tag {
+      display: inline-block;
+      padding: 7px 11px;
+      color: #fff;
+      background: var(--ink);
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .role h3 {
+      margin: 19px 0 14px;
+      font-size: 30px;
+      line-height: 1.18;
+      font-weight: 900;
+    }
+
+    .role ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .role li {
+      position: relative;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.52;
+      font-weight: 650;
+    }
+
+    .role li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 13px;
+      width: 7px;
+      height: 7px;
+      background: currentColor;
+      border-radius: 50%;
+    }
+
+    .system-grid {
+      display: grid;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .branch-map {
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .merge-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 14px;
+      border-bottom: 4px solid var(--ink);
+    }
+
+    .merge-title h3 {
+      margin: 0;
+      font-size: 31px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .merge-title span {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .main-trunk {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 16px;
+      align-items: center;
+      margin-top: 20px;
+      padding: 16px;
+      color: #fff;
+      background: var(--ink);
+      box-shadow: 0 16px 34px rgba(22, 33, 31, 0.12);
+    }
+
+    .main-trunk strong {
+      font-family: "SFMono-Regular", "Consolas", monospace;
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .main-trunk span {
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 18px;
+      line-height: 1.42;
+      font-weight: 700;
+    }
+
+    .merge-flow {
+      display: grid;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .merge-lane {
+      display: grid;
+      grid-template-columns: 150px repeat(3, 1fr) 150px;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .merge-tag {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      color: #fff;
+      background: var(--ink);
+      font-family: "SFMono-Regular", "Consolas", monospace;
+      font-size: 21px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .merge-tag.ux { background: var(--red); }
+    .merge-tag.feature { background: var(--teal); }
+    .merge-tag.qa { background: var(--green); }
+    .merge-tag.fix { background: var(--blue); }
+    .merge-tag.main { background: var(--ink); }
+
+    .merge-node {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 72px;
+      padding: 13px 15px;
+      color: var(--ink);
+      background: var(--soft);
+      border: 1px solid rgba(22, 33, 31, 0.12);
+      font-size: 17px;
+      line-height: 1.28;
+      font-weight: 800;
+    }
+
+    .merge-node::after {
+      content: "→";
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      color: var(--muted);
+      font-size: 24px;
+      font-weight: 900;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+
+    .merge-node:last-child::after,
+    .merge-lane .merge-tag:last-child::after {
+      display: none;
+    }
+
+    .merge-node.dark {
+      color: #fff;
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .branch-rules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .branch-rule {
+      min-height: 96px;
+      padding: 16px;
+      background: rgba(22, 33, 31, 0.045);
+      border: 1px solid rgba(22, 33, 31, 0.09);
+    }
+
+    .branch-rule strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .branch-rule span {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.4;
+      font-weight: 650;
+    }
+
+    .definition {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .done {
+      min-height: 235px;
+      padding: 27px 25px;
+      color: #fff9ec;
+      background: var(--ink);
+      box-shadow: 0 18px 44px rgba(29, 38, 35, 0.12);
+    }
+
+    .done:nth-child(2) {
+      background: var(--blue);
+    }
+
+    .done:nth-child(3) {
+      background: var(--green);
+    }
+
+    .done h3 {
+      margin: 0 0 18px;
+      font-size: 29px;
+      line-height: 1.16;
+      font-weight: 900;
+    }
+
+    .done p {
+      margin: 0;
+      color: rgba(255, 249, 236, 0.82);
+      font-size: 18px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .gates {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+    }
+
+    .gate {
+      min-height: 126px;
+      padding: 18px 14px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(22, 33, 31, 0.14);
+      text-align: center;
+    }
+
+    .gate .mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      margin: 0 auto 13px;
+      color: #fff;
+      background: var(--ink);
+      border-radius: 50%;
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    .gate:nth-child(2) .mark { background: var(--red); }
+    .gate:nth-child(3) .mark { background: var(--teal); }
+    .gate:nth-child(4) .mark { background: var(--blue); }
+    .gate:nth-child(5) .mark { background: var(--amber); }
+    .gate:nth-child(6) .mark { background: var(--green); }
+
+    .gate strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .gate span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 650;
+    }
+
+    .bottom {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      margin-top: 26px;
+      align-items: stretch;
+    }
+
+    .metrics {
+      padding: 28px 30px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .metrics h3,
+    .rulebook h3 {
+      margin: 0 0 18px;
+      font-size: 31px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .metric {
+      min-height: 118px;
+      padding: 18px 16px;
+      background: rgba(22, 33, 31, 0.055);
+      border: 1px solid rgba(22, 33, 31, 0.08);
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--ink);
+      font-size: 22px;
+      line-height: 1.16;
+      font-weight: 900;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 650;
+    }
+
+    .rulebook {
+      padding: 28px 30px;
+      color: #fff9ec;
+      background: var(--ink);
+      box-shadow: var(--shadow);
+    }
+
+    .rules {
+      display: grid;
+      gap: 14px;
+    }
+
+    .rule {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 13px;
+      align-items: start;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 249, 236, 0.18);
+    }
+
+    .rule:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .rule .check {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      color: var(--ink);
+      background: #e3c87c;
+      border-radius: 50%;
+      font-weight: 900;
+    }
+
+    .rule strong {
+      display: block;
+      font-size: 21px;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .rule span {
+      display: block;
+      margin-top: 4px;
+      color: rgba(255, 249, 236, 0.72);
+      font-size: 16px;
+      line-height: 1.38;
+      font-weight: 600;
+    }
+
+    .closing {
+      position: relative;
+      margin-top: 34px;
+      padding: 28px 34px;
+      color: #fff9ec;
+      background: linear-gradient(90deg, var(--red), #9b4f15 42%, var(--teal));
+      box-shadow: var(--shadow);
+    }
+
+    .closing strong {
+      display: block;
+      font-size: 34px;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .closing span {
+      display: block;
+      margin-top: 12px;
+      color: rgba(255, 249, 236, 0.82);
+      font-size: 20px;
+      line-height: 1.42;
+      font-weight: 650;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 28px;
+      color: rgba(22, 33, 31, 0.62);
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    @media (max-width: 900px) {
+      .site-nav-inner {
+        height: auto;
+        min-height: 72px;
+        padding: 14px 0;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .site-links {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="site-nav" aria-label="站点导航">
+    <div class="site-nav-inner">
+      <a class="site-brand" href="index.html" aria-label="返回产研模式演进首页">
+        <span class="site-brand-mark">AI</span>
+        <span>产研模式演进</span>
+      </a>
+      <div class="site-links">
+        <a href="index.html#matrix">模式对比与解读</a>
+        <a class="active" href="ai-native-delivery-exec-map.html">AI-native 机制</a>
+        <a href="ai-native-enablement.html">落地配套</a>
+      </div>
+    </div>
+  </nav>
+  <main class="poster">
+    <header class="topbar">
+      <div>
+        <div class="kicker"><span class="dot"></span><span>AI-native Operating Model</span></div>
+        <h1>AI-native<br>产研交付机制</h1>
+        <p class="lead">从“人肉交接”升级为“Issue 驱动、PR 承载、Agent 共创、人类决策放行”的连续交付系统。</p>
+      </div>
+      <aside class="executive-note">
+        <div class="sentence">AI 提效后的瓶颈，不在生成速度，而在共识、集成、质量与放行。</div>
+        <div class="small">把体验探索、工程治理、质量安全、Agent 生产协同和灰度验证放进同一个可度量闭环。</div>
+      </aside>
+    </header>
+
+    <section class="value-strip" aria-label="战略价值">
+      <div class="value">
+        <strong>更快验证价值</strong>
+        <span>先做可体验版本，让需求从文档进入真实交互。</span>
+      </div>
+      <div class="value">
+        <strong>更稳工程落地</strong>
+        <span>用契约、架构、可观测性把 Demo 收敛为系统。</span>
+      </div>
+      <div class="value">
+        <strong>更强质量治理</strong>
+        <span>测试、安全、性能、可访问性前置并自动化执行。</span>
+      </div>
+      <div class="value">
+        <strong>更低发布风险</strong>
+        <span>Feature Flag 灰度验证，指标达标再全量。</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">01</span>
+        <h2>端到端交付主线</h2>
+        <p>每个阶段都有明确产物、责任 owner 和自动化验证证据，避免需求、代码、测试和发布脱节。</p>
+      </div>
+      <div class="flow">
+        <div class="step">
+          <span class="num">1</span>
+          <h3>立项 Issue</h3>
+          <p><b>目标、用户故事、验收标准、成功指标</b><br>由 Agent 协助拆解任务、补全场景与风险。</p>
+        </div>
+        <div class="step">
+          <span class="num">2</span>
+          <h3>体验探索</h3>
+          <p><b>ux/&lt;ticket&gt;</b><br>甲方与 Agent 共创原型、文案、交互变体和 Mock。</p>
+        </div>
+        <div class="step">
+          <span class="num">3</span>
+          <h3>宣讲 PR</h3>
+          <p><b>Draft PR 做共识</b><br>Agent 辅助生成评审材料，乙方评估实现，丙方前置门槛。</p>
+        </div>
+        <div class="step">
+          <span class="num">4</span>
+          <h3>契约锁定</h3>
+          <p><b>API、数据、权限、错误码、埋点</b><br>Agent 辅助生成契约草案和一致性校验。</p>
+        </div>
+        <div class="step">
+          <span class="num">5</span>
+          <h3>工程收敛</h3>
+          <p><b>feature/&lt;ticket&gt;</b><br>乙方与 Agent 共创代码、测试、异常、日志、监控。</p>
+        </div>
+        <div class="step">
+          <span class="num">6</span>
+          <h3>质量门禁</h3>
+          <p><b>自动测试 + 安全 + 性能</b><br>丙方与 Agent 共创用例、规则、报告和阻塞 Issue。</p>
+        </div>
+        <div class="step">
+          <span class="num">7</span>
+          <h3>灰度放量</h3>
+          <p><b>Feature Flag</b><br>试用指标达标后进入 main 和全量发布。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">02</span>
+        <h2>AI Agent 生产协同与反馈闭环</h2>
+        <p>Agent 进入甲乙丙生产现场参与产物生成，同时用 Issue/PR 闭环完成检查、分派、验证和愈合。</p>
+      </div>
+      <div class="agent-loop">
+        <div class="loop-panel">
+          <h3>甲方生产增强</h3>
+          <p>辅助生成需求卡、用户故事、验收标准、交互原型、文案变体、Mock 数据和埋点草案。</p>
+        </div>
+        <div class="loop-panel">
+          <h3>乙方生产增强</h3>
+          <p>辅助生成接口契约、业务代码、状态模型、单测、异常处理、日志监控和重构建议。</p>
+        </div>
+        <div class="loop-panel">
+          <h3>丙方生产增强</h3>
+          <p>辅助生成测试策略、E2E 用例、安全规则、性能预算、可访问性检查和放行报告。</p>
+        </div>
+      </div>
+      <div class="feedback-loop">
+        <div class="feedback-title">
+          <strong>反馈愈合闭环</strong>
+          <span>让 AI 产出速度与质量反馈密度同步提升。</span>
+        </div>
+        <div class="feedback-card">
+          <h3>Issue 是最小管理单元</h3>
+          <p>体验偏差、契约风险、工程问题、测试失败、安全漏洞和上线风险进入 Issue 池，自动打标、归因和分派。</p>
+        </div>
+        <div class="feedback-card">
+          <h3>PR 是解决证据载体</h3>
+          <p>每个 PR 关联 Issue，说明变更、验证方式、风险、回滚和契约影响。Agent 预审后进入人工评审。</p>
+        </div>
+        <div class="feedback-card">
+          <h3>人类负责关键取舍</h3>
+          <p>业务价值、架构方向、质量放行和灰度节奏由 owner 决策。Agent 提高效率，但不替代责任。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">03</span>
+        <h2>角色边界与两两闭环</h2>
+        <p>甲乙丙不再串行交接，而是在同一功能分支和 Issue 系统里持续协同。</p>
+      </div>
+      <div class="roles">
+        <div class="role">
+          <span class="tag">甲方</span>
+          <h3>需求与体验 Owner</h3>
+          <ul>
+            <li>业务目标与用户场景</li>
+            <li>交互、视觉、动效</li>
+            <li>Mock 可演示实现</li>
+            <li>验收标准与埋点需求</li>
+          </ul>
+        </div>
+        <div class="role">
+          <span class="tag">乙方</span>
+          <h3>工程与系统 Owner</h3>
+          <ul>
+            <li>接口契约与数据模型</li>
+            <li>业务逻辑与权限边界</li>
+            <li>异常处理、日志、监控</li>
+            <li>性能、可维护性与 ADR</li>
+          </ul>
+        </div>
+        <div class="role">
+          <span class="tag">丙方</span>
+          <h3>质量与安全 Owner</h3>
+          <ul>
+            <li>测试策略与上线门槛</li>
+            <li>回归、安全、性能检查</li>
+            <li>可访问性与埋点验证</li>
+            <li>放行、拦截与灰度观察</li>
+          </ul>
+        </div>
+        <div class="role">
+          <span class="tag">Agent</span>
+          <h3>生产协同引擎</h3>
+          <ul>
+            <li>参与甲方体验生产</li>
+            <li>参与乙方工程生产</li>
+            <li>参与丙方质量生产</li>
+            <li>持续检查、反馈与愈合</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">04</span>
+        <h2>分支策略与完成定义</h2>
+        <p>保留清晰分支边界，同时压缩生命周期；成熟后可逐步向短分支 + Feature Flag + main 常绿演进。</p>
+      </div>
+      <div class="system-grid">
+        <div class="branch-map">
+          <div class="merge-title">
+            <h3>分支合并路径</h3>
+            <span>main 常驻可发布；辅助分支先进入 feature 收敛，再经门禁与灰度回流 main</span>
+          </div>
+          <div class="main-trunk">
+            <strong>main</strong>
+            <span>常驻主干，始终可发布；禁止直接 push，所有未验证能力通过 Feature Flag 隔离。</span>
+          </div>
+          <div class="merge-flow" aria-label="分支合并路径图">
+            <div class="merge-lane">
+              <div class="merge-tag feature">feature/*</div>
+              <div class="merge-node">功能集成<br>工程收敛</div>
+              <div class="merge-node">契约锁定<br>Mock 替换</div>
+              <div class="merge-node">质量门禁<br>Canary 灰度</div>
+              <div class="merge-tag main">main</div>
+            </div>
+            <div class="merge-lane">
+              <div class="merge-tag ux">ux/*</div>
+              <div class="merge-node">体验探索<br>可演示原型</div>
+              <div class="merge-node">宣讲 PR<br>拆分 Issue</div>
+              <div class="merge-node">合入 feature/*</div>
+              <div class="merge-tag feature">feature/*</div>
+            </div>
+            <div class="merge-lane">
+              <div class="merge-tag qa">qa/*</div>
+              <div class="merge-node">测试脚本<br>放行规则</div>
+              <div class="merge-node">阻断 Issue<br>报告证据</div>
+              <div class="merge-node">合入 feature/*</div>
+              <div class="merge-tag feature">feature/*</div>
+            </div>
+            <div class="merge-lane">
+              <div class="merge-tag fix">fix/*</div>
+              <div class="merge-node">短修复<br>关联 Issue</div>
+              <div class="merge-node">验证证据<br>小 PR</div>
+              <div class="merge-node">合入 feature<br>或热修 main</div>
+              <div class="merge-tag main">main</div>
+            </div>
+          </div>
+          <div class="branch-rules">
+            <div class="branch-rule">
+              <strong>main 常绿</strong>
+              <span>始终可发布，禁止直接 push，未验证能力必须被 Feature Flag 隔离。</span>
+            </div>
+            <div class="branch-rule">
+              <strong>feature 收敛</strong>
+              <span>甲乙丙共同收敛的功能集成分支，避免长期漂移，优先小 PR。</span>
+            </div>
+            <div class="branch-rule">
+              <strong>辅助分支短命</strong>
+              <span>ux、qa、fix 都必须关联 Issue、PR 与验证证据，完成后及时合并或关闭。</span>
+            </div>
+          </div>
+        </div>
+        <div class="definition">
+          <div class="done">
+            <h3>体验完成</h3>
+            <p>可演示、主流程闭环、关键状态覆盖、视觉交互对齐、文案基本稳定、埋点需求明确。</p>
+          </div>
+          <div class="done">
+            <h3>工程完成</h3>
+            <p>接口联通、Mock 替换或隔离、权限完整、异常处理完整、日志监控可用、测试通过。</p>
+          </div>
+          <div class="done">
+            <h3>上线完成</h3>
+            <p>质量门禁通过、Feature Flag 可控、灰度指标达标、高优风险关闭、回滚机制验证。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">05</span>
+        <h2>质量门禁与经营看板</h2>
+        <p>把质量从“最后测试”升级为“可审计、可阻断、可度量”的经营能力。</p>
+      </div>
+      <div class="gates">
+        <div class="gate">
+          <div class="mark">T</div>
+          <strong>自动测试</strong>
+          <span>单测、集成、E2E、回归</span>
+        </div>
+        <div class="gate">
+          <div class="mark">S</div>
+          <strong>安全扫描</strong>
+          <span>SAST、依赖漏洞、权限边界</span>
+        </div>
+        <div class="gate">
+          <div class="mark">P</div>
+          <strong>性能预算</strong>
+          <span>延迟、加载、资源、容量</span>
+        </div>
+        <div class="gate">
+          <div class="mark">A</div>
+          <strong>可访问性</strong>
+          <span>键盘、语义、对比度、读屏</span>
+        </div>
+        <div class="gate">
+          <div class="mark">O</div>
+          <strong>可观测性</strong>
+          <span>日志、指标、告警、埋点</span>
+        </div>
+        <div class="gate">
+          <div class="mark">R</div>
+          <strong>回滚就绪</strong>
+          <span>开关、脚本、负责人、预案</span>
+        </div>
+      </div>
+      <div class="bottom">
+        <div class="metrics">
+          <h3>集团可跟踪的关键指标</h3>
+          <div class="metric-grid">
+            <div class="metric"><strong>Lead Time</strong><span>立项到放行周期</span></div>
+            <div class="metric"><strong>PR 等待</strong><span>首次响应与合并时长</span></div>
+            <div class="metric"><strong>PR 规模</strong><span>变更行数与拆分质量</span></div>
+            <div class="metric"><strong>缺陷逃逸</strong><span>生产缺陷与回归遗漏</span></div>
+            <div class="metric"><strong>灰度回滚</strong><span>试用失败与回滚比例</span></div>
+            <div class="metric"><strong>Agent 贡献率</strong><span>生产协同、有效发现、自动修复</span></div>
+          </div>
+        </div>
+        <div class="rulebook">
+          <h3>治理规则</h3>
+          <div class="rules">
+            <div class="rule">
+              <span class="check">1</span>
+              <div><strong>所有需求必须 Issue 化</strong><span>没有目标、验收标准和成功指标，不进入实现。</span></div>
+            </div>
+            <div class="rule">
+              <span class="check">2</span>
+              <div><strong>所有上线必须可灰度、可回滚</strong><span>Feature Flag、负责人和退出条件是发布前置条件。</span></div>
+            </div>
+            <div class="rule">
+              <span class="check">3</span>
+              <div><strong>质量门禁有阻断权</strong><span>P0/P1 风险未关闭，不允许正式放量。</span></div>
+            </div>
+            <div class="rule">
+              <span class="check">4</span>
+              <div><strong>Agent 参与生产但 owner 负责</strong><span>AI 参与甲乙丙生产与反馈，人类承担业务、架构和质量决策。</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="closing">
+      <strong>最终目标：让 AI 带来的产出速度，真正转化为可控、可审计、可持续的集团级交付能力。</strong>
+      <span>机制关键词：体验先行、契约先稳、工程收敛、质量放行、灰度验证、Agent 共创与愈合。</span>
+    </div>
+
+    <footer class="footer">
+      <span>AI-native 产研交付机制</span>
+      <span>Issue 驱动 · PR 承载 · Agent 共创 · 人类放行</span>
+    </footer>
+  </main>
+</body>
+</html>

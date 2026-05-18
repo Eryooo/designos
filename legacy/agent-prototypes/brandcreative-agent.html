@@ -1,0 +1,1593 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BrandCreative Agent：AI-native 品牌创意生产系统实践</title>
+  <style>
+    :root {
+      --paper: #ffffff;
+      --paper-2: #ffffff;
+      --ink: #16211f;
+      --muted: #5d6763;
+      --line: rgba(22, 33, 31, 0.16);
+      --teal: #106b6f;
+      --blue: #255ea8;
+      --red: #cf4636;
+      --amber: #b77b16;
+      --green: #2e7b4f;
+      --violet: #6b4aa5;
+      --shadow: 0 28px 70px rgba(29, 38, 35, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #ffffff;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      letter-spacing: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .site-nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      width: min(1600px, calc(100vw - 48px));
+      height: 72px;
+      margin: 0 auto;
+    }
+
+    .site-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .site-brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      color: #fff;
+      background: var(--ink);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .site-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .site-links a {
+      padding: 10px 12px;
+      border: 1px solid transparent;
+    }
+
+    .site-links a:hover,
+    .site-links a.active {
+      color: var(--ink);
+      border-color: var(--line);
+      background: rgba(22, 33, 31, 0.045);
+    }
+
+    .poster {
+      width: 1600px;
+      min-height: 2360px;
+      margin: 0 auto;
+      padding: 74px 78px 70px;
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .poster > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .poster::before {
+      content: "";
+      position: absolute;
+      inset: 28px;
+      border: 1px solid rgba(22, 33, 31, 0.18);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .poster::after {
+      content: "";
+      position: absolute;
+      right: -120px;
+      bottom: -180px;
+      width: 520px;
+      height: 520px;
+      border: 88px solid rgba(37, 94, 168, 0.08);
+      transform: rotate(18deg);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .topbar {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 44px;
+      padding-bottom: 36px;
+      border-bottom: 5px solid var(--ink);
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      height: 36px;
+      padding: 0 14px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.88);
+    }
+
+    .kicker .dot {
+      width: 46px;
+      height: 10px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle 5px at 5px 5px, var(--red) 98%, transparent),
+        radial-gradient(circle 5px at 23px 5px, var(--teal) 98%, transparent),
+        radial-gradient(circle 5px at 41px 5px, var(--amber) 98%, transparent);
+    }
+
+    h1 {
+      width: 920px;
+      margin: 24px 0 0;
+      font-size: 78px;
+      line-height: 1.03;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      width: 850px;
+      margin: 28px 0 0;
+      color: #2c3734;
+      font-size: 28px;
+      line-height: 1.52;
+      font-weight: 500;
+    }
+
+    .executive-note {
+      width: 425px;
+      padding: 30px;
+      background: var(--ink);
+      color: #fff9ec;
+      box-shadow: var(--shadow);
+    }
+
+    .executive-note .label {
+      color: #e3c87c;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .executive-note .sentence {
+      margin-top: 18px;
+      font-size: 31px;
+      line-height: 1.28;
+      font-weight: 900;
+    }
+
+    .executive-note .small {
+      margin-top: 22px;
+      color: rgba(255, 249, 236, 0.76);
+      font-size: 20px;
+      line-height: 1.5;
+    }
+
+    .value-strip {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 34px;
+    }
+
+    .value {
+      min-height: 140px;
+      padding: 22px 22px 20px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 36px rgba(29, 38, 35, 0.08);
+    }
+
+    .value strong {
+      display: block;
+      font-size: 30px;
+      line-height: 1.12;
+      font-weight: 900;
+    }
+
+    .value span {
+      display: block;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.45;
+      font-weight: 600;
+    }
+
+    .value:nth-child(1) { border-top: 8px solid var(--red); }
+    .value:nth-child(2) { border-top: 8px solid var(--teal); }
+    .value:nth-child(3) { border-top: 8px solid var(--blue); }
+    .value:nth-child(4) { border-top: 8px solid var(--green); }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin: 54px 0 22px;
+    }
+
+    .section-title .index {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      color: #fff;
+      background: var(--ink);
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 37px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .section-title p {
+      margin: 0 0 0 auto;
+      max-width: 620px;
+      color: var(--muted);
+      text-align: right;
+      font-size: 19px;
+      line-height: 1.42;
+      font-weight: 600;
+    }
+
+    .flow {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      padding: 30px 24px 42px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .flow::before {
+      content: "";
+      position: absolute;
+      left: 86px;
+      right: 86px;
+      top: 85px;
+      height: 6px;
+      background: linear-gradient(90deg, var(--red), var(--amber), var(--teal), var(--blue));
+      opacity: 0.7;
+    }
+
+    .step {
+      position: relative;
+      min-height: 292px;
+      padding: 68px 15px 18px;
+      text-align: center;
+    }
+
+    .step .num {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      display: grid;
+      place-items: center;
+      width: 68px;
+      height: 68px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      color: #fff;
+      background: var(--ink);
+      border: 7px solid var(--paper-2);
+      font-size: 23px;
+      font-weight: 900;
+      z-index: 2;
+    }
+
+    .step h3 {
+      margin: 36px 0 12px;
+      font-size: 25px;
+      line-height: 1.18;
+      font-weight: 900;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .step b {
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .agent-loop {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: stretch;
+      gap: 20px;
+      margin-top: 22px;
+    }
+
+    .loop-panel {
+      min-height: 214px;
+      padding: 26px 28px;
+      background: #15211f;
+      color: #fff9ec;
+      box-shadow: var(--shadow);
+    }
+
+    .loop-panel h3 {
+      margin: 0;
+      font-size: 29px;
+      line-height: 1.14;
+      font-weight: 900;
+    }
+
+    .loop-panel p {
+      margin: 18px 0 0;
+      color: rgba(255, 249, 236, 0.76);
+      font-size: 19px;
+      line-height: 1.52;
+      font-weight: 600;
+    }
+
+    .loop-panel:nth-child(2) {
+      background: var(--teal);
+    }
+
+    .loop-panel:nth-child(3) {
+      background: var(--red);
+    }
+
+    .feedback-loop {
+      display: grid;
+      grid-template-columns: 0.72fr repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+      padding: 20px;
+      background: rgba(21, 33, 31, 0.055);
+      border: 1px solid rgba(22, 33, 31, 0.12);
+      box-shadow: 0 18px 45px rgba(29, 38, 35, 0.08);
+    }
+
+    .feedback-title {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 150px;
+      padding: 20px;
+      color: #fff9ec;
+      background: var(--ink);
+    }
+
+    .feedback-title strong {
+      display: block;
+      font-size: 29px;
+      line-height: 1.14;
+      font-weight: 900;
+    }
+
+    .feedback-title span {
+      display: block;
+      margin-top: 12px;
+      color: rgba(255, 249, 236, 0.76);
+      font-size: 17px;
+      line-height: 1.36;
+      font-weight: 650;
+    }
+
+    .feedback-card {
+      min-height: 150px;
+      padding: 20px 20px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(22, 33, 31, 0.12);
+    }
+
+    .feedback-card h3 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.16;
+      font-weight: 900;
+    }
+
+    .feedback-card p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.48;
+      font-weight: 650;
+    }
+
+    .roles {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .role {
+      position: relative;
+      min-height: 330px;
+      padding: 26px 24px 24px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 45px rgba(29, 38, 35, 0.1);
+    }
+
+    .role::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 9px;
+      background: var(--teal);
+    }
+
+    .role:nth-child(1)::before { background: var(--red); }
+    .role:nth-child(2)::before { background: var(--blue); }
+    .role:nth-child(3)::before { background: var(--green); }
+    .role:nth-child(4)::before { background: var(--amber); }
+
+    .role .tag {
+      display: inline-block;
+      padding: 7px 11px;
+      color: #fff;
+      background: var(--ink);
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .role h3 {
+      margin: 19px 0 14px;
+      font-size: 30px;
+      line-height: 1.18;
+      font-weight: 900;
+    }
+
+    .role ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .role li {
+      position: relative;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.52;
+      font-weight: 650;
+    }
+
+    .role li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 13px;
+      width: 7px;
+      height: 7px;
+      background: currentColor;
+      border-radius: 50%;
+    }
+
+    .system-grid {
+      display: grid;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .branch-map {
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .merge-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 14px;
+      border-bottom: 4px solid var(--ink);
+    }
+
+    .merge-title h3 {
+      margin: 0;
+      font-size: 31px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .merge-title span {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .main-trunk {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 16px;
+      align-items: center;
+      margin-top: 20px;
+      padding: 16px;
+      color: #fff;
+      background: var(--ink);
+      box-shadow: 0 16px 34px rgba(22, 33, 31, 0.12);
+    }
+
+    .main-trunk strong {
+      font-family: "SFMono-Regular", "Consolas", monospace;
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .main-trunk span {
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 18px;
+      line-height: 1.42;
+      font-weight: 700;
+    }
+
+    .merge-flow {
+      display: grid;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .merge-lane {
+      display: grid;
+      grid-template-columns: 150px repeat(3, 1fr) 150px;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .merge-tag {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      color: #fff;
+      background: var(--ink);
+      font-family: "SFMono-Regular", "Consolas", monospace;
+      font-size: 21px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .merge-tag.ux { background: var(--red); }
+    .merge-tag.feature { background: var(--teal); }
+    .merge-tag.qa { background: var(--green); }
+    .merge-tag.fix { background: var(--blue); }
+    .merge-tag.main { background: var(--ink); }
+
+    .merge-node {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 72px;
+      padding: 13px 15px;
+      color: var(--ink);
+      background: rgba(22, 33, 31, 0.045);
+      border: 1px solid rgba(22, 33, 31, 0.12);
+      font-size: 17px;
+      line-height: 1.28;
+      font-weight: 800;
+    }
+
+    .merge-node::after {
+      content: "→";
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      color: var(--muted);
+      font-size: 24px;
+      font-weight: 900;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+
+    .merge-node:last-child::after,
+    .merge-lane .merge-tag:last-child::after {
+      display: none;
+    }
+
+    .merge-node.dark {
+      color: #fff;
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .branch-rules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .branch-rule {
+      min-height: 96px;
+      padding: 16px;
+      background: rgba(22, 33, 31, 0.045);
+      border: 1px solid rgba(22, 33, 31, 0.09);
+    }
+
+    .branch-rule strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .branch-rule span {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.4;
+      font-weight: 650;
+    }
+
+    .definition {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .done {
+      min-height: 235px;
+      padding: 27px 25px;
+      color: #fff9ec;
+      background: var(--ink);
+      box-shadow: 0 18px 44px rgba(29, 38, 35, 0.12);
+    }
+
+    .done:nth-child(2) {
+      background: var(--blue);
+    }
+
+    .done:nth-child(3) {
+      background: var(--green);
+    }
+
+    .done h3 {
+      margin: 0 0 18px;
+      font-size: 29px;
+      line-height: 1.16;
+      font-weight: 900;
+    }
+
+    .done p {
+      margin: 0;
+      color: rgba(255, 249, 236, 0.82);
+      font-size: 18px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .gates {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+    }
+
+    .gate {
+      min-height: 126px;
+      padding: 18px 14px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(22, 33, 31, 0.14);
+      text-align: center;
+    }
+
+    .gate .mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      margin: 0 auto 13px;
+      color: #fff;
+      background: var(--ink);
+      border-radius: 50%;
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    .gate:nth-child(2) .mark { background: var(--red); }
+    .gate:nth-child(3) .mark { background: var(--teal); }
+    .gate:nth-child(4) .mark { background: var(--blue); }
+    .gate:nth-child(5) .mark { background: var(--amber); }
+    .gate:nth-child(6) .mark { background: var(--green); }
+
+    .gate strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .gate span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 650;
+    }
+
+    .bottom {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      margin-top: 26px;
+      align-items: stretch;
+    }
+
+    .metrics {
+      padding: 28px 30px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .metrics h3,
+    .rulebook h3 {
+      margin: 0 0 18px;
+      font-size: 31px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .metric {
+      min-height: 118px;
+      padding: 18px 16px;
+      background: rgba(22, 33, 31, 0.055);
+      border: 1px solid rgba(22, 33, 31, 0.08);
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--ink);
+      font-size: 22px;
+      line-height: 1.16;
+      font-weight: 900;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 650;
+    }
+
+    .rulebook {
+      padding: 28px 30px;
+      color: #fff9ec;
+      background: var(--ink);
+      box-shadow: var(--shadow);
+    }
+
+    .rules {
+      display: grid;
+      gap: 14px;
+    }
+
+    .rule {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 13px;
+      align-items: start;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 249, 236, 0.18);
+    }
+
+    .rule:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .rule .check {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      color: var(--ink);
+      background: #e3c87c;
+      border-radius: 50%;
+      font-weight: 900;
+    }
+
+    .rule strong {
+      display: block;
+      font-size: 21px;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .rule span {
+      display: block;
+      margin-top: 4px;
+      color: rgba(255, 249, 236, 0.72);
+      font-size: 16px;
+      line-height: 1.38;
+      font-weight: 600;
+    }
+
+    .closing {
+      position: relative;
+      margin-top: 34px;
+      padding: 28px 34px;
+      color: #fff9ec;
+      background: linear-gradient(90deg, var(--red), #9b4f15 42%, var(--teal));
+      box-shadow: var(--shadow);
+    }
+
+    .closing strong {
+      display: block;
+      font-size: 34px;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .closing span {
+      display: block;
+      margin-top: 12px;
+      color: rgba(255, 249, 236, 0.82);
+      font-size: 20px;
+      line-height: 1.42;
+      font-weight: 650;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 28px;
+      color: rgba(22, 33, 31, 0.62);
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .comparison-table {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 22px;
+    }
+
+    .comparison-col {
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .comparison-col h4 {
+      margin: 0 0 16px;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .comparison-col.before h4 { color: var(--muted); }
+    .comparison-col.after h4 { color: var(--teal); }
+
+    .comparison-col ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .comparison-col li {
+      position: relative;
+      padding-left: 18px;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .comparison-col li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 6px;
+      height: 6px;
+      background: currentColor;
+      border-radius: 50%;
+    }
+
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .data-card {
+      min-height: 160px;
+      padding: 24px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .data-card:nth-child(1) { border-top: 6px solid var(--red); }
+    .data-card:nth-child(2) { border-top: 6px solid var(--teal); }
+    .data-card:nth-child(3) { border-top: 6px solid var(--blue); }
+    .data-card:nth-child(4) { border-top: 6px solid var(--green); }
+
+    .data-card .number {
+      font-size: 48px;
+      font-weight: 900;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .data-card .label {
+      margin-top: 12px;
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .data-card .desc {
+      margin-top: 8px;
+      font-size: 15px;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .methodology-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .method-card {
+      min-height: 180px;
+      padding: 22px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 30px rgba(29, 38, 35, 0.08);
+    }
+
+    .method-card h4 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .method-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .method-card:nth-child(1) { border-left: 6px solid var(--red); }
+    .method-card:nth-child(2) { border-left: 6px solid var(--amber); }
+    .method-card:nth-child(3) { border-left: 6px solid var(--teal); }
+    .method-card:nth-child(4) { border-left: 6px solid var(--blue); }
+    .method-card:nth-child(5) { border-left: 6px solid var(--violet); }
+    .method-card:nth-child(6) { border-left: 6px solid var(--green); }
+
+    @media (max-width: 900px) {
+      .site-nav-inner {
+        height: auto;
+        min-height: 72px;
+        padding: 14px 0;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .site-links {
+        flex-wrap: wrap;
+      }
+    }
+
+    .flow.bc-eight {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .flow.bc-eight .step {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    .flow.bc-eight .step p {
+      font-size: 16px;
+    }
+
+    .agent-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 22px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .agent-table th,
+    .agent-table td {
+      padding: 16px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .agent-table th {
+      background: var(--ink);
+      color: #fff9ec;
+      font-weight: 800;
+      font-size: 16px;
+    }
+
+    .agent-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .agent-table td {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    .agent-table td strong {
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .stage-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 13px;
+      font-weight: 800;
+      border-radius: 4px;
+    }
+
+    .stage-tag.strategy { background: rgba(207, 70, 54, 0.15); color: var(--red); }
+    .stage-tag.creative { background: rgba(16, 107, 111, 0.15); color: var(--teal); }
+    .stage-tag.delivery { background: rgba(46, 123, 79, 0.15); color: var(--green); }
+
+    .checkpoint-tag {
+      display: inline-block;
+      padding: 4px 10px;
+      font-size: 13px;
+      font-weight: 800;
+      background: var(--ink);
+      color: #fff9ec;
+      border-radius: 4px;
+    }
+
+    .checkpoint-tag.internal {
+      background: rgba(22, 33, 31, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <nav class="site-nav" aria-label="站点导航">
+    <div class="site-nav-inner">
+      <a class="site-brand" href="#" aria-label="BrandCreative Agent 品牌创意工作流">
+        <span class="site-brand-mark">AI</span>
+        <span>品牌创意 Agent</span>
+      </a>
+      <div class="site-links">
+        <a class="active" href="#workflow">Agent工作流</a>
+        <a href="#value">价值增值</a>
+        <a href="#methodology">方法沉淀</a>
+      </div>
+    </div>
+  </nav>
+  <main class="poster">
+    <header class="topbar">
+      <div>
+        <div class="kicker"><span class="dot"></span><span>AI-native Brand Creative</span></div>
+        <h1>BrandCreative Agent<br>品牌创意生产系统实践</h1>
+        <p class="lead">从"专家经验式创作"升级为"Agent 协同、方法论驱动、Checkpoint 确认、人类校准"的品牌创意生产机制。</p>
+      </div>
+      <aside class="executive-note">
+        <div class="label">核心洞察</div>
+        <div class="sentence">品牌创意的 AI 价值，不是替顾问做策略判断，而是把"如何做策略"变成可执行流程。</div>
+        <div class="small">将高级品牌顾问的创意经验封装为 Agent 工作流，让品牌策略从主观表达升级为可复用、可追踪、可推动的组织资产。</div>
+      </aside>
+    </header>
+
+    <section class="value-strip" aria-label="战略价值">
+      <div class="value">
+        <strong>咨询边界扩展</strong>
+        <span>从单一视觉交付扩展到需求勘探、竞品分析、策略生成、创意概念、设计语言全链路。</span>
+      </div>
+      <div class="value">
+        <strong>创意过程标准化</strong>
+        <span>用8个Agent协同、5个Checkpoint确认、方法论驱动替代经验依赖。</span>
+      </div>
+      <div class="value">
+        <strong>咨询产物可复用</strong>
+        <span>策略文档、竞品报告、创意概念、设计规范、知识库可跨项目复用。</span>
+      </div>
+      <div class="value">
+        <strong>策略价值可放大</strong>
+        <span>高级顾问沉淀方法，中初级顾问按流程执行，团队创意质量更稳定。</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">01</span>
+        <h2>项目背景：传统品牌咨询为什么难以规模化？</h2>
+        <p>品牌创意高度依赖资深顾问经验，策略产出不稳定、评审主观化、资产一次性、能力断层化。</p>
+      </div>
+      <div class="comparison-table">
+        <div class="comparison-col before">
+          <h4>传统方式痛点</h4>
+          <ul>
+            <li>经验黑箱：策略质量高度依赖资深顾问个人经验，难以编码传承。</li>
+            <li>产出不稳：同一品牌，不同顾问策略差异巨大，缺乏标准流程。</li>
+            <li>评审主观：提案改稿多轮，标准随评审人变化，缺乏客观依据。</li>
+            <li>资产一次：项目结束留下PPT，没有形成可复用的方法和模板。</li>
+            <li>能力断层：新人成长慢，老人被琐事困住，经验传递困难。</li>
+            <li>价值后置：顾问常在需求明确后介入，影响力集中在执行而非策略定义。</li>
+          </ul>
+        </div>
+        <div class="comparison-col after">
+          <h4>BrandCreative Agent 解决方案</h4>
+          <ul>
+            <li>方法论驱动：将品牌屋、竞品矩阵、用户洞察转成稳定的策略框架。</li>
+            <li>8Agent协同：需求理解→竞品分析→需求升维→策略生成→创意概念→设计语言→方案输出→评估交付。</li>
+            <li>Checkpoint确认：5个关键节点人类确认，确保方向不偏离。</li>
+            <li>人类校准：AI 负责结构化，顾问负责价值判断和质量放行。</li>
+            <li>资产沉淀：输出策略文档、竞品报告、创意概念、设计规范、知识库。</li>
+            <li>组织赋能：把高级顾问经验转化为团队可复制的品牌创意基础设施。</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="workflow">
+      <div class="section-title">
+        <span class="index">02</span>
+        <h2>BrandCreative Agent 协同工作流</h2>
+        <p>把一次品牌创意拆成"策略→创意→交付"三个阶段，8个Agent协同、5个Checkpoint确认。</p>
+      </div>
+      <table class="agent-table">
+        <thead>
+          <tr>
+            <th>阶段</th>
+            <th>Agent</th>
+            <th>核心职责</th>
+            <th>输入</th>
+            <th>输出</th>
+            <th>Checkpoint</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="stage-tag strategy">策略</span></td>
+            <td><strong>01 需求理解Agent</strong></td>
+            <td>解析PRD，提取商业目标、用户人群、品牌定位</td>
+            <td>PRD、产品描述</td>
+            <td>功能模块、用户角色、关键任务、业务目标</td>
+            <td><span class="checkpoint-tag">C1确认</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-tag strategy">策略</span></td>
+            <td><strong>02 竞品分析Agent</strong></td>
+            <td>竞品定位、视觉分析、策略差异、机会点识别</td>
+            <td>竞品资料、市场数据</td>
+            <td>竞品定位矩阵、视觉风格分析、机会点</td>
+            <td><span class="checkpoint-tag">C2确认</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-tag strategy">策略</span></td>
+            <td><strong>03 需求升维Agent</strong></td>
+            <td>商业策略、用户价值、品牌机会、北极星指标</td>
+            <td>T1-T2输出</td>
+            <td>商业策略简报、用户价值主张、北极星指标</td>
+            <td><span class="checkpoint-tag internal">内部</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-tag strategy">策略</span></td>
+            <td><strong>04 策略生成Agent</strong></td>
+            <td>设计目标、策略拆解、创意方向、评估标准</td>
+            <td>T3输出</td>
+            <td>设计目标、策略框架、创意方向</td>
+            <td><span class="checkpoint-tag internal">内部</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-tag creative">创意</span></td>
+            <td><strong>05 创意概念Agent</strong></td>
+            <td>创意概念、视觉方向、符号系统、情绪板</td>
+            <td>T4-A输出</td>
+            <td>创意概念方案、视觉方向、符号系统</td>
+            <td><span class="checkpoint-tag">C4确认</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-tag creative">创意</span></td>
+            <td><strong>06 设计语言Agent</strong></td>
+            <td>设计语言定义、符号规范、色彩系统、字体系统</td>
+            <td>T5输出</td>
+            <td>设计语言定义书、符号规范、色彩系统</td>
+            <td><span class="checkpoint-tag">C3确认</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-tag creative">创意</span></td>
+            <td><strong>07 方案输出Agent</strong></td>
+            <td>多版本设计方案、差异化表达、应用场景</td>
+            <td>T4-B输出</td>
+            <td>多版本设计方案、应用场景</td>
+            <td><span class="checkpoint-tag">C5确认</span></td>
+          </tr>
+          <tr>
+            <td><span class="stage-tag delivery">交付</span></td>
+            <td><strong>08 评估沉淀Agent</strong></td>
+            <td>多维度评估、标准沉淀、知识总结</td>
+            <td>T6输出</td>
+            <td>评估报告、标准沉淀、知识总结</td>
+            <td>用户确定</td>
+          </tr>
+          <tr>
+            <td><span class="stage-tag delivery">交付</span></td>
+            <td><strong>09 物料输出Agent</strong></td>
+            <td>物料清单、生图提示词、交付规范</td>
+            <td>T7输出</td>
+            <td>物料清单、生图提示词</td>
+            <td>项目归档</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">03</span>
+        <h2>人机协同：AI 做结构化，顾问做判断</h2>
+        <p>AI 提升创意效率，但策略价值、方向选择和质量责任仍由顾问掌控。</p>
+      </div>
+      <div class="agent-loop">
+        <div class="loop-panel">
+          <h3>AI Agent 负责</h3>
+          <p>读取资料、整理定位、生成分析、拆解策略、创意概念、设计规范、多版本方案、评估报告。</p>
+        </div>
+        <div class="loop-panel">
+          <h3>高级顾问负责</h3>
+          <p>定义品牌目标、校准用户画像、判断竞品洞察、选择创意方向、把控设计语言、确认最终质量。</p>
+        </div>
+        <div class="loop-panel">
+          <h3>协同工作方式</h3>
+          <p>每个Agent产物经确认后进入下一步，发现策略偏离或创意不足时及时纠偏，确保质量可控。</p>
+        </div>
+      </div>
+      <div class="feedback-loop">
+        <div class="feedback-title">
+          <strong>协同工作三大原则</strong>
+          <span>让 AI 的结构化能力与顾问的专业判断形成互补。</span>
+        </div>
+        <div class="feedback-card">
+          <h3>Checkpoint确认</h3>
+          <p>C1→C2→C4→C3→C5 五个关键节点必须人类确认，避免错误判断在后续环节累积。</p>
+        </div>
+        <div class="feedback-card">
+          <h3>人工校准</h3>
+          <p>当策略偏离业务目标、分析过于表面、创意缺乏差异化时，由顾问纠偏回到品牌价值。</p>
+        </div>
+        <div class="feedback-card">
+          <h3>方法论闭环</h3>
+          <p>每个策略建议必须有品牌屋依据、竞品支撑、用户洞察，避免只有观点没有证据。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">04</span>
+        <h2>流程变革：从"经验驱动"到"方法论驱动"</h2>
+        <p>品牌创意不再是顾问个人的灵感爆发，而是可以前置、贯穿、沉淀的方法论系统。</p>
+      </div>
+      <div class="system-grid">
+        <div class="branch-map">
+          <div class="merge-title">
+            <h3>传统流程 vs BrandCreative Agent 流程</h3>
+            <span>从个人经验驱动升级为 Agent 协同、方法论驱动、Checkpoint 确认。</span>
+          </div>
+          <div class="main-trunk">
+            <strong>传统品牌咨询</strong>
+            <span>人工读PRD → 凭经验做分析 → 自由发挥创意 → 主观评审修改 → 交付PPT → 后续复用困难。</span>
+          </div>
+          <div class="merge-flow" aria-label="流程变革图">
+            <div class="merge-lane">
+              <div class="merge-tag feature">BrandCreative</div>
+              <div class="merge-node">需求理解<br>用户画像</div>
+              <div class="merge-node">竞品分析<br>机会识别</div>
+              <div class="merge-node">策略生成<br>创意概念</div>
+              <div class="merge-tag main">资产沉淀</div>
+            </div>
+            <div class="merge-lane">
+              <div class="merge-tag ux">传统</div>
+              <div class="merge-node">人工理解<br>资料分散</div>
+              <div class="merge-node">经验判断<br>口径不稳</div>
+              <div class="merge-node">创意产出<br>质量波动</div>
+              <div class="merge-tag main">一次性</div>
+            </div>
+          </div>
+          <div class="branch-rules">
+            <div class="branch-rule">
+              <strong>经验驱动 → 方法论驱动</strong>
+              <span>不只靠个人灵感，而是基于品牌屋、竞品矩阵、用户洞察系统推导。</span>
+            </div>
+            <div class="branch-rule">
+              <strong>自由发挥 → 框架约束</strong>
+              <span>创意在方法论框架内发挥，确保策略与品牌定位、用户心智一致。</span>
+            </div>
+            <div class="branch-rule">
+              <strong>主观评审 → Checkpoint确认</strong>
+              <span>五个关键节点人类确认，确保方向正确后再进入下一阶段。</span>
+            </div>
+          </div>
+        </div>
+        <div class="definition">
+          <div class="done">
+            <h3>策略前置</h3>
+            <p>在需求理解阶段就建立品牌定位、用户画像和竞争策略，提前识别品牌价值机会。</p>
+          </div>
+          <div class="done">
+            <h3>过程校准</h3>
+            <p>完整方案给专家把控，Checkpoint确认确保每个阶段质量，减少返工和方向偏离。</p>
+          </div>
+          <div class="done">
+            <h3>资产沉淀</h3>
+            <p>策略文档、竞品报告、创意概念、设计规范、知识库沉淀为可复用资产。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="value">
+      <div class="section-title">
+        <span class="index">05</span>
+        <h2>实践案例：品牌创意Agent系统建设</h2>
+        <p>本次实践跑通了"资料输入 → Agent建模 → 顾问校准 → 资产化输出 → 团队复用"的品牌创意生产线。</p>
+      </div>
+      <div class="data-grid">
+        <div class="data-card">
+          <div class="number">8</div>
+          <div class="label">专业Agent</div>
+          <div class="desc">覆盖需求理解、竞品分析、需求升维、策略生成、创意概念、设计语言、方案输出、评估交付</div>
+        </div>
+        <div class="data-card">
+          <div class="number">5</div>
+          <div class="label">Checkpoint</div>
+          <div class="desc">C1需求确认、C2竞品确认、C4创意方向、C3设计语言、C5方案确认，确保质量可控</div>
+        </div>
+        <div class="data-card">
+          <div class="number">13</div>
+          <div class="label">知识库模块</div>
+          <div class="desc">品牌策略到创意落地的完整方法论，支撑Agent稳定执行</div>
+        </div>
+        <div class="data-card">
+          <div class="number">9</div>
+          <div class="label">可复用产物</div>
+          <div class="desc">策略文档、竞品报告、创意概念、设计规范、评估报告、物料清单、知识库、模板、提示词</div>
+        </div>
+      </div>
+      <div class="bottom">
+        <div class="metrics">
+          <h3>实际产出物</h3>
+          <div class="metric-grid">
+            <div class="metric"><strong>策略文档</strong><span>需求澄清、竞品分析、需求升维</span></div>
+            <div class="metric"><strong>设计规范</strong><span>设计策略、设计语言定义</span></div>
+            <div class="metric"><strong>创意方案</strong><span>创意概念手册、多版本方案</span></div>
+            <div class="metric"><strong>评估报告</strong><span>综合评估、标准沉淀</span></div>
+            <div class="metric"><strong>物料清单</strong><span>物料清单、生图提示词</span></div>
+            <div class="metric"><strong>知识资产</strong><span>知识库、模板、Agent流程</span></div>
+          </div>
+        </div>
+        <div class="rulebook">
+          <h3>价值增值</h3>
+          <div class="rules">
+            <div class="rule">
+              <span class="check">1</span>
+              <div><strong>效率提升</strong><span>将资料读取、分析整理、策略拆解、报告结构化交给 Agent，顾问聚焦判断。</span></div>
+            </div>
+            <div class="rule">
+              <span class="check">2</span>
+              <div><strong>质量提升</strong><span>策略从主观表达升级为方法论支撑、竞品依据、用户洞察的完整闭环。</span></div>
+            </div>
+            <div class="rule">
+              <span class="check">3</span>
+              <div><strong>影响提升</strong><span>业务、产品和研发更容易理解策略逻辑、价值主张和创意方向。</span></div>
+            </div>
+            <div class="rule">
+              <span class="check">4</span>
+              <div><strong>复用提升</strong><span>专家经验沉淀为团队方法，新项目只需替换资料即可迁移创意流程。</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="methodology">
+      <div class="section-title">
+        <span class="index">06</span>
+        <h2>专业知识库：把品牌创意经验转成 Agent 资产</h2>
+        <p>高级顾问的隐性经验被拆解为策略库、分析框架、创意模板、设计规范、评估标准和知识库。</p>
+      </div>
+      <div class="methodology-grid">
+        <div class="method-card">
+          <h4>品牌策略库</h4>
+          <p>品牌定位画布、北极星指标、用户心智模型、竞品分析框架、需求升维方法。</p>
+        </div>
+        <div class="method-card">
+          <h4>分析框架库</h4>
+          <p>竞品定位矩阵、视觉风格分析、策略差异识别、机会点挖掘、用户价值主张。</p>
+        </div>
+        <div class="method-card">
+          <h4>创意概念模板</h4>
+          <p>创意方向定义、符号系统设计、情绪板制作、视觉语言提炼、差异化表达。</p>
+        </div>
+        <div class="method-card">
+          <h4>设计规范模板</h4>
+          <p>设计语言定义、色彩系统、字体系统、符号规范、应用规范、生图提示词。</p>
+        </div>
+        <div class="method-card">
+          <h4>评估标准库</h4>
+          <p>策略一致性、创意差异化、品牌匹配度、落地完整度、可执行性评估。</p>
+        </div>
+        <div class="method-card">
+          <h4>知识库规范</h4>
+          <p>Markdown便于评审阅读，Excel便于分派跟踪，HTML便于分享传播。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">07</span>
+        <h2>超级个体能力闭环</h2>
+        <p>本次 BrandCreative Agent 实践对应 AI 变革下品牌顾问应具备的六大核心能力。</p>
+      </div>
+      <div class="gates">
+        <div class="gate">
+          <div class="mark">1</div>
+          <strong>边界扩展</strong>
+          <span>从单一设计到品牌创意全链路</span>
+        </div>
+        <div class="gate">
+          <div class="mark">2</div>
+          <strong>AI应用</strong>
+          <span>组合8个Agent协同生产</span>
+        </div>
+        <div class="gate">
+          <div class="mark">3</div>
+          <strong>流程变革</strong>
+          <span>从经验驱动到方法论驱动</span>
+        </div>
+        <div class="gate">
+          <div class="mark">4</div>
+          <strong>经验沉淀</strong>
+          <span>把专家经验转成可执行模板</span>
+        </div>
+        <div class="gate">
+          <div class="mark">5</div>
+          <strong>分享影响</strong>
+          <span>形成团队可传播的方法论</span>
+        </div>
+        <div class="gate">
+          <div class="mark">6</div>
+          <strong>业务价值</strong>
+          <span>让品牌策略更早明确更易推动</span>
+        </div>
+      </div>
+      <div class="bottom">
+        <div class="metrics">
+          <h3>后续可跟踪指标</h3>
+          <div class="metric-grid">
+            <div class="metric"><strong>准备时间</strong><span>策略前置资料整理耗时</span></div>
+            <div class="metric"><strong>记录完整率</strong><span>策略是否包含依据和建议</span></div>
+            <div class="metric"><strong>执行独立率</strong><span>中初级顾问独立完成比例</span></div>
+            <div class="metric"><strong>报告复用率</strong><span>模板和知识库跨项目使用</span></div>
+            <div class="metric"><strong>策略采纳率</strong><span>评审后被业务采纳比例</span></div>
+            <div class="metric"><strong>资产沉淀率</strong><span>项目产物进入知识库比例</span></div>
+          </div>
+        </div>
+        <div class="rulebook">
+          <h3>核心经验总结</h3>
+          <div class="rules">
+            <div class="rule">
+              <span class="check">1</span>
+              <div><strong>把经验变成结构</strong><span>AI 才能稳定执行，团队才能复用。</span></div>
+            </div>
+            <div class="rule">
+              <span class="check">2</span>
+              <div><strong>把流程拆成阶段</strong><span>顾问才能持续校准，质量才能可控。</span></div>
+            </div>
+            <div class="rule">
+              <span class="check">3</span>
+              <div><strong>把策略绑定依据</strong><span>品牌建议才更容易推动和落地。</span></div>
+            </div>
+            <div class="rule">
+              <span class="check">4</span>
+              <div><strong>把产物做成模板</strong><span>个人能力才能变成团队能力。</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="closing">
+      <strong>BrandCreative Agent 的最终目标，不是让 AI 替顾问做策略，而是把高级顾问的策略能力沉淀为团队可复用的品牌创意基础设施。</strong>
+      <span>机制关键词：策略定义 · Agent生产 · Checkpoint确认 · 人类校准 · 资产沉淀 · 组织赋能。</span>
+    </div>
+
+    <footer class="footer">
+      <span>BrandCreative Agent：AI-native 品牌创意生产系统实践</span>
+      <span>八Agent协同 · 五Checkpoint确认 · 方法论驱动 · 人类放行</span>
+    </footer>
+  </main>
+</body>
+</html>
