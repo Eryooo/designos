@@ -1,0 +1,28 @@
+{
+  "include": [
+    "kernel",
+    "designos",
+    "mcp-servers",
+    "skills"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "**/.venv",
+    "**/.ruff_cache",
+    "**/.pytest_cache",
+    "tests",
+    "legacy",
+    "docs",
+    "dist",
+    "build"
+  ],
+  "pythonVersion": "3.11",
+  "typeCheckingMode": "strict",
+  "reportMissingTypeStubs": "warning",
+  "reportUnknownMemberType": "warning",
+  "reportUnknownVariableType": "warning",
+  "reportUnknownArgumentType": "warning",
+  "reportPrivateUsage": "warning",
+  "reportImplicitStringConcatenation": "warning",
+  "useLibraryCodeForTypes": true
+}
