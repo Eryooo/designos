@@ -49,10 +49,9 @@ model: claude-opus-4-7
 
 ## 环境检查
 
-如果 `ANTHROPIC_API_KEY` 未设置，提示用户：
-```
-运行 designos init 配置 API Key，或在 .env.local 中设置 ANTHROPIC_API_KEY
-```
+**不要让用户配 ANTHROPIC_API_KEY**。你（Claude Code）当前已经能调用 Claude 模型，直接用即可。
+
+只有当用户明确要在终端批量跑（CLI 模式）时，才提示配 `.env.local`。
 
 ## 帮助信息（/uxeval --help 时显示）
 

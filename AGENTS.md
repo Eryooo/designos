@@ -2,7 +2,24 @@
 
 > 兼容：Trae IDE / Claude Code / Cursor / Codex / Workbuddy / Codebuddy / 任何支持 AGENTS.md 或 CLAUDE.md 约定的 AI IDE。
 >
-> 这份文件让 IDE 里的 AI 助手能自动识别 DesignOS Skills 并按规范执行，**用户不需要敲命令行**。
+> 这份文件让 IDE 里的 AI 助手能自动识别 DesignOS Skills 并按规范执行，**用户不需要敲命令行，不需要单独配 API Key**。
+
+---
+
+## 执行模式（重要）
+
+**默认走「IDE 原生模式」**：
+
+- 用户在 IDE 里说 `/uxeval`，你（AI）**直接用 IDE 当前配置的模型**（Claude / GPT / DeepSeek 等）按本文档定义的 12 阶段流水线执行。
+- **不要让用户去 `pip install designos`**
+- **不要让用户去 `~/.designos/.env.local` 配 `ANTHROPIC_API_KEY`**
+- **不要让用户运行 `designos init`**
+- 你需要的所有 prompt 模板、知识库、评估宪法都在 `skills/uxeval/` 目录下，直接读文件即可。
+
+**仅在以下情况才提示用户走 CLI 模式**（`pip install designos`）：
+- 用户明确说「批量跑」「CI 集成」「自动化产出」
+- 用户问「能不能在终端跑」
+- 工程师场景
 
 ---
 
@@ -181,22 +198,19 @@ outputs/*/evidence/
 
 必须等到用户明确回复才继续。
 
-#### 1.5 环境检查（API Key）
+#### 1.5 模型可用性检查
 
-读取当前目录 `.env.local`：
+确认你（AI）当前能调用 LLM。如果 IDE 已配置好 Claude / GPT / DeepSeek 等模型，直接进入下一步——**不要让用户去配 API Key**。
 
-- 有 `ANTHROPIC_API_KEY` → ✓ 通过。
-- 没有 → 提示：
-
+只有当 IDE 完全没配置任何模型时（极少见）才提示：
 ```
-⚠ 未检测到 ANTHROPIC_API_KEY。请二选一：
-  1. 在项目根目录运行：designos init（向导式配置）
-  2. 手动创建 .env.local，写一行：ANTHROPIC_API_KEY=sk-ant-...
-
+当前 IDE 似乎未配置 LLM 模型。请在 IDE 设置里配置任意一个：
+  - Claude (推荐，prompt 都针对它调优)
+  - GPT-4o / DeepSeek 等
 配置完成后回复「继续」。
 ```
 
-不阻塞用户审阅 scope，但流水线开跑前必须解决。
+**绝对不要**：让用户运行 `designos init`、写 `.env.local`、配 `ANTHROPIC_API_KEY`。这些是 CLI 模式才需要的，IDE 模式下你直接用 IDE 的模型即可。
 
 #### 1.6 自动判定模式（客户端 vs Web）
 
@@ -388,19 +402,11 @@ AI：（进入 Step 2 流水线）
 3. 仍找不到 → 按自然语言意图匹配 Skill
 4. 都找不到 → 告诉用户「未识别命令：/xxx，输入 /skills 查看可用列表」
 
-### 2. MCP Server 调用
+### 2. 执行方式（默认 AI 自己跑）
 
-每个 Skill 在 `SKILL.md` frontmatter 中声明依赖的 MCP Server。如果环境中有 designos 的 CLI（`designos` 命令可用），优先用 CLI 跑 pipeline；否则自己按 pipeline.yaml 逐步骤执行（调 LLM + 调 MCP 工具）。
+**默认路径**：你（AI）自己按 `skills/uxeval/pipeline.yaml` 逐 stage 执行——读对应 prompt 文件、用 IDE 当前模型调 LLM、把产物写到 `outputs/`。不需要任何外部依赖。
 
-**对设计师友好的实操路径**：
-```
-找到 designos 仓库根目录
-  ↓
-检查 .venv/bin/designos 或 .venv/bin/python -m designos.cli.main 是否可用
-  ↓
-能用 → 执行 `designos run uxeval --mode <mode> --auto-confirm`（自动跑 + 自动 resume Checkpoint）
-不能用 → 你（AI）自己按 pipeline.yaml 执行各 stage
-```
+**可选加速**：如果用户明确说「我装了 designos」或当前目录有 `.venv/bin/designos`，可以用 CLI 跑流水线（更稳，自动 resume）。但**不要主动建议用户去装**。
 
 ### 3. 资产路径
 
