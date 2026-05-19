@@ -136,14 +136,18 @@ skills/uxeval/
 
 **Checkpoint 机制**：在关键产物点暂停、展示给用户、等回复「继续 / 修改 / 补充」，避免 AI 自嗨跑偏。
 
-### 2.6 双模式执行
+### 2.6 双模式（客户端 vs Web）
 
-| 模式 | 谁在跑流水线 | 何时用 |
+UXEval 支持两种证据采集模式，核心流程一致，区别在于截图从哪来：
+
+| 模式 | 证据采集方式 | 适用场景 |
 |---|---|---|
-| **IDE 原生模式（默认）** | IDE 里的 AI 读 AGENTS.md + prompts，自己跑 | 设计师日常使用 |
-| **CLI 模式（可选）** | Python 引擎调 LLM API 跑 | 工程师批量评估、CI 集成 |
+| **客户端模式** | 用户提供界面截图，AI 直接读取分析 | 移动 App / 桌面客户端 / 小程序 / 无法自动化的系统 |
+| **Web 模式** | AI 生成 Playwright 脚本，自动登录 + 导航 + 截图 | Web 后台 / SaaS / 内部管理系统 |
 
-**关键洞察**：设计师在 IDE 里已经配过 LLM 模型（Claude / GPT / DeepSeek），DesignOS **不需要重复要求他们配 API Key**。
+**触发入口统一**：无论从 IDE 对话框还是 terminal 触发，做的事情完全一样——AI 是执行主体，按 pipeline.yaml 逐 stage 执行，需要工具时就调用工具。`designos run` 只是另一个触发入口（适合 CI / 批量场景），不是另一条路径。
+
+**关键洞察**：设计师在 IDE/CLI 里已经配过 LLM 模型（Claude / GPT / DeepSeek），DesignOS **不需要重复要求他们配 API Key**。
 
 ---
 
@@ -363,19 +367,19 @@ Organization Memory（组织级，GitHub repo）
 | 模型协议 | MCP | OpenAI Function Calling | MCP 跨厂商、标准化、未来兼容性好 |
 | 默认模型 | Claude Opus 4.7 | GPT-4o / DeepSeek | 长上下文 + 多模态视觉 + Anthropic 调优最稳 |
 | Skill 格式 | Markdown + YAML | JSON Schema / 自定义 DSL | 设计师能读能写，git diff 友好 |
-| 执行模式 | IDE 原生为默认 | CLI 强制要求 | 设计师不愿装 Python，IDE 已有 LLM |
+| 执行模式 | 统一流程，CLI 只是另一个触发入口 | IDE 和 CLI 是两条路径 | 本质上做的事一样，不应区分 |
 | 记忆存储 | 本地文件 → GitHub | 数据库 / 向量库 | 透明、可审计、零运维 |
 | License | Apache 2.0 | MIT / 私有 | 集团内分享，可商用，专利保护 |
 
 ### 5.2 走过弯路的决策
 
-#### 弯路 1：CLI-first 而非 IDE-first（已纠正）
+#### 弯路 1：把 IDE 和 CLI 当成两条路径（已纠正）
 
-**初版**：要求设计师 `pip install designos` → `designos init` → 配 API Key → `designos run uxeval`。
+**初版**：要求设计师 `pip install designos` → `designos init` → 配 API Key → `designos run uxeval`，把这叫"CLI 模式"；IDE 里说 `/uxeval` 叫"IDE 模式"。
 
-**问题**：设计师不愿装 Python、不想配 API Key（明明 IDE 里已经有了）。
+**问题**：本质上做的事完全一样——AI 按 pipeline 逐 stage 执行，需要工具时调工具。区分两条路径是多余的，还让设计师以为必须装 Python 才能用。
 
-**纠正**：默认走 IDE 原生模式，CLI 降级为「工程师/批量场景」可选项。
+**纠正**：只有一套执行流程。`/uxeval`（IDE 对话框）和 `designos run uxeval`（terminal）是同一件事的两个触发入口。设计师用前者，CI/批量用后者。
 
 #### 弯路 2：让设计师 git clone 整个仓库（待纠正）
 
@@ -391,7 +395,7 @@ Organization Memory（组织级，GitHub repo）
 
 ### Day 1：架构定型
 
-- 确认双模式架构（CLI 引擎 + IDE wrapper）
+- 确认统一执行流程（AI 按 pipeline 执行 + client/web 双模式证据采集）
 - 选定技术栈（Python + uv + hatch + Pydantic）
 - 7 个 Agent → 6 个 Skill（PRD→Proto 合并 design-system）
 - 10 个 MCP Server 初始清单
@@ -426,13 +430,13 @@ Organization Memory（组织级，GitHub repo）
 ### Day 5：方向调整
 
 - 发现：让设计师 `pip install` + 配 API Key 是过度设计
-- 调整：默认走 IDE 原生模式，CLI 仅服务工程师/批量场景
+- 调整：统一为一套执行流程，`designos run` 只是 CI/批量场景的触发入口
 - 重写设计师内测手册：从 6 步降到 3 步
-- 改 AGENTS.md，明确告诉 IDE 里的 AI「不要让用户配 API Key」
+- 改 AGENTS.md，明确告诉 AI「不要让用户重复配 API Key」
 
 ### Day 6（明天）：install 命令
 
-- 实现 `designos install`，在用户当前目录注入 Skill
+- 实现 `designos install`，一行命令把 skills 安装到全局
 - 让设计师不需要 git clone 整个仓库
 - 对标 oh-my-zsh / husky 的安装体验
 
@@ -719,14 +723,12 @@ Agent-design/
 ### C. 命令速查
 
 ```bash
-# 设计师（IDE 模式，推荐）
-git clone git@github.com:Eryooo/designos.git
-# 用 IDE 打开 → 把 PRD 放到 work/ → 说 /uxeval
+# 安装（一次性）
+curl -fsSL https://designos.dev/install.sh | bash
+# 安装后在任何项目目录说 /uxeval 即可
 
-# 工程师（CLI 模式）
+# 批量 / CI 场景（同一套流程，另一个触发入口）
 pip install designos
-designos init                    # 全局配置
-designos init <project-name>     # 创建工作区
 designos run uxeval --mode client --auto-confirm
 designos --help
 

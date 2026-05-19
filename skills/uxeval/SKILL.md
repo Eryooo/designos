@@ -1,193 +1,113 @@
 ---
 name: uxeval
-version: 1.0.0
-type: pipeline
-description: 体验启发式评估 + 可用性测试，支持 Web 自动化与 Client 截图双模式
-authors:
-  - young@company.com
-tags: [ux, evaluation, heuristics, playwright, journey, accessibility]
-
-requires:
-  kernel: ">=1.0.0,<2.0.0"
-  mcp_servers:
-    - name: playwright-driver
-      builtin: true
-      requires_external:
-        - command: "playwright --version"
-          install_hint: "pip install playwright && playwright install chromium"
-          required_when: "mode == 'web'"
-    - name: heuristic-engine
-      builtin: true
-    - name: pdf-parser
-      builtin: true
-    - name: excel-builder
-      builtin: true
-    - name: image-analyzer
-      builtin: true
-
-  models:
-    primary: claude-opus-4-7
-    fallback: deepseek-v3
-
-modes:
-  - id: web
-    label: "Web 应用（提供 URL + 账号密码）"
-    requires:
-      env: [APP_BASE_URL, APP_USERNAME, APP_PASSWORD]
-  - id: client
-    label: "客户端应用（提供截图目录）"
-    requires:
-      directory: [inputs/screens/]
-
-inputs:
-  - name: prd_file
-    type: file
-    formats: [pdf, docx, md]
-    required: true
-    path_hint: inputs/prd.pdf
-  - name: scope_md
-    type: file
-    formats: [md]
-    required: true
-    path_hint: inputs/scope.md
-  - name: principles_md
-    type: file
-    formats: [md]
-    required: false
-    path_hint: inputs/principles.md
-  - name: screenshots_dir
-    type: directory
-    required: false
-    path_hint: inputs/screens/
-    required_when: "mode == 'client'"
-
-outputs:
-  - id: journey_map
-    type: user_journey
-    format: markdown
-  - id: task_checklist_full
-    type: task_checklist
-    format: markdown
-  - id: task_checklist_lite
-    type: task_checklist
-    format: markdown
-  - id: issue_report
-    type: issue_report
-    format: xlsx
-  - id: html_report
-    type: issue_report
-    format: html
-  - id: evidence_pack
-    type: evidence_pack
-    format: directory
-
-upstream_refs:
-  - skill: ai-analytics
-    output_type: design_strategy
-    inject_as: competitive_context
-    required: false
-  - skill: ai-analytics
-    output_type: user_persona
-    inject_as: existing_personas
-    required: false
+description: 体验启发式评估 + 可用性测试。当用户说体验评估、启发式评估、可用性测试、UX 走查、/uxeval 时使用。支持客户端模式（用户提供截图）和 Web 模式（Playwright 自动截图）两种证据采集方式。
 ---
 
-# UXEval Skill
+# UXEval — 体验启发式评估
 
-## When to use this skill
+## 触发条件
 
-启动 `/uxeval` 当你需要：
+用户说出以下任一意图时立即启动：
+- 自然语言：「做体验评估」「启发式走查」「可用性测试」「UX 评估」
+- 快捷命令：`/uxeval`、`/uxeval client`、`/uxeval web <URL>`
 
-- 对一个 **Web 后台 / Web 应用** 做体验启发式评估（web 模式：提供 URL + 账号密码，由 Playwright 自动化采集证据）
-- 对一个 **客户端 / 移动端应用** 做体验评估（client 模式：人工提交截图集，AI 做视觉分析）
-- 把高级体验设计师的评估流程标准化成「需求理解 → 旅程建模 → 任务清单 → 证据采集 → 问题归因 → 报告」的可复用工作流
-- 输出可被产品 / 研发评审、可分派、可跟踪的体验问题清单（Excel + Markdown + HTML）
+## Step 0：欢迎 + 模式选择
 
-不适合的场景：
-
-- **设计稿还原度验收**：用 `/design-acceptance`
-- **PRD → 原型代码**：用 `/prd2proto`
-- **品牌创意 / 视觉评估**：用 `/brand-creative:multi-dim-design-evaluator`
-
-## How it works
-
-UXEval 是一个 8 阶段 Pipeline（带 3 个用户确认点）：
+回复用户：
 
 ```
-prd-understanding ──► persona-derivation ──► scenario-derivation ──► principle-mapping
-                                                                          │
-                                                                          ▼
-                                                                  journey-modeling [C1]
-                                                                          │
-                                                                          ▼
-                                                                  task-generation [C2]
-                                                                          │
-                                              ┌───────────────────────────┴───────────────────────────┐
-                                              │ mode == "web"                                          │ mode == "client"
-                                              ▼                                                        ▼
-                                    task-script-generation ──► web-automation               screenshot-loading
-                                              │                                                        │
-                                              └───────────────────────────┬───────────────────────────┘
-                                                                          ▼
-                                                                  heuristic-detection
-                                                                          │
-                                                                          ▼
-                                                                  issue-attribution [C3]
-                                                                          │
-                                                                          ▼
-                                                                  report-generation
+我将用 UXEval 评估你的产品。请确认：
+
+1. Web 应用还是客户端应用？
+   - Web：我用 Playwright 自动登录 + 截图（需要 URL + 账号密码）
+   - 客户端：你提供产品截图
+
+2. 必需输入：
+   - PRD 文档（.md / .pdf / .docx）
+   - 评估范围（几句话：目标、角色、产品范围）
+
+3. 推荐输入：
+   - 5+ 张关键页面截图（客户端模式）
+   - 用户角色描述（PRD 里没写清楚时）
+
+准备好了吗？可以先提供 PRD，其他我会引导你补充。
 ```
 
-### 双模式说明
+不要跳过模式选择直接开始分析。
 
-| 模式 | 输入 | 自动化范围 | 适用场景 |
-|---|---|---|---|
-| `web` | URL + 账号密码 | Playwright 自动登录、采集截图、采集 DOM | 后台 / SaaS / 内部系统 |
-| `client` | 截图目录 | LLM 多模态分析截图，无浏览器自动化 | 桌面客户端 / 移动 App / 已下线系统 |
+## Step 1：自动初始化
 
-### 三个 Checkpoint
+用户只需丢 PRD，AI 自动完成目录创建、scope 推断。不要让用户建目录或填表。
 
-- **C1（旅程确认）**：Agent 输出旅程地图后停下，让你确认「这个旅程是否覆盖关键用户路径」
-- **C2（任务清单确认）**：拆出体验任务清单后停下，让你校准「是否偏功能测试，是否漏掉关键体验任务」
-- **C3（问题清单确认）**：归因后的问题清单停下，让你确认「严重等级、归因、改进建议是否合理」
+1. **找 PRD**：优先用户给的路径 → 消息附件 → 粘贴正文（>500字） → 自动扫描当前目录
+2. **建目录**：自动创建 `inputs/` `outputs/` `runs/`
+3. **推断 scope.md**：从 PRD 自动提取评估范围，写到 `inputs/scope.md`，让用户审阅
+4. **确认模式**：根据 Step 0 的回答写入 `designos.project.yaml`
 
-### 与上游 Skill 的衔接
+## Step 2：8 阶段流水线
 
-如果先跑了 `/competitor-analysis`（ai-analytics），UXEval 会自动询问你是否注入：
+按以下顺序逐 stage 执行。每个 stage 读取对应 prompt 文件 + reference 知识库。
 
-- `design_strategy`：竞品体验对标基线
-- `user_persona`：竞品分析阶段已沉淀的用户画像
+| # | Stage | 读取 | 输出 | 备注 |
+|---|---|---|---|---|
+| 1 | PRD 结构化理解 | `prompts/v1.0.0/01-prd-understanding.md` | modules / roles / scenarios JSON | |
+| 2 | 用户角色推导 | `prompts/v1.0.0/02-persona-derivation.md` + `reference/m01-角色推导.md` | personas JSON | |
+| 3 | 场景推导 | `prompts/v1.0.0/02b-scenario-derivation.md` | scenarios JSON | |
+| 4 | 启发式原则映射 | `prompts/v1.0.0/03-principle-mapping.md` + `reference/m02-启发式原则.md` | principles JSON | |
+| 5 | 旅程建模 | `prompts/v1.0.0/03b-journey-modeling.md` + `reference/m03-旅程建模.md` | journey_map | **⚠️ Checkpoint C1** |
+| 6 | 任务生成 | `prompts/v1.0.0/04-task-generation.md` + `reference/m04-任务生成.md` | task_checklist | **⚠️ Checkpoint C2** |
+| 7a | 脚本生成（仅 web） | `prompts/v1.0.0/05a-script-generation.md` + `reference/m05-证据采集.md` | Playwright specs | |
+| 7b | 截图加载（仅 client） | 读取 `inputs/screens/` 目录 | screenshots list | |
+| 8 | 启发式检测 + 问题归因 | `prompts/v1.0.0/06-issue-attribution.md` + `reference/m06-问题归因.md` | issues JSON | **⚠️ Checkpoint C3** |
+| 9 | 报告生成 | `prompts/v1.0.0/07-report-generation.md` + `templates/*.md` | Markdown + Excel | |
 
-注入后用于「persona-derivation」和「issue-attribution」阶段，让评估有竞品参照。
+每个 stage 的执行方式：
+1. 读取对应 prompt 文件（含角色设定 + 输入输出格式）
+2. 读取对应 reference 文件（领域知识）
+3. 用当前模型推理，产出写到 `outputs/`
+4. 遇到 Checkpoint 暂停等用户确认
 
-## What you get
+## Checkpoint 交互
 
-每次跑完 UXEval（约 30-90 分钟，取决于产品复杂度），你会得到：
+三个暂停点（C1 / C2 / C3），用户回复：
+- `继续` → 进入下一阶段
+- `修改 <说明>` → 按说明调整后重新输出
+- `补充 <内容>` → 追加信息后重新推理
 
-1. **旅程地图** `01-旅程地图.md`：用户角色 + 阶段 + 任务链路
-2. **完整版任务清单** `02-任务清单-完整版.md`：给资深设计师参考
-3. **简洁执行版任务清单** `03-任务清单-简洁版.md`：给中低阶设计师顺序执行
-4. **问题清单 Excel** `04-问题报告.xlsx`：含截图、原则、严重等级、改进建议
-5. **HTML 报告** `04-问题报告.html`：分享用
-6. **证据包** `evidence/`：所有截图 + 流程文件 + 自动化 trace（仅 web 模式）
+不要超时跳过 Checkpoint。用户不回复就等待。
 
-## Inputs you must prepare
+## 宪法约束（不可违反）
 
-放在工作区的 `inputs/` 目录下：
+读取 `constitution.md`，核心 7 条：
+1. 只评体验问题，不评功能 bug
+2. 每条问题必须绑定截图证据
+3. 每条问题必须映射到启发式原则
+4. 严重等级必须有判定依据
+5. 不编造 PRD 没写的功能
+6. 推断内容必须标记 [inferred]
+7. 不输出无证据的主观判断
 
-- `prd.pdf` 或 `prd.md`：产品需求文档
-- `scope.md`：评估范围（用户提供，模板见 `templates/scope.md`）
-- `principles.md`（可选）：自定义启发式原则；不提供则用 Nielsen 10 原则
-- `screens/`（仅 client 模式）：截图目录
+## 工具调用
 
-Web 模式额外需要在 `.env.local` 中：
+需要工具时直接调用（通过 terminal / Bash）：
+- **PDF/DOCX 解析**：PRD 是 PDF 时用多模态读取或 pdf-parser
+- **Playwright**（仅 web 模式）：执行 Stage 7a 生成的 .spec.mjs 脚本
+- **Excel 生成**：最终报告用 openpyxl 或 excel-builder 脚本生成 .xlsx
+- **图片分析**：截图用多模态视觉能力直接分析
 
-```
-APP_BASE_URL=https://...
-APP_USERNAME=...
-APP_PASSWORD=...
-```
+工具未安装时降级：能 AI 自己做的就自己做，必须工具支持的提示用户安装。
 
-## Constitution
+## 对话风格
 
-不可违反的 7 条评估宪法见 `constitution.md`。任何违反都会导致 stage 输出被拒。
+- 每次回复 ≤ 3 段
+- 每完成一个 stage 报一次进度
+- 不说"完美的评估"，说"已完成第 X 阶段，输出在 outputs/..."
+- 承认局限：Web 自动化不稳时明说
+
+## 错误处理
+
+- PRD 缺失 → 拒绝执行，请求补充
+- scope.md 缺失 → 从 PRD 自动推断，让用户审阅
+- 截图缺失（client 模式）→ 询问用补文字描述还是补截图
+- 宪法违反 → 重新生成（最多 3 次）
+

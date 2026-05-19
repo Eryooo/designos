@@ -6,20 +6,17 @@
 
 ---
 
-## 执行模式（重要）
+## 执行原则（重要）
 
-**默认走「IDE 原生模式」**：
+**只有一套执行流程**，无论用户从 IDE 对话框还是 terminal 触发，做的事情完全一样：你（AI）是执行主体，按本文档定义的流水线分步执行；需要工具时（PDF 解析、浏览器自动化、Excel 生成等）就调用对应工具或 MCP。
 
-- 用户在 IDE 里说 `/uxeval`，你（AI）**直接用 IDE 当前配置的模型**（Claude / GPT / DeepSeek 等）按本文档定义的 12 阶段流水线执行。
-- **不要让用户去 `pip install designos`**
-- **不要让用户去 `~/.designos/.env.local` 配 `ANTHROPIC_API_KEY`**
-- **不要让用户运行 `designos init`**
-- 你需要的所有 prompt 模板、知识库、评估宪法都在 `skills/uxeval/` 目录下，直接读文件即可。
+**关键约束**：
 
-**仅在以下情况才提示用户走 CLI 模式**（`pip install designos`）：
-- 用户明确说「批量跑」「CI 集成」「自动化产出」
-- 用户问「能不能在终端跑」
-- 工程师场景
+- 用户在对话框说 `/uxeval`，你**直接用当前配置的模型**（Claude / GPT / DeepSeek 等）按 `skills/uxeval/pipeline.yaml` 逐 stage 执行。
+- 你需要的所有 prompt 模板、知识库、评估宪法都在 skills/uxeval/ 全局位置（用户已通过 install 注入），直接读文件即可。
+- **不要要求用户重复配 API Key**（IDE/CLI 已经配过了）。
+- **不要要求用户手动 mkdir / 填空模板 / 跑 designos init**——所有目录、配置、scope 推断都由你自动完成。
+- 需要外部工具时（如 Web 模式的 Playwright）才提示用户安装；客户端模式（M1 主路径）不需要任何额外依赖。
 
 ---
 
@@ -210,7 +207,7 @@ outputs/*/evidence/
 配置完成后回复「继续」。
 ```
 
-**绝对不要**：让用户运行 `designos init`、写 `.env.local`、配 `ANTHROPIC_API_KEY`。这些是 CLI 模式才需要的，IDE 模式下你直接用 IDE 的模型即可。
+**绝对不要**：让用户运行 `designos init`、写 `.env.local`、配 `ANTHROPIC_API_KEY`——这些都不是必需步骤。IDE/CLI 已经配过模型，你直接用即可。
 
 #### 1.6 自动判定模式（客户端 vs Web）
 
@@ -402,11 +399,16 @@ AI：（进入 Step 2 流水线）
 3. 仍找不到 → 按自然语言意图匹配 Skill
 4. 都找不到 → 告诉用户「未识别命令：/xxx，输入 /skills 查看可用列表」
 
-### 2. 执行方式（默认 AI 自己跑）
+### 2. 执行方式
 
-**默认路径**：你（AI）自己按 `skills/uxeval/pipeline.yaml` 逐 stage 执行——读对应 prompt 文件、用 IDE 当前模型调 LLM、把产物写到 `outputs/`。不需要任何外部依赖。
+你（AI）按 `skills/uxeval/pipeline.yaml` 逐 stage 执行：读对应 prompt 文件 + reference 知识库，用当前模型推理，把产物写到用户当前项目的 `outputs/`。
 
-**可选加速**：如果用户明确说「我装了 designos」或当前目录有 `.venv/bin/designos`，可以用 CLI 跑流水线（更稳，自动 resume）。但**不要主动建议用户去装**。
+**遇到需要工具的 stage**：
+- **PRD 是 .pdf / .docx**：调用 `pdf-parser` 工具解析为文本（IDE 多模态可读 PDF 时也可直接读）。
+- **Web 模式生成评估脚本**：自己写 Playwright `.spec.mjs` 文件，然后通过 terminal 跑 `node ...spec.mjs` 自动登录 + 截图。
+- **Excel 报告**：调用 `excel-builder` 工具或自己用 openpyxl 临时脚本生成 .xlsx。
+- **批量启发式检测**：调用 `heuristic-engine` MCP 跑结构化检测（含 LLM judge + 宪法校验）。
+- **MCP / 工具未安装**：降级——能 AI 自己做的就自己做，必须工具支持的就提示用户安装。
 
 ### 3. 资产路径
 
