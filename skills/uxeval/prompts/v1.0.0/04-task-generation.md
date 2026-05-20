@@ -9,6 +9,115 @@
 
 详细判别规则见 `reference/m04-任务生成.md`。
 
+## 执行流程（不可跳过）
+
+任务生成必须按以下顺序执行，不能跳过任何步骤：
+
+### Step 1：完整的角色分析 + 功能分析 + 场景分析
+
+基于 Stage 1 的输出（modules / roles / scenarios / key_tasks），深度分析：
+- **角色**：每个角色的目标、痛点、使用频率、专业度
+- **功能**：每个功能模块的核心价值、使用场景、前置条件
+- **场景**：每个场景的触发条件、关键路径、成功标准
+
+### Step 2：输出完整的用户旅程地图（必须输出的正式产物）
+
+**格式**（参考真实业务文档"用户体验地图"）：
+
+```yaml
+journey_map:
+  - stage_id: S1
+    stage_name: 认知阶段
+    stage_tasks:
+      - task: 了解产品价值
+        user_behaviors: [访问官网, 查看介绍视频, 阅读功能列表]
+        mot_goals: [快速理解产品定位, 判断是否符合需求]
+  - stage_id: S2
+    stage_name: 注册登录
+    stage_tasks:
+      - task: 完成账号注册
+        user_behaviors: [填写手机号, 接收验证码, 设置密码]
+        mot_goals: [快速完成注册, 无挫折感]
+  - stage_id: S3
+    stage_name: 首次使用
+    stage_tasks:
+      - task: 完成首次核心任务
+        user_behaviors: [找到入口, 理解操作流程, 完成任务]
+        mot_goals: [快速上手, 感受到产品价值]
+```
+
+**旅程地图必须包含**：
+- **阶段（stage）**：用户完成目标的关键阶段
+- **阶段任务（stage_tasks）**：每个阶段的具体任务
+- **用户行为（user_behaviors）**：用户在该任务中的具体操作
+- **MOT 目标（mot_goals）**：关键体验时刻的目标
+
+### Step 3：基于旅程地图生成可用性测试脚本
+
+**格式**（参考真实业务文档"任务脚本-星火英语"）：
+
+```yaml
+usability_test_script:
+  - scenario: 作业设计
+    estimated_time: 15min
+    intro: "老师好，接下来请您按照以下指引完成一次作业设计任务..."
+    steps:
+      - name: 登录网站
+        script: "进入官方网站，登录账号；账号/密码：xxx"
+        completion: S/P/F
+      - name: 进入作业设计
+        script: "您今天完成了高一英语第一章节的授课，现在需要布置一套课后练习..."
+        completion: S/P/F
+      - name: 选择题型
+        script: "请从题库中选择 5 道单选题、3 道完形填空..."
+        completion: S/P/F
+```
+
+**每个步骤必须包含**：
+- **name**：步骤名称
+- **script**：引导语（告诉执行人具体怎么做）
+- **completion**：完成判定（S 成功 / P 部分完成 / F 失败）
+
+### Step 4：基于旅程地图生成任务执行清单
+
+**格式**：
+
+```yaml
+task_checklist_full:
+  - task_id: T1
+    journey_stage_id: S2  # 必须能追溯到旅程地图
+    task_name: 注册流程体验
+    evaluation_focus: [用户是否理解注册流程, 是否敢点提交, 是否能预测结果]
+    evidence_requirements:
+      - 截图：注册页面、验证码页面、成功页面
+      - 记录：用户是否犹豫、是否重复操作、是否报错
+    prd_screenshot_conflict_points:
+      - PRD 说支持邮箱注册，截图只有手机号注册（标注"需补充现场验证"）
+    completion_criteria:
+      - S：用户一次性完成注册，无挫折
+      - P：用户完成注册，但有犹豫或重复操作
+      - F：用户无法完成注册
+```
+
+**每个任务必须包含**：
+- **journey_stage_id**：对应的旅程阶段 ID
+- **evaluation_focus**：评估重点（"用户是否理解、是否敢点、是否能预测结果"）
+- **evidence_requirements**：证据记录要求
+- **prd_screenshot_conflict_points**：PRD-截图冲突观察点
+- **completion_criteria**：任务完成判定标准
+
+---
+
+## 负面约束（以下写法禁止）
+
+- ❌ 不直接按截图逐页写"页面检查清单"
+- ❌ 不只按 PRD 线性抄功能测试步骤
+- ❌ 不把"看页面是否有某按钮"当成主要目标
+- ❌ 不生成可以套用到任何产品的通用任务
+- ❌ 不跳过旅程地图直接生成任务
+
+---
+
 ## 输入
 
 ```

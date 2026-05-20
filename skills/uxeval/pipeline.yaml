@@ -112,12 +112,22 @@ stages:
     outputs: [screenshots, image_analysis]
 
   # ────────────────────────────────────────────────────────────
+  # Stage 5.5: PRD-截图冲突分析
+  # ────────────────────────────────────────────────────────────
+  - id: prd-screenshot-conflict
+    type: llm
+    prompt: prompts/v1.0.0/05c-conflict-analysis.md
+    inputs: [modules, key_features, screenshots, image_analysis]
+    outputs: [prd_screenshot_conflicts]
+    knowledge: []
+
+  # ────────────────────────────────────────────────────────────
   # Stage 6: 问题检测 + 归因（Checkpoint C3）
   # ────────────────────────────────────────────────────────────
   - id: issue-attribution
     type: llm
     prompt: prompts/v1.0.0/06-issue-attribution.md
-    inputs: [screenshots, image_analysis, journey_map, journey_stages, principles, task_checklist_full, competitive_context]
+    inputs: [screenshots, image_analysis, prd_screenshot_conflicts, journey_map, journey_stages, principles, task_checklist_full, competitive_context]
     outputs: [raw_issues, issues]
     knowledge: [reference/m06-问题归因.md]
     checkpoint:

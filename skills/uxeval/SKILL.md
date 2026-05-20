@@ -55,8 +55,9 @@ description: 体验启发式评估 + 可用性测试。当用户说体验评估�
 | 3 | 旅程建模 | `prompts/v1.0.0/03-journey-modeling.md` + `reference/m03-旅程建模.md` | journey_map / journey_stages | **⚠️ Checkpoint C1** |
 | 4 | 任务生成 | `prompts/v1.0.0/04-task-generation.md` + `reference/m04-任务生成.md` | task_checklist_full / task_checklist_lite | **⚠️ Checkpoint C2** |
 | 5a | 脚本生成（仅 web） | `prompts/v1.0.0/05a-script-generation.md` + `reference/m05-证据采集.md` | evaluation_script | |
-| 5b | 截图分析（仅 client） | `prompts/v1.0.0/05b-screenshot-analysis.md` + 读取 `inputs/screens/` | screenshots / image_analysis | |
-| 6 | 问题检测 + 归因 | `prompts/v1.0.0/06-issue-attribution.md` + `reference/m06-问题归因.md` | issues JSON | **⚠️ Checkpoint C3** |
+| 5b | 截图分析（仅 client） | `prompts/v1.0.0/05b-screenshot-analysis.md` + 读取 `inputs/screens/` | screenshots / image_analysis | 必须逐张分析所有截图，分批处理（每批 5 张），禁止跳过任何截图，报告进度："已分析 X/Y 张截图" |
+| 5.5 | PRD-截图冲突分析 | Stage 5b 输出 + Stage 1 输出 | prd_screenshot_conflicts | |
+| 6 | 问题检测 + 归因 | `prompts/v1.0.0/06-issue-attribution.md` + `reference/m06-问题归因.md` | issues JSON | **⚠️ Checkpoint C3** + ⚠️ 宪法自检 |
 | 7 | 报告生成 | `templates/*.md` | Markdown + Excel + evidence_pack | |
 
 每个 stage 的执行方式：
@@ -64,6 +65,19 @@ description: 体验启发式评估 + 可用性测试。当用户说体验评估�
 2. 读取对应 reference 文件（领域知识）
 3. 用当前模型推理，产出写到 `outputs/`
 4. 遇到 Checkpoint 暂停等用户确认
+
+### Stage 5.5：PRD-截图冲突分析
+
+对比 PRD 和截图，输出：
+- PRD 说了但截图没体现的功能/页面（标注"需补充现场验证"）
+- 截图有但 PRD 没覆盖的功能/页面（标注"可能是新增或变更"）
+- 冲突处理规则：PRD 是主基准、截图是现实校准层、冲突不直接抹平而是显式标注
+
+这些冲突点不作为体验问题，但作为 Stage 6 的评估上下文。
+
+### Stage 6：宪法自检
+
+Stage 6 输出前必须逐条执行 7 条宪法校验，不通过的问题删除。
 
 ## Checkpoint 交互
 
@@ -88,12 +102,10 @@ description: 体验启发式评估 + 可用性测试。当用户说体验评估�
 ## 工具调用
 
 需要工具时直接调用（通过 terminal / Bash）：
-- **PDF/DOCX 解析**：PRD 是 PDF 时用多模态读取或 pdf-parser
+- **PDF/DOCX 解析**：PRD 是 PDF 时必须用 `pdftotext` 或 python 脚本转为 Markdown，写到 `inputs/prd.md`。禁止只靠多模态"看"PDF。需要 pdftotext 时提示用户安装（`brew install poppler` 或 `apt install poppler-utils`）
 - **Playwright**（仅 web 模式）：执行 Stage 7a 生成的 .spec.mjs 脚本
-- **Excel 生成**：最终报告用 openpyxl 或 excel-builder 脚本生成 .xlsx
+- **Excel 生成**：最终报告用 openpyxl 或 excel-builder 脚本生成 .xlsx。需要 openpyxl 时提示用户安装
 - **图片分析**：截图用多模态视觉能力直接分析
-
-工具未安装时降级：能 AI 自己做的就自己做，必须工具支持的提示用户安装。
 
 ## 对话风格
 
