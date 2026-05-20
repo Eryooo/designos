@@ -55,7 +55,7 @@ description: 体验启发式评估 + 可用性测试。当用户说体验评估�
 | 3 | 旅程建模 | `prompts/v1.0.0/03-journey-modeling.md` + `reference/m03-旅程建模.md` | journey_map / journey_stages | **⚠️ Checkpoint C1** |
 | 4 | 任务生成 | `prompts/v1.0.0/04-task-generation.md` + `reference/m04-任务生成.md` | task_checklist_full / task_checklist_lite | **⚠️ Checkpoint C2** |
 | 5a | 脚本生成（仅 web） | `prompts/v1.0.0/05a-script-generation.md` + `reference/m05-证据采集.md` | evaluation_script | |
-| 5b | 截图分析（仅 client） | `prompts/v1.0.0/05b-screenshot-analysis.md` + 读取 `inputs/screens/` | screenshots / image_analysis | 必须逐张分析所有截图，分批处理（每批 5 张），禁止跳过任何截图，报告进度："已分析 X/Y 张截图" |
+| 5b | 截图分析（仅 client） | `prompts/v1.0.0/05b-screenshot-analysis.md` + 读取 `inputs/screens/` | screenshots / image_analysis | 必须逐张分析所有截图，**每次只读 1 张**逐张分析，每张输出结构化观察后再读下一张。禁止跳过任何截图，报告进度："已分析 X/Y 张截图" |
 | 5.5 | PRD-截图冲突分析 | Stage 5b 输出 + Stage 1 输出 | prd_screenshot_conflicts | |
 | 6 | 问题检测 + 归因 | `prompts/v1.0.0/06-issue-attribution.md` + `reference/m06-问题归因.md` | issues JSON | **⚠️ Checkpoint C3** + ⚠️ 宪法自检 |
 | 7 | 报告生成 | `templates/*.md` | Markdown + Excel + evidence_pack | |
