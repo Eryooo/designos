@@ -105,25 +105,61 @@ scene_evidence_validation:
 - 合并所有截图证据
 - 合并所有用户影响描述
 
-### Step 6：系统性归并
+### Step 6：系统性归并（强制执行）
 
-将所有问题归并为 5-10 类系统性问题。
+将所有问题归并为 5-10 类系统性问题，从业务视角而非技术视角归纳。
 
-**归并维度**：
-- 按原则类型（表现层 / 框架层 / 结构层）
-- 按影响范围（单模块 / 跨模块）
-- 按严重度（critical / major / minor）
+**归并维度（按优先级）**：
+1. **业务影响维度**：影响哪些核心业务场景？（如"搜索能力缺失""一致性断层"）
+2. **用户体验维度**：影响哪些体验要素？（如"帮助缺失""校验时机不当"）
+3. **原则类型维度**：违反哪一层原则？（表现层 P / 框架层 F / 结构层 S）
+
+**归并规则**：
+- 同一类系统性问题必须包含 ≥3 个典型案例
+- 每类系统性问题必须说明业务影响（不能只说"违反XX原则"）
+- 系统性问题按严重度排序（critical > major > minor）
 
 **输出格式**：
 ```yaml
 system_issues:
   - category_id: SYS-001
-    category_name: "空状态引导缺失"
-    affected_modules: [M-001, M-002]
+    category_name: "搜索能力缺失"
+    category_type: "业务功能缺失"
+    affected_modules: [M-001, M-002, M-006]
     severity: major
-    typical_cases: [I-001, I-003, I-007]
-    business_impact: "..."
-    improvement_suggestion: "..."
+    typical_cases: [I-002, I-010, I-015]
+    business_impact: "数据源下拉、算子目录、模型库筛选均无搜索，高频操作（每个任务流平均3+次）需滚动扫读20+条列表，平均耗时8-12秒。PRD F-14已要求但未实现。"
+    improvement_suggestion: "建议在所有长列表（>10条）顶部增加搜索框，支持按名称实时过滤。参考M-02算法分析的搜索实现。"
+    principle_ids: [S3, S2]
+  
+  - category_id: SYS-002
+    category_name: "一致性断层"
+    category_type: "交互一致性"
+    affected_modules: [M-001, M-002, M-006, M-007]
+    severity: major
+    typical_cases: [I-021, I-022, I-023]
+    business_impact: "M-01任务流建模与M-02算法分析的数据源下拉交互不一致（一个无搜索、一个有搜索）；模型库'已训练模型'用卡片网格、'自定义模型'用表格，同模块两套显示模式。用户需要在不同模块间重新学习交互模式。"
+    improvement_suggestion: "建议统一全局交互模式：数据源下拉统一增加搜索，模型库统一使用卡片网格（或统一使用表格）。"
+    principle_ids: [P3]
+```
+
+**强制要求**：
+- 系统性问题数量：5-10 类
+- 每类必须包含：category_name（业务语言）、business_impact（量化影响）、improvement_suggestion（可执行建议）
+- 不能只按模块分布统计，必须从业务视角归纳
+
+**反例（拒绝）**：
+```yaml
+system_issues:
+  - category_name: "M-01模块问题"  # ✗ 技术视角，不是业务视角
+    typical_cases: [I-001, I-002, I-003]
+```
+
+**正例（接受）**：
+```yaml
+system_issues:
+  - category_name: "搜索能力缺失"  # ✓ 业务视角
+    business_impact: "高频操作需滚动扫读，平均耗时8-12秒"  # ✓ 量化影响
 ```
 
 ## 输入
