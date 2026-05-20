@@ -21,8 +21,8 @@ dimensions:
   principle_mapping:
     expected_principles_count_min: 6
     expected_principles_count_max: 12
-    must_include: ["H1", "H3", "H5", "H11"]
-    must_exclude_reason: ["H8 极简", "H10 帮助文档"]   # B 端表单密度高
+    must_include: ["F2", "S1", "F1", "P3"]
+    must_exclude_reason: ["P1 极简", "F4 帮助文档"]   # B 端表单密度高
 
   journey_modeling:
     expected_stages_count_min: 4
@@ -54,13 +54,13 @@ dimensions:
 golden_issues:
   - title_keywords: ["待办", "视觉区分"]
     expected_severity: major
-    expected_principles: ["H6", "H12"]
+    expected_principles: ["S2", "P3"]
   - title_keywords: ["保存", "草稿", "丢失"]
     expected_severity: critical
-    expected_principles: ["H3", "H5"]
+    expected_principles: ["S1", "F1"]
   - title_keywords: ["规则测试", "结果", "不一致"]
     expected_severity: critical
-    expected_principles: ["H1", "H11"]
+    expected_principles: ["F2", "F5"]
 
 # 必须不出现的反例（防跑偏）
 forbidden_issues:

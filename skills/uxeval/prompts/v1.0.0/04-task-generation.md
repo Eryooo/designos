@@ -153,7 +153,7 @@ task_checklist_full:
         "5 秒内识别出规则待办数量",
         "能区分「我创建」和「待我审批」"
       ],
-      "applicable_principles": ["H1", "H6", "H12"],
+      "applicable_principles": ["F2", "S2", "P3"],
       "evidence_requirements": [
         "工作台首页截图（关键区域有 bbox 标注）",
         "鼠标悬停在待办上的截图"
@@ -173,7 +173,7 @@ task_checklist_full:
       "title": "工作台快速定位待办",
       "role": "运营专员",
       "steps_summary": "登录 → 工作台首页 → 识别规则待办",
-      "must_check": ["H1 系统状态", "H6 识别优于回忆", "H12 视觉层级"]
+      "must_check": ["F2 系统状态可见性", "S2 再认而非记忆", "P3 一致性与标准化"]
     }
   ]
 }
@@ -238,7 +238,7 @@ task_checklist_full:
     "上次未提交的内容自动保留 OR",
     "明确提示「未保存，是否丢弃」"
   ],
-  "applicable_principles": ["H3", "H5"],
+  "applicable_principles": ["S1", "F1"],
   "evidence_requirements": ["关闭前截图", "重新打开后截图", "草稿状态 DOM 快照"]
 }
 ```

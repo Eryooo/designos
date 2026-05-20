@@ -110,7 +110,7 @@ low 质量截图不会被排除，但会在 heuristic-detection 中降低权重�
 从静态图中能识别的问题，提供给下游参考。
 不下结论，只列观察：
 - ✅ 「12 条待办无视觉分类」
-- ❌ 「这是 H6 违反」（这是 heuristic-detection 的活，不是这一步）
+- ❌ 「这是 S2 违反」（这是 heuristic-detection 的活，不是这一步）
 
 ## 注意事项
 

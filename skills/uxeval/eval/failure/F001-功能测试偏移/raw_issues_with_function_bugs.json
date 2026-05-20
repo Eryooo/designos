@@ -2,7 +2,7 @@
   "raw_issues": [
     {
       "raw_id": "RAW-001",
-      "principle_id": "H6",
+      "principle_id": "S2",
       "module_id": "M-WORKBENCH",
       "found_at": "screens/工作台.png",
       "raw_observation": "待办无视觉分类"
@@ -30,7 +30,7 @@
     },
     {
       "raw_id": "RAW-005",
-      "principle_id": "H1",
+      "principle_id": "F2",
       "module_id": "M-001",
       "found_at": "screens/规则保存.png",
       "raw_observation": "保存无加载反馈"

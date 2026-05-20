@@ -44,6 +44,36 @@ raw_issues:
 - 截图有但 PRD 没覆盖的 → 标注 `conflict_type: screenshot_not_in_prd`
 - 无冲突 → 标注 `conflict_type: none`
 
+### Step 2.5：场景-证据匹配校验
+
+对每条 raw_issue，校验问题描述的场景与证据截图的实际内容是否匹配。
+
+**执行方式**：
+- 读取问题描述中的场景关键词（如"配置数据源节点""查看评估报告"）
+- 读取 Stage 5b 截图分析中该截图的内容描述
+- 判断：场景与截图内容是否一致？
+
+**判定规则**：
+- ✅ 匹配：问题描述"在配置数据源节点场景"，截图内容"任务流画布-数据源节点配置"
+- ❌ 不匹配：问题描述"在配置数据源节点场景"，截图内容"空间详情页"
+- ⚠️ 无法判断：截图内容描述不够详细
+
+**处理方式**：
+- 匹配 → 保留该问题
+- 不匹配 → 删除该问题，或标注 `[需现场验证]` 并移到附录 `unverified_issues`
+- 无法判断 → 标注 `[证据不足]` 并移到附录 `unverified_issues`
+
+**输出格式**：
+```yaml
+scene_evidence_validation:
+  - issue_id: I-002
+    scene: "配置数据源节点"
+    evidence_screenshot: S02
+    screenshot_content: "空间详情页"
+    match_result: false
+    action: "删除（场景与证据不匹配）"
+```
+
 ### Step 3：宪法过滤
 
 对每条 raw_issue，检查是否违反 7 条宪法（读取 constitution.md）：
