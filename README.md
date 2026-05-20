@@ -2,9 +2,21 @@
 
 AI-native 设计能力包，把高级设计专家方法论封装为可共享的 Skill 矩阵，跨 IDE / Agent 统一调用。
 
-## 状态
+## 安装
 
-`v0.1.0` — M0 阶段（接口冻结 + 仓库骨架）。Kernel / MCP Servers / Skills 实现尚在并行开发中，暂未具备端到端运行能力。
+```bash
+npx designos
+```
+
+一行命令，自动检测并配置所有已安装的 IDE（Claude Code / Cursor / Trae / Codex / Qoder / WorkBuddy）。
+
+安装完成后，在任意项目目录的 AI 对话框输入 `/uxeval` 即可启动体验评估。
+
+## 升级
+
+```bash
+npx designos@latest
+```
 
 ## 文档与贡献
 

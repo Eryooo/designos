@@ -1,0 +1,34 @@
+{
+  "name": "designos",
+  "version": "0.2.1",
+  "description": "DesignOS - AI-powered UX evaluation skills for Claude Code, Cursor, Trae, and more",
+  "bin": {
+    "designos": "bin/cli.mjs"
+  },
+  "type": "module",
+  "files": [
+    "bin/",
+    "skills/",
+    "AGENTS.md",
+    "install.sh"
+  ],
+  "keywords": [
+    "designos",
+    "ux",
+    "evaluation",
+    "heuristic",
+    "usability",
+    "claude-code",
+    "cursor",
+    "trae"
+  ],
+  "author": "Eryooo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Eryooo/designos.git"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
