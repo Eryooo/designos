@@ -4,11 +4,11 @@
 description: UXEval Skill 的 Prompt 评估集
 
 prompts:
-  - file://prompts/v1.0.0/01-prd-understanding.md
-  - file://prompts/v1.0.0/02-principle-mapping.md
-  - file://prompts/v1.0.0/03-journey-modeling.md
-  - file://prompts/v1.0.0/04-task-generation.md
-  - file://prompts/v1.0.0/06-issue-attribution.md
+  - file://prompts/01-prd-understanding.md
+  - file://prompts/02-principle-mapping.md
+  - file://prompts/03-journey-modeling.md
+  - file://prompts/04-task-generation.md
+  - file://prompts/06-issue-attribution.md
 
 providers:
   - id: anthropic:messages:claude-opus-4-7

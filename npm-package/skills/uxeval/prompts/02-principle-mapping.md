@@ -16,18 +16,30 @@
 
 ## 内置原则库（前置加载）
 
-- H1 系统状态可见性
-- H2 系统与现实匹配
-- H3 用户控制与自由
-- H4 一致性与标准
-- H5 错误预防
-- H6 识别优于回忆
-- H7 灵活性与效率
-- H8 美学与极简设计
-- H9 错误恢复
-- H10 帮助与文档
-- H11 数据可信性（B 端补充）
-- H12 视觉层级（数据系统补充）
+**从 `reference/m02-启发式原则.md` 加载完整三层原则体系**：
+
+### 表现层（视觉呈现）
+- P1 美观而简洁的设计
+- P2 不脱离现实（环境适配）
+- P3 一致性与标准化
+- P4 反馈与动效
+
+### 框架层（界面设计）
+- F1 预防出错
+- F2 系统状态可见性
+- F3 信息布局与可读性
+- F4 帮助和说明
+- F5 对象关系可理解性
+- F6 前置条件表达
+- F7 空状态引导
+- F8 高成本操作帮助
+
+### 结构层（导航与架构）
+- S1 用户控制度与自由度
+- S2 再认而非记忆
+- S3 灵活性与效率
+- S4 多层级上下文
+- S5 状态机可预测性
 - H13 可访问性（WCAG 2.1 AA 子集）
 
 详细定义见 `reference/m02-启发式原则.md`。
@@ -38,7 +50,7 @@
 {
   "principles": [
     {
-      "id": "H1",
+      "id": "F2",
       "name": "系统状态可见性",
       "description": "用户随时知道系统正在做什么、自己处于哪一步",
       "source": "Nielsen 1994",
@@ -46,17 +58,17 @@
       "priority_for_this_eval": "high"
     }
   ],
-  "principle_selection_rationale": "本次评估涉及数据规则配置（异步操作多）+ 跨角色协作，重点关注 H1/H3/H5/H11，因为...",
+  "principle_selection_rationale": "本次评估涉及数据规则配置（异步操作多）+ 跨角色协作，重点关注 F2/S1/F1/P3，因为...",
   "skipped_principles": [
-    {"id": "H10", "reason": "本产品无独立帮助文档需求，由内嵌引导承载"}
+    {"id": "F4", "reason": "本产品无独立帮助文档需求，由内嵌引导承载"}
   ]
 }
 ```
 
 ## 选择规则
 
-1. **每个产品至少包含 H1 / H3 / H4 / H5**（这四条几乎适用所有产品）
-2. **B 端 / 数据产品**：必加 H11 + H12
+1. **每个产品至少包含 F2 / S1 / P3 / F1**（这四条几乎适用所有产品）
+2. **B 端 / 数据产品**：必加 F5 + F3
 3. **政府 / 公共服务 / 涉残**：必加 H13
 4. **自定义原则与内置语义重合时**：保留自定义、删除对应内置（用户优先）
 5. **每个 Module 至少匹配 3 条原则**，最多 6 条
@@ -87,19 +99,19 @@
 ```json
 {
   "principles": [
-    {"id": "H1", "applicable_modules": ["M-001", "M-002", "M-003"], "priority_for_this_eval": "high"},
-    {"id": "H3", "applicable_modules": ["M-001", "M-002"], "priority_for_this_eval": "high"},
-    {"id": "H5", "applicable_modules": ["M-001", "M-003"], "priority_for_this_eval": "critical"},
-    {"id": "H4", "applicable_modules": ["M-001", "M-002", "M-003"], "priority_for_this_eval": "medium"},
-    {"id": "H6", "applicable_modules": ["M-001"], "priority_for_this_eval": "medium"},
-    {"id": "H9", "applicable_modules": ["M-001", "M-003"], "priority_for_this_eval": "high"},
-    {"id": "H11", "applicable_modules": ["M-002", "M-003"], "priority_for_this_eval": "critical"},
-    {"id": "H12", "applicable_modules": ["M-001"], "priority_for_this_eval": "medium"}
+    {"id": "F2", "applicable_modules": ["M-001", "M-002", "M-003"], "priority_for_this_eval": "high"},
+    {"id": "S1", "applicable_modules": ["M-001", "M-002"], "priority_for_this_eval": "high"},
+    {"id": "F1", "applicable_modules": ["M-001", "M-003"], "priority_for_this_eval": "critical"},
+    {"id": "P3", "applicable_modules": ["M-001", "M-002", "M-003"], "priority_for_this_eval": "medium"},
+    {"id": "S2", "applicable_modules": ["M-001"], "priority_for_this_eval": "medium"},
+    {"id": "P4", "applicable_modules": ["M-001", "M-003"], "priority_for_this_eval": "high"},
+    {"id": "F5", "applicable_modules": ["M-002", "M-003"], "priority_for_this_eval": "critical"},
+    {"id": "F3", "applicable_modules": ["M-001"], "priority_for_this_eval": "medium"}
   ],
-  "principle_selection_rationale": "数据规则平台的核心风险是错误规则影响全量数据，因此 H5（错误预防）+ H11（数据可信性）优先级最高；规则编辑作为长流程，H3（用户控制）确保草稿与回滚体验。",
+  "principle_selection_rationale": "数据规则平台的核心风险是错误规则影响全量数据，因此 F1（错误预防）+ F5（对象关系可理解性）优先级最高；规则编辑作为长流程，S1（用户控制）确保草稿与回滚体验。",
   "skipped_principles": [
-    {"id": "H8", "reason": "B 端表单密度高，极简不是优先目标"},
-    {"id": "H10", "reason": "本系统通过内嵌引导承载，无独立帮助文档"},
+    {"id": "P1", "reason": "B 端表单密度高，极简不是优先目标"},
+    {"id": "F4", "reason": "本系统通过内嵌引导承载，无独立帮助文档"},
     {"id": "H13", "reason": "内部系统，可访问性非本期重点"}
   ]
 }

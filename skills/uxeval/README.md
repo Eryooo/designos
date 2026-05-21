@@ -1,7 +1,7 @@
 # UXEval Skill
 
 > 体验启发式评估 + 可用性测试 Pipeline Skill
-> 版本：v1.0.0 · 形态：Pipeline · 模式：web / client
+> 版本：v0.2.0 · 形态：Pipeline · 模式：web / client
 
 ## 是什么
 
@@ -153,7 +153,7 @@ skills/uxeval/
 │   ├── m04-任务生成.md
 │   ├── m05-证据采集.md
 │   └── m06-问题归因.md
-├── prompts/v1.0.0/
+├── prompts/
 │   ├── 01-prd-understanding.md
 │   ├── 02-principle-mapping.md
 │   ├── 03-journey-modeling.md

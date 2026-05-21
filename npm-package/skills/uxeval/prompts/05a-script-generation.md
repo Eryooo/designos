@@ -148,7 +148,7 @@ playwright-driver MCP 会按拓扑序执行。
   title: 规则草稿保存与恢复
   role: 运营专员
   steps_summary: 编辑 → 关闭 → 重开 → 检查内容
-  must_check: [H3, H5]
+  must_check: [S1, F1]
 ```
 
 ### 期望输出脚本

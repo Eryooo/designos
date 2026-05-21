@@ -1,5 +1,5 @@
 name: uxeval-pipeline
-version: 1.0.0
+version: 0.2.0
 
 description: |
   UXEval Pipeline：把高级体验设计师的评估流程标准化为
@@ -29,7 +29,7 @@ stages:
   # ────────────────────────────────────────────────────────────
   - id: prd-understanding
     type: llm
-    prompt: prompts/v1.0.0/01-prd-understanding.md
+    prompt: prompts/01-prd-understanding.md
     inputs: [prd_file, scope_md, existing_personas]
     outputs: [modules, key_features, roles, scenarios, key_tasks, business_goal, evaluation_boundary]
     knowledge: [reference/m01-需求理解.md]
@@ -42,7 +42,7 @@ stages:
   # ────────────────────────────────────────────────────────────
   - id: principle-mapping
     type: llm
-    prompt: prompts/v1.0.0/02-principle-mapping.md
+    prompt: prompts/02-principle-mapping.md
     inputs: [scope_md, modules, principles_md]
     outputs: [principles]
     knowledge: [reference/m02-启发式原则.md]
@@ -52,7 +52,7 @@ stages:
   # ────────────────────────────────────────────────────────────
   - id: journey-modeling
     type: llm
-    prompt: prompts/v1.0.0/03-journey-modeling.md
+    prompt: prompts/03-journey-modeling.md
     inputs: [modules, roles, scenarios, key_tasks, competitive_context]
     outputs: [journey_map, journey_stages]
     knowledge: [reference/m03-旅程建模.md]
@@ -66,7 +66,7 @@ stages:
   # ────────────────────────────────────────────────────────────
   - id: task-generation
     type: llm
-    prompt: prompts/v1.0.0/04-task-generation.md
+    prompt: prompts/04-task-generation.md
     inputs: [journey_map, journey_stages, principles, roles]
     outputs: [task_checklist_full, task_checklist_lite]
     knowledge: [reference/m04-任务生成.md]
@@ -81,7 +81,7 @@ stages:
   - id: task-script-generation
     type: llm
     only_when: mode == "web"
-    prompt: prompts/v1.0.0/05a-script-generation.md
+    prompt: prompts/05a-script-generation.md
     inputs: [task_checklist_lite, modules]
     outputs: [evaluation_script]
     knowledge: [reference/m05-证据采集.md]
@@ -116,7 +116,7 @@ stages:
   # ────────────────────────────────────────────────────────────
   - id: prd-screenshot-conflict
     type: llm
-    prompt: prompts/v1.0.0/05c-conflict-analysis.md
+    prompt: prompts/05c-conflict-analysis.md
     inputs: [modules, key_features, screenshots, image_analysis]
     outputs: [prd_screenshot_conflicts]
     knowledge: []
@@ -126,7 +126,7 @@ stages:
   # ────────────────────────────────────────────────────────────
   - id: issue-attribution
     type: llm
-    prompt: prompts/v1.0.0/06-issue-attribution.md
+    prompt: prompts/06-issue-attribution.md
     inputs: [screenshots, image_analysis, prd_screenshot_conflicts, journey_map, journey_stages, principles, task_checklist_full, competitive_context]
     outputs: [raw_issues, issues]
     knowledge: [reference/m06-问题归因.md]

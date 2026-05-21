@@ -71,7 +71,7 @@ def test_all_prompts_exist(uxeval_skill_dir: Path) -> None:
         "06-issue-attribution.md",
         "CHANGELOG.md",
     ]
-    prompts_dir = uxeval_skill_dir / "prompts" / "v1.0.0"
+    prompts_dir = uxeval_skill_dir / "prompts"
     for name in expected_prompts:
         assert (prompts_dir / name).exists(), f"Missing prompt: {name}"
 

@@ -4,11 +4,11 @@
 description: UXEval Skill 的 Prompt 评估集
 
 prompts:
-  - file://prompts/v1.0.0/01-prd-understanding.md
-  - file://prompts/v1.0.0/02-principle-mapping.md
-  - file://prompts/v1.0.0/03-journey-modeling.md
-  - file://prompts/v1.0.0/04-task-generation.md
-  - file://prompts/v1.0.0/06-issue-attribution.md
+  - file://prompts/01-prd-understanding.md
+  - file://prompts/02-principle-mapping.md
+  - file://prompts/03-journey-modeling.md
+  - file://prompts/04-task-generation.md
+  - file://prompts/06-issue-attribution.md
 
 providers:
   - id: anthropic:messages:claude-opus-4-7
@@ -67,9 +67,9 @@ tests:
           return p.length >= 6 && p.length <= 12;
       - type: javascript
         value: |
-          // 必须包含 H1, H3, H5, H11
+          // 必须包含 F2, S1, F1, P3
           const ids = (output.principles || []).map(x => x.id);
-          return ['H1', 'H3', 'H5', 'H11'].every(id => ids.includes(id));
+          return ['F2', 'S1', 'F1', 'P3'].every(id => ids.includes(id));
       - type: javascript
         value: |
           // skipped_principles 必须解释原因
