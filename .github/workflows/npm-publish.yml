@@ -16,6 +16,24 @@ jobs:
           node-version: '20'
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Sync skills to npm-package
+        run: |
+          rm -rf npm-package/skills
+          cp -r skills npm-package/skills
+          echo "✅ skills synced to npm-package"
+
+      - name: Version consistency check
+        run: |
+          NPM_VER=$(node -p "require('./npm-package/package.json').version")
+          INSTALL_VER=$(grep '^VERSION=' npm-package/install.sh | head -1 | cut -d'"' -f2)
+          echo "npm-package version: ${NPM_VER}"
+          echo "install.sh VERSION: ${INSTALL_VER}"
+          if [[ "${NPM_VER}" != "${INSTALL_VER}" ]]; then
+            echo "❌ Version mismatch!"
+            exit 1
+          fi
+          echo "✅ Versions consistent"
+
       - name: Publish
         working-directory: npm-package
         run: npm publish
