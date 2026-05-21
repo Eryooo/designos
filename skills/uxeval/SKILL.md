@@ -101,78 +101,34 @@ Stage 6 输出前必须逐条执行 7 条宪法校验，不通过的问题删除
 
 ## 工具调用
 
-需要工具时直接调用（通过 terminal / Bash）。AI 必须自适应当前 IDE/CLI 环境，按以下顺序检测可用工具：
+需要工具时直接调用。不同 IDE/CLI 环境（Claude Code、Codex、Cursor、Trae、Cline 等）可用工具不同，AI 自主判断当前环境最适合的方式。
 
 ### PDF/DOCX 解析（PRD 是 PDF 时必须执行）
 
-**核心原则**：不允许只靠多模态"看"PDF，必须把 PDF 完整文本提取到 `inputs/prd.md`，确保 Stage 1 拿到完整文本。
+**目标**：把 PDF 完整文本提取到 `inputs/prd.md`，确保 Stage 1 拿到完整内容。
 
-**自适应工具检测**（按优先级，逐个尝试）：
+**执行方式**：
+1. 自主检查当前环境有哪些 PDF 读取能力（MCP 工具、Python 库、系统命令行工具等）
+2. 选择最适合当前环境的方式提取全文
+3. 如果当前环境没有任何可用的 PDF 提取工具 → 提示用户安装一个适合其环境的工具
+4. 提取完成后验证：文本长度是否合理（与 PDF 页数匹配），是否有乱码或截断
 
-```bash
-# 步骤 1：检测系统命令行工具
-which pdftotext      # poppler-utils / poppler
-which mutool         # mupdf
-which pdf2txt.py     # pdfminer
-
-# 步骤 2：检测 Python 库
-python3 -c "import fitz; print('pymupdf available')"     # 推荐：纯 Python，无系统依赖
-python3 -c "import pypdf; print('pypdf available')"      # 备用 1
-python3 -c "import PyPDF2; print('PyPDF2 available')"    # 备用 2
-python3 -c "import pdfplumber; print('pdfplumber available')"  # 备用 3
-```
-
-**执行策略**：
-
-1. 如果有任何一个工具可用 → 直接使用提取，写到 `inputs/prd.md`
-2. 如果**全部不可用** → 提示用户在当前 IDE/CLI 环境安装合适的工具：
-   ```
-   PDF 解析工具未安装，请在终端执行以下任一命令安装：
-
-   推荐（纯 Python，跨平台）：
-     pip install pymupdf
-
-   或（系统命令行工具）：
-     macOS:    brew install poppler
-     Linux:    apt install poppler-utils
-     Windows:  choco install poppler 或下载 https://github.com/oschwartz10612/poppler-windows
-
-   安装后重新执行 /uxeval。
-   ```
-3. **降级方案**：如果用户拒绝安装，且 PDF < 5MB，可以多模态读取作为 fallback，但**必须明确告知用户**：
-   - 多模态可能漏读复杂内容（表格、图标、长文档后半部分）
-   - 风险：Stage 1 输出可能不完整，影响后续所有 stage 质量
-
-**禁止**：
-- ❌ 直接多模态读 PDF 而不告知用户局限
-- ❌ 工具未安装时静默跳过 PDF 解析
-- ❌ 提示"工具未安装时降级"这种给 AI 偷懒空间的话术
+**约束**：
+- ❌ 禁止只靠多模态"看"PDF 而不提取文本（多模态会漏读复杂内容、表格、长文档后半部分）
+- ❌ 禁止工具未安装时静默跳过
+- ⚠️ 如果用户拒绝安装且 PDF < 5MB，可以多模态 fallback，但必须告知用户风险（Stage 1 可能不完整）
 
 ### Playwright（仅 web 模式）
 
-执行 Stage 5a 生成的 .spec.mjs 脚本采集真实环境截图。
-
-**自适应检测**：
-```bash
-which playwright || npx playwright --version
-```
-
-未安装时提示用户：`npm install -g playwright && playwright install chromium`
+自主检查 Playwright 是否可用，未安装时提示用户安装。
 
 ### Excel 生成（最终报告）
 
-最终报告用 openpyxl 或 excel-builder 脚本生成 .xlsx。
-
-**自适应检测**：
-```bash
-python3 -c "import openpyxl; print('available')"
-```
-
-未安装时提示用户：`pip install openpyxl`
+自主检查 openpyxl 或其他 Excel 库是否可用，未安装时提示用户安装。
 
 ### 图片分析（截图）
 
-截图用多模态视觉能力直接分析（IDE/CLI 都支持）。
+截图用多模态视觉能力直接分析（所有 IDE/CLI 都支持）。
 - 一次只读 1 张，避免 context 爆掉
 - 每张输出 `content_description` 字段（页面类型 + 主要元素 + 数据状态）
 
