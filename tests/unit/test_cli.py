@@ -5,12 +5,67 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
+import yaml
 from typer.testing import CliRunner
 
+from designos import __version__ as DESIGNOS_VERSION
 from designos.cli.main import app
 
 
 runner = CliRunner()
+
+
+def _make_preflight_skill(
+    root: Path,
+    *,
+    command: str = "definitely-missing-command-12345 --version",
+    required_when: str | None = 'mode == "web"',
+) -> Path:
+    skill_dir = root / "demo-preflight"
+    skill_dir.mkdir(parents=True, exist_ok=True)
+    required_when_lines = ""
+    if required_when is not None:
+        required_when_lines = f"      required_when: '{required_when}'\n"
+    (skill_dir / "SKILL.md").write_text(
+        "---\n"
+        "name: demo-preflight\n"
+        "version: 1.2.3\n"
+        "type: pipeline\n"
+        "requires:\n"
+        "  kernel: \">=1.0.0,<2.0.0\"\n"
+        "  mcp_servers:\n"
+        "    - name: pdf-parser\n"
+        "      builtin: true\n"
+        "    - name: playwright-driver\n"
+        "      builtin: false\n"
+        f"{required_when_lines}"
+        "      requires_external:\n"
+        f"        - command: \"{command}\"\n"
+        "          install_hint: \"Install Playwright before using web mode.\"\n"
+        "modes:\n"
+        "  - id: client\n"
+        "  - id: web\n"
+        "---\n"
+        "# Demo preflight skill\n",
+        encoding="utf-8",
+    )
+    (skill_dir / "pipeline.yaml").write_text(
+        yaml.safe_dump(
+            {
+                "name": "demo-preflight-pipeline",
+                "version": "1.2.3",
+                "stages": [
+                    {
+                        "id": "noop",
+                        "type": "composite",
+                        "outputs": ["ok"],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+    return skill_dir
 
 
 # ---------------------------------------------------------------------------
@@ -21,7 +76,7 @@ runner = CliRunner()
 def test_version_command_prints_designos_version() -> None:
     result = runner.invoke(app, ["version"])
     assert result.exit_code == 0
-    assert "0.1.0" in result.stdout
+    assert DESIGNOS_VERSION in result.stdout
     assert "DesignOS" in result.stdout
 
 
@@ -208,6 +263,69 @@ def test_skill_versions_unknown_skill_exits_1(tmp_path: Path, monkeypatch: pytes
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["skill", "versions", "nonexistent"])
     assert result.exit_code == 1
+
+
+# ---------------------------------------------------------------------------
+# preflight
+# ---------------------------------------------------------------------------
+
+
+def test_preflight_client_mode_passes_when_web_dependency_not_required(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    skills_dir = tmp_path / "skills"
+    _make_preflight_skill(skills_dir)
+
+    import designos.cli.main as cli_mod
+
+    monkeypatch.setattr(cli_mod, "_GLOBAL_SKILLS_DIR", skills_dir)
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(app, ["preflight", "demo-preflight", "--mode", "client"], catch_exceptions=False)
+
+    assert result.exit_code == 0
+    assert "Preflight passed" in result.stdout
+
+
+def test_preflight_web_mode_fails_for_missing_playwright_probe(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    skills_dir = tmp_path / "skills"
+    _make_preflight_skill(skills_dir)
+
+    import designos.cli.main as cli_mod
+
+    monkeypatch.setattr(cli_mod, "_GLOBAL_SKILLS_DIR", skills_dir)
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(app, ["preflight", "demo-preflight", "--mode", "web"], catch_exceptions=False)
+
+    assert result.exit_code == 1
+    assert "definitely-missing-command-12345 --version" in result.output
+    assert "Install Playwright before using web mode." in result.output
+
+
+def test_preflight_prefers_repo_skill_over_global_install(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    skills_dir = tmp_path / "skills"
+    global_skills = tmp_path / "global-skills"
+    _make_preflight_skill(skills_dir)
+    _make_preflight_skill(
+        global_skills,
+        command="definitely-missing-command-99999 --version",
+        required_when=None,
+    )
+
+    import designos.cli.main as cli_mod
+
+    monkeypatch.setattr(cli_mod, "_GLOBAL_SKILLS_DIR", global_skills)
+    monkeypatch.chdir(tmp_path)
+
+    result = runner.invoke(app, ["preflight", "demo-preflight", "--mode", "client"], catch_exceptions=False)
+
+    assert result.exit_code == 0
+    assert "Preflight passed" in result.stdout
 
 
 # ---------------------------------------------------------------------------

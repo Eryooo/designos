@@ -6,12 +6,17 @@ and creates correct workspace structures. No real LLM calls are made.
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
+from designos import __version__ as DESIGNOS_VERSION
+
+
+_REPO_ROOT = Path(__file__).resolve().parents[2]
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -19,30 +24,27 @@ import pytest
 
 
 def _run_cli(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
-    """Run the designos CLI via the current Python environment."""
+    """Run the repository CLI via the current Python environment."""
+    env = os.environ.copy()
+    existing_pythonpath = env.get("PYTHONPATH")
+    pythonpath_parts = [str(_REPO_ROOT)]
+    if existing_pythonpath:
+        pythonpath_parts.append(existing_pythonpath)
+    env["PYTHONPATH"] = os.pathsep.join(pythonpath_parts)
+
     return subprocess.run(
         [sys.executable, "-m", "designos.cli.main", *args],
         capture_output=True,
         text=True,
-        cwd=str(cwd) if cwd else None,
+        cwd=str(cwd) if cwd else str(_REPO_ROOT),
+        env=env,
         timeout=30,
     )
 
 
 def _run_designos(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
-    """Run designos via the installed console script, falling back to module."""
-    try:
-        result = subprocess.run(
-            ["designos", *args],
-            capture_output=True,
-            text=True,
-            cwd=str(cwd) if cwd else None,
-            timeout=30,
-        )
-        return result
-    except FileNotFoundError:
-        # Fall back to module invocation if script not on PATH
-        return _run_cli(*args, cwd=cwd)
+    """Run the repository CLI, never the globally installed `designos`."""
+    return _run_cli(*args, cwd=cwd)
 
 
 # ---------------------------------------------------------------------------
@@ -63,11 +65,11 @@ class TestVersionCommand:
         )
 
     def test_version_output_contains_version_string(self) -> None:
-        """designos version output contains '0.1.0'."""
+        """designos version output contains the package version."""
         result = _run_designos("version")
         combined = result.stdout + result.stderr
-        assert "0.1.0" in combined, (
-            f"Expected '0.1.0' in output, got:\n{combined}"
+        assert DESIGNOS_VERSION in combined, (
+            f"Expected '{DESIGNOS_VERSION}' in output, got:\n{combined}"
         )
 
     def test_version_output_contains_designos(self) -> None:
@@ -120,7 +122,7 @@ class TestInitCommand:
         Note: In M1 the init command is a placeholder (A6 not yet complete),
         so we only verify the CLI accepts the arguments without crashing.
         """
-        result = _run_designos("init", "test-project", cwd=tmp_path)
+        result = _run_designos("init", "test-project", "--skill", "uxeval", cwd=tmp_path)
         # CLI must not crash with an unhandled exception
         assert result.returncode == 0, (
             f"CLI crashed with exit {result.returncode}\n"
@@ -187,7 +189,7 @@ class TestImportSmoke:
 
         mod = importlib.import_module("designos")
         assert hasattr(mod, "__version__")
-        assert mod.__version__ == "0.1.0"
+        assert mod.__version__ == DESIGNOS_VERSION
 
     def test_kernel_contracts_importable(self) -> None:
         """kernel.contracts package imports cleanly."""

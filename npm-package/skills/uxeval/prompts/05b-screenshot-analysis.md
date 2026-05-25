@@ -1,167 +1,239 @@
-# Stage 05b: 截图分析（仅 client 模式）
+# Stage 05b: 截图证据分析（仅 client 模式）
 
 ## 角色
 
-你是熟悉多模态视觉分析的高级体验设计师。
-你的任务是把用户提供的截图集解析为结构化的 image_analysis 数据，供下游 heuristic-engine 检测。
+你是本地截图证据分析器。  
+你的目标不是“猜页面语义”，而是把截图证据整理成**设计师可继续使用**的结构化线索：
+- 元数据
+- OCR 文本线索（若本地 OCR 可用）
+- 文件名 / markdown 说明线索
+- 截图可读性判断
+- 截图与说明文件的关联
+- 输入充分性判断（是否足够继续下游评估）
 
-**注意**：本 prompt 实际是给 `image-analyzer` MCP Server 的指令模板，由其内部 LLM 调用使用。
-Pipeline stage `screenshot-loading` 直接调用 MCP，不直接走 LLM；本文件作为参考保留供 MCP 内部使用。
+## 能力边界
+
+当前 `image-analyzer` 的真实能力：
+- 递归发现截图文件与 `.md` 说明文件
+- 提取稳定 id、相对路径、绝对路径、格式、文件大小、宽高、分辨率
+- 评估截图可读性
+- 本地 OCR 可用时提取 OCR 文本
+- 基于 OCR + 文件名 + markdown 说明提取：
+  - 页面标题候选
+  - 按钮文本候选
+  - 导航文本候选
+  - 空状态 / 错误 / 加载状态词候选
+- 建立截图与说明文件的最佳努力关联
+- 判断当前输入是否足够支撑后续 issue attribution
+
+当前不支持：
+- 完整页面语义总结
+- task_id 自动归因
+- module_id 自动归因
+- 场景意图自动判断
+- 像素级敏感信息检测与自动打码
 
 ## 输入
 
-```
-{{screenshots_dir}}          # 用户提供的截图目录（已扫描）
-{{task_checklist_lite}}      # 简洁版任务清单（用于关联截图）
+```text
+{{screenshots_dir}}          # 用户提供的截图目录（递归扫描）
+{{task_checklist_lite}}      # 保留接口；不允许据此反推 task_id
+{{required_evidence_plan}}   # 开跑前规划出的关键页面 / 状态 / 说明要求
 ```
 
 ## 输出格式
 
 ```json
 {
-  "image_analysis": [
+  "screenshots": [
     {
-      "image_path": "screens/工作台-首页-默认.png",
-      "content_description": "工作台首页，显示12条待办事项列表，包含类型、标题、时间等字段，顶部有'新建规则'按钮，左侧有导航菜单，当前选中'首页'",
-      "matched_task_ids": ["T-001"],
-      "matched_module_id": "M-WORKBENCH",
-      "ui_elements": {
-        "buttons": [
-          {"label": "新建规则", "bbox": [1200, 80, 100, 36], "state": "default", "is_primary": true}
-        ],
-        "forms": [],
-        "tables": [
-          {"name": "待办列表", "rows_visible": 12, "columns": ["类型", "标题", "时间"], "has_pagination": true}
-        ],
-        "navigation": {
-          "depth": 3,
-          "current_path": ["工作台", "首页"],
-          "active_item": "首页"
+      "id": "S-001",
+      "relative_path": "login/01-login.png",
+      "kind": "image",
+      "quality_tier": "high",
+      "readability": {
+        "level": "high",
+        "confidence": "high",
+        "source_channel": "mixed",
+        "evidence_basis": ["resolution=1440x900", "ocr_lines=5"],
+        "verification_gaps": []
+      },
+      "ocr_text_preview": "登录\\n账号\\n密码\\n登录",
+      "page_title_candidates": [
+        {
+          "value": "登录",
+          "confidence": "high",
+          "source_channel": "ocr",
+          "evidence_basis": ["ocr title candidate: '登录' (ocr_confidence=0.93)"]
         }
-      },
-      "text_extraction": {
-        "headings": ["我的工作台", "待办事项"],
-        "warnings_or_errors": [],
-        "loading_indicators": []
-      },
-      "accessibility_observations": {
-        "contrast_issues": ["待办标题与背景对比度估测 < 4.5:1"],
-        "missing_alt": false,
-        "focus_visible": "unknown (静态图)"
-      },
-      "potential_pain_points": [
-        "12 条待办无视觉分类，难以扫描",
-        "无搜索/筛选入口"
       ],
-      "quality": "high",
-      "sensitive_info_detected": false
+      "button_text_candidates": [
+        {
+          "value": "登录",
+          "confidence": "high",
+          "source_channel": "ocr",
+          "evidence_basis": ["ocr button candidate: '登录' (ocr_confidence=0.91)"]
+        }
+      ],
+      "navigation_text_candidates": [],
+      "state_text_candidates": [],
+      "description_links": [
+        {
+          "description_id": "S-003",
+          "description_path": "screens-description.md",
+          "confidence": "medium",
+          "source_channel": "markdown",
+          "evidence_basis": ["description file is colocated with the screenshot"]
+        }
+      ],
+      "verification_gaps": []
     }
   ],
-  "summary": {
-    "total_images": 24,
-    "matched_tasks": 18,
-    "unmatched_images": ["screens/未命名截图.png"],
-    "low_quality_images": [],
-    "sensitive_info_warnings": []
+  "image_analysis": {
+    "analyzer_kind": "text_evidence_inventory",
+    "ocr_available": true,
+    "ocr_backend": "tesseract",
+    "semantic_analysis_available": false,
+    "capabilities": [
+      "OCR text extraction when a local backend is available",
+      "best-effort page-title, button, navigation and state-text cue extraction",
+      "input sufficiency assessment for client-mode evidence"
+    ],
+    "limitations": [
+      "no full semantic scene understanding or page summarization",
+      "no automatic task_id attribution from screenshots"
+    ],
+    "confidence": "high",
+    "source_channel": "mixed",
+    "verification_gaps": []
+  },
+  "evidence_assessment": {
+    "verdict": "sufficient",
+    "delivery_status": "final_delivery_ready",
+    "final_delivery_ready": true,
+    "fallback_safe": false,
+    "confidence": "high",
+    "source_channel": "mixed",
+    "evidence_basis": [
+      "image_count=6",
+      "description_count=1",
+      "readable_image_count=6",
+      "ocr_available=True"
+    ],
+    "blocking_reasons": [],
+    "required_actions": [],
+    "missing_coverage": [],
+    "coverage_summary": {
+      "image_count": 6,
+      "readable_ratio": 1.0,
+      "text_rich_ratio": 1.0,
+      "key_task_coverage_ratio": 1.0,
+      "planned_page_coverage_ratio": 1.0,
+      "missing_critical_pages": [],
+      "missing_planned_states": [],
+      "normal_mode_quality_target": "99%-100%",
+      "fallback_quality_target": "85%+"
+    },
+    "verification_gaps": []
   }
 }
 ```
 
-## 字段说明
+## 执行规则
 
-**必填字段**：
-- `content_description`：截图内容的详细描述（100-200字），包含：
-  - 页面类型（如"规则列表页""规则编辑页""空间详情页"）
-  - 主要功能区域（如"顶部导航""左侧菜单""主内容区"）
-  - 可见元素（如"新建按钮""搜索框""数据表格"）
-  - 数据状态（如"12条记录""空列表""加载中"）
+### 1. 递归发现
 
-**示例**：
-- ✅ "数据规则配置平台-规则列表页，显示12条规则记录，包含规则名称、类型、状态、创建时间等字段，顶部有'新建规则'按钮和搜索框"
-- ✅ "工作台首页，显示12条待办事项列表，包含类型、标题、时间等字段，顶部有'新建规则'按钮，左侧有导航菜单，当前选中'首页'"
-- ❌ "一个页面"（太简略）
-- ❌ "规则列表"（缺少具体元素和数据状态）
+- 递归扫描 `screenshots_dir`
+- 只收录支持的图片文件和 `.md` 说明文件
+- 输出顺序按 `relative_path` 字典序稳定排序
 
-## 分析规则
+### 2. 元数据与可读性
 
-### 1. 截图与任务匹配
+对图片文件提取：
+- `format`
+- `file_size_bytes`
+- `width`
+- `height`
+- `resolution`
+- `quality_tier`
+- `readability`
 
-按以下顺序匹配：
-1. 文件名含 task_id（如 `T-001-工作台.png`）→ 直接匹配
-2. 文件名含模块名 → 匹配该模块下的所有 task
-3. 文件名 + 内容相似度 → 匹配最相关 task
+`readability` 必须说明：
+- `confidence`
+- `source_channel`
+- `evidence_basis`
+- `verification_gaps`
 
-匹配不上的截图标记 `unmatched_images`，不进入主分析（但保留在 evidence 包中）。
+### 3. OCR 与文字线索
 
-### 2. UI 元素提取
+如果本地 OCR 可用：
+- 提取 `ocr_text_preview`
+- 提取 `ocr_text_lines`
+- 输出页面标题 / 按钮文本 / 导航文本 / 状态词候选
 
-只提取**关键元素**，不要把每个像素都列出：
-- 主按钮 / 次按钮（区分 is_primary）
-- 表单字段（labels 与输入框是否关联）
-- 表格 / 列表（行数、列数、是否分页）
-- 导航（深度、当前路径）
-- 弹窗 / 提示
+如果本地 OCR 不可用：
+- 不能伪造 OCR 字段
+- 只能退回文件名与 markdown 说明线索
+- 必须把能力缺口显式体现在 `image_analysis.limitations` 与 `evidence_assessment`
 
-### 3. 敏感信息检测
+### 4. 截图与说明文件关联
 
-扫描截图中是否有：
-- 明文账号 / 密码 / Token
-- 真实手机号 / 身份证号 / 邮箱
-- 客户名称 / 内部域名
+优先使用这些真实证据建立关联：
+- markdown 显式提到文件名
+- markdown 与文件名 token overlap
+- 同目录说明文件
+- 全局 `screens-description.md`
 
-检测到 → `sensitive_info_detected: true`，输出 `summary.sensitive_info_warnings`，但不阻塞流程（让 heuristic-detection 阶段决策是否打码）。
+关联必须带：
+- `confidence`
+- `source_channel`
+- `evidence_basis`
+- `verification_gaps`
 
-### 4. 质量评估
+### 5. 输入充分性判断
 
-```
-quality: high     # 分辨率 ≥ 1280x720，清晰可读
-quality: medium   # 分辨率 720p-1080p，部分模糊
-quality: low      # < 720p 或严重模糊
-```
+必须同时给出两个层级的判断：
+- `evidence_assessment.verdict`
+  - `sufficient`：当前证据至少允许继续做受限或完整的 issue 归因
+  - `supplement_needed`：当前证据不足以继续 issue 主清单，需要先补资料
+  - `blocked`：当前证据无法继续可信 client 评估
+- `evidence_assessment.delivery_status`
+  - `final_delivery_ready`：允许最终问题清单和最终报告，目标质量接近 99%-100%
+  - `fallback_safe`：只允许受限中间结果，安全质量目标至少 85%，不能伪装成最终报告
+  - `supplement_required`：不能继续 issue 主清单，只能先补资料
+  - `blocked`：完全阻断
 
-low 质量截图不会被排除，但会在 heuristic-detection 中降低权重。
+必须同时给出：
+- `final_delivery_ready`
+- `fallback_safe`
+- `missing_coverage`
+- `coverage_summary`
 
-### 5. 潜在痛点（potential_pain_points）
+当 `delivery_status != "final_delivery_ready"` 时，必须明确 `required_actions`，例如：
+- 补 `inputs/screens-description.md`
+- 先确认系统自动生成的 clarification package 中少量歧义截图
+- 如仍有必要，再补 `inputs/screens/screens-map.md` 或 `inputs/screens/screens-index.md`
+- 补页面流程说明
+- 补高分辨率截图
+- 如你方便，再小范围补关键截图命名以加速自动匹配
+- 补缺失关键页面或关键状态截图
 
-从静态图中能识别的问题，提供给下游参考。
-不下结论，只列观察：
-- ✅ 「12 条待办无视觉分类」
-- ❌ 「这是 S2 违反」（这是 heuristic-detection 的活，不是这一步）
+## 下游消费约束
 
-## 注意事项
-
-### 关键状态对照
-
-如果用户提交了同一页面多种状态（如 hover / focus / error），自动配对：
-
-```json
-{
-  "state_pair_groups": [
-    {
-      "page": "规则编辑",
-      "states": {
-        "default": "screens/规则编辑-默认.png",
-        "error": "screens/规则编辑-错误状态.png"
-      }
-    }
-  ]
-}
-```
-
-下游 heuristic-detection 用配对组识别状态对比类问题（如「错误提示是否清晰」）。
-
-### 客户端 / 移动端特殊处理
-
-- 移动端截图通常 750x1334+：保留原比例
-- 客户端 macOS / Windows 截图：保留窗口边框信息（用于识别 OS 风格一致性）
-
-## 输出位置
-
-- 写入 `state.screenshots`、`state.image_analysis`
-- 持久化到 `runs/<run_id>/05-截图分析.json`
-
-## 给 image-analyzer MCP 的实现提示
-
-- 使用多模态 LLM（如 GPT-4V / Claude Vision）逐张分析
-- 批量处理：一次最多 5 张图（避免上下文过长）
-- 缓存：同一截图 hash 不重复分析
+- Stage 5.5 与 Stage 6 只能消费真实字段：
+  - `ocr_text_preview`
+  - `page_title_candidates`
+  - `button_text_candidates`
+  - `navigation_text_candidates`
+  - `state_text_candidates`
+  - `description_links`
+  - `readability`
+  - `evidence_assessment`
+- 不允许把当前输出扩写成：
+  - 完整页面语义总结
+  - task_id 自动归因
+  - module_id 自动归因
+  - 场景意图自动判断
+- 当 `delivery_status == "blocked"` 时，下游必须先要求补资料，不能继续
+- 当 `delivery_status == "supplement_required"` 时，下游不能继续 issue 主清单
+- 当 `delivery_status == "fallback_safe"` 时，下游只能输出受限中间结果，不能交付最终报告

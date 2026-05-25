@@ -11,6 +11,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from kernel.contracts.interfaces import ISkill
+from kernel.contracts.schemas import MCPServerConfig
 
 
 @dataclass(frozen=True, slots=True)
@@ -20,14 +21,24 @@ class ExternalRequirement:
     command: str
     install_hint: str = ""
     required_when: str | None = None
+    server_name: str | None = None
 
 
 def requirements_from_skill(skill: ISkill) -> list[ExternalRequirement]:
     """Return requirements declared by a loaded skill.
 
-    Looks at the (optional) ``preflight`` attribute on the skill instance for
-    a list of dicts or :class:`ExternalRequirement` entries.
+    Primary source is ``skill.config.mcp_servers[*].requires_external`` so the
+    runtime consumes parsed SKILL.md frontmatter. The legacy ``skill.preflight``
+    attribute is still accepted as a compatibility fallback.
     """
+    config: Any = getattr(skill, "config", None)
+    if config is not None:
+        servers: Any = getattr(config, "mcp_servers", None)
+        if isinstance(servers, list):
+            parsed = _requirements_from_servers(servers)
+            if parsed:
+                return parsed
+
     raw: Any = getattr(skill, "preflight", None)
     if raw is None:
         return []
@@ -41,18 +52,31 @@ def requirements_from_frontmatter(frontmatter: dict[str, Any]) -> list[ExternalR
     requires: Any = frontmatter.get("requires", {}) or {}
     if not isinstance(requires, dict):
         return []
-    out: list[ExternalRequirement] = []
     servers: Any = requires.get("mcp_servers", []) or []
-    if isinstance(servers, list):
-        for server in servers:
-            if not isinstance(server, dict):
-                continue
-            entries: Any = server.get("requires_external", []) or []
-            if not isinstance(entries, list):
-                continue
-            for entry in entries:
-                if isinstance(entry, dict):
-                    out.append(_coerce(entry))
+    if not isinstance(servers, list):
+        return []
+    parsed_servers: list[MCPServerConfig] = []
+    for server in servers:
+        if not isinstance(server, dict):
+            continue
+        if not server.get("name"):
+            continue
+        parsed_servers.append(MCPServerConfig.model_validate(server))
+    return _requirements_from_servers(parsed_servers)
+
+
+def _requirements_from_servers(servers: list[MCPServerConfig]) -> list[ExternalRequirement]:
+    out: list[ExternalRequirement] = []
+    for server in servers:
+        for entry in server.requires_external:
+            out.append(
+                ExternalRequirement(
+                    command=entry.command,
+                    install_hint=entry.install_hint,
+                    required_when=entry.required_when or server.required_when,
+                    server_name=server.name,
+                )
+            )
     return out
 
 
@@ -64,6 +88,7 @@ def _coerce(entry: Any) -> ExternalRequirement:
             command=str(entry.get("command", "")),
             install_hint=str(entry.get("install_hint", "")),
             required_when=entry.get("required_when"),
+            server_name=entry.get("server_name"),
         )
     return ExternalRequirement(command=str(entry))
 

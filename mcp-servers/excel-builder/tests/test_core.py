@@ -4,7 +4,7 @@ import pytest
 from pathlib import Path
 from openpyxl import load_workbook
 
-from core import build_issue_report, ExcelBuilderError
+from core import audit_delivery_readiness, build_issue_report, ExcelBuilderError
 
 
 def test_build_uxeval_report(temp_output_dir, mock_issues):
@@ -17,8 +17,11 @@ def test_build_uxeval_report(temp_output_dir, mock_issues):
         template="uxeval",
     )
 
-    assert result["sheet_count"] == 3
-    assert Path(result["path"]).exists()
+    assert result["issue_report"]["sheet_count"] == 3
+    assert Path(result["issue_report"]["path"]).exists()
+    assert Path(result["html_report"]["path"]).exists()
+    assert Path(result["evidence_pack"]["path"]).is_dir()
+    assert (Path(result["evidence_pack"]["path"]) / "manifest.json").exists()
 
     # Verify workbook can be loaded
     wb = load_workbook(output_path)
@@ -53,8 +56,10 @@ def test_build_design_acceptance_report(temp_output_dir, mock_issues):
         template="design-acceptance",
     )
 
-    assert result["sheet_count"] == 3
-    assert Path(result["path"]).exists()
+    assert result["issue_report"]["sheet_count"] == 3
+    assert Path(result["issue_report"]["path"]).exists()
+    assert Path(result["html_report"]["path"]).exists()
+    assert Path(result["evidence_pack"]["path"]).is_dir()
 
     # Verify workbook can be loaded
     wb = load_workbook(output_path)
@@ -76,8 +81,10 @@ def test_build_competitor_report(temp_output_dir, mock_issues):
         template="competitor",
     )
 
-    assert result["sheet_count"] == 2
-    assert Path(result["path"]).exists()
+    assert result["issue_report"]["sheet_count"] == 2
+    assert Path(result["issue_report"]["path"]).exists()
+    assert Path(result["html_report"]["path"]).exists()
+    assert Path(result["evidence_pack"]["path"]).is_dir()
 
     # Verify workbook can be loaded
     wb = load_workbook(output_path)
@@ -134,7 +141,7 @@ def test_file_overwrite(temp_output_dir, mock_issues):
         output_path=str(output_path),
         template="uxeval",
     )
-    assert Path(result1["path"]).exists()
+    assert Path(result1["issue_report"]["path"]).exists()
 
     # Overwrite with second report
     result2 = build_issue_report(
@@ -142,7 +149,7 @@ def test_file_overwrite(temp_output_dir, mock_issues):
         output_path=str(output_path),
         template="uxeval",
     )
-    assert Path(result2["path"]).exists()
+    assert Path(result2["issue_report"]["path"]).exists()
 
     # Verify the file was overwritten
     wb = load_workbook(output_path)
@@ -168,19 +175,19 @@ def test_severity_color_coding(temp_output_dir, mock_issues):
 
     # Check critical issue (row 2)
     critical_cell = ws.cell(2, 3)
-    assert critical_cell.fill.start_color.rgb == "FFCCCC"
+    assert critical_cell.fill.start_color.rgb.endswith("FFCCCC")
 
     # Check major issue (row 3)
     major_cell = ws.cell(3, 3)
-    assert major_cell.fill.start_color.rgb == "FFE5CC"
+    assert major_cell.fill.start_color.rgb.endswith("FFE5CC")
 
     # Check minor issue (row 4)
     minor_cell = ws.cell(4, 3)
-    assert minor_cell.fill.start_color.rgb == "FFFFCC"
+    assert minor_cell.fill.start_color.rgb.endswith("FFFFCC")
 
     # Check suggestion (row 5)
     suggestion_cell = ws.cell(5, 3)
-    assert suggestion_cell.fill.start_color.rgb == "E6E6E6"
+    assert suggestion_cell.fill.start_color.rgb.endswith("E6E6E6")
 
     wb.close()
 
@@ -209,6 +216,158 @@ def test_principle_aggregation(temp_output_dir, mock_issues):
     assert h1_count == 3
 
     wb.close()
+
+
+def test_build_uxeval_report_returns_stage_output_contract(temp_output_dir, mock_issues):
+    """Stage 7 tool contract exposes same-named structured outputs."""
+    result = build_issue_report(
+        issues=mock_issues,
+        output_dir=str(temp_output_dir),
+        template="uxeval",
+    )
+
+    assert set(result) == {"issue_report", "html_report", "evidence_pack"}
+    assert result["issue_report"]["id"] == "issue_report"
+    assert result["issue_report"]["type"] == "issue_report"
+    assert result["html_report"]["id"] == "html_report"
+    assert result["html_report"]["type"] == "html_report"
+    assert result["evidence_pack"]["id"] == "evidence_pack"
+    assert result["evidence_pack"]["type"] == "evidence_pack"
+
+
+def test_delivery_audit_rejects_llm_claimed_final_when_main_issue_is_not_verified(temp_output_dir):
+    issues = [
+        {
+            "id": "I-001",
+            "title": "Primary CTA is buried",
+            "severity": "major",
+            "description": "CTA is below the fold.",
+            "user_impact": "User misses the primary action.",
+            "suggestion": "Move CTA above the fold.",
+            "evidence_refs": ["E-001"],
+            "evidence_basis": ["ocr CTA cue"],
+            "verification_status": "verified",
+        },
+        {
+            "id": "I-002",
+            "title": "Error state is inconsistent",
+            "severity": "major",
+            "description": "State text differs across pages.",
+            "user_impact": "Users cannot trust result feedback.",
+            "suggestion": "Unify state feedback copy.",
+            "evidence_refs": ["E-002"],
+            "evidence_basis": ["markdown description"],
+            "verification_status": "needs_verification",
+        },
+    ]
+    result = audit_delivery_readiness(
+        issues=issues,
+        unverified_issues=[],
+        evidence_assessment={
+            "delivery_status": "final_delivery_ready",
+            "required_actions": [],
+            "missing_coverage": [],
+            "verification_gaps": [],
+            "coverage_summary": {},
+        },
+        delivery_assessment={
+            "delivery_status": "final_delivery_ready",
+        },
+        output_dir=str(temp_output_dir),
+    )
+
+    audited = result["audited_delivery_assessment"]
+    assert audited["delivery_status"] == "fallback_safe"
+    assert audited["final_delivery_ready"] is False
+    assert "failed deterministic verification" in " ".join(audited["audit_failures"])
+    bundle = Path(result["delivery_audit_bundle"]["path"])
+    assert (bundle / "bounded_issue_pass.md").exists()
+    assert (bundle / "unverified_issues.json").exists()
+    assert (bundle / "supplement_request.md").exists()
+
+
+def test_delivery_audit_creates_bounded_fallback_package(temp_output_dir):
+    issues = [
+        {
+            "id": "I-001",
+            "title": "Primary CTA is buried",
+            "severity": "major",
+            "description": "CTA is below the fold.",
+            "user_impact": "User misses the primary action.",
+            "suggestion": "Move CTA above the fold.",
+            "evidence_refs": ["E-001"],
+            "evidence_basis": ["ocr CTA cue"],
+            "verification_status": "verified",
+        }
+    ]
+    result = audit_delivery_readiness(
+        issues=issues,
+        unverified_issues=[
+            {
+                "id": "I-099",
+                "title": "Export success feedback may be missing",
+                "severity": "major",
+                "blocked_by": ["缺导出成功状态截图"],
+            }
+        ],
+        evidence_assessment={
+            "delivery_status": "fallback_safe",
+            "required_actions": ["补导出成功状态截图"],
+            "missing_coverage": ["关键状态覆盖不足"],
+            "verification_gaps": ["导出成功状态未覆盖"],
+            "coverage_summary": {
+                "missing_state_categories": ["success"],
+                "missing_tasks": ["导出成功"],
+            },
+        },
+        delivery_assessment={
+            "delivery_status": "fallback_safe",
+        },
+        output_dir=str(temp_output_dir),
+    )
+
+    audited = result["audited_delivery_assessment"]
+    assert audited["delivery_status"] == "fallback_safe"
+    bundle = Path(result["delivery_audit_bundle"]["path"])
+    supplement_request = (bundle / "supplement_request.md").read_text(encoding="utf-8")
+    bounded_issue_pass = (bundle / "bounded_issue_pass.md").read_text(encoding="utf-8")
+    assert "success" in supplement_request
+    assert "Primary CTA is buried" in bounded_issue_pass
+
+
+def test_delivery_audit_allows_final_ready_when_all_rules_pass(temp_output_dir):
+    issues = [
+        {
+            "id": "I-001",
+            "title": "Primary CTA is buried",
+            "severity": "major",
+            "description": "CTA is below the fold.",
+            "user_impact": "User misses the primary action.",
+            "suggestion": "Move CTA above the fold.",
+            "evidence_refs": ["E-001"],
+            "evidence_basis": ["ocr CTA cue", "markdown description"],
+            "verification_status": "verified",
+        }
+    ]
+    result = audit_delivery_readiness(
+        issues=issues,
+        unverified_issues=[],
+        evidence_assessment={
+            "delivery_status": "final_delivery_ready",
+            "required_actions": [],
+            "missing_coverage": [],
+            "verification_gaps": [],
+            "coverage_summary": {},
+        },
+        delivery_assessment={"delivery_status": "final_delivery_ready"},
+        output_dir=str(temp_output_dir),
+    )
+
+    audited = result["audited_delivery_assessment"]
+    assert audited["delivery_status"] == "final_delivery_ready"
+    assert audited["final_delivery_ready"] is True
+    bundle = Path(result["delivery_audit_bundle"]["path"])
+    assert (bundle / "audited_delivery_assessment.json").exists()
 
 
 __all__ = []

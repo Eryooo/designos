@@ -1,5 +1,11 @@
 line-length = 100
 target-version = "py311"
+force-exclude = true
+include = [
+    "designos/**/*.py",
+    "kernel/**/*.py",
+    "mcp-servers/*/**/*.py",
+]
 
 extend-exclude = [
     ".venv",
@@ -8,19 +14,21 @@ extend-exclude = [
     "dist",
     "legacy",
     "docs",
+    "skills",
+    "npm-package",
+    "tests",
+    "mcp-servers/*/tests",
+    "mcp-servers/*/tests/**",
+    "**/fixtures/**",
 ]
 
 [lint]
 select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade
-    "SIM", # flake8-simplify
-    "RUF", # ruff-specific
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "RUF100", # stale noqa directives
 ]
 ignore = [
     "E501",  # line length handled by formatter

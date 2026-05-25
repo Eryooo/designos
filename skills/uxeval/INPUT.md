@@ -37,9 +37,24 @@
 ### 4. 截图目录（仅 client 模式必需）
 
 放在 `inputs/screens/`，约定：
-- 文件名：`{模块}-{页面}-{状态}.png`，例如 `工作台-首页-默认.png`
+- 推荐命名：`{模块}-{页面}-{状态}.png`，例如 `工作台-首页-默认.png`
 - 单张图 < 5MB，批量总大小 < 200MB
 - 关键流程必须有「初始 → 中间 → 结果」三连截图
+
+如果截图很多，不想批量改文件名，优先补下面这些低摩擦输入：
+- `inputs/screens/screens-description.md`
+  - 用几段文字说明关键页面名称、关键按钮、关键状态
+- `inputs/screens/screens-map.md` 或 `inputs/screens/screens-index.md`
+  - 当系统自动起草的 mapping 仍有少数歧义项时，再用最少量映射说明“截图文件 -> 页面 / 状态”
+  - 例如：
+
+```md
+- IMG_1024.png -> 工作台首页 / 加载态
+- IMG_1025.png -> 工作台首页 / 空状态
+- final-01.png -> 设置页 / 保存成功
+```
+
+系统会优先自动起草 screenshot -> page/state 映射；只有在 OCR、markdown 说明和自动起草仍不足以稳定匹配时，才建议你补最少量 mapping 或小范围补命名，不需要先大规模重命名整个截图集。
 
 ### 5. 历史问题清单（可选）
 

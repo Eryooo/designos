@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 
 import pdfplumber
-
+from pdfminer.pdfparser import PDFSyntaxError
 from schemas import PdfContent, PdfMetadata, Section
 
 
@@ -178,7 +178,7 @@ def parse_pdf(path: Path | str) -> PdfContent:
                 raw_text=raw_text,
             )
 
-    except pdfplumber.pdfminer.pdfparser.PDFSyntaxError as e:
+    except PDFSyntaxError as e:
         raise PdfParseError(f"Invalid PDF format: {e}", path) from e
     except Exception as e:
         if isinstance(e, (PdfParseError, FileNotFoundError)):

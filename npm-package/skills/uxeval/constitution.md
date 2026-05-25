@@ -41,7 +41,8 @@
 
 **怎么实现**：
 - Kernel 的 `Sanitizer` 在每个 stage 输出后扫描
-- 截图中的敏感信息由 `image-analyzer` 检测到后必须打码
+- `image-analyzer` 会基于文件名 / OCR / `.md` 说明文件输出风险提示，但仍不提供像素级敏感信息自动打码
+- 如果截图来自真实环境，或 `signal_warnings` / OCR 文本提示可能含敏感内容，必须人工复核并打码
 - evidence 路径不能包含真实用户名
 
 ---
@@ -140,12 +141,14 @@
 
 **怎么实现**：
 - 每条问题的 `description` 必须明确场景（如"在「配置数据源节点」场景下"）
-- 每条问题的 `evidence_refs` 引用的截图必须真实展示该场景
-- Stage 6 问题检测时必须交叉校验：问题场景 vs 截图内容是否匹配
+- 每条问题的 `evidence_refs` 引用的截图必须真实展示该场景，或由说明文件 / 人工证据描述明确覆盖该场景
+- Stage 6 问题检测时必须交叉校验：问题场景 vs OCR / 文件名 / 说明文件 / 人工证据描述是否匹配
+- 任何 client 模式自动提取的证据线索都必须保留 `confidence / source_channel / evidence_basis`
+- 只有 `verification_status == verified` 的 issue 才允许进入主问题清单
 - 如果截图不匹配，有三种处理方式：
   1. 截图错误 → 更换正确的截图
   2. 场景推断错误 → 删除该问题
-  3. 截图未覆盖该场景 → 标注 `[需现场验证]` 并移到附录
+  3. 当前截图只有低置信度 hint、或 `evidence_assessment` 已判定证据不足 → 标注 `[需现场验证]` 或 `[证据不足]` 并移到附录
 
 **违反示例（拒）**：
 ```yaml
@@ -235,9 +238,10 @@ def verify_constitution(stage_output: dict) -> list[ViolationError]:
 - user_impact 是否包含"场景 + 角色 + 问题 + 影响"四要素？
 - 违反 → 补充或删除该问题
 
-**□ 检查 6：推断比例**
+**□ 检查 6：推断比例与交付资格**
 - `[inferred]` 标记的问题是否超过总数 30%？
-- 超过 → 回去补截图分析（Stage 5b）
+- 超过，或 `evidence_assessment.delivery_status` 不是 `final_delivery_ready / fallback_safe` → 回去补截图分析（Stage 5b）并要求补资料
+- 如果 `audited_delivery_assessment.delivery_status != "final_delivery_ready"`，不得交付最终报告
 
 **□ 检查 7：核心场景覆盖**
 - 是否遗漏了 PRD 中的核心场景？
@@ -245,7 +249,7 @@ def verify_constitution(stage_output: dict) -> list[ViolationError]:
 
 ### 输出要求
 
-- 通过自检的问题 → 进入 `issues` 主清单
+- 通过自检、且 `verification_status == verified` 的问题 → 进入 `issues` 主清单
 - 未通过检查 1/4/5 → 移到附录 `unverified_issues`
 - 未通过检查 3 → 移到附录 `out_of_scope_issues`
 - 未通过检查 2 → 拒绝输出，重新推理

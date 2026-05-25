@@ -19,6 +19,7 @@ Skill 产物的标准类型，用于 Skill 间自动匹配和注入。
 | `user_journey` | 用户旅程图 | uxeval | prd2proto |
 | `task_checklist` | 任务清单 | uxeval | — |
 | `issue_report` | 问题报告 | uxeval | — |
+| `html_report` | HTML 版问题报告 | uxeval | — |
 | `prototype_code` | 原型代码 | prd2proto | design-system, uxeval |
 | `design_tokens` | Design Token | prd2proto, design-system | — |
 | `information_architecture` | 信息架构 | prd2proto | uxeval |
@@ -30,6 +31,7 @@ Skill 产物的标准类型，用于 Skill 间自动匹配和注入。
 | `content_plan` | 内容计划 | ip-design, brand-creative | — |
 | `heuristic_checklist` | 启发式检查清单 | uxeval | — |
 | `evidence_pack` | 证据包 | uxeval, design-acceptance | — |
+| `delivery_audit_bundle` | 最终交付资格审计包（含 bounded fallback package） | uxeval | — |
 | `evaluation_script` | Playwright 评估脚本 | uxeval | — |
 | `automated_eval_trace` | 自动化执行 trace | uxeval, design-acceptance | — |
 | `visual_diff_report` | 视觉差异报告 | design-acceptance | — |

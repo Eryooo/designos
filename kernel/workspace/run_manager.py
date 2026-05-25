@@ -7,8 +7,8 @@ from pathlib import Path
 
 import yaml
 
-from kernel.contracts.enums import RunStatus
-from kernel.contracts.schemas import RunManifest
+from kernel.contracts.enums import Mode, RunStatus
+from kernel.contracts.schemas import OutputManifest, RunManifest
 
 from .workspace import Workspace
 
@@ -53,7 +53,15 @@ class RunManager:
         )
         return target
 
-    def start_manifest(self, run_id: str, skill: str, version: str, model: str) -> RunManifest:
+    def start_manifest(
+        self,
+        run_id: str,
+        skill: str,
+        version: str,
+        model: str,
+        *,
+        mode: Mode | None = None,
+    ) -> RunManifest:
         """Build a fresh ``RUNNING`` manifest with the right timestamps."""
         return RunManifest(
             id=run_id,
@@ -62,6 +70,39 @@ class RunManager:
             status=RunStatus.RUNNING,
             started_at=datetime.now(UTC),
             model=model,
+            mode=mode,
+        )
+
+    def resume_manifest(self, manifest: RunManifest) -> RunManifest:
+        """Return a paused manifest switched back to ``RUNNING`` for resume."""
+        return manifest.model_copy(
+            update={
+                "status": RunStatus.RUNNING,
+                "completed_at": None,
+                "status_reason": None,
+                "required_actions": [],
+            }
+        )
+
+    def finish_manifest(
+        self,
+        manifest: RunManifest,
+        *,
+        status: RunStatus,
+        outputs: list[OutputManifest] | None = None,
+        status_reason: str | None = None,
+        required_actions: list[str] | None = None,
+    ) -> RunManifest:
+        """Return a terminal manifest updated with final status and timestamp."""
+        completed_at = datetime.now(UTC) if status in {RunStatus.COMPLETED, RunStatus.FAILED} else None
+        return manifest.model_copy(
+            update={
+                "status": status,
+                "completed_at": completed_at,
+                "outputs": list(outputs or []),
+                "status_reason": status_reason,
+                "required_actions": list(required_actions or []),
+            }
         )
 
 

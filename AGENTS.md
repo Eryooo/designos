@@ -465,5 +465,5 @@ designos/
 
 ## 版本
 
-- 当前：v0.1.0（M1 — UXEval 内测版，2026-05-18）
+- 当前：v0.4.0（V1 Candidate，2026-05-25）
 - 仓库：https://github.com/Eryooo/designos

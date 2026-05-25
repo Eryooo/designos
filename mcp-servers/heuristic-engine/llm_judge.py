@@ -40,7 +40,6 @@ from pathlib import Path
 from typing import Any, Protocol, cast
 
 from pydantic import ValidationError
-
 from schemas import (
     DetectionRequest,
     HeuristicPrinciple,
@@ -347,7 +346,7 @@ class LLMJudge:
                     issue = _validate_issue_dict(payload, valid_screenshot_ids, valid_principle_ids)
                     if issue is not None:
                         out.append(issue)
-            except (LLMJudgeError, Exception) as exc:  # noqa: BLE001
+            except (LLMJudgeError, Exception) as exc:
                 import logging
                 logging.getLogger(__name__).warning(
                     "LLM judge failed for %s: %s", screenshot.id, str(exc)[:200]

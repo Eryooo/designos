@@ -2,7 +2,7 @@
 name = "designos-mcp-image-analyzer"
 version = "0.1.0"
 requires-python = ">=3.11"
-description = "MCP Server for screenshot loading and stub analysis (M1)"
+description = "MCP Server for honest screenshot inventory and local metadata extraction"
 dependencies = [
     "pydantic>=2.0",
 ]

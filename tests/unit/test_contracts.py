@@ -235,8 +235,10 @@ def test_skill_result_paused() -> None:
         skill_version="1.0.0",
         status=RunStatus.PAUSED,
         paused_at_checkpoint="C1",
+        pause_kind="checkpoint",
     )
     assert res.paused_at_checkpoint == "C1"
+    assert res.pause_kind == "checkpoint"
 
 
 def test_stage_event() -> None:
@@ -278,6 +280,7 @@ def test_run_manifest_minimal() -> None:
         model="claude-opus-4-7",
     )
     assert rm.outputs == []
+    assert rm.required_actions == []
 
 
 def test_checkpoint_snapshot_round_trip() -> None:
@@ -325,6 +328,21 @@ def test_input_used_and_output_manifest() -> None:
     )
     assert iu.type == "PRD"
     assert om.format == "xlsx"
+
+
+def test_issue_defaults_include_delivery_metadata() -> None:
+    issue = Issue(
+        id="I-001",
+        title="Sample",
+        description="Sample description",
+        severity=SeverityLevel.MINOR,
+        evidence_refs=["E-001"],
+        user_impact="在示例场景下，用户完成操作时遇到示例问题，导致效率下降。",
+        suggestion="建议把当前示例元素改为更清晰的反馈样式，并降低理解成本。",
+    )
+    assert issue.confidence == "medium"
+    assert issue.evidence_basis == []
+    assert issue.verification_status == "verified"
 
 
 def test_checkpoint_decision_record() -> None:

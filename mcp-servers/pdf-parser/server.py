@@ -3,11 +3,12 @@
 import json
 import sys
 from pathlib import Path
+from typing import Any
 
 from core import PdfParseError, parse_pdf
 
 
-def handle_parse_pdf(params: dict) -> dict:
+def handle_parse_pdf(params: dict[str, Any]) -> dict[str, Any]:
     """Handle parse_pdf tool call.
 
     Args:
@@ -17,8 +18,8 @@ def handle_parse_pdf(params: dict) -> dict:
         Dict with parsed PDF content or error
     """
     try:
-        path = params.get("path")
-        if not path:
+        path_value = params.get("path")
+        if not isinstance(path_value, str) or not path_value:
             return {
                 "error": {
                     "code": "invalid_params",
@@ -26,34 +27,34 @@ def handle_parse_pdf(params: dict) -> dict:
                 }
             }
 
-        result = parse_pdf(Path(path))
+        result = parse_pdf(Path(path_value))
         return {"result": result.model_dump()}
 
-    except FileNotFoundError as e:
+    except FileNotFoundError as exc:
         return {
             "error": {
                 "code": "file_not_found",
-                "message": str(e),
+                "message": str(exc),
             }
         }
-    except PdfParseError as e:
+    except PdfParseError as exc:
         return {
             "error": {
                 "code": "parse_error",
-                "message": e.message,
-                "path": str(e.path),
+                "message": exc.message,
+                "path": str(exc.path),
             }
         }
-    except Exception as e:
+    except Exception as exc:
         return {
             "error": {
                 "code": "internal_error",
-                "message": f"Unexpected error: {e}",
+                "message": f"Unexpected error: {exc}",
             }
         }
 
 
-def handle_request(request: dict) -> dict:
+def handle_request(request: dict[str, Any]) -> dict[str, Any] | None:
     """Handle incoming JSON-RPC request.
 
     Args:
@@ -68,8 +69,12 @@ def handle_request(request: dict) -> dict:
 
     # Handle tool calls
     if method == "tools/call":
+        if not isinstance(params, dict):
+            params = {}
         tool_name = params.get("name")
         tool_params = params.get("arguments", {})
+        if not isinstance(tool_params, dict):
+            tool_params = {}
 
         if tool_name == "parse_pdf":
             response_data = handle_parse_pdf(tool_params)
@@ -130,19 +135,18 @@ def handle_request(request: dict) -> dict:
         }
 
     # Handle notifications/initialized
-    elif method == "notifications/initialized":
+    if method == "notifications/initialized":
         return None  # No response for notifications
 
     # Unknown method
-    else:
-        return {
-            "jsonrpc": "2.0",
-            "id": request_id,
-            "error": {
-                "code": -32601,
-                "message": f"Method not found: {method}",
-            },
-        }
+    return {
+        "jsonrpc": "2.0",
+        "id": request_id,
+        "error": {
+            "code": -32601,
+            "message": f"Method not found: {method}",
+        },
+    }
 
 
 def main() -> None:
@@ -162,23 +166,23 @@ def main() -> None:
             if response is not None:
                 print(json.dumps(response), flush=True)
 
-        except json.JSONDecodeError as e:
+        except json.JSONDecodeError as exc:
             error_response = {
                 "jsonrpc": "2.0",
                 "id": None,
                 "error": {
                     "code": -32700,
-                    "message": f"Parse error: {e}",
+                    "message": f"Parse error: {exc}",
                 },
             }
             print(json.dumps(error_response), flush=True)
-        except Exception as e:
+        except Exception as exc:
             error_response = {
                 "jsonrpc": "2.0",
                 "id": None,
                 "error": {
                     "code": -32603,
-                    "message": f"Internal error: {e}",
+                    "message": f"Internal error: {exc}",
                 },
             }
             print(json.dumps(error_response), flush=True)

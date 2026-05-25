@@ -11,14 +11,13 @@ import asyncio
 import json
 from typing import Any
 
+from core import detect
+from llm_judge import LLMJudge
 from mcp.server import Server  # type: ignore[import-not-found]
 from mcp.server.stdio import stdio_server  # type: ignore[import-not-found]
 from mcp.types import TextContent, Tool  # type: ignore[import-not-found]
-from pydantic import ValidationError
-
-from core import detect
-from llm_judge import LLMJudge
 from principles_library import default_principles
+from pydantic import ValidationError
 from schemas import DetectionRequest, HeuristicPrinciple
 
 SERVER_NAME = "designos-heuristic-engine"

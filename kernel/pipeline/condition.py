@@ -1,7 +1,8 @@
-"""Tiny safe expression evaluator for ``stage.only_when``.
+"""Tiny safe expression evaluator for runtime stage expressions.
 
 The DSL supports:
 - ``mode == "<value>"`` / ``mode != "<value>"``
+- dotted runtime references like ``evidence_assessment.verdict``
 - ``mode in ["a", "b"]``
 - conjunction with ``and``
 
@@ -12,6 +13,7 @@ hand-rolled parser to keep the threat surface tiny.
 from __future__ import annotations
 
 import ast
+from typing import Any
 
 from kernel.contracts.schemas import SkillContext
 
@@ -27,8 +29,22 @@ def condition_satisfied(expression: str | None, ctx: SkillContext) -> bool:
     return _eval(tree.body, _vars(ctx))
 
 
+def context_value(ctx: SkillContext, path: str | None) -> Any:
+    """Resolve a dotted path against the runtime condition environment."""
+    if not path:
+        return None
+    current: Any = _vars(ctx)
+    for part in path.split("."):
+        current = _member(current, part)
+        if current is None:
+            return None
+    return current
+
+
 def _vars(ctx: SkillContext) -> dict[str, object]:
-    return {"mode": ctx.mode}
+    env: dict[str, object] = {"mode": ctx.mode}
+    env.update(ctx.state)
+    return env
 
 
 def _eval(node: ast.expr, env: dict[str, object]) -> bool:
@@ -58,6 +74,9 @@ def _value(node: ast.expr, env: dict[str, object]) -> object:
         return node.value
     if isinstance(node, ast.Name):
         return env.get(node.id)
+    if isinstance(node, ast.Attribute):
+        base = _value(node.value, env)
+        return _member(base, node.attr)
     if isinstance(node, ast.List):
         return [_value(e, env) for e in node.elts]
     if isinstance(node, ast.Tuple):
@@ -65,4 +84,10 @@ def _value(node: ast.expr, env: dict[str, object]) -> object:
     return None
 
 
-__all__ = ["condition_satisfied"]
+def _member(value: object, key: str) -> object | None:
+    if isinstance(value, dict):
+        return value.get(key)
+    return getattr(value, key, None)
+
+
+__all__ = ["condition_satisfied", "context_value"]

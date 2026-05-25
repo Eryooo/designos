@@ -52,7 +52,7 @@ def mock_mcp_client() -> AsyncMock:
             server="mock-server",
             tool="mock-tool",
             ok=True,
-            data={"parsed_sections": ["需求背景", "功能描述"]},
+            data={"sections": ["需求背景", "功能描述"]},
         )
     )
     return client

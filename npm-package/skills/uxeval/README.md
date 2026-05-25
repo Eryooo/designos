@@ -140,8 +140,8 @@ UXEval 可消费上游 ai-analytics 的产物，用于增强归因（竞品参�
 
 ```
 skills/uxeval/
-├── SKILL.md                      # 入口 + frontmatter
-├── pipeline.yaml                 # 10-stage pipeline
+├── SKILL.md                      # 入口 + frontmatter（运行时 version 真源）
+├── pipeline.yaml                 # 10-stage pipeline（只定义 stages，不声明独立运行时 version）
 ├── constitution.md               # 7 条宪法
 ├── INPUT.md                      # 输入指南
 ├── README.md                     # 本文件

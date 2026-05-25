@@ -12,6 +12,7 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+from PIL import Image
 
 # ---------------------------------------------------------------------------
 # Path helpers — MCP servers are standalone uv projects; add their dirs to
@@ -21,6 +22,7 @@ import pytest
 _REPO_ROOT = Path(__file__).parent.parent.parent
 _PDF_PARSER_DIR = _REPO_ROOT / "mcp-servers" / "pdf-parser"
 _EXCEL_BUILDER_DIR = _REPO_ROOT / "mcp-servers" / "excel-builder"
+_IMAGE_ANALYZER_DIR = _REPO_ROOT / "mcp-servers" / "image-analyzer"
 _HEURISTIC_ENGINE_DIR = _REPO_ROOT / "mcp-servers" / "heuristic-engine"
 
 
@@ -39,7 +41,7 @@ def _isolate_mcp_path(p: Path) -> None:
     # Remove any other mcp-servers/* dir from sys.path
     other_mcp_dirs = [
         str(d)
-        for d in (_PDF_PARSER_DIR, _EXCEL_BUILDER_DIR, _HEURISTIC_ENGINE_DIR)
+        for d in (_PDF_PARSER_DIR, _EXCEL_BUILDER_DIR, _IMAGE_ANALYZER_DIR, _HEURISTIC_ENGINE_DIR)
         if d != p
     ]
     sys.path[:] = [s for s in sys.path if s not in other_mcp_dirs]
@@ -65,6 +67,12 @@ def excel_builder_env() -> None:
 def heuristic_engine_env() -> None:
     """Test fixture: isolate sys.path to heuristic-engine MCP."""
     _isolate_mcp_path(_HEURISTIC_ENGINE_DIR)
+
+
+@pytest.fixture
+def image_analyzer_env() -> None:
+    """Test fixture: isolate sys.path to image-analyzer MCP."""
+    _isolate_mcp_path(_IMAGE_ANALYZER_DIR)
 
 
 # ---------------------------------------------------------------------------
@@ -175,6 +183,7 @@ class TestExcelBuilderIntegration:
 
         core = importlib.import_module("core")
         assert hasattr(core, "build_issue_report")
+        assert hasattr(core, "audit_delivery_readiness")
         assert hasattr(core, "ExcelBuilderError")
 
     def test_build_issue_report_uxeval_template(self, tmp_path: Path) -> None:
@@ -195,12 +204,16 @@ class TestExcelBuilderIntegration:
                 "suggestion": "调整颜色",
             }
         ]
-        output_path = str(tmp_path / "report.xlsx")
-        result = core.build_issue_report(issues, output_path, "uxeval")
+        output_dir = tmp_path / "outputs"
+        output_dir.mkdir()
+        result = core.build_issue_report(issues, output_dir=str(output_dir), template="uxeval")
 
-        assert result["path"] == output_path
-        assert result["sheet_count"] == 3
-        assert Path(output_path).exists()
+        assert result["issue_report"]["id"] == "issue_report"
+        assert result["issue_report"]["sheet_count"] == 3
+        assert Path(result["issue_report"]["path"]).exists()
+        assert Path(result["html_report"]["path"]).exists()
+        assert Path(result["evidence_pack"]["path"]).is_dir()
+        assert (Path(result["evidence_pack"]["path"]) / "manifest.json").exists()
 
     def test_build_issue_report_unknown_template_raises(self, tmp_path: Path) -> None:
         """build_issue_report raises ExcelBuilderError for unknown template."""
@@ -211,6 +224,56 @@ class TestExcelBuilderIntegration:
 
         with pytest.raises(core.ExcelBuilderError, match="Unknown template"):
             core.build_issue_report([], str(tmp_path / "out.xlsx"), "unknown-template")
+
+    def test_audit_delivery_readiness_returns_bounded_package(self, tmp_path: Path) -> None:
+        """audit_delivery_readiness creates a deterministic audit bundle."""
+        _isolate_mcp_path(_EXCEL_BUILDER_DIR)
+        import importlib
+
+        core = importlib.import_module("core")
+
+        result = core.audit_delivery_readiness(
+            issues=[
+                {
+                    "id": "I-001",
+                    "title": "CTA hidden below the fold",
+                    "severity": "major",
+                    "description": "CTA is below the fold.",
+                    "user_impact": "Users miss the primary action.",
+                    "suggestion": "Move CTA above the fold.",
+                    "evidence_refs": ["E-001"],
+                    "evidence_basis": ["ocr CTA cue"],
+                    "verification_status": "verified",
+                }
+            ],
+            unverified_issues=[
+                {
+                    "id": "I-099",
+                    "title": "Export feedback may be missing",
+                    "severity": "major",
+                    "blocked_by": ["missing success-state screenshot"],
+                }
+            ],
+            evidence_assessment={
+                "delivery_status": "fallback_safe",
+                "required_actions": ["补导出成功状态截图"],
+                "missing_coverage": ["关键状态覆盖不足"],
+                "verification_gaps": ["导出成功状态未覆盖"],
+                "coverage_summary": {
+                    "missing_state_categories": ["success"],
+                    "missing_tasks": ["导出成功"],
+                },
+            },
+            delivery_assessment={"delivery_status": "fallback_safe"},
+            output_dir=str(tmp_path / "outputs"),
+        )
+
+        assert result["audited_delivery_assessment"]["delivery_status"] == "fallback_safe"
+        bundle_path = Path(result["delivery_audit_bundle"]["path"])
+        assert bundle_path.is_dir()
+        assert (bundle_path / "bounded_issue_pass.md").exists()
+        assert (bundle_path / "unverified_issues.json").exists()
+        assert (bundle_path / "supplement_request.md").exists()
 
     @pytest.mark.asyncio
     async def test_kernel_mcp_client_calls_excel_builder(self) -> None:
@@ -224,7 +287,30 @@ class TestExcelBuilderIntegration:
                 server="excel-builder",
                 tool="build_issue_report",
                 ok=True,
-                data={"path": "/tmp/report.xlsx", "sheet_count": 3},
+                data={
+                    "issue_report": {
+                        "id": "issue_report",
+                        "type": "issue_report",
+                        "path": "/tmp/report.xlsx",
+                        "format": "xlsx",
+                        "summary": "Excel report",
+                        "sheet_count": 3,
+                    },
+                    "html_report": {
+                        "id": "html_report",
+                        "type": "html_report",
+                        "path": "/tmp/report.html",
+                        "format": "html",
+                        "summary": "HTML report",
+                    },
+                    "evidence_pack": {
+                        "id": "evidence_pack",
+                        "type": "evidence_pack",
+                        "path": "/tmp/evidence_pack",
+                        "format": "directory",
+                        "summary": "Evidence pack",
+                    },
+                },
             )
         )
 
@@ -244,16 +330,228 @@ class TestExcelBuilderIntegration:
         result: ToolResult = await client.call_tool(
             "excel-builder",
             "build_issue_report",
-            {"issues": [], "output_path": "/tmp/r.xlsx", "template": "uxeval"},
+            {"issues": [], "output_dir": "/tmp/out", "template": "uxeval"},
         )
 
         assert result.ok is True
-        assert result.data["sheet_count"] == 3
+        assert result.data["issue_report"]["sheet_count"] == 3
+        assert result.data["html_report"]["type"] == "html_report"
 
 
 # ---------------------------------------------------------------------------
 # heuristic-engine integration
 # ---------------------------------------------------------------------------
+
+
+@pytest.mark.integration
+class TestImageAnalyzerIntegration:
+    """Kernel MCPClient can call image-analyzer core.py directly."""
+
+    def test_image_analyzer_core_importable(self) -> None:
+        _isolate_mcp_path(_IMAGE_ANALYZER_DIR)
+        import importlib
+
+        core = importlib.import_module("core")
+        assert hasattr(core, "load_and_analyze")
+        assert hasattr(core, "plan_required_evidence")
+
+    def test_image_analyzer_planning_returns_structured_pre_run_guidance(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        _isolate_mcp_path(_IMAGE_ANALYZER_DIR)
+        import importlib
+
+        core = importlib.import_module("core")
+        ocr_runtime = importlib.import_module("ocr_runtime")
+
+        screens = tmp_path / "screens"
+        screens.mkdir()
+        Image.new("RGB", (1440, 900), "white").save(screens / "login-default.png")
+        Image.new("RGB", (1440, 900), "white").save(screens / "dashboard-default.png")
+        (screens / "screens-description.md").write_text(
+            "# 登录页\n\n登录页默认态。\n\n# 工作台首页\n\n工作台首页默认态。",
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(
+            core,
+            "probe_ocr_backend",
+            lambda: ocr_runtime.OCRProbeResult(available=False, backend=None, error="ocr unavailable"),
+        )
+
+        result = core.plan_required_evidence(
+            modules=[{"name": "登录"}, {"name": "工作台首页"}, {"name": "设置页"}],
+            key_features=[{"name": "登录"}, {"name": "查看工作台"}, {"name": "进入设置"}],
+            task_checklist_lite="- 登录\n- 工作台首页\n- 设置页",
+            journey_stages=["进入登录", "进入工作台", "进入设置"],
+            screenshots_dir=screens,
+        )
+
+        assert result.required_evidence_plan.critical_page_count >= 3
+        assert result.evidence_input_guidance.pre_run_status == "supplement_required"
+        assert "设置页" in "；".join(result.evidence_input_guidance.missing_pages)
+
+    def test_image_analyzer_returns_text_evidence_contract(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        _isolate_mcp_path(_IMAGE_ANALYZER_DIR)
+        import importlib
+
+        core = importlib.import_module("core")
+        ocr_runtime = importlib.import_module("ocr_runtime")
+
+        nested = tmp_path / "screens" / "nested"
+        nested.mkdir(parents=True)
+        Image.new("RGB", (1440, 900), "white").save(nested / "screen-01.png")
+        (tmp_path / "screens" / "screens-description.md").write_text(
+            "# Login Screen\n\nContains 登录 button and error state tips.",
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(
+            core,
+            "probe_ocr_backend",
+            lambda: ocr_runtime.OCRProbeResult(available=True, backend="tesseract"),
+        )
+        monkeypatch.setattr(
+            core,
+            "run_ocr",
+            lambda path, preferred_backend=None: ocr_runtime.OCRResult(
+                backend="tesseract",
+                lines=(
+                    ocr_runtime.OCRLine(text="登录", confidence=0.92),
+                    ocr_runtime.OCRLine(text="重试", confidence=0.88),
+                ),
+                raw_text="登录\n重试",
+            ),
+        )
+
+        result = core.load_and_analyze(tmp_path / "screens")
+
+        assert result.image_analysis.analyzer_kind == "text_evidence_inventory"
+        assert result.image_analysis.ocr_available is True
+        assert result.image_analysis.semantic_analysis_available is False
+        assert result.image_analysis.summary["total_files"] == 2
+        assert result.evidence_assessment.verdict == "sufficient"
+        assert result.evidence_assessment.delivery_status == "fallback_safe"
+        assert result.evidence_assessment.final_delivery_ready is False
+        assert result.screenshots[0].relative_path == "nested/screen-01.png"
+        assert result.screenshots[0].resolution == "1440x900"
+        assert result.screenshots[0].button_text_candidates[0].source_channel == "ocr"
+
+    def test_image_analyzer_plan_flows_into_runtime_coverage(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        _isolate_mcp_path(_IMAGE_ANALYZER_DIR)
+        import importlib
+
+        core = importlib.import_module("core")
+        ocr_runtime = importlib.import_module("ocr_runtime")
+
+        screens = tmp_path / "screens"
+        screens.mkdir()
+        for name in ("login-default.png", "dashboard-default.png", "settings-default.png"):
+            Image.new("RGB", (1440, 900), "white").save(screens / name)
+        (screens / "screens-description.md").write_text(
+            "# 登录页\n\n登录默认态。\n\n# 工作台首页\n\n工作台首页默认态。\n\n# 设置页\n\n设置页默认态。",
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(
+            core,
+            "probe_ocr_backend",
+            lambda: ocr_runtime.OCRProbeResult(available=False, backend=None, error="ocr unavailable"),
+        )
+
+        plan = core.plan_required_evidence(
+            modules=[{"name": "登录"}, {"name": "工作台首页"}, {"name": "设置页"}],
+            key_features=[{"name": "登录"}, {"name": "查看工作台"}, {"name": "进入设置"}],
+            task_checklist_lite="- 登录\n- 工作台首页\n- 设置页",
+            journey_stages=["进入登录", "进入工作台", "进入设置"],
+            screenshots_dir=screens,
+        )
+
+        result = core.load_and_analyze(
+            screens,
+            task_checklist_lite="- 登录\n- 工作台首页\n- 设置页",
+            required_evidence_plan=plan.required_evidence_plan,
+        )
+
+        summary = result.evidence_assessment.coverage_summary
+        assert summary["required_evidence_plan_version"] == "2026-05-22"
+        assert summary["planned_page_count"] >= 3
+        assert "missing_critical_pages" in summary
+
+    def test_image_analyzer_auto_drafts_mapping_for_messy_names(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        _isolate_mcp_path(_IMAGE_ANALYZER_DIR)
+        import importlib
+
+        core = importlib.import_module("core")
+        ocr_runtime = importlib.import_module("ocr_runtime")
+
+        screens = tmp_path / "screens"
+        screens.mkdir()
+        for name in ("IMG3001.png", "IMG3002.png", "IMG3003.png", "IMG3004.png", "IMG3005.png"):
+            Image.new("RGB", (1440, 900), "white").save(screens / name)
+        (screens / "screens-description.md").write_text(
+            "\n".join(
+                [
+                    "# 关键页面说明",
+                    "",
+                    "## IMG3001.png",
+                    "这是登录页加载态。",
+                    "",
+                    "## IMG3002.png",
+                    "这是登录页错误态。",
+                    "",
+                    "## IMG3003.png",
+                    "这是工作台首页默认态。",
+                    "",
+                    "## IMG3004.png",
+                    "这是设置页保存成功态。",
+                    "",
+                    "## IMG3005.png",
+                    "这是报表列表空状态。",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(
+            core,
+            "probe_ocr_backend",
+            lambda: ocr_runtime.OCRProbeResult(available=False, backend=None, error="ocr unavailable"),
+        )
+
+        plan = core.plan_required_evidence(
+            modules=[{"name": "登录"}, {"name": "工作台首页"}, {"name": "设置页"}, {"name": "报表列表"}],
+            key_features=[{"name": "登录"}, {"name": "查看工作台"}, {"name": "保存设置"}, {"name": "查看报表"}],
+            task_checklist_lite="- 登录\n- 工作台首页\n- 设置页\n- 报表列表",
+            journey_stages=["进入登录", "进入工作台", "保存设置", "查看报表"],
+            screenshots_dir=screens,
+        )
+
+        result = core.load_and_analyze(
+            screens,
+            task_checklist_lite="- 登录\n- 工作台首页\n- 设置页\n- 报表列表",
+            required_evidence_plan=plan.required_evidence_plan,
+        )
+
+        image_refs = [ref for ref in result.screenshots if ref.kind == "image"]
+        assert result.evidence_assessment.coverage_summary["draft_mapping_count"] == len(image_refs)
+        assert result.evidence_assessment.coverage_summary["clarification_needed_count"] == 0
+        assert result.evidence_assessment.coverage_summary["naming_issues"]
+        assert all(ref.draft_mapping is not None for ref in image_refs)
+        assert all(
+            ref.draft_mapping is not None and ref.draft_mapping.page_name is not None
+            for ref in image_refs
+        )
 
 
 @pytest.mark.integration

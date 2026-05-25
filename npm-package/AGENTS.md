@@ -317,7 +317,7 @@ AI：（进入 Step 2 流水线）
 
 | # | Stage | 输入 | 输出 | 行动 |
 |---|---|---|---|---|
-| 1 | prd-understanding | PRD + scope | 模块/功能/业务目标/评估边界 | 用 `prompts/01-prd-understanding.md` 调 LLM，输出 JSON |
+| 1 | prd-understanding | PRD + scope | 模块/功能/业务目标/评估边界 | 用 `prompts/v1.0.0/01-prd-understanding.md` 调 LLM，输出 JSON |
 | 2 | persona-derivation | 模块/功能/边界 | 用户角色 | 同上，用 prompt 02 |
 | 3 | scenario-derivation | 角色/模块 | 用户场景 | 同上，用 prompt 03 |
 | 4 | principle-mapping | scope/模块 | 启发式原则集 | 加载 `reference/m02-启发式原则.md`，用 prompt 04 |
@@ -413,7 +413,7 @@ AI：（进入 Step 2 流水线）
 ### 3. 资产路径
 
 - 知识库：`skills/uxeval/reference/m*.md`
-- Prompt 模板：`skills/uxeval/prompts/*.md`
+- Prompt 模板：`skills/uxeval/prompts/v1.0.0/*.md`
 - 输出模板：`skills/uxeval/templates/*.md`
 - 评估宪法：`skills/uxeval/constitution.md`
 - 黄金样本：`skills/uxeval/eval/golden/`
@@ -465,5 +465,5 @@ designos/
 
 ## 版本
 
-- 当前：v0.1.0（M1 — UXEval 内测版，2026-05-18）
+- 当前：v0.4.0（V1 Candidate，2026-05-25）
 - 仓库：https://github.com/Eryooo/designos

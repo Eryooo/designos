@@ -31,7 +31,6 @@ from .enums import (
     StageType,
 )
 
-
 # ---------------------------------------------------------------------------
 # Building blocks
 # ---------------------------------------------------------------------------
@@ -104,6 +103,39 @@ class CheckpointConfig(BaseModel):
     )
 
 
+class StageGateConfig(BaseModel):
+    """Runtime quality or safety gate evaluated before a stage executes."""
+
+    when: str = Field(
+        ...,
+        description="Conditional expression that triggers the gate when truthy.",
+    )
+    action: Literal["pause", "fail"] = Field(
+        default="pause",
+        description="Whether the gate pauses for user action or fails the stage immediately.",
+    )
+    checkpoint_id: str | None = Field(
+        default=None,
+        description="Checkpoint id surfaced when action == pause.",
+    )
+    message: str = Field(
+        default="",
+        description="User-facing gate summary shown when execution is paused or failed.",
+    )
+    status_reason_from: str | None = Field(
+        default=None,
+        description="Optional dotted path resolved from runtime state for a more specific pause reason.",
+    )
+    required_actions_from: str | None = Field(
+        default=None,
+        description="Optional dotted path resolved from runtime state for required follow-up actions.",
+    )
+    resume_from_stage: str | None = Field(
+        default=None,
+        description="Optional stage id to rewind to when resuming after this gate.",
+    )
+
+
 class StageConfig(BaseModel):
     """One node in a Pipeline Skill's execution graph."""
 
@@ -140,6 +172,10 @@ class StageConfig(BaseModel):
     checkpoint: CheckpointConfig | None = Field(
         default=None,
         description="Optional checkpoint to pause after this stage.",
+    )
+    gate: StageGateConfig | None = Field(
+        default=None,
+        description="Optional runtime gate evaluated before this stage executes.",
     )
     retry: RetryConfig = Field(
         default_factory=RetryConfig,
@@ -182,6 +218,20 @@ class WorkflowConfig(BaseModel):
 # ---------------------------------------------------------------------------
 
 
+class ExternalRequirementConfig(BaseModel):
+    """Declarative preflight probe attached to a skill or MCP dependency."""
+
+    command: str = Field(..., description="Shell command used as a preflight probe.")
+    install_hint: str = Field(
+        default="",
+        description="User-facing install or remediation hint shown when the probe fails.",
+    )
+    required_when: str | None = Field(
+        default=None,
+        description="Conditional expression controlling when this probe is required.",
+    )
+
+
 class MCPServerConfig(BaseModel):
     """Connection settings for a single MCP server."""
 
@@ -205,6 +255,14 @@ class MCPServerConfig(BaseModel):
     builtin: bool = Field(
         default=True,
         description="True if maintained by DesignOS, false if user-installed.",
+    )
+    required_when: str | None = Field(
+        default=None,
+        description="Conditional expression controlling when this server is required.",
+    )
+    requires_external: list[ExternalRequirementConfig] = Field(
+        default_factory=list,
+        description="External commands or probes required before this server can run.",
     )
 
 
@@ -269,6 +327,24 @@ class SkillConfig(BaseModel):
         default_factory=list,
         description="MCP servers the skill depends on.",
     )
+    outputs: list["SkillOutputConfig"] = Field(
+        default_factory=list,
+        description="Runtime-declared artifact outputs surfaced by this skill.",
+    )
+
+
+class SkillOutputConfig(BaseModel):
+    """Declared artifact contract for a skill output in ``SKILL.md``."""
+
+    id: str = Field(..., description="Stable output id used in pipeline/runtime wiring.")
+    type: OutputType = Field(..., description="Canonical output type exposed by the skill.")
+    format: Literal["markdown", "xlsx", "html", "json", "directory"] = Field(
+        ...,
+        description="Physical artifact format.",
+    )
+
+
+SkillConfig.model_rebuild()
 
 
 class DesignOSConfig(BaseModel):
@@ -385,6 +461,18 @@ class SkillResult(BaseModel):
     paused_at_checkpoint: str | None = Field(
         default=None,
         description="Checkpoint id the run is paused at, when status == PAUSED.",
+    )
+    pause_kind: Literal["checkpoint", "gate"] | None = Field(
+        default=None,
+        description="Whether a paused run stopped at a normal checkpoint or a runtime gate.",
+    )
+    status_reason: str | None = Field(
+        default=None,
+        description="Human-readable reason for the current paused/failed state.",
+    )
+    required_actions: list[str] = Field(
+        default_factory=list,
+        description="Concrete next actions required before the run can continue safely.",
     )
 
 
@@ -531,6 +619,10 @@ class RunManifest(BaseModel):
         description="Run completion timestamp (UTC).",
     )
     model: str = Field(..., description="LLM model identifier used.")
+    mode: Mode | None = Field(
+        default=None,
+        description="Execution mode used for the run, when the skill is multi-mode.",
+    )
     depends_on: list[str] = Field(
         default_factory=list,
         description="Upstream run ids this run consumed.",
@@ -546,6 +638,14 @@ class RunManifest(BaseModel):
     checkpoint_decisions: list[CheckpointDecision] = Field(
         default_factory=list,
         description="User decisions at every checkpoint encountered.",
+    )
+    status_reason: str | None = Field(
+        default=None,
+        description="Human-readable reason for the current paused/failed state.",
+    )
+    required_actions: list[str] = Field(
+        default_factory=list,
+        description="Concrete next actions required before the run can continue safely.",
     )
 
 
@@ -711,6 +811,18 @@ class Issue(BaseModel):
         ...,
         description="Actionable fix recommendation (constitution rule #5).",
     )
+    confidence: Literal["high", "medium", "low"] = Field(
+        default="medium",
+        description="Confidence that the issue is sufficiently evidenced for the main issue list.",
+    )
+    evidence_basis: list[str] = Field(
+        default_factory=list,
+        description="Concrete evidence snippets that justify why this issue can stay in the main list.",
+    )
+    verification_status: Literal["verified", "needs_verification"] = Field(
+        default="verified",
+        description="Whether the issue is verified enough for the main issue list or should remain in a verification bucket.",
+    )
     source_basis: Literal["prd", "screenshot", "inferred"] = Field(
         default="screenshot",
         description="Authoritative basis when PRD and implementation conflict.",
@@ -739,6 +851,7 @@ __all__ = [
     "RetryConfig",
     "RunManifest",
     "SkillConfig",
+    "SkillOutputConfig",
     "SkillContext",
     "SkillResult",
     "StageConfig",

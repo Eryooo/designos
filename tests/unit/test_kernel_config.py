@@ -66,6 +66,8 @@ def test_load_config_layers_priority(tmp_path: Path, monkeypatch: Any) -> None:
     assert cfg.global_config.primary_model == "user-claude"
     assert cfg.project_config is not None
     assert cfg.project_config.name == "proj"
+    assert cfg.skill_config is not None
+    assert cfg.skill_config.version == "1.0.0"
     assert "pdf-parser" in cfg.mcp_servers
 
     # CLI override wins.

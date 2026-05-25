@@ -12,11 +12,14 @@ from __future__ import annotations
 import asyncio
 import json
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import typer
+import yaml
 
 from designos import __version__
+from kernel.contracts.enums import Mode, RunStatus
+from kernel.contracts.schemas import OutputManifest, RunManifest, SkillResult
 
 # ---------------------------------------------------------------------------
 # App + sub-app wiring
@@ -56,8 +59,8 @@ _LOCAL_SKILLS_DIR: Path = Path(".claude") / "skills"
 
 
 def _skill_search_paths() -> list[Path]:
-    """Return skill search paths: global then project-local."""
-    paths: list[Path] = [_GLOBAL_SKILLS_DIR]
+    """Return skill search paths with the current project taking precedence."""
+    paths: list[Path] = []
     local = Path.cwd() / _LOCAL_SKILLS_DIR
     if local.exists():
         paths.append(local)
@@ -72,6 +75,8 @@ def _skill_search_paths() -> list[Path]:
             if candidate not in paths:
                 paths.append(candidate)
             break
+    if _GLOBAL_SKILLS_DIR not in paths:
+        paths.append(_GLOBAL_SKILLS_DIR)
     return paths
 
 
@@ -132,6 +137,27 @@ def _load_workspace_inputs(ws_root: Path) -> dict[str, Any]:
     return state
 
 
+def _manifest_outputs(result: SkillResult) -> list[OutputManifest]:
+    return [
+        OutputManifest(
+            id=artifact.id,
+            type=artifact.output_type,
+            path=artifact.path,
+            format=artifact.format,
+            summary=artifact.summary,
+        )
+        for artifact in result.artifacts
+    ]
+
+
+def _exit_code_for_status(status: RunStatus) -> int:
+    if status is RunStatus.COMPLETED:
+        return 0
+    if status is RunStatus.PAUSED:
+        return 2
+    return 1
+
+
 def _find_workspace() -> Path | None:
     """Walk up from cwd looking for designos.project.yaml."""
     cur = Path.cwd()
@@ -139,6 +165,171 @@ def _find_workspace() -> Path | None:
         if (candidate / "designos.project.yaml").exists():
             return candidate
     return None
+
+
+def _load_run_manifest(ws_root: Path, run_id: str) -> RunManifest:
+    from kernel.contracts.enums import ErrorCode
+    from kernel.errors import WorkspaceError
+
+    manifest_path = ws_root / "runs" / run_id / "run.yaml"
+    if not manifest_path.exists():
+        raise WorkspaceError(
+            ErrorCode.E4001,
+            f"run manifest not found: {manifest_path}",
+            context={"run_id": run_id, "path": str(manifest_path)},
+        )
+    try:
+        loaded: Any = yaml.safe_load(manifest_path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        raise WorkspaceError(
+            ErrorCode.E4001,
+            f"invalid run manifest: {manifest_path}",
+            context={"run_id": run_id, "path": str(manifest_path)},
+        ) from exc
+    if not isinstance(loaded, dict):
+        raise WorkspaceError(
+            ErrorCode.E4001,
+            f"run manifest is not a mapping: {manifest_path}",
+            context={"run_id": run_id, "path": str(manifest_path)},
+        )
+    try:
+        return RunManifest.model_validate(loaded)
+    except Exception as exc:
+        raise WorkspaceError(
+            ErrorCode.E4001,
+            f"run manifest failed validation: {manifest_path}",
+            context={"run_id": run_id, "path": str(manifest_path)},
+        ) from exc
+
+
+def _latest_paused_run_id(ws_root: Path) -> str | None:
+    from kernel.checkpoint.manager import CheckpointManager
+
+    runs_dir = ws_root / "runs"
+    if not runs_dir.exists():
+        return None
+
+    cm = CheckpointManager(ws_root)
+    paused: list[tuple[RunManifest, Any]] = []
+    for entry in runs_dir.iterdir():
+        if not entry.is_dir():
+            continue
+        manifest_path = entry / "run.yaml"
+        if not manifest_path.exists():
+            continue
+        try:
+            manifest = _load_run_manifest(ws_root, entry.name)
+        except Exception:
+            continue
+        if manifest.status is not RunStatus.PAUSED:
+            continue
+        try:
+            snapshot = cm.load(manifest.id)
+        except Exception:
+            continue
+        if snapshot is None:
+            continue
+        paused.append((manifest, snapshot))
+
+    if not paused:
+        return None
+
+    paused.sort(
+        key=lambda item: item[1].last_updated,
+        reverse=True,
+    )
+    return paused[0][0].id
+
+
+def _prepare_skill_runtime(
+    *,
+    ws_root: Path,
+    skill: str,
+    run_id: str,
+    mode: str | None,
+    skill_version: str | None = None,
+    model: str | None = None,
+) -> tuple[Any, Any, Any]:
+    from kernel.config.loader import load_config
+    from kernel.contracts.schemas import SkillContext
+    from kernel.llm.client import LLMClient
+    from kernel.mcp.client import MCPClient
+    from kernel.mcp.registry import MCPRegistry
+    from kernel.pipeline.engine import make_engine
+    from kernel.skill_loader.loader import SkillLoader
+    from kernel.workspace.workspace import Workspace
+
+    ws = Workspace(ws_root)
+    loader = SkillLoader(_skill_search_paths())
+    loaded_skill = loader.load(skill)
+    cfg = load_config(workspace=ws_root, skill_config=loaded_skill.config)  # type: ignore[attr-defined]
+    if model is not None:
+        cfg = cfg.model_copy(
+            update={
+                "global_config": cfg.global_config.model_copy(update={"primary_model": model}),
+            }
+        )
+
+    ctx = SkillContext(
+        run_id=run_id,
+        workspace=ws_root,
+        skill_name=skill,
+        skill_version=skill_version or getattr(loaded_skill, "version", "0.0.0"),
+        mode=mode,  # type: ignore[arg-type]
+        config=cfg,
+        state=_load_workspace_inputs(ws_root),
+    )
+
+    llm_client = LLMClient.from_global_config(cfg.global_config)
+    repo_root = _detect_repo_root()
+    registry = MCPRegistry(cfg.mcp_servers)
+    mcp_client = MCPClient(registry, repo_root=repo_root) if repo_root else None
+    engine = make_engine(workspace=ws, llm=llm_client, mcp=mcp_client)
+    attach = getattr(loaded_skill, "attach", None)
+    if callable(attach):
+        attach(engine=engine, llm=llm_client, mcp=mcp_client)
+    return loaded_skill, ctx, cfg
+
+
+def _drive_skill(loaded_skill: Any, ctx: Any, *, auto_confirm: bool) -> SkillResult:
+    async def _drive() -> SkillResult:
+        result: SkillResult
+        while True:
+            result = await loaded_skill.run(ctx)  # type: ignore[func-returns-value]
+            if result.status is not RunStatus.PAUSED or not auto_confirm:
+                return result
+            if result.pause_kind != "checkpoint":
+                return result
+
+    return asyncio.run(_drive())
+
+
+def _write_terminal_manifest(rm: Any, manifest: RunManifest, result: SkillResult) -> RunManifest:
+    final_manifest = rm.finish_manifest(
+        manifest,
+        status=result.status,
+        outputs=_manifest_outputs(result),
+        status_reason=result.status_reason,
+        required_actions=result.required_actions,
+    )
+    rm.write_manifest(final_manifest)
+    return final_manifest
+
+
+def _emit_terminal_status(result: SkillResult) -> None:
+    if result.status is RunStatus.COMPLETED:
+        _ok("Run complete.")
+    elif result.status is RunStatus.PAUSED:
+        checkpoint = result.paused_at_checkpoint or "checkpoint"
+        _info(typer.style(f"Run paused at {checkpoint}.", fg=typer.colors.YELLOW))
+        if result.status_reason:
+            _info(f"Reason: {result.status_reason}")
+        for action in result.required_actions:
+            _info(f"Required action: {action}")
+    else:
+        _err("Run failed.")
+        if result.status_reason:
+            _info(f"Reason: {result.status_reason}")
 
 
 def _err(msg: str) -> None:
@@ -216,14 +407,7 @@ def run(
     run_id: Optional[str] = typer.Option(None, "--run-id", help="Explicit run id (auto-assigned if omitted)."),
 ) -> None:
     """Execute a Skill against the current workspace."""
-    from kernel.config.loader import load_config
     from kernel.contracts.errors import DesignOSError
-    from kernel.contracts.schemas import SkillContext
-    from kernel.llm.client import LLMClient
-    from kernel.mcp.client import MCPClient
-    from kernel.mcp.registry import MCPRegistry
-    from kernel.pipeline.engine import make_engine
-    from kernel.skill_loader.loader import SkillLoader
     from kernel.workspace.run_manager import RunManager
     from kernel.workspace.workspace import Workspace
 
@@ -232,71 +416,39 @@ def run(
         _err("No DesignOS workspace found. Run `designos init <name>` first.")
         raise typer.Exit(1)
 
+    manifest: RunManifest | None = None
+    rm: RunManager | None = None
     try:
         ws = Workspace(ws_root)
-        loader = SkillLoader(_skill_search_paths())
-        loaded_skill = loader.load(skill)
-
         rm = RunManager(ws)
         resolved_run_id = run_id or rm.allocate(skill)
         rm.run_dir(resolved_run_id, create=True)
 
-        cfg = load_config(workspace=ws_root)
-
-        initial_state: dict[str, Any] = _load_workspace_inputs(ws_root)
-
-        ctx = SkillContext(
+        loaded_skill, ctx, cfg = _prepare_skill_runtime(
+            ws_root=ws_root,
+            skill=skill,
             run_id=resolved_run_id,
-            workspace=ws_root,
-            skill_name=skill,
-            skill_version=getattr(loaded_skill, "version", "0.0.0"),
-            mode=mode,  # type: ignore[arg-type]
-            config=cfg,
-            state=initial_state,
+            mode=mode,
         )
 
-        llm_client = LLMClient.from_global_config(cfg.global_config)
-
-        # Wire MCP client. Builtin servers are auto-discovered from the repo's
-        # ``mcp-servers/`` directory via the in-process transport.
-        repo_root = _detect_repo_root()
-        registry = MCPRegistry.from_skill_config(loaded_skill.config)  # type: ignore[attr-defined]
-        mcp_client = MCPClient(registry, repo_root=repo_root) if repo_root else None
-
-        engine = make_engine(workspace=ws, llm=llm_client, mcp=mcp_client)
+        manifest = rm.start_manifest(
+            resolved_run_id,
+            skill,
+            getattr(loaded_skill, "version", "0.0.0"),
+            cfg.global_config.primary_model,
+            mode=cast(Mode | None, mode),
+        )
+        rm.write_manifest(manifest)
 
         _info(f"Running skill '{skill}' (run_id={resolved_run_id}) …")
-
-        async def _drive_once() -> bool:
-            """Drive engine.execute once, returning True if a checkpoint paused the run."""
-            paused = False
-            async for event in engine.execute(loaded_skill, ctx):  # type: ignore[arg-type]
-                kind: str = event.kind
-                stage: str = event.stage_id
-                if kind == "stage_started":
-                    _info(f"  → {stage}")
-                elif kind == "stage_completed":
-                    _info(typer.style(f"  ✓ {stage}", fg=typer.colors.GREEN))
-                elif kind == "stage_failed":
-                    _err(f"  ✗ {stage} failed")
-                elif kind == "checkpoint":
-                    msg: str = event.payload.get("message", "Checkpoint reached.")
-                    _info(typer.style(f"\nCheckpoint: {msg}", fg=typer.colors.YELLOW))
-                    if not auto_confirm:
-                        typer.confirm("Continue?", default=True, abort=True)
-                    paused = True
-            return paused
-
-        async def _drive() -> None:
-            # With ``--auto-confirm``, automatically resume past every checkpoint.
-            while True:
-                paused = await _drive_once()
-                if not paused or not auto_confirm:
-                    break
-
-        asyncio.run(_drive())
-        _ok("Run complete.")
+        result = _drive_skill(loaded_skill, ctx, auto_confirm=auto_confirm)
+        _write_terminal_manifest(rm, manifest, result)
+        _emit_terminal_status(result)
+        raise typer.Exit(_exit_code_for_status(result.status))
     except DesignOSError as exc:
+        if manifest is not None and rm is not None:
+            failed_manifest = rm.finish_manifest(manifest, status=RunStatus.FAILED)
+            rm.write_manifest(failed_manifest)
         _err(str(exc))
         raise typer.Exit(1) from exc
 
@@ -309,10 +461,14 @@ def run(
 @app.command()
 def resume(
     run_id: Optional[str] = typer.Option(None, "--run-id", help="Run id to resume (latest paused run if omitted)."),
+    auto_confirm: bool = typer.Option(False, "--auto-confirm", help="Skip checkpoint confirmation prompts."),
 ) -> None:
     """Resume a paused Skill run from the latest checkpoint."""
-    from kernel.contracts.errors import DesignOSError
     from kernel.checkpoint.manager import CheckpointManager
+    from kernel.contracts.enums import ErrorCode
+    from kernel.contracts.errors import DesignOSError
+    from kernel.errors import WorkspaceError
+    from kernel.workspace.run_manager import RunManager
     from kernel.workspace.workspace import Workspace
 
     ws_root = _find_workspace()
@@ -320,32 +476,62 @@ def resume(
         _err("No DesignOS workspace found.")
         raise typer.Exit(1)
 
+    manifest: RunManifest | None = None
+    rm: RunManager | None = None
     try:
         ws = Workspace(ws_root)
+        rm = RunManager(ws)
         cm = CheckpointManager(ws_root)
 
-        # Resolve run_id: use provided or find the most recent checkpoint file.
-        resolved: str | None = run_id
+        resolved = run_id or _latest_paused_run_id(ws_root)
         if resolved is None:
-            checkpoints_dir = ws.checkpoints_dir
-            if checkpoints_dir.exists():
-                files = sorted(checkpoints_dir.glob("session-*.yaml"), key=lambda p: p.stat().st_mtime, reverse=True)
-                if files:
-                    # Extract run_id from filename: session-<run_id>.yaml
-                    resolved = files[0].stem[len("session-"):]
+            raise WorkspaceError(
+                ErrorCode.E4001,
+                "No paused run found. Start a run with `designos run <skill>` first.",
+            )
 
-        if resolved is None:
-            _err("No paused run found. Start a run with `designos run <skill>` first.")
-            raise typer.Exit(1)
+        manifest = _load_run_manifest(ws_root, resolved)
+        if manifest.status is not RunStatus.PAUSED:
+            raise WorkspaceError(
+                ErrorCode.E4001,
+                f"run '{resolved}' is not paused",
+                context={"run_id": resolved, "status": manifest.status.value},
+            )
 
         snap = cm.load(resolved)
         if snap is None:
-            _err(f"No checkpoint found for run '{resolved}'.")
-            raise typer.Exit(1)
+            raise WorkspaceError(
+                ErrorCode.E4001,
+                f"No checkpoint found for run '{resolved}'.",
+                context={"run_id": resolved},
+            )
+        if snap.skill != manifest.skill:
+            raise WorkspaceError(
+                ErrorCode.E4001,
+                f"checkpoint skill mismatch for run '{resolved}'",
+                context={"run_id": resolved, "snapshot_skill": snap.skill, "manifest_skill": manifest.skill},
+            )
 
+        loaded_skill, ctx, _cfg = _prepare_skill_runtime(
+            ws_root=ws_root,
+            skill=manifest.skill,
+            run_id=resolved,
+            mode=manifest.mode,
+            skill_version=manifest.version,
+            model=manifest.model,
+        )
+
+        manifest = rm.resume_manifest(manifest)
+        rm.write_manifest(manifest)
         _info(f"Resuming run '{resolved}' (skill={snap.skill}, stage={snap.current_stage_index}) …")
-        _info("Use `designos run <skill> --run-id <id>` to re-execute from the checkpoint.")
+        result = _drive_skill(loaded_skill, ctx, auto_confirm=auto_confirm)
+        _write_terminal_manifest(rm, manifest, result)
+        _emit_terminal_status(result)
+        raise typer.Exit(_exit_code_for_status(result.status))
     except DesignOSError as exc:
+        if manifest is not None and rm is not None and manifest.status is RunStatus.RUNNING:
+            failed_manifest = rm.finish_manifest(manifest, status=RunStatus.FAILED)
+            rm.write_manifest(failed_manifest)
         _err(str(exc))
         raise typer.Exit(1) from exc
 
@@ -441,22 +627,26 @@ def history() -> None:
 
     import yaml
 
-    _info(typer.style(f"{'RUN ID':<30} {'SKILL':<20} {'STATUS':<12} STARTED", bold=True))
-    _info("-" * 80)
+    manifests: list[RunManifest] = []
     for entry in entries:
         manifest_path = entry / "run.yaml"
-        if manifest_path.exists():
-            try:
-                data: dict = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
-                run_id_col = data.get("id", entry.name)
-                skill_col = data.get("skill", "-")
-                status_col = data.get("status", "-")
-                started_col = str(data.get("started_at", "-"))[:19]
-                _info(f"{run_id_col:<30} {skill_col:<20} {status_col:<12} {started_col}")
-            except Exception:
-                _info(f"{entry.name:<30} {'?':<20} {'?':<12} ?")
-        else:
-            _info(f"{entry.name:<30} {'?':<20} {'?':<12} ?")
+        if not manifest_path.exists():
+            continue
+        try:
+            data: dict[str, Any] = yaml.safe_load(manifest_path.read_text(encoding="utf-8")) or {}
+            manifests.append(RunManifest.model_validate(data))
+        except Exception:
+            continue
+
+    if not manifests:
+        _info("No runs yet.")
+        return
+
+    _info(typer.style(f"{'RUN ID':<30} {'SKILL':<20} {'STATUS':<12} STARTED", bold=True))
+    _info("-" * 80)
+    for manifest in manifests:
+        started_col = str(manifest.started_at)[:19]
+        _info(f"{manifest.id:<30} {manifest.skill:<20} {manifest.status.value:<12} {started_col}")
 
 
 # ---------------------------------------------------------------------------
@@ -481,7 +671,7 @@ def preflight(
     try:
         loader = SkillLoader(_skill_search_paths())
         loaded_skill = loader.load(skill)
-        cfg = load_config(workspace=ws_root)
+        cfg = load_config(workspace=ws_root, skill_config=loaded_skill.config)  # type: ignore[attr-defined]
         ctx = SkillContext(
             run_id="preflight",
             workspace=ws_root,
@@ -491,7 +681,7 @@ def preflight(
             config=cfg,
             state={},
         )
-        checker = PreflightChecker()
+        checker = PreflightChecker(repo_root=_detect_repo_root())
         errors: list[str] = asyncio.run(checker.check(loaded_skill, ctx))
         if errors:
             _err(f"Preflight failed for '{skill}':")
@@ -525,8 +715,8 @@ def input_check() -> None:
         _err("designos.project.yaml not found.")
         raise typer.Exit(1)
 
-    data: dict = yaml.safe_load(project_yaml.read_text(encoding="utf-8")) or {}
-    skills: dict = data.get("skills", {})
+    data: dict[str, Any] = yaml.safe_load(project_yaml.read_text(encoding="utf-8")) or {}
+    skills: dict[str, Any] = data.get("skills", {})
     if not skills:
         _err("No skill configured in this workspace. Run `designos init <name> --skill <skill>`.")
         raise typer.Exit(1)

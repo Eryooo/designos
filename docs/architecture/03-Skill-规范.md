@@ -49,6 +49,8 @@ skills/<skill-name>/
 
 ### 2.2 SKILL.md 格式
 
+`SKILL.md` frontmatter 是 Skill 的运行时元数据真源，尤其是 `version`。loader、preflight、MCP registry 只应消费这里的版本声明。
+
 ```markdown
 ---
 name: uxeval
@@ -112,8 +114,11 @@ outputs:
     type: issue_report
     format: xlsx
   - id: html_report
-    type: issue_report
+    type: html_report
     format: html
+  - id: evidence_pack
+    type: evidence_pack
+    format: directory
 
 upstream_refs:                  # 可选：消费上游 Skill 产物
   - skill: ai-analytics
@@ -133,9 +138,10 @@ upstream_refs:                  # 可选：消费上游 Skill 产物
 
 ### 2.3 pipeline.yaml 格式
 
+`pipeline.yaml` 只描述 stage graph，不应再声明独立运行时 `version`；否则会和 `SKILL.md` 形成多真源。
+
 ```yaml
 name: uxeval-pipeline
-version: 1.0.0
 
 stages:
   - id: prd-understanding
@@ -215,8 +221,8 @@ stages:
     type: tool
     mcp_server: excel-builder
     mcp_tool: build_issue_report
-    inputs: [issues, journey_map]
-    outputs: [issue_report, html_report]
+    inputs: [issues, journey_map, principles]
+    outputs: [issue_report, html_report, evidence_pack]
 
 memory:
   read:

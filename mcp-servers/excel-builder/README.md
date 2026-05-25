@@ -65,12 +65,13 @@ issues = [
 
 result = build_issue_report(
     issues=issues,
-    output_path="/path/to/report.xlsx",
+    output_dir="/path/to/run/outputs",
     template="uxeval",
 )
 
-print(f"Generated: {result['path']}")
-print(f"Sheets: {result['sheet_count']}")
+print(f"Excel: {result['issue_report']['path']}")
+print(f"HTML: {result['html_report']['path']}")
+print(f"Evidence: {result['evidence_pack']['path']}")
 ```
 
 ## MCP 工具接口
@@ -92,16 +93,39 @@ print(f"Sheets: {result['sheet_count']}")
       "user_impact": "string"
     }
   ],
-  "output_path": "string",
-  "template": "uxeval|design-acceptance|competitor"
+  "output_path": "string | null",
+  "output_dir": "string | null",
+  "template": "uxeval|design-acceptance|competitor",
+  "journey_map": "object | null",
+  "principles": "array | object | null"
 }
 ```
 
 **输出**：
 ```json
 {
-  "path": "string",
-  "sheet_count": "number"
+  "issue_report": {
+    "id": "issue_report",
+    "type": "issue_report",
+    "path": "string",
+    "format": "xlsx",
+    "summary": "string",
+    "sheet_count": 3
+  },
+  "html_report": {
+    "id": "html_report",
+    "type": "html_report",
+    "path": "string",
+    "format": "html",
+    "summary": "string"
+  },
+  "evidence_pack": {
+    "id": "evidence_pack",
+    "type": "evidence_pack",
+    "path": "string",
+    "format": "directory",
+    "summary": "string"
+  }
 }
 ```
 

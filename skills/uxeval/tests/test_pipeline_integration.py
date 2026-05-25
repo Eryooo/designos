@@ -68,8 +68,8 @@ def test_all_prompts_exist(uxeval_skill_dir: Path) -> None:
         "04-task-generation.md",
         "05a-script-generation.md",
         "05b-screenshot-analysis.md",
+        "05c-conflict-analysis.md",
         "06-issue-attribution.md",
-        "CHANGELOG.md",
     ]
     prompts_dir = uxeval_skill_dir / "prompts"
     for name in expected_prompts:
@@ -115,6 +115,7 @@ def test_pipeline_yaml_parses(uxeval_skill_dir: Path) -> None:
     """pipeline.yaml is valid YAML with required top-level keys."""
     pipeline = yaml.safe_load((uxeval_skill_dir / "pipeline.yaml").read_text(encoding="utf-8"))
     assert pipeline["name"] == "uxeval-pipeline"
+    assert "version" not in pipeline
     assert "stages" in pipeline
     assert isinstance(pipeline["stages"], list)
     assert len(pipeline["stages"]) >= 6, "Expected at least 6 stages per ADR-002"
@@ -172,7 +173,11 @@ def test_skill_stages_loaded(uxeval_skill_dir: Path) -> None:
         "principle-mapping",
         "journey-modeling",
         "task-generation",
-        "heuristic-detection",
+        "evidence-planning",
+        "task-script-generation",
+        "web-automation",
+        "screenshot-loading",
+        "prd-screenshot-conflict",
         "issue-attribution",
         "report-generation",
     }
@@ -186,8 +191,82 @@ def test_stage_types_correct(uxeval_skill_dir: Path) -> None:
     skill = load_pipeline_skill(uxeval_skill_dir)
     stages = {s.id: s for s in skill.get_stages()}
     assert stages["prd-understanding"].type == StageType.LLM
-    assert stages["heuristic-detection"].type == StageType.TOOL
+    assert stages["screenshot-loading"].type == StageType.TOOL
+    assert stages["web-automation"].type == StageType.TOOL
     assert stages["report-generation"].type == StageType.TOOL
+
+
+def test_report_generation_declares_real_stage_outputs(uxeval_skill_dir: Path) -> None:
+    """Stage 7 declares the same-named outputs consumed by the runtime."""
+    skill = load_pipeline_skill(uxeval_skill_dir)
+    stages = {s.id: s for s in skill.get_stages()}
+
+    assert stages["report-generation"].outputs == [
+        "issue_report",
+        "html_report",
+        "evidence_pack",
+    ]
+
+
+def test_screenshot_loading_declares_evidence_assessment_output(uxeval_skill_dir: Path) -> None:
+    skill = load_pipeline_skill(uxeval_skill_dir)
+    stages = {s.id: s for s in skill.get_stages()}
+
+    assert stages["evidence-planning"].outputs == [
+        "required_evidence_plan",
+        "critical_page_requirements",
+        "critical_state_requirements",
+        "evidence_input_guidance",
+    ]
+    assert stages["screenshot-loading"].outputs == [
+        "screenshots",
+        "image_analysis",
+        "evidence_assessment",
+    ]
+    assert stages["screenshot-loading"].inputs == [
+        "screenshots_dir",
+        "task_checklist_lite",
+        "required_evidence_plan",
+    ]
+
+
+def test_client_mode_prompts_do_not_depend_on_fake_semantic_fields(uxeval_skill_dir: Path) -> None:
+    forbidden = [
+        "content_description",
+        "matched_task_ids",
+        "matched_module_id",
+        "sensitive_info_detected",
+    ]
+    prompt_05b = (uxeval_skill_dir / "prompts" / "05b-screenshot-analysis.md").read_text(encoding="utf-8")
+    prompt_05c = (uxeval_skill_dir / "prompts" / "05c-conflict-analysis.md").read_text(encoding="utf-8")
+    prompt_06 = (uxeval_skill_dir / "prompts" / "06-issue-attribution.md").read_text(encoding="utf-8")
+
+    for token in forbidden:
+        assert token not in prompt_05b
+        assert token not in prompt_05c
+        assert token not in prompt_06
+
+
+def test_client_mode_prompts_reference_real_text_evidence_contract(uxeval_skill_dir: Path) -> None:
+    prompt_05b = (uxeval_skill_dir / "prompts" / "05b-screenshot-analysis.md").read_text(encoding="utf-8")
+    prompt_05c = (uxeval_skill_dir / "prompts" / "05c-conflict-analysis.md").read_text(encoding="utf-8")
+    prompt_06 = (uxeval_skill_dir / "prompts" / "06-issue-attribution.md").read_text(encoding="utf-8")
+
+    assert "text_evidence_inventory" in prompt_05b
+    assert "ocr_text_preview" in prompt_05b
+    assert "evidence_assessment" in prompt_05b
+    assert "semantic_analysis_available" in prompt_05b
+    assert "final_delivery_ready" in prompt_05b
+    assert "fallback_safe" in prompt_05b
+    assert "required_evidence_plan" in prompt_05b
+    assert "evidence_assessment" in prompt_05c
+    assert "delivery_status" in prompt_05c
+    assert "page_title_candidates" in prompt_06
+    assert "evidence_assessment" in prompt_06
+    assert "[证据不足]" in prompt_06
+    assert "unverified_issues" in prompt_06
+    assert "delivery_assessment" in prompt_06
+    assert "runtime 不会允许生成最终 issue_report / html_report" in prompt_06
 
 
 def test_checkpoints_in_stage_config(uxeval_skill_dir: Path) -> None:
@@ -207,7 +286,59 @@ def test_only_when_clauses_preserved(uxeval_skill_dir: Path) -> None:
     skill = load_pipeline_skill(uxeval_skill_dir)
     stages = {s.id: s for s in skill.get_stages()}
     assert stages["task-script-generation"].only_when == 'mode == "web"'
+    assert stages["evidence-planning"].only_when == 'mode == "client"'
     assert stages["screenshot-loading"].only_when == 'mode == "client"'
+
+
+def test_client_evidence_quality_gates_are_declared(uxeval_skill_dir: Path) -> None:
+    skill = load_pipeline_skill(uxeval_skill_dir)
+    stages = {s.id: s for s in skill.get_stages()}
+
+    conflict_gate = stages["prd-screenshot-conflict"].gate
+    issue_gate = stages["issue-attribution"].gate
+    audit_stage = stages["delivery-audit"]
+    report_gate = stages["report-generation"].gate
+
+    assert stages["evidence-planning"].type.value == "tool"
+    assert stages["evidence-planning"].mcp_server == "image-analyzer"
+    assert stages["evidence-planning"].mcp_tool == "plan_required_evidence"
+
+    screenshot_gate = stages["screenshot-loading"].gate
+    assert screenshot_gate is not None
+    assert screenshot_gate.when == 'evidence_input_guidance.pre_run_status in ["supplement_required", "blocked"]'
+    assert screenshot_gate.resume_from_stage == "evidence-planning"
+
+    assert conflict_gate is not None
+    assert conflict_gate.when == 'evidence_assessment.delivery_status == "blocked"'
+    assert conflict_gate.resume_from_stage == "screenshot-loading"
+
+    assert issue_gate is not None
+    assert issue_gate.when == 'evidence_assessment.delivery_status in ["blocked", "supplement_required"]'
+    assert issue_gate.resume_from_stage == "screenshot-loading"
+
+    assert audit_stage.type.value == "tool"
+    assert audit_stage.mcp_server == "excel-builder"
+    assert audit_stage.mcp_tool == "audit_delivery_readiness"
+    assert audit_stage.outputs == [
+        "audited_delivery_assessment",
+        "delivery_audit_bundle",
+    ]
+
+    assert report_gate is not None
+    assert report_gate.when == 'audited_delivery_assessment.delivery_status != "final_delivery_ready"'
+    assert report_gate.resume_from_stage == "screenshot-loading"
+
+
+def test_issue_attribution_declares_unverified_and_delivery_outputs(uxeval_skill_dir: Path) -> None:
+    skill = load_pipeline_skill(uxeval_skill_dir)
+    stages = {s.id: s for s in skill.get_stages()}
+
+    assert stages["issue-attribution"].outputs == [
+        "raw_issues",
+        "issues",
+        "unverified_issues",
+        "delivery_assessment",
+    ]
 
 
 def test_prompt_files_resolved(uxeval_skill_dir: Path) -> None:

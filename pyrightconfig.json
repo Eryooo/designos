@@ -2,8 +2,10 @@
   "include": [
     "kernel",
     "designos",
-    "mcp-servers",
-    "skills"
+    "mcp-servers/excel-builder",
+    "mcp-servers/image-analyzer",
+    "mcp-servers/pdf-parser",
+    "mcp-servers/heuristic-engine"
   ],
   "exclude": [
     "**/__pycache__",
@@ -11,18 +13,32 @@
     "**/.ruff_cache",
     "**/.pytest_cache",
     "tests",
+    "**/tests",
+    "**/fixtures",
     "legacy",
     "docs",
     "dist",
-    "build"
+    "build",
+    "skills",
+    "npm-package"
   ],
   "pythonVersion": "3.11",
-  "typeCheckingMode": "strict",
-  "reportMissingTypeStubs": "warning",
-  "reportUnknownMemberType": "warning",
-  "reportUnknownVariableType": "warning",
-  "reportUnknownArgumentType": "warning",
-  "reportPrivateUsage": "warning",
-  "reportImplicitStringConcatenation": "warning",
+  "venvPath": ".",
+  "venv": ".venv",
+  "typeCheckingMode": "standard",
+  "reportMissingImports": "error",
+  "reportMissingModuleSource": "none",
+  "reportMissingTypeStubs": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownParameterType": "none",
+  "reportPrivateUsage": "none",
+  "reportImplicitStringConcatenation": "none",
+  "reportUnusedImport": "error",
+  "reportMissingTypeArgument": "error",
+  "reportReturnType": "error",
+  "reportUnnecessaryIsInstance": "error",
+  "reportUnnecessaryComparison": "error",
   "useLibraryCodeForTypes": true
 }

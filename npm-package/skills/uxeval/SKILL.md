@@ -1,6 +1,71 @@
 ---
 name: uxeval
+version: 1.0.0
+type: pipeline
 description: 体验启发式评估 + 可用性测试。当用户说体验评估、启发式评估、可用性测试、UX 走查、/uxeval 时使用。支持客户端模式（用户提供截图）和 Web 模式（Playwright 自动截图）两种证据采集方式。
+requires:
+  kernel: ">=1.0.0,<2.0.0"
+  mcp_servers:
+    - name: pdf-parser
+      builtin: true
+    - name: excel-builder
+      builtin: true
+    - name: image-analyzer
+      builtin: true
+      required_when: 'mode == "client"'
+      requires_external:
+        - command: "python3 {repo_root}/mcp-servers/image-analyzer/probe_ocr.py"
+          install_hint: "Install a local OCR backend (for example Tesseract or a Vision-compatible local OCR runtime), or provide screens-description.md so client mode can fall back to manual page descriptions."
+          required_when: 'mode == "client"'
+    - name: heuristic-engine
+      builtin: true
+    - name: playwright-driver
+      builtin: true
+      required_when: 'mode == "web"'
+      requires_external:
+        - command: "playwright --version"
+          install_hint: "Install Playwright and browsers before running web mode."
+          required_when: 'mode == "web"'
+modes:
+  - id: web
+    label: "Web 应用（Playwright 自动化采集）"
+    requires:
+      env: [APP_BASE_URL, APP_USERNAME, APP_PASSWORD]
+  - id: client
+    label: "客户端应用（人工提交截图）"
+    requires:
+      directory: [inputs/screens/]
+inputs:
+  - name: prd_file
+    type: file
+    formats: [pdf, docx, md]
+    required: true
+  - name: scope_md
+    type: file
+    formats: [md]
+    required: true
+  - name: screenshots_dir
+    type: directory
+    required: false
+outputs:
+  - id: journey_map
+    type: user_journey
+    format: markdown
+  - id: task_checklist_full
+    type: task_checklist
+    format: markdown
+  - id: delivery_audit_bundle
+    type: delivery_audit_bundle
+    format: directory
+  - id: issue_report
+    type: issue_report
+    format: xlsx
+  - id: html_report
+    type: html_report
+    format: html
+  - id: evidence_pack
+    type: evidence_pack
+    format: directory
 ---
 
 # UXEval — 体验启发式评估
@@ -80,7 +145,7 @@ description: 体验启发式评估 + 可用性测试。当用户说体验评估�
 3. **推断 scope.md**：从 PRD 自动提取评估范围，写到 `inputs/scope.md`，让用户审阅
 4. **确认模式**：根据 Step 0 的回答写入 `designos.project.yaml`
 
-## Step 2：7 阶段流水线
+## Step 2：9 阶段流水线
 
 按以下顺序逐 stage 执行。每个 stage 读取对应 prompt 文件 + reference 知识库。
 
@@ -90,11 +155,13 @@ description: 体验启发式评估 + 可用性测试。当用户说体验评估�
 | 2 | 启发式原则映射 | `prompts/02-principle-mapping.md` + `reference/m02-启发式原则.md` | principles JSON | |
 | 3 | 旅程建模 | `prompts/03-journey-modeling.md` + `reference/m03-旅程建模.md` | journey_map / journey_stages | **⚠️ Checkpoint C1** |
 | 4 | 任务生成 | `prompts/04-task-generation.md` + `reference/m04-任务生成.md` | task_checklist_full / task_checklist_lite | **⚠️ Checkpoint C2** |
+| 4.5 | 关键证据规划（仅 client） | deterministic tool planning | required_evidence_plan / critical_page_requirements / critical_state_requirements / evidence_input_guidance | 开跑前先规划关键页面、关键状态、关键说明；当前输入明显缺料时，一次性给出结构化补料清单。 |
 | 5a | 脚本生成（仅 web） | `prompts/05a-script-generation.md` + `reference/m05-证据采集.md` | evaluation_script | |
-| 5b | 截图分析（仅 client） | `prompts/05b-screenshot-analysis.md` + 读取 `inputs/screens/` | screenshots / image_analysis | 必须逐张分析所有截图，**每次只读 1 张**逐张分析，每张输出结构化观察后再读下一张。禁止跳过任何截图，报告进度："已分析 X/Y 张截图" |
+| 5b | 截图证据分析（仅 client） | `prompts/05b-screenshot-analysis.md` + 读取 `inputs/screens/` | screenshots / image_analysis / evidence_assessment | 消费 `required_evidence_plan` 做 plan-aware coverage；递归清点截图和 `.md` 说明文件；有本地 OCR 时抽取文字线索、按钮/导航/状态词；同时判断是否只够 fallback_safe，还是达到 final_delivery_ready。 |
 | 5.5 | PRD-截图冲突分析 | Stage 5b 输出 + Stage 1 输出 | prd_screenshot_conflicts | |
-| 6 | 问题检测 + 归因 | `prompts/06-issue-attribution.md` + `reference/m06-问题归因.md` | issues JSON | **⚠️ Checkpoint C3** + ⚠️ 宪法自检 |
-| 7 | 报告生成 | `templates/*.md` | Markdown + Excel + evidence_pack | |
+| 6 | 问题检测 + 归因 | `prompts/06-issue-attribution.md` + `reference/m06-问题归因.md` | issues / unverified_issues / delivery_assessment | **⚠️ Checkpoint C3** + ⚠️ 宪法自检 |
+| 6.5 | 运行时最终交付审计 | deterministic tool audit | audited_delivery_assessment / delivery_audit_bundle | 不信任 LLM 自报；runtime 硬审计主清单、未验证问题和证据覆盖。 |
+| 7 | 报告生成 | `templates/*.md` | Markdown + Excel + evidence_pack | 只有 audited_delivery_assessment 通过时才允许最终报告。 |
 
 每个 stage 的执行方式：
 1. 读取对应 prompt 文件（含角色设定 + 输入输出格式）
@@ -165,9 +232,25 @@ Stage 6 输出前必须逐条执行 8 条宪法校验，不通过的问题删除
 
 ### 图片分析（截图）
 
-截图用多模态视觉能力直接分析（所有 IDE/CLI 都支持）。
-- 一次只读 1 张，避免 context 爆掉
-- 每张输出 `content_description` 字段（页面类型 + 主要元素 + 数据状态）
+当前 `image-analyzer` 是**本地证据分析工具**，不是全知多模态语义分析器。
+- 在正式截图分析前，会先产出 `required_evidence_plan`，把本次 run 最关键需要哪些页面、哪些状态、哪些说明规划出来
+- 递归发现截图与 `.md` 说明文件
+- 提取稳定 id、相对路径、绝对路径、格式、尺寸、分辨率、文件大小
+- 有本地 OCR 时抽取 OCR 文本、页面标题候选、按钮文本、导航文本、空状态/错误/加载状态词
+- 基于 OCR + 文件名 + `.md` 说明文件建立更强的截图-说明关联
+- 对照 `required_evidence_plan` 做关键页面 / 关键状态 / 关键说明覆盖判断
+- 输出 `confidence / source_channel / evidence_basis / verification_gaps`
+- 对 client 模式给出 `evidence_assessment`，明确区分：
+  - `final_delivery_ready`：只有 runtime delivery-audit 通过后，才允许最终问题清单和最终报告
+  - `fallback_safe`：自动生成 bounded fallback package（含 `bounded_issue_pass.md` / `unverified_issues.json` / `supplement_request.md`），但不允许最终报告
+  - `supplement_required / blocked`：必须补资料或阻断
+- Stage 6 必须把低置信度、待验证问题移到 `unverified_issues`，不能混入主问题清单
+
+当前不做：
+- 完整页面语义总结
+- 基于视觉内容的 task / module 自动归因
+- 场景意图自动判断
+- 像素级敏感信息检测
 
 ## 对话风格
 
@@ -182,4 +265,3 @@ Stage 6 输出前必须逐条执行 8 条宪法校验，不通过的问题删除
 - scope.md 缺失 → 从 PRD 自动推断，让用户审阅
 - 截图缺失（client 模式）→ 询问用补文字描述还是补截图
 - 宪法违反 → 重新生成（最多 3 次）
-

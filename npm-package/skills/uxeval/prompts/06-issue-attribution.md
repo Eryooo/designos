@@ -50,13 +50,14 @@ raw_issues:
 
 **执行方式**：
 - 读取问题描述中的场景关键词（如"配置数据源节点""查看评估报告"）
-- 读取 Stage 5b 截图分析中该截图的内容描述
+- 优先读取 Stage 5b 的 `relative_path`、`ocr_text_preview`、`page_title_candidates`、`button_text_candidates`、`navigation_text_candidates`、`state_text_candidates`、`description_links`、`signal_warnings`
+- 同时检查 `image_analysis.limitations` 与 `evidence_assessment.verdict`
 - 判断：场景与截图内容是否一致？
 
 **判定规则**：
-- ✅ 匹配：问题描述"在配置数据源节点场景"，截图内容"任务流画布-数据源节点配置"
-- ❌ 不匹配：问题描述"在配置数据源节点场景"，截图内容"空间详情页"
-- ⚠️ 无法判断：截图内容描述不够详细
+- ✅ 匹配：问题描述"在配置数据源节点场景"，OCR 或说明文件明确提到"数据源节点配置"
+- ❌ 不匹配：问题描述"在配置数据源节点场景"，OCR / 说明文件明确写的是"空间详情页"
+- ⚠️ 无法判断：只有低置信度 filename hint，或当前 `evidence_assessment` 已提示证据不足
 
 **处理方式**：
 - 匹配 → 保留该问题
@@ -69,7 +70,7 @@ scene_evidence_validation:
   - issue_id: I-002
     scene: "配置数据源节点"
     evidence_screenshot: S02
-    screenshot_content: "空间详情页"
+    evidence_signal: "screens-description.md 预览中写明“空间详情页”"
     match_result: false
     action: "删除（场景与证据不匹配）"
 ```
@@ -166,6 +167,9 @@ system_issues:
 
 ```
 {{raw_issues}}              # heuristic-engine 输出的原始问题清单
+{{screenshots}}             # Stage 5b 截图证据清单
+{{image_analysis}}          # Stage 5b 能力与线索摘要
+{{evidence_assessment}}     # Stage 5b 输入充分性判断
 {{journey_map}}             # 旅程地图
 {{journey_stages}}          # 旅程阶段
 {{principles}}              # 启发式原则列表
@@ -191,9 +195,38 @@ system_issues:
       "evidence_content": "E-001: 工作台首页，显示12条混合待办列表（规则/审批/消息），所有待办字号颜色图标相同; E-002: 待办详情页，展示单条规则待办的完整信息",
       "user_impact": "每天早晨运营专员需 8-15 秒定位规则待办（实测平均 11s），且漏看率约 23%（基于 5 名用户 20 次点击的数据）。高频场景下累计认知负担显著，影响工作启动效率。",
       "suggestion": "建议为规则相关待办增加视觉标识（推荐方案：左侧增加蓝色 4px 侧边条 + 「规则」浅蓝标签），与审批、消息类待办形成视觉层级。当前违反 F2（系统状态可见性，需逐字阅读判断类型）和 P3（一致性与标准化，所有待办视觉权重相同无法快速扫描）。",
+      "confidence": "high",
+      "evidence_basis": [
+        "ocr page-title cue supports 工作台 context",
+        "markdown description confirms mixed todo list without visual distinction"
+      ],
+      "verification_status": "verified",
       "source_basis": "screenshot"
     }
   ],
+  "unverified_issues": [
+    {
+      "id": "I-099-unverified",
+      "title": "导出流程可能缺少结果反馈",
+      "reason": "当前只有低置信度文件名 hint，没有 OCR 或说明文件支撑，不能进入主问题清单。",
+      "blocked_by": ["低置信度 filename hint", "缺少导出成功/失败状态截图"],
+      "required_actions": ["补导出流程截图", "补导出成功和失败状态说明"]
+    }
+  ],
+  "delivery_assessment": {
+    "delivery_status": "final_delivery_ready",
+    "final_delivery_ready": true,
+    "fallback_safe": false,
+    "status_reason": "主问题清单全部由 verified issue 构成，关键页面覆盖达到最终交付门槛。",
+    "confidence": "high",
+    "evidence_basis": [
+      "issue_count=27",
+      "unverified_issue_count=0",
+      "all main-list issues verification_status=verified"
+    ],
+    "required_actions": [],
+    "verification_gaps": []
+  },
   "attribution_summary": {
     "total_issues": 27,
     "by_severity": {"critical": 3, "major": 12, "minor": 9, "suggestion": 3},
@@ -301,6 +334,12 @@ raw_issues 通常有重复，必须去重：
   "evidence_content": "E-007: 规则编辑页-保存按钮点击瞬间，按钮样式无变化，无loading状态; E-008: 规则编辑页-保存3秒后状态，页面无任何反馈提示",
   "user_impact": "在「保存规则草稿」场景下（高频，每条规则平均保存 5+ 次），运营专员点击保存后等待 3-5 秒无反馈，[推断] 用户会重复点击或刷新，可能导致重复提交。约 40% 用户在前 3 次使用中发生重复点击行为。",
   "suggestion": "建议把「保存」按钮从无反馈改为「点击后立即变 loading 状态（按钮文案「保存中...」+ 禁用）+ 完成后顶部 toast 提示「保存成功」」。当前违反 F2（系统状态可见性）：用户在异步操作中无法判断系统状态，是 B 端长操作的高频痛点。",
+  "confidence": "high",
+  "evidence_basis": [
+    "screenshot E-007 shows no loading state on save click",
+    "screenshot E-008 still shows no success feedback after 3 seconds"
+  ],
+  "verification_status": "verified",
   "source_basis": "screenshot"
 }
 ```
@@ -316,7 +355,52 @@ raw_issues 通常有重复，必须去重：
 - ⚠️ `evidence_content` 缺失 → 警告（推荐字段，用于场景-证据匹配校验）
 
 **字段说明**：
-- `evidence_content`（可选但推荐）：证据截图的内容描述，格式为"E-001: 描述1; E-002: 描述2"，用于验证场景-证据匹配度，防止 I-002 类误判（场景描述与证据截图不符）
+- `evidence_content`（可选但推荐）：来自说明文件或人工整理的证据描述，格式为"E-001: 描述1; E-002: 描述2"，用于验证场景-证据匹配度
+
+## Client 模式诚实约束
+
+如果 `image_analysis.semantic_analysis_available == false`：
+- 不要把截图文字线索伪装成完整页面语义理解
+- 只能使用带 `confidence / source_channel / evidence_basis` 的真实 cue
+- 如果 `evidence_assessment.delivery_status == "blocked"`：
+  - 不要继续输出确定性问题主清单
+  - 所有问题移入 `unverified_issues`
+  - `delivery_assessment.delivery_status` 必须是 `blocked` 或 `supplement_required`
+- 如果 `evidence_assessment.delivery_status == "supplement_required"`：
+  - 不允许产出 `issues` 主清单
+  - 只能输出 `unverified_issues` 与补资料要求
+- 如果 `evidence_assessment.delivery_status == "fallback_safe"`：
+  - 允许输出受限主清单
+  - 但凡只依赖低置信度 filename hint、或 `verification_status != verified` 的问题，都必须移入 `unverified_issues`
+  - `delivery_assessment.delivery_status` 必须保持 `fallback_safe`，不能冒充最终交付
+- 只有当 `evidence_assessment.delivery_status == "final_delivery_ready"` 且主清单问题都 `verification_status == verified` 时，才允许把 `delivery_assessment.delivery_status` 设为 `final_delivery_ready`
+
+## 主清单与待验证区分流
+
+- `issues` 主清单只允许包含：
+  - `confidence` 为 `high` 或 `medium`
+  - `verification_status == "verified"`
+  - `evidence_refs` 非空
+  - `evidence_basis` 能明确解释为什么这条问题可以进入主清单
+- 以下情况必须移入 `unverified_issues`，不能混入主清单：
+  - 只有低置信度 filename hint
+  - 场景-证据匹配失败或无法判断
+  - 关键状态未覆盖
+  - 证据不足以支撑 severity 或 user_impact
+
+## 最终交付判定
+
+你必须输出 `delivery_assessment`，并且只能在以下条件同时满足时把 `delivery_status` 设为 `final_delivery_ready`：
+- `evidence_assessment.delivery_status == "final_delivery_ready"`
+- 主问题清单全部为 `verification_status == verified`
+- `unverified_issues` 为空，或仅保留不进入主清单的附录项且不影响本次最终交付
+- 当前主问题清单对关键页面/关键状态覆盖充分，没有会改变主结论的重大证据缺口
+
+如果只能达到 85%+ 的安全兜底质量：
+- `delivery_assessment.delivery_status = "fallback_safe"`
+- 可以输出受限主清单
+- 但后续 runtime 不会允许生成最终 issue_report / html_report
+- 后续 deterministic delivery-audit 会复核主清单、`unverified_issues` 和证据覆盖；你的 `delivery_assessment` 只是 provisional，自报不能替代 runtime audit
 
 ## 总体输出约束
 
@@ -336,6 +420,8 @@ raw_issues 通常有重复，必须去重：
 ## 输出位置
 
 - 写入 `state.issues`
+- 写入 `state.unverified_issues`
+- 写入 `state.delivery_assessment`
 - 持久化到 `runs/<run_id>/06-问题清单.json`
 - 后续 report-generation 阶段渲染为 Excel + HTML
 

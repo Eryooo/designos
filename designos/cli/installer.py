@@ -5,7 +5,6 @@ from __future__ import annotations
 import os
 import platform
 import shutil
-import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -148,7 +147,7 @@ def check_api_connectivity(
         )
     except httpx.ConnectError as exc:
         return False, f"Connection error: {exc}"
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         return False, f"Unexpected error: {exc}"
 
 
@@ -318,7 +317,7 @@ def ensure_path_configured() -> bool:
         typer.style(f"  PATH updated in {rc_file}", fg=typer.colors.GREEN)
     )
     typer.echo(f"  Run: source {rc_file}")
-    typer.echo(f"  Or open a new terminal window.")
+    typer.echo("  Or open a new terminal window.")
     return True
 
 

@@ -23,8 +23,10 @@ from kernel.contracts.schemas import (
     MCPServerConfig,
     SkillConfig,
     SkillContext,
+    SkillOutputConfig,
     SkillResult,
     StageConfig,
+    StageResult,
 )
 from kernel.errors import ConfigError
 
@@ -88,15 +90,53 @@ class PipelineSkill(IPipelineSkill):
                 context={"skill": self.name},
             )
         events = self._engine.execute(self, ctx)
-        async for _ in events:
-            pass
-        # Final aggregation is the engine's responsibility; if it returns the
-        # iterator only, attach() must wire a wrapper. Return a default
-        # COMPLETED to keep the surface minimal in M1.
+        status = RunStatus.COMPLETED
+        paused_at_checkpoint: str | None = None
+        pause_kind: str | None = None
+        status_reason: str | None = None
+        required_actions: list[str] = []
+        async for event in events:
+            if event.kind == "checkpoint":
+                status = RunStatus.PAUSED
+                checkpoint_id = event.payload.get("checkpoint_id")
+                paused_at_checkpoint = str(checkpoint_id) if checkpoint_id is not None else None
+                pause_kind_value = event.payload.get("pause_kind")
+                if pause_kind_value in {"checkpoint", "gate"}:
+                    pause_kind = str(pause_kind_value)
+                else:
+                    pause_kind = "checkpoint"
+                reason_value = event.payload.get("status_reason")
+                if isinstance(reason_value, str) and reason_value.strip():
+                    status_reason = reason_value.strip()
+                payload_actions = event.payload.get("required_actions")
+                if isinstance(payload_actions, list):
+                    required_actions = [str(item).strip() for item in payload_actions if str(item).strip()]
+            elif event.kind in {"stage_failed", "error"}:
+                status = RunStatus.FAILED
+                paused_at_checkpoint = None
+                pause_kind = None
+                error_payload = event.payload.get("error")
+                if isinstance(error_payload, dict):
+                    message = error_payload.get("message")
+                    if isinstance(message, str) and message.strip():
+                        status_reason = message.strip()
+                    context = error_payload.get("context")
+                    if isinstance(context, dict):
+                        context_actions = context.get("required_actions")
+                        if isinstance(context_actions, list):
+                            required_actions = [str(item).strip() for item in context_actions if str(item).strip()]
+
+        stages = _stage_results_from_engine(self._engine, ctx.run_id)
         return SkillResult(
             skill_name=self.name,
             skill_version=self.version,
-            status=RunStatus.COMPLETED,
+            status=status,
+            stages=stages,
+            artifacts=[artifact for stage in stages for artifact in stage.artifacts],
+            paused_at_checkpoint=paused_at_checkpoint,
+            pause_kind=pause_kind,  # type: ignore[arg-type]
+            status_reason=status_reason,
+            required_actions=required_actions,
         )
 
 
@@ -112,13 +152,24 @@ def load_pipeline_skill(skill_dir: Path) -> PipelineSkill:
             context={"path": str(manifest)},
         )
     config: SkillConfig = _config_from_frontmatter(fm)
+    # Runtime metadata comes from SKILL.md frontmatter. pipeline.yaml only
+    # contributes the stage graph and must not act as an independent version source.
     stages: list[StageConfig] = _read_pipeline_yaml(skill_dir / "pipeline.yaml", base=skill_dir)
     return PipelineSkill(config=config, stages=stages, skill_dir=skill_dir)
 
 
 def _config_from_frontmatter(fm: dict[str, Any]) -> SkillConfig:
     modes_raw: Any = fm.get("modes", []) or []
-    modes: list[str] = [str(m.get("id", "")) for m in modes_raw if isinstance(m, dict)]
+    modes: list[str] = []
+    for mode in modes_raw:
+        if isinstance(mode, dict):
+            mode_id = str(mode.get("id", "")).strip()
+            if mode_id:
+                modes.append(mode_id)
+        elif isinstance(mode, str):
+            mode_id = mode.strip()
+            if mode_id:
+                modes.append(mode_id)
     requires: dict[str, Any] = fm.get("requires", {}) or {}
     mcp_raw: Any = requires.get("mcp_servers", []) or []
     mcp_servers: list[MCPServerConfig] = []
@@ -128,12 +179,19 @@ def _config_from_frontmatter(fm: dict[str, Any]) -> SkillConfig:
         name: str = str(entry.get("name", "")).strip()
         if not name:
             continue
-        mcp_servers.append(
-            MCPServerConfig(
-                name=name,
-                builtin=bool(entry.get("builtin", False)),
-            )
-        )
+        payload: dict[str, Any] = {"name": name}
+        for key in ("transport", "command", "url", "env", "builtin", "required_when", "requires_external"):
+            if key in entry:
+                payload[key] = entry[key]
+        mcp_servers.append(MCPServerConfig.model_validate(payload))
+    outputs_raw: Any = fm.get("outputs", []) or []
+    outputs: list[SkillOutputConfig] = []
+    for entry in outputs_raw:
+        if not isinstance(entry, dict):
+            continue
+        if "id" not in entry or "type" not in entry or "format" not in entry:
+            continue
+        outputs.append(SkillOutputConfig.model_validate(entry))
     return SkillConfig(
         name=str(fm.get("name", "")),
         version=str(fm.get("version", "0.0.0")),
@@ -141,6 +199,7 @@ def _config_from_frontmatter(fm: dict[str, Any]) -> SkillConfig:
         supported_modes=[m for m in modes if m],
         requires_kernel=str(requires.get("kernel", ">=1.0.0,<2.0.0")),
         mcp_servers=mcp_servers,
+        outputs=outputs,
     )
 
 
@@ -182,6 +241,17 @@ def _read_pipeline_yaml(path: Path, *, base: Path) -> list[StageConfig]:
             )
         stages.append(_build_stage(entry, base))
     return stages
+
+
+def _stage_results_from_engine(engine: IPipelineEngine, run_id: str) -> list[StageResult]:
+    last_results: Any = getattr(engine, "last_results", None)
+    if not isinstance(last_results, dict):
+        return []
+
+    stages: Any = last_results.get(run_id, [])
+    if not isinstance(stages, list):
+        return []
+    return [stage for stage in stages if isinstance(stage, StageResult)]
 
 
 def _build_stage(entry: dict[str, Any], base: Path) -> StageConfig:

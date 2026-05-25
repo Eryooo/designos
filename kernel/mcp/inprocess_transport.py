@@ -76,7 +76,7 @@ class InProcessTransport:
                 f"tool {self._server.name}.{tool} call failed: {exc}",
                 context={"server": self._server.name, "tool": tool, "args": list(args)},
             ) from exc
-        except Exception as exc:  # noqa: BLE001
+        except Exception as exc:
             duration_ms: int = int((time.monotonic() - started) * 1000)
             return ToolResult(
                 server=self._server.name,
@@ -168,7 +168,7 @@ class InProcessTransport:
         # Resolve string annotations (from __future__ import annotations).
         try:
             hints = typing.get_type_hints(fn)
-        except Exception:  # noqa: BLE001
+        except Exception:
             hints = {}
 
         params = list(sig.parameters.values())
@@ -194,7 +194,7 @@ class InProcessTransport:
                 cleaned = _drop_none_recursive(args)
                 try:
                     return {required_positional[0].name: ann.model_validate(cleaned)}
-                except Exception as exc:  # noqa: BLE001
+                except Exception as exc:
                     _log.warning(
                         "mcp.inprocess.model_validate_failed",
                         target=getattr(ann, "__name__", str(ann)),
