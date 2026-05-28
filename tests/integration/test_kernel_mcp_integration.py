@@ -259,21 +259,43 @@ class TestExcelBuilderIntegration:
                 "required_actions": ["补导出成功状态截图"],
                 "missing_coverage": ["关键状态覆盖不足"],
                 "verification_gaps": ["导出成功状态未覆盖"],
+                "fusion_summary": {
+                    "trusted_page_mappings": [{"relative_path": "screen-01.png"}],
+                    "provisional_mappings": [{"relative_path": "screen-02.png"}],
+                    "conflicting_evidence_groups": [{"relative_path": "screen-03.png"}],
+                    "unresolved_ambiguities": [{"relative_path": "screen-04.png"}],
+                },
                 "coverage_summary": {
+                    "capture_mission_version": "2026-05-25",
                     "missing_state_categories": ["success"],
                     "missing_tasks": ["导出成功"],
+                    "fusion_conflicting_paths": ["screen-03.png"],
+                    "fusion_unresolved_paths": ["screen-04.png"],
                 },
             },
             delivery_assessment={"delivery_status": "fallback_safe"},
+            capture_mission={
+                "mission_version": "2026-05-25",
+                "critical_flows": ["导出报表"],
+                "capture_order": ["导出入口", "导出成功反馈"],
+                "final_delivery_pass_line": ["must_capture_states 覆盖率 >= 80%。"],
+                "fallback_pass_line": ["must_capture_states 覆盖率 >= 40%。"],
+            },
             output_dir=str(tmp_path / "outputs"),
         )
 
         assert result["audited_delivery_assessment"]["delivery_status"] == "fallback_safe"
+        assert result["audited_delivery_assessment"]["capture_mission_version"] == "2026-05-25"
+        assert result["audited_delivery_assessment"]["fallback_pass_line"] == ["must_capture_states 覆盖率 >= 40%。"]
+        assert result["audited_delivery_assessment"]["fusion_summary"]["conflict_count"] == 1
+        assert result["audited_delivery_assessment"]["delivery_readiness_breakdown"]["fallback_gate_pass"] is True
+        assert "trusted_evidence_sufficiency" in result["audited_delivery_assessment"]["delivery_readiness_breakdown"]["failing_final_gates"]
         bundle_path = Path(result["delivery_audit_bundle"]["path"])
         assert bundle_path.is_dir()
         assert (bundle_path / "bounded_issue_pass.md").exists()
         assert (bundle_path / "unverified_issues.json").exists()
         assert (bundle_path / "supplement_request.md").exists()
+        assert "Capture Mission pass lines" in (bundle_path / "supplement_request.md").read_text(encoding="utf-8")
 
     @pytest.mark.asyncio
     async def test_kernel_mcp_client_calls_excel_builder(self) -> None:
@@ -388,6 +410,7 @@ class TestImageAnalyzerIntegration:
             screenshots_dir=screens,
         )
 
+        assert result.capture_mission.must_capture_pages
         assert result.required_evidence_plan.critical_page_count >= 3
         assert result.evidence_input_guidance.pre_run_status == "supplement_required"
         assert "设置页" in "；".join(result.evidence_input_guidance.missing_pages)
@@ -481,9 +504,110 @@ class TestImageAnalyzerIntegration:
         )
 
         summary = result.evidence_assessment.coverage_summary
-        assert summary["required_evidence_plan_version"] == "2026-05-22"
+        assert summary["required_evidence_plan_version"] == "2026-05-25"
+        assert summary["capture_mission_version"] == "2026-05-25"
         assert summary["planned_page_count"] >= 3
+        assert summary["final_delivery_pass_line"] == plan.capture_mission.final_delivery_pass_line
         assert "missing_critical_pages" in summary
+
+    def test_image_analyzer_critical_path_summary_blocks_final_when_p0_missing(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        _isolate_mcp_path(_IMAGE_ANALYZER_DIR)
+        import importlib
+
+        core = importlib.import_module("core")
+        ocr_runtime = importlib.import_module("ocr_runtime")
+
+        screens = tmp_path / "screens"
+        screens.mkdir()
+        for name in (
+            "dashboard-home.png",
+            "settings-page.png",
+            "report-list.png",
+            "export-center.png",
+            "notice-center.png",
+        ):
+            Image.new("RGB", (1440, 900), "white").save(screens / name)
+        (screens / "screens-description.md").write_text(
+            "\n".join(
+                [
+                    "# 关键页面说明",
+                    "",
+                    "## dashboard-home.png",
+                    "这是工作台首页加载态。",
+                    "",
+                    "## settings-page.png",
+                    "这是设置页保存成功态。",
+                    "",
+                    "## report-list.png",
+                    "这是报表列表空状态。",
+                    "",
+                    "## export-center.png",
+                    "这是导出中心成功态。",
+                    "",
+                    "## notice-center.png",
+                    "这是通知中心默认态。",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(
+            core,
+            "probe_ocr_backend",
+            lambda: ocr_runtime.OCRProbeResult(available=True, backend="tesseract"),
+        )
+        ocr_lines = {
+            "dashboard-home.png": ("工作台首页", "加载中"),
+            "settings-page.png": ("设置页", "保存成功"),
+            "report-list.png": ("报表列表", "暂无数据"),
+            "export-center.png": ("导出中心", "导出成功"),
+            "notice-center.png": ("通知中心", "消息中心"),
+        }
+        monkeypatch.setattr(
+            core,
+            "run_ocr",
+            lambda path, preferred_backend=None: ocr_runtime.OCRResult(
+                backend="tesseract",
+                lines=tuple(
+                    ocr_runtime.OCRLine(text=text, confidence=0.93)
+                    for text in ocr_lines[path.name]
+                ),
+                raw_text="\n".join(ocr_lines[path.name]),
+            ),
+        )
+
+        plan = core.plan_required_evidence(
+            modules=[{"name": name} for name in ("登录", "工作台首页", "设置页", "报表列表", "导出中心", "通知中心")],
+            key_features=[{"name": name} for name in ("登录", "查看工作台", "保存设置", "查看报表", "导出中心", "通知中心")],
+            task_checklist_lite="- 登录\n- 工作台首页\n- 设置页\n- 报表列表\n- 导出中心\n- 通知中心",
+            journey_stages=["登录", "工作台首页", "设置页", "报表列表", "导出中心", "通知中心"],
+            screenshots_dir=screens,
+        )
+
+        result = core.load_and_analyze(
+            screens,
+            task_checklist_lite="- 登录\n- 工作台首页\n- 设置页\n- 报表列表\n- 导出中心\n- 通知中心",
+            required_evidence_plan=plan.required_evidence_plan,
+        )
+
+        assert result.evidence_assessment.delivery_status == "supplement_required"
+        assert result.evidence_assessment.first_pass_success_breakdown is not None
+        assert "missing_evidence" in result.evidence_assessment.first_pass_success_breakdown["supplement_cause_classification"]
+        assert result.evidence_assessment.critical_path_coverage_summary is not None
+        assert "[P0] 登录" in result.evidence_assessment.critical_path_coverage_summary.failing_final_paths
+        assert result.evidence_assessment.coverage_summary["planned_page_coverage_ratio"] == 0.833
+        assert result.evidence_assessment.targeted_acquisition_plan is not None
+        assert result.evidence_assessment.targeted_acquisition_plan.highest_value_next_captures
+        assert result.evidence_assessment.targeted_acquisition_plan.highest_value_next_captures[0].target_page == "登录"
+        assert result.evidence_assessment.targeted_acquisition_plan.highest_value_next_captures[0].suggested_input_form == "screenshot"
+        assert result.evidence_assessment.client_mode_metrics is not None
+        assert result.evidence_assessment.client_mode_metrics.success_metrics.supplement_required_rate == 1.0
+        assert result.evidence_assessment.benchmark_summary is not None
+        assert result.evidence_assessment.benchmark_summary.delivery_status == "supplement_required"
+        assert result.evidence_assessment.benchmark_summary.root_cause == "input_truly_insufficient"
 
     def test_image_analyzer_auto_drafts_mapping_for_messy_names(
         self,
@@ -547,11 +671,115 @@ class TestImageAnalyzerIntegration:
         assert result.evidence_assessment.coverage_summary["draft_mapping_count"] == len(image_refs)
         assert result.evidence_assessment.coverage_summary["clarification_needed_count"] == 0
         assert result.evidence_assessment.coverage_summary["naming_issues"]
+        assert result.evidence_assessment.fusion_summary is not None
+        assert len(result.evidence_assessment.fusion_summary.trusted_page_mappings) >= 4
         assert all(ref.draft_mapping is not None for ref in image_refs)
         assert all(
             ref.draft_mapping is not None and ref.draft_mapping.page_name is not None
             for ref in image_refs
         )
+
+    def test_image_analyzer_clarification_mapping_file_promotes_final_delivery(
+        self,
+        tmp_path: Path,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        _isolate_mcp_path(_IMAGE_ANALYZER_DIR)
+        import importlib
+
+        core = importlib.import_module("core")
+        ocr_runtime = importlib.import_module("ocr_runtime")
+
+        screens = tmp_path / "screens"
+        screens.mkdir()
+        for name in ("IMG4001.png", "IMG4002.png", "IMG4003.png", "IMG4004.png", "IMG4005.png"):
+            Image.new("RGB", (1440, 900), "white").save(screens / name)
+        (screens / "screens-description.md").write_text(
+            "\n".join(
+                [
+                    "# 关键页面说明",
+                    "",
+                    "## IMG4001.png",
+                    "这是登录页成功态。",
+                    "",
+                    "## IMG4002.png",
+                    "这是工作台首页默认态。",
+                    "",
+                    "## IMG4003.png",
+                    "这个页面可能是设置页或报表列表，当前只看到列表区域和一个保存入口。",
+                    "",
+                    "## IMG4004.png",
+                    "这是报表列表空状态。",
+                    "",
+                    "## IMG4005.png",
+                    "这是通知中心默认态。",
+                ]
+            ),
+            encoding="utf-8",
+        )
+        monkeypatch.setattr(
+            core,
+            "probe_ocr_backend",
+            lambda: ocr_runtime.OCRProbeResult(available=True, backend="tesseract"),
+        )
+        ocr_lines = {
+            "IMG4001.png": ("登录", "登录成功"),
+            "IMG4002.png": ("工作台首页", "首页"),
+            "IMG4003.png": ("保存", "列表"),
+            "IMG4004.png": ("报表列表", "暂无数据"),
+            "IMG4005.png": ("通知中心", "消息中心"),
+        }
+        monkeypatch.setattr(
+            core,
+            "run_ocr",
+            lambda path, preferred_backend=None: ocr_runtime.OCRResult(
+                backend="tesseract",
+                lines=tuple(
+                    ocr_runtime.OCRLine(text=text, confidence=0.93)
+                    for text in ocr_lines[path.name]
+                ),
+                raw_text="\n".join(ocr_lines[path.name]),
+            ),
+        )
+
+        plan = core.plan_required_evidence(
+            modules=[{"name": name} for name in ("登录", "工作台首页", "设置页", "报表列表", "通知中心")],
+            key_features=[{"name": name} for name in ("登录", "查看工作台", "保存设置", "查看报表", "通知中心")],
+            task_checklist_lite="- 登录\n- 工作台首页\n- 设置页\n- 报表列表\n- 通知中心",
+            journey_stages=["登录", "工作台首页", "设置页", "报表列表", "通知中心"],
+            screenshots_dir=screens,
+        )
+
+        before = core.load_and_analyze(
+            screens,
+            task_checklist_lite="- 登录\n- 工作台首页\n- 设置页\n- 报表列表\n- 通知中心",
+            required_evidence_plan=plan.required_evidence_plan,
+        )
+        assert before.evidence_assessment.delivery_status == "fallback_safe"
+        assert before.evidence_assessment.clarification_items
+        assert before.evidence_assessment.targeted_acquisition_plan is not None
+        assert before.evidence_assessment.targeted_acquisition_plan.highest_value_next_captures[0].suggested_input_form == "clarification"
+
+        (screens / "screens-map.md").write_text(
+            "- IMG4003.png -> page=设置页; states=success\n",
+            encoding="utf-8",
+        )
+        after = core.load_and_analyze(
+            screens,
+            task_checklist_lite="- 登录\n- 工作台首页\n- 设置页\n- 报表列表\n- 通知中心",
+            required_evidence_plan=plan.required_evidence_plan,
+        )
+
+        assert after.evidence_assessment.delivery_status == "final_delivery_ready"
+        assert after.evidence_assessment.clarification_items == []
+        assert after.evidence_assessment.targeted_acquisition_plan is not None
+        assert after.evidence_assessment.targeted_acquisition_plan.highest_value_next_captures == []
+        assert before.evidence_assessment.benchmark_summary is not None
+        assert before.evidence_assessment.benchmark_summary.delivery_status == "fallback_safe"
+        assert after.evidence_assessment.client_mode_metrics is not None
+        assert after.evidence_assessment.client_mode_metrics.success_metrics.final_delivery_ready_rate == 1.0
+        assert after.evidence_assessment.benchmark_summary is not None
+        assert after.evidence_assessment.benchmark_summary.delivery_status == "final_delivery_ready"
 
 
 @pytest.mark.integration

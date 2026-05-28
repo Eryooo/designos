@@ -34,6 +34,10 @@ SEVERITY_COLORS = {
 
 HEADER_FILL = PatternFill(start_color="D6EAF8", end_color="D6EAF8", fill_type="solid")
 HEADER_FONT = Font(bold=True)
+_BENCHMARK_DIRNAME = "benchmark"
+_BENCHMARK_JSON_FILENAME = "client_mode_benchmark_summary.json"
+_BENCHMARK_MD_FILENAME = "client_mode_benchmark_summary.md"
+_BENCHMARK_CONTRACT_VERSION = "2026-05-27"
 
 
 def _require_worksheet(sheet: object, *, label: str) -> Worksheet:
@@ -366,6 +370,368 @@ def _unique_preserve_order(values: list[str]) -> list[str]:
     return unique
 
 
+def _coerce_float(value: Any) -> float:
+    if isinstance(value, bool):
+        return 1.0 if value else 0.0
+    if isinstance(value, (int, float)):
+        return float(value)
+    try:
+        return float(str(value).strip())
+    except (TypeError, ValueError):
+        return 0.0
+
+
+def _coerce_int(value: Any) -> int:
+    if isinstance(value, bool):
+        return 1 if value else 0
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return int(value)
+    try:
+        return int(str(value).strip())
+    except (TypeError, ValueError):
+        return 0
+
+
+def _build_client_mode_benchmark_summary(
+    *,
+    output_dir: Path,
+    bundle_dir: Path,
+    issues: list[dict[str, Any]],
+    demoted_main_issues: list[dict[str, Any]],
+    key_unverified_issues: list[dict[str, Any]],
+    evidence_assessment: dict[str, Any],
+    audited_delivery_assessment: dict[str, Any],
+) -> dict[str, Any]:
+    existing_metrics = evidence_assessment.get("client_mode_metrics", {})
+    if not isinstance(existing_metrics, dict):
+        existing_metrics = {}
+    existing_summary = evidence_assessment.get("benchmark_summary", {})
+    if not isinstance(existing_summary, dict):
+        existing_summary = {}
+    coverage_summary = evidence_assessment.get("coverage_summary", {})
+    if not isinstance(coverage_summary, dict):
+        coverage_summary = {}
+    audited_breakdown = audited_delivery_assessment.get("delivery_readiness_breakdown", {})
+    if not isinstance(audited_breakdown, dict):
+        audited_breakdown = {}
+
+    existing_coverage = existing_metrics.get("coverage_metrics", {})
+    if not isinstance(existing_coverage, dict):
+        existing_coverage = {}
+    existing_trust = existing_metrics.get("trust_metrics", {})
+    if not isinstance(existing_trust, dict):
+        existing_trust = {}
+    existing_success = existing_metrics.get("success_metrics", {})
+    if not isinstance(existing_success, dict):
+        existing_success = {}
+    existing_human = existing_metrics.get("human_burden_metrics", {})
+    if not isinstance(existing_human, dict):
+        existing_human = {}
+
+    delivery_status = str(audited_delivery_assessment.get("delivery_status", "supplement_required"))
+    planned_page_count = max(1, _coerce_int(coverage_summary.get("planned_page_count", 0)))
+    trusted_mapping_count = _coerce_int(coverage_summary.get("final_delivery_trusted_mapping_count", 0))
+    provisional_mapping_count = _coerce_int(coverage_summary.get("fusion_provisional_mapping_count", 0))
+    conflict_count = _coerce_int(coverage_summary.get("fusion_conflict_count", 0))
+    clarification_count = _coerce_int(coverage_summary.get("clarification_needed_count", 0))
+    unverified_leakage_rate = round(
+        (len(demoted_main_issues) + len(key_unverified_issues)) / max(1, len(issues)),
+        3,
+    )
+
+    coverage_metrics = {
+        "critical_path_page_hit_rate": _coerce_float(
+            existing_coverage.get(
+                "critical_path_page_hit_rate",
+                coverage_summary.get("final_delivery_page_coverage_ratio", 0.0),
+            )
+        ),
+        "critical_path_state_hit_rate": _coerce_float(
+            existing_coverage.get(
+                "critical_path_state_hit_rate",
+                coverage_summary.get("final_delivery_state_coverage_ratio", 0.0),
+            )
+        ),
+        "p0_page_coverage": _coerce_float(existing_coverage.get("p0_page_coverage", 0.0)),
+        "p0_state_coverage": _coerce_float(existing_coverage.get("p0_state_coverage", 0.0)),
+        "p1_page_coverage": _coerce_float(existing_coverage.get("p1_page_coverage", 0.0)),
+        "p1_state_coverage": _coerce_float(existing_coverage.get("p1_state_coverage", 0.0)),
+    }
+    trust_metrics = {
+        "trusted_mapping_rate": _coerce_float(
+            existing_trust.get(
+                "trusted_mapping_rate",
+                round(trusted_mapping_count / planned_page_count, 3),
+            )
+        ),
+        "provisional_mapping_rate": _coerce_float(
+            existing_trust.get(
+                "provisional_mapping_rate",
+                round(min(1.0, provisional_mapping_count / planned_page_count), 3),
+            )
+        ),
+        "conflicting_mapping_rate": _coerce_float(
+            existing_trust.get(
+                "conflicting_mapping_rate",
+                round(min(1.0, conflict_count / planned_page_count), 3),
+            )
+        ),
+        "unverified_leakage_rate": unverified_leakage_rate,
+    }
+    success_metrics = {
+        "final_delivery_ready_rate": 1.0 if delivery_status == "final_delivery_ready" else 0.0,
+        "fallback_safe_rate": 1.0 if delivery_status == "fallback_safe" else 0.0,
+        "supplement_required_rate": 1.0 if delivery_status == "supplement_required" else 0.0,
+        "blocked_rate": 1.0 if delivery_status == "blocked" else 0.0,
+        "first_pass_final_rate": _coerce_float(existing_success.get("first_pass_final_rate", 0.0)),
+        "auto_remediation_lift": _coerce_float(existing_success.get("auto_remediation_lift", 0.0)),
+        "salvageable_input_rate": _coerce_float(existing_success.get("salvageable_input_rate", 0.0)),
+    }
+    human_burden_metrics = {
+        "clarification_item_count": _coerce_int(
+            existing_human.get("clarification_item_count", clarification_count)
+        ),
+        "supplement_request_precision": _coerce_float(
+            existing_human.get("supplement_request_precision", 0.0)
+        ),
+        "low_value_work_return_rate": _coerce_float(
+            existing_human.get("low_value_work_return_rate", 0.0)
+        ),
+    }
+
+    failing_final_gates = _string_list(audited_breakdown.get("failing_final_gates"))
+    met_metrics = _unique_preserve_order(
+        [
+            *(
+                ["critical_path_page_hit_rate>=0.90"]
+                if coverage_metrics["critical_path_page_hit_rate"] >= 0.9
+                else []
+            ),
+            *(
+                ["critical_path_state_hit_rate>=0.90"]
+                if coverage_metrics["critical_path_state_hit_rate"] >= 0.9
+                else []
+            ),
+            *(
+                ["trusted_mapping_rate>=0.90"]
+                if trust_metrics["trusted_mapping_rate"] >= 0.9
+                else []
+            ),
+            *(
+                ["unverified_leakage_rate==0.00"]
+                if trust_metrics["unverified_leakage_rate"] == 0.0
+                else []
+            ),
+            *(
+                ["clarification_item_count==0"]
+                if human_burden_metrics["clarification_item_count"] == 0
+                else []
+            ),
+        ]
+    )
+    unmet_metrics = _unique_preserve_order(
+        [
+            *(
+                ["critical_path_page_hit_rate<0.90"]
+                if coverage_metrics["critical_path_page_hit_rate"] < 0.9
+                else []
+            ),
+            *(
+                ["critical_path_state_hit_rate<0.90"]
+                if coverage_metrics["critical_path_state_hit_rate"] < 0.9
+                else []
+            ),
+            *(
+                ["trusted_mapping_rate<0.90"]
+                if trust_metrics["trusted_mapping_rate"] < 0.9
+                else []
+            ),
+            *(
+                ["unverified_leakage_rate>0.00"]
+                if trust_metrics["unverified_leakage_rate"] > 0.0
+                else []
+            ),
+            *(
+                ["clarification_item_count>0"]
+                if human_burden_metrics["clarification_item_count"] > 0
+                else []
+            ),
+            *[f"gate:{gate}" for gate in failing_final_gates],
+        ]
+    )
+
+    distance_to_90_plus = _unique_preserve_order(
+        [
+            *(
+                [
+                    "critical_path_page_hit_rate still below 0.90"
+                ]
+                if coverage_metrics["critical_path_page_hit_rate"] < 0.9
+                else []
+            ),
+            *(
+                [
+                    "critical_path_state_hit_rate still below 0.90"
+                ]
+                if coverage_metrics["critical_path_state_hit_rate"] < 0.9
+                else []
+            ),
+            *(
+                [
+                    "trusted_mapping_rate still below 0.90"
+                ]
+                if trust_metrics["trusted_mapping_rate"] < 0.9
+                else []
+            ),
+            *(
+                [
+                    f"unverified issue leakage still at {trust_metrics['unverified_leakage_rate']:.3f}"
+                ]
+                if trust_metrics["unverified_leakage_rate"] > 0.0
+                else []
+            ),
+            *[f"final gate still fails at {gate}" for gate in failing_final_gates],
+        ]
+    )
+
+    artifact_paths = {
+        "benchmark_dir": str((output_dir / _BENCHMARK_DIRNAME).resolve()),
+        "benchmark_json_path": str((output_dir / _BENCHMARK_DIRNAME / _BENCHMARK_JSON_FILENAME).resolve()),
+        "benchmark_markdown_path": str((output_dir / _BENCHMARK_DIRNAME / _BENCHMARK_MD_FILENAME).resolve()),
+        "delivery_audit_bundle_path": str(bundle_dir.resolve()),
+        "bounded_issue_pass_path": str((bundle_dir / "bounded_issue_pass.md").resolve()),
+        "supplement_request_path": str((bundle_dir / "supplement_request.md").resolve()),
+        "audited_delivery_assessment_path": str((bundle_dir / "audited_delivery_assessment.json").resolve()),
+    }
+    root_cause = str(existing_summary.get("root_cause", "unknown")).strip() or "unknown"
+    if root_cause == "unknown":
+        if delivery_status in {"supplement_required", "blocked"}:
+            root_cause = "input_truly_insufficient"
+        elif delivery_status == "fallback_safe" and trust_metrics["unverified_leakage_rate"] > 0.0:
+            root_cause = "system_ingestion_gap"
+        else:
+            root_cause = "mixed_gap_profile"
+
+    summary_headline = {
+        "final_delivery_ready": "当前 run 已通过 final delivery audit，可进入最终交付。",
+        "fallback_safe": "当前 run 只达到 bounded fallback；audit 已阻止它冒充 final。",
+        "supplement_required": "当前 run 仍需补证据后再尝试升级为 final。",
+        "blocked": "当前 run 被阻断，audit 认定现有证据不适合继续交付。",
+    }.get(delivery_status, "当前 run 仍需进一步诊断。")
+
+    return {
+        "contract_version": _BENCHMARK_CONTRACT_VERSION,
+        "run_mode": "client",
+        "input_quality_class": str(
+            existing_summary.get("input_quality_class")
+            or existing_metrics.get("input_quality_class")
+            or "unknown"
+        ),
+        "delivery_status": delivery_status,
+        "metrics": {
+            "contract_version": _BENCHMARK_CONTRACT_VERSION,
+            "run_mode": "client",
+            "input_quality_class": str(
+                existing_summary.get("input_quality_class")
+                or existing_metrics.get("input_quality_class")
+                or "unknown"
+            ),
+            "delivery_status": delivery_status,
+            "coverage_metrics": coverage_metrics,
+            "trust_metrics": trust_metrics,
+            "success_metrics": success_metrics,
+            "human_burden_metrics": human_burden_metrics,
+            "metric_notes": {
+                "unverified_leakage_rate": "overwritten by delivery audit using the actual qualified vs unverified issue split",
+            },
+        },
+        "met_metrics": met_metrics,
+        "unmet_metrics": unmet_metrics,
+        "distance_to_90_plus": distance_to_90_plus,
+        "root_cause": root_cause,
+        "next_best_action": audited_breakdown.get("next_best_action", ""),
+        "summary_headline": summary_headline,
+        "artifact_paths": artifact_paths,
+    }
+
+
+def _render_client_mode_benchmark_summary(summary: dict[str, Any]) -> str:
+    metrics = summary.get("metrics", {})
+    coverage = metrics.get("coverage_metrics", {}) if isinstance(metrics, dict) else {}
+    trust = metrics.get("trust_metrics", {}) if isinstance(metrics, dict) else {}
+    success = metrics.get("success_metrics", {}) if isinstance(metrics, dict) else {}
+    burden = metrics.get("human_burden_metrics", {}) if isinstance(metrics, dict) else {}
+    lines = [
+        "# Client Mode Benchmark Summary",
+        "",
+        f"- contract_version: {summary.get('contract_version', '')}",
+        f"- run_mode: {summary.get('run_mode', '')}",
+        f"- input_quality_class: {summary.get('input_quality_class', '')}",
+        f"- delivery_status: {summary.get('delivery_status', '')}",
+        f"- summary_headline: {summary.get('summary_headline', '')}",
+        f"- root_cause: {summary.get('root_cause', '')}",
+        f"- next_best_action: {summary.get('next_best_action', '')}",
+        "",
+        "## Coverage metrics",
+        f"- critical_path_page_hit_rate: {_coerce_float(coverage.get('critical_path_page_hit_rate', 0.0)):.3f}",
+        f"- critical_path_state_hit_rate: {_coerce_float(coverage.get('critical_path_state_hit_rate', 0.0)):.3f}",
+        f"- p0_page_coverage: {_coerce_float(coverage.get('p0_page_coverage', 0.0)):.3f}",
+        f"- p0_state_coverage: {_coerce_float(coverage.get('p0_state_coverage', 0.0)):.3f}",
+        f"- p1_page_coverage: {_coerce_float(coverage.get('p1_page_coverage', 0.0)):.3f}",
+        f"- p1_state_coverage: {_coerce_float(coverage.get('p1_state_coverage', 0.0)):.3f}",
+        "",
+        "## Trust metrics",
+        f"- trusted_mapping_rate: {_coerce_float(trust.get('trusted_mapping_rate', 0.0)):.3f}",
+        f"- provisional_mapping_rate: {_coerce_float(trust.get('provisional_mapping_rate', 0.0)):.3f}",
+        f"- conflicting_mapping_rate: {_coerce_float(trust.get('conflicting_mapping_rate', 0.0)):.3f}",
+        f"- unverified_leakage_rate: {_coerce_float(trust.get('unverified_leakage_rate', 0.0)):.3f}",
+        "",
+        "## Success / throughput metrics",
+        f"- final_delivery_ready_rate: {_coerce_float(success.get('final_delivery_ready_rate', 0.0)):.3f}",
+        f"- fallback_safe_rate: {_coerce_float(success.get('fallback_safe_rate', 0.0)):.3f}",
+        f"- supplement_required_rate: {_coerce_float(success.get('supplement_required_rate', 0.0)):.3f}",
+        f"- blocked_rate: {_coerce_float(success.get('blocked_rate', 0.0)):.3f}",
+        f"- first_pass_final_rate: {_coerce_float(success.get('first_pass_final_rate', 0.0)):.3f}",
+        f"- auto_remediation_lift: {_coerce_float(success.get('auto_remediation_lift', 0.0)):.3f}",
+        f"- salvageable_input_rate: {_coerce_float(success.get('salvageable_input_rate', 0.0)):.3f}",
+        "",
+        "## Human burden metrics",
+        f"- clarification_item_count: {_coerce_int(burden.get('clarification_item_count', 0))}",
+        f"- supplement_request_precision: {_coerce_float(burden.get('supplement_request_precision', 0.0)):.3f}",
+        f"- low_value_work_return_rate: {_coerce_float(burden.get('low_value_work_return_rate', 0.0)):.3f}",
+        "",
+        "## Met metrics",
+    ]
+    met_metrics = _string_list(summary.get("met_metrics"))
+    lines.extend([f"- {item}" for item in met_metrics] or ["- 无"])
+    lines.extend(["", "## Unmet metrics"])
+    unmet_metrics = _string_list(summary.get("unmet_metrics"))
+    lines.extend([f"- {item}" for item in unmet_metrics] or ["- 无"])
+    lines.extend(["", "## Distance to 90%+"])
+    distance = _string_list(summary.get("distance_to_90_plus"))
+    lines.extend([f"- {item}" for item in distance] or ["- 当前已达到或超过关键 90%+ 目标。"])
+    return "\n".join(lines).strip() + "\n"
+
+
+def _write_client_mode_benchmark_summary(
+    *,
+    output_dir: Path,
+    summary: dict[str, Any],
+) -> None:
+    benchmark_dir = output_dir / _BENCHMARK_DIRNAME
+    benchmark_dir.mkdir(parents=True, exist_ok=True)
+    (benchmark_dir / _BENCHMARK_JSON_FILENAME).write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2, default=str),
+        encoding="utf-8",
+    )
+    (benchmark_dir / _BENCHMARK_MD_FILENAME).write_text(
+        _render_client_mode_benchmark_summary(summary),
+        encoding="utf-8",
+    )
+
+
 def _issue_audit_failures(issue: dict[str, Any]) -> list[str]:
     failures: list[str] = []
     if str(issue.get("verification_status", "")).strip() != "verified":
@@ -386,6 +752,12 @@ def _is_key_unverified_issue(issue: dict[str, Any]) -> bool:
     return severity == ""
 
 
+def _gate_metric_list(value: Any) -> list[str]:
+    if isinstance(value, list):
+        return [str(item).strip() for item in value if str(item).strip()]
+    return []
+
+
 def _render_bounded_issue_pass(
     *,
     safe_main_issues: list[dict[str, Any]],
@@ -399,8 +771,37 @@ def _render_bounded_issue_pass(
         f"- qualified_issue_count: {len(safe_main_issues)}",
         f"- demoted_main_issue_count: {len(demoted_main_issues)}",
         "",
-        "## 当前可直接使用的可信主结论",
+        "## Capture Mission pass lines",
     ]
+    for line in _string_list(audited_delivery_assessment.get("fallback_pass_line")):
+        lines.append(f"- fallback: {line}")
+    for line in _string_list(audited_delivery_assessment.get("final_delivery_pass_line")):
+        lines.append(f"- final: {line}")
+    breakdown = audited_delivery_assessment.get("delivery_readiness_breakdown", {})
+    if isinstance(breakdown, dict):
+        lines.extend(
+            [
+                "",
+                "## Delivery readiness breakdown",
+                f"- final_gate_pass: {breakdown.get('final_gate_pass', False)}",
+                f"- fallback_gate_pass: {breakdown.get('fallback_gate_pass', False)}",
+            ]
+        )
+        failing_final = _string_list(breakdown.get("failing_final_gates"))
+        failing_fallback = _string_list(breakdown.get("failing_fallback_gates"))
+        if failing_final:
+            lines.append(f"- failing_final_gates: {' / '.join(failing_final)}")
+        if failing_fallback:
+            lines.append(f"- failing_fallback_gates: {' / '.join(failing_fallback)}")
+        next_best_action = str(breakdown.get("next_best_action", "")).strip()
+        if next_best_action:
+            lines.append(f"- next_best_action: {next_best_action}")
+    lines.extend(
+        [
+            "",
+        "## 当前可直接使用的可信主结论",
+        ]
+    )
     if safe_main_issues:
         for issue in safe_main_issues:
             evidence_refs = ", ".join(_string_list(issue.get("evidence_refs")))
@@ -473,6 +874,10 @@ def _render_supplement_request(
     missing_planned_states = _string_list(coverage_summary.get("missing_planned_states"))
     missing_required_descriptions = _string_list(coverage_summary.get("missing_required_description_pages"))
     naming_issues = _string_list(coverage_summary.get("naming_issues"))
+    fusion_conflicting_paths = _string_list(coverage_summary.get("fusion_conflicting_paths"))
+    fusion_unresolved_paths = _string_list(coverage_summary.get("fusion_unresolved_paths"))
+    critical_path_final_blockers = _string_list(coverage_summary.get("final_delivery_missing_critical_paths"))
+    critical_path_fallback_blockers = _string_list(coverage_summary.get("fallback_missing_critical_paths"))
 
     lines.extend(
         [
@@ -490,6 +895,10 @@ def _render_supplement_request(
         ("missing_description_paths", missing_desc),
         ("missing_ocr_paths", missing_ocr),
         ("naming_issues", naming_issues),
+        ("fusion_conflicting_paths", fusion_conflicting_paths),
+        ("fusion_unresolved_paths", fusion_unresolved_paths),
+        ("final_delivery_missing_critical_paths", critical_path_final_blockers),
+        ("fallback_missing_critical_paths", critical_path_fallback_blockers),
     ]
     any_coverage = False
     for label, values in coverage_items:
@@ -499,6 +908,37 @@ def _render_supplement_request(
         lines.append(f"- {label}: {'；'.join(values[:6])}")
     if not any_coverage:
         lines.append("- 当前没有额外的结构化 coverage gap。")
+
+    lines.extend(["", "## Capture Mission pass lines"])
+    final_pass_line = _string_list(audited_delivery_assessment.get("final_delivery_pass_line"))
+    fallback_pass_line = _string_list(audited_delivery_assessment.get("fallback_pass_line"))
+    if final_pass_line:
+        lines.extend(f"- final: {line}" for line in final_pass_line)
+    if fallback_pass_line:
+        lines.extend(f"- fallback: {line}" for line in fallback_pass_line)
+    if not final_pass_line and not fallback_pass_line:
+        lines.append("- 当前未附带 Capture Mission pass line。")
+
+    breakdown = audited_delivery_assessment.get("delivery_readiness_breakdown", {})
+    if isinstance(breakdown, dict):
+        lines.extend(["", "## Delivery readiness breakdown"])
+        lines.append(f"- final_gate_pass: {breakdown.get('final_gate_pass', False)}")
+        lines.append(f"- fallback_gate_pass: {breakdown.get('fallback_gate_pass', False)}")
+        for gate in breakdown.get("gates", []):
+            if not isinstance(gate, dict):
+                continue
+            gate_name = str(gate.get("gate", "")).strip()
+            final_status = str(gate.get("final_status", "")).strip()
+            fallback_status = str(gate.get("fallback_status", "")).strip()
+            failure_reasons = _string_list(gate.get("failure_reasons"))
+            if not gate_name:
+                continue
+            lines.append(f"- {gate_name}: final={final_status} fallback={fallback_status}")
+            for reason in failure_reasons[:3]:
+                lines.append(f"  - {reason}")
+        next_best_action = str(breakdown.get("next_best_action", "")).strip()
+        if next_best_action:
+            lines.append(f"- next_best_action: {next_best_action}")
 
     lines.extend(["", "## Still-unverified issues"])
     if key_unverified_issues or demoted_main_issues:
@@ -518,6 +958,7 @@ def audit_delivery_readiness(
     unverified_issues: list[dict[str, Any]] | None = None,
     evidence_assessment: dict[str, Any] | None = None,
     delivery_assessment: dict[str, Any] | None = None,
+    capture_mission: dict[str, Any] | None = None,
     output_dir: str | None = None,
     run_id: str | None = None,
     skill_name: str | None = None,
@@ -560,34 +1001,255 @@ def audit_delivery_readiness(
     coverage_summary = evidence.get("coverage_summary", {})
     if not isinstance(coverage_summary, dict):
         coverage_summary = {}
+    mission = capture_mission if isinstance(capture_mission, dict) else {}
+    mission_version = str(
+        mission.get("mission_version")
+        or coverage_summary.get("capture_mission_version")
+        or ""
+    ).strip()
+    mission_path = str(
+        mission.get("mission_doc_path")
+        or coverage_summary.get("capture_mission_path")
+        or ""
+    ).strip()
+    critical_flows = _string_list(
+        mission.get("critical_flows") or coverage_summary.get("critical_flows")
+    )
+    critical_path_coverage = evidence.get("critical_path_coverage_summary", {})
+    if not isinstance(critical_path_coverage, dict):
+        critical_path_coverage = {}
+    capture_order = _string_list(
+        mission.get("capture_order") or coverage_summary.get("capture_order")
+    )
+    final_delivery_pass_line = _string_list(
+        mission.get("final_delivery_pass_line") or coverage_summary.get("final_delivery_pass_line")
+    )
+    fallback_pass_line = _string_list(
+        mission.get("fallback_pass_line") or coverage_summary.get("fallback_pass_line")
+    )
+    fusion_summary = evidence.get("fusion_summary", {})
+    if not isinstance(fusion_summary, dict):
+        fusion_summary = {}
+    trusted_page_mappings = fusion_summary.get("trusted_page_mappings", [])
+    provisional_mappings = fusion_summary.get("provisional_mappings", [])
+    conflicting_groups = fusion_summary.get("conflicting_evidence_groups", [])
+    unresolved_ambiguities = fusion_summary.get("unresolved_ambiguities", [])
+    if not isinstance(trusted_page_mappings, list):
+        trusted_page_mappings = []
+    if not isinstance(provisional_mappings, list):
+        provisional_mappings = []
+    if not isinstance(conflicting_groups, list):
+        conflicting_groups = []
+    if not isinstance(unresolved_ambiguities, list):
+        unresolved_ambiguities = []
+    critical_path_records = critical_path_coverage.get("critical_paths", [])
+    if not isinstance(critical_path_records, list):
+        critical_path_records = []
+    evidence_breakdown = evidence.get("delivery_readiness_breakdown")
+    if not isinstance(evidence_breakdown, dict):
+        evidence_breakdown = coverage_summary.get("delivery_readiness_breakdown", {})
+    if not isinstance(evidence_breakdown, dict):
+        evidence_breakdown = {}
 
     audit_failures: list[str] = []
+    final_critical_path_failures = _string_list(coverage_summary.get("final_delivery_missing_critical_paths"))
+    fallback_critical_path_failures = _string_list(coverage_summary.get("fallback_missing_critical_paths"))
+    clarification_needed_count = int(coverage_summary.get("clarification_needed_count", 0) or 0)
+    clarification_unlocks_final_count = int(
+        coverage_summary.get("clarification_unlocks_final_count", 0) or 0
+    )
+    unresolved_ambiguity_count = int(
+        coverage_summary.get("fusion_unresolved_ambiguity_count", 0) or 0
+    )
+
+    critical_path_gate = {
+        "gate": "critical_path_coverage",
+        "label": "P0/P1 critical path coverage",
+        "required_for_final": True,
+        "required_for_fallback": True,
+        "final_status": "fail" if final_critical_path_failures else "pass",
+        "fallback_status": "fail" if fallback_critical_path_failures else "pass",
+        "failure_reasons": _unique_preserve_order(
+            [
+                *(
+                    [
+                        "critical business path final gate not met: "
+                        + "；".join(final_critical_path_failures[:4])
+                    ]
+                    if final_critical_path_failures
+                    else []
+                ),
+                *(
+                    [
+                        "P0 critical path still blocks bounded fallback: "
+                        + "；".join(fallback_critical_path_failures[:4])
+                    ]
+                    if fallback_critical_path_failures
+                    else []
+                ),
+            ]
+        ),
+        "next_actions": [
+            action
+            for action in evidence_required_actions
+            if "critical path" in action or "P0" in action
+        ][:3],
+        "metrics": {
+            "failing_final_paths": final_critical_path_failures,
+            "failing_fallback_paths": fallback_critical_path_failures,
+            "critical_path_count": len(critical_path_records),
+        },
+    }
+
+    trusted_evidence_final_failures = _string_list(
+        evidence_breakdown.get("failing_final_gates")
+    )
+    if "trusted_evidence_sufficiency" in trusted_evidence_final_failures:
+        trusted_evidence_final_failures = []
     if evidence_delivery_status != "final_delivery_ready":
-        audit_failures.append(
+        trusted_evidence_final_failures.append(
             f"evidence_assessment.delivery_status={evidence_delivery_status}, not final_delivery_ready"
         )
+    if missing_coverage:
+        trusted_evidence_final_failures.append("critical evidence coverage gaps remain unresolved")
+    if _string_list(coverage_summary.get("final_delivery_missing_critical_pages")):
+        trusted_evidence_final_failures.append("Capture Mission final pass line not met: missing critical pages")
+    if _string_list(coverage_summary.get("final_delivery_missing_planned_states")):
+        trusted_evidence_final_failures.append("Capture Mission final pass line not met: missing critical states")
+    if _string_list(coverage_summary.get("final_delivery_missing_required_description_pages")):
+        trusted_evidence_final_failures.append("Capture Mission final pass line not met: missing required descriptions")
+
+    trusted_evidence_fallback_failures: list[str] = []
+    if evidence_delivery_status not in {"final_delivery_ready", "fallback_safe"}:
+        trusted_evidence_fallback_failures.append(
+            f"evidence_assessment.delivery_status={evidence_delivery_status}, below fallback_safe"
+        )
+    if fallback_critical_path_failures:
+        trusted_evidence_fallback_failures.append("fallback critical path pass line not met")
+
+    trusted_evidence_gate = {
+        "gate": "trusted_evidence_sufficiency",
+        "label": "Trusted evidence sufficiency",
+        "required_for_final": True,
+        "required_for_fallback": True,
+        "final_status": "fail" if trusted_evidence_final_failures else "pass",
+        "fallback_status": "fail" if trusted_evidence_fallback_failures else "pass",
+        "failure_reasons": _unique_preserve_order(
+            trusted_evidence_final_failures + trusted_evidence_fallback_failures
+        ),
+        "next_actions": [
+            action
+            for action in evidence_required_actions
+            if "截图" in action or "说明" in action or "状态" in action or "页面" in action
+        ][:4],
+        "metrics": {
+            "final_delivery_page_coverage_ratio": coverage_summary.get("final_delivery_page_coverage_ratio"),
+            "final_delivery_state_coverage_ratio": coverage_summary.get("final_delivery_state_coverage_ratio"),
+            "final_delivery_trusted_mapping_count": coverage_summary.get("final_delivery_trusted_mapping_count"),
+            "readable_ratio": coverage_summary.get("readable_ratio"),
+            "text_rich_ratio": coverage_summary.get("text_rich_ratio"),
+        },
+    }
+
+    clarification_failures: list[str] = []
+    if clarification_needed_count > 0:
+        clarification_failures.append(
+            f"{clarification_needed_count} clarification item(s) still unresolved"
+        )
+    if clarification_unlocks_final_count > 0:
+        clarification_failures.append(
+            f"{clarification_unlocks_final_count} clarification item(s) still block final delivery"
+        )
+    if unresolved_ambiguity_count > 0:
+        clarification_failures.append(
+            f"{unresolved_ambiguity_count} unresolved ambiguity group(s) still remain"
+        )
+    clarification_gate = {
+        "gate": "clarification_residue",
+        "label": "Clarification residue",
+        "required_for_final": True,
+        "required_for_fallback": False,
+        "final_status": "fail" if clarification_failures else "pass",
+        "fallback_status": "pass",
+        "failure_reasons": clarification_failures,
+        "next_actions": [
+            action
+            for action in evidence_required_actions
+            if "歧义截图" in action or "确认" in action
+        ][:2],
+        "metrics": {
+            "clarification_needed_count": clarification_needed_count,
+            "clarification_unlocks_final_count": clarification_unlocks_final_count,
+            "unresolved_ambiguity_count": unresolved_ambiguity_count,
+            "clarification_paths": _string_list(coverage_summary.get("clarification_relative_paths")),
+        },
+    }
+
+    issue_qualification_failures: list[str] = []
+    if not safe_main_issues:
+        issue_qualification_failures.append("no qualified issue left for the final main list")
     if demoted_main_issues:
-        audit_failures.append(
+        issue_qualification_failures.append(
             f"{len(demoted_main_issues)} main-list issue(s) failed deterministic verification"
         )
     if key_unverified:
-        audit_failures.append(
+        issue_qualification_failures.append(
             f"{len(key_unverified)} key unverified issue(s) still affect the main conclusion"
         )
-    if missing_coverage:
-        audit_failures.append("critical evidence coverage gaps remain unresolved")
+    issue_qualification_gate = {
+        "gate": "issue_qualification",
+        "label": "Issue-level qualification",
+        "required_for_final": True,
+        "required_for_fallback": True,
+        "final_status": "fail" if issue_qualification_failures else "pass",
+        "fallback_status": "pass" if safe_main_issues else "fail",
+        "failure_reasons": issue_qualification_failures,
+        "next_actions": demoted_actions[:4],
+        "metrics": {
+            "main_issue_count": len(issues),
+            "qualified_issue_count": len(safe_main_issues),
+            "demoted_main_issue_count": len(demoted_main_issues),
+            "key_unverified_issue_count": len(key_unverified),
+        },
+    }
 
-    final_delivery_ready = bool(safe_main_issues) and not audit_failures
-    fallback_safe = False
-    audited_status = "final_delivery_ready"
-    if not final_delivery_ready:
-        if evidence_delivery_status in {"final_delivery_ready", "fallback_safe"} and safe_main_issues:
-            audited_status = "fallback_safe"
-            fallback_safe = True
-        elif evidence_delivery_status == "blocked":
-            audited_status = "blocked"
-        else:
-            audited_status = "supplement_required"
+    gates = [
+        critical_path_gate,
+        trusted_evidence_gate,
+        clarification_gate,
+        issue_qualification_gate,
+    ]
+    failing_final_gates = [
+        str(gate["gate"])
+        for gate in gates
+        if gate["required_for_final"] and gate["final_status"] != "pass"
+    ]
+    failing_fallback_gates = [
+        str(gate["gate"])
+        for gate in gates
+        if gate["required_for_fallback"] and gate["fallback_status"] != "pass"
+    ]
+
+    final_delivery_ready = not failing_final_gates
+    fallback_gate_pass = not failing_fallback_gates and bool(safe_main_issues)
+    if final_delivery_ready:
+        audited_status = "final_delivery_ready"
+    elif fallback_gate_pass:
+        audited_status = "fallback_safe"
+    elif evidence_delivery_status == "blocked":
+        audited_status = "blocked"
+    else:
+        audited_status = "supplement_required"
+    fallback_safe = audited_status == "fallback_safe"
+
+    gate_failure_reasons = _unique_preserve_order(
+        [
+            reason
+            for gate in gates
+            for reason in _string_list(gate.get("failure_reasons"))
+        ]
+    )
+    audit_failures.extend(gate_failure_reasons)
 
     required_actions = _unique_preserve_order(
         evidence_required_actions + demoted_actions
@@ -648,10 +1310,51 @@ def audit_delivery_readiness(
             "missing_critical_pages": _string_list(coverage_summary.get("missing_critical_pages")),
             "missing_planned_states": _string_list(coverage_summary.get("missing_planned_states")),
             "missing_required_description_pages": _string_list(coverage_summary.get("missing_required_description_pages")),
+            "final_delivery_missing_critical_paths": final_critical_path_failures,
+            "fallback_missing_critical_paths": fallback_critical_path_failures,
             "naming_issues": _string_list(coverage_summary.get("naming_issues")),
             "low_readability_paths": _string_list(coverage_summary.get("low_readability_paths")),
             "missing_description_paths": _string_list(coverage_summary.get("missing_description_paths")),
             "missing_ocr_paths": _string_list(coverage_summary.get("missing_ocr_paths")),
+            "fusion_conflicting_paths": [
+                str(item.get("relative_path", "")).strip()
+                for item in conflicting_groups
+                if isinstance(item, dict) and str(item.get("relative_path", "")).strip()
+            ],
+            "fusion_unresolved_paths": [
+                str(item.get("relative_path", "")).strip()
+                for item in unresolved_ambiguities
+                if isinstance(item, dict) and str(item.get("relative_path", "")).strip()
+            ],
+        },
+        "capture_mission_version": mission_version or None,
+        "capture_mission_path": mission_path or None,
+        "critical_flows": critical_flows,
+        "capture_order": capture_order,
+        "final_delivery_pass_line": final_delivery_pass_line,
+        "fallback_pass_line": fallback_pass_line,
+        "critical_path_coverage_summary": {
+            "critical_path_count": len(critical_path_records),
+            "failing_final_paths": _string_list(critical_path_coverage.get("failing_final_paths")),
+            "failing_fallback_paths": _string_list(critical_path_coverage.get("failing_fallback_paths")),
+        },
+        "fusion_summary": {
+            "trusted_page_mapping_count": len(trusted_page_mappings),
+            "provisional_mapping_count": len(provisional_mappings),
+            "conflict_count": len(conflicting_groups),
+            "unresolved_ambiguity_count": len(unresolved_ambiguities),
+        },
+        "delivery_readiness_breakdown": {
+            "contract_version": "2026-05-26",
+            "overall_status": audited_status,
+            "final_gate_pass": final_delivery_ready,
+            "fallback_gate_pass": fallback_gate_pass,
+            "normal_mode_target": "90%+ critical coverage with 99%-100% confidence",
+            "fallback_target": "85%+ bounded confidence without pretending to be final",
+            "failing_final_gates": failing_final_gates,
+            "failing_fallback_gates": failing_fallback_gates,
+            "next_best_action": required_actions[0] if required_actions else "",
+            "gates": gates,
         },
         "run_id": run_id,
         "skill_name": skill_name,
@@ -692,6 +1395,26 @@ def audit_delivery_readiness(
         encoding="utf-8",
     )
 
+    benchmark_summary = _build_client_mode_benchmark_summary(
+        output_dir=Path(output_dir),
+        bundle_dir=bundle_dir,
+        issues=issues,
+        demoted_main_issues=demoted_main_issues,
+        key_unverified_issues=key_unverified,
+        evidence_assessment=evidence,
+        audited_delivery_assessment=audited_delivery_assessment,
+    )
+    _write_client_mode_benchmark_summary(
+        output_dir=Path(output_dir),
+        summary=benchmark_summary,
+    )
+    audited_delivery_assessment["client_mode_metrics"] = benchmark_summary["metrics"]
+    audited_delivery_assessment["benchmark_summary"] = benchmark_summary
+    audited_assessment_path.write_text(
+        json.dumps(audited_delivery_assessment, ensure_ascii=False, indent=2, default=str),
+        encoding="utf-8",
+    )
+
     audit_manifest = {
         "generated_at": datetime.now(UTC).isoformat(),
         "delivery_status": audited_status,
@@ -703,6 +1426,8 @@ def audit_delivery_readiness(
             "unverified_issues.json",
             "supplement_request.md",
             "audited_delivery_assessment.json",
+            "../benchmark/client_mode_benchmark_summary.json",
+            "../benchmark/client_mode_benchmark_summary.md",
         ],
     }
     (bundle_dir / "manifest.json").write_text(
@@ -712,6 +1437,7 @@ def audit_delivery_readiness(
 
     return {
         "audited_delivery_assessment": audited_delivery_assessment,
+        "client_mode_benchmark_summary": benchmark_summary,
         "delivery_audit_bundle": _artifact_payload(
             artifact_id="delivery_audit_bundle",
             output_type="delivery_audit_bundle",

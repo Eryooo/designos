@@ -83,7 +83,7 @@ stages:
     mcp_server: image-analyzer
     mcp_tool: plan_required_evidence
     inputs: [modules, key_features, task_checklist_lite, journey_map, journey_stages, screenshots_dir]
-    outputs: [required_evidence_plan, critical_page_requirements, critical_state_requirements, evidence_input_guidance]
+    outputs: [capture_mission, required_evidence_plan, critical_page_requirements, critical_state_requirements, evidence_input_guidance]
 
   # ────────────────────────────────────────────────────────────
   # Stage 5a: 评估脚本生成（仅 web 模式）
@@ -176,7 +176,7 @@ stages:
     type: tool
     mcp_server: excel-builder
     mcp_tool: audit_delivery_readiness
-    inputs: [issues, unverified_issues, evidence_assessment, delivery_assessment]
+    inputs: [issues, unverified_issues, evidence_assessment, delivery_assessment, capture_mission]
     outputs: [audited_delivery_assessment, delivery_audit_bundle]
 
   # ────────────────────────────────────────────────────────────

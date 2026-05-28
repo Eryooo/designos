@@ -375,6 +375,7 @@ def _make_proactive_planning_skill(workspace: Path, name: str) -> None:
                             "screenshots_dir",
                         ],
                         "outputs": [
+                            "capture_mission",
                             "required_evidence_plan",
                             "critical_page_requirements",
                             "critical_state_requirements",
@@ -417,7 +418,7 @@ def _make_proactive_planning_skill(workspace: Path, name: str) -> None:
                         "type": "tool",
                         "mcp_server": "excel-builder",
                         "mcp_tool": "audit_delivery_readiness",
-                        "inputs": ["issues", "unverified_issues", "evidence_assessment", "delivery_assessment"],
+                        "inputs": ["issues", "unverified_issues", "evidence_assessment", "delivery_assessment", "capture_mission"],
                         "outputs": ["audited_delivery_assessment", "delivery_audit_bundle"],
                     },
                     {
@@ -497,7 +498,7 @@ def _make_audited_delivery_skill(workspace: Path, name: str) -> None:
                         "type": "tool",
                         "mcp_server": "excel-builder",
                         "mcp_tool": "audit_delivery_readiness",
-                        "inputs": ["issues", "unverified_issues", "evidence_assessment", "delivery_assessment"],
+                        "inputs": ["issues", "unverified_issues", "evidence_assessment", "delivery_assessment", "capture_mission"],
                         "outputs": ["audited_delivery_assessment", "delivery_audit_bundle"],
                     },
                     {
@@ -1161,8 +1162,7 @@ def test_client_auto_remediation_can_complete_without_user_pause(tmp_path: Path)
     manifest = yaml.safe_load((run_dir / "run.yaml").read_text(encoding="utf-8"))
     assert manifest["status"] == "completed"
     remediation_dir = run_dir / "outputs" / "evidence-remediation" / "generated-notes"
-    assert remediation_dir.is_dir()
-    assert len(list(remediation_dir.glob("*.md"))) == 5
+    assert not remediation_dir.exists()
 
 
 @pytest.mark.e2e
