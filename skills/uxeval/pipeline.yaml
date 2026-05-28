@@ -103,9 +103,9 @@ stages:
     type: tool
     only_when: mode == "web"
     mcp_server: playwright-driver
-    mcp_tool: run_evaluation
+    mcp_tool: execute_batch
     inputs: [evaluation_script]
-    outputs: [screenshots, dom_data, automated_eval_trace]
+    outputs: [screenshots, dom_data, detection_request, execution_summary]
     retry:
       max_attempts: 2
       backoff_seconds: 5.0

@@ -151,6 +151,9 @@ def _handle_execute_batch(args: dict) -> dict:
     total_steps = sum(r.steps_total for r in all_results)
     total_succeeded = sum(r.steps_succeeded for r in all_results)
 
+    screenshots = detection_request.get("screenshots", [])
+    dom_data = detection_request.get("dom_data")
+
     return {
         "execution_summary": {
             "tasks_executed": len(scripts_data),
@@ -160,8 +163,10 @@ def _handle_execute_batch(args: dict) -> dict:
             "steps_failed": total_steps - total_succeeded,
             "coverage_pct": round(total_succeeded / total_steps * 100, 1) if total_steps else 0,
         },
-        "results": [r.model_dump() for r in all_results],
+        "screenshots": screenshots,
+        "dom_data": dom_data,
         "detection_request": detection_request,
+        "results": [r.model_dump() for r in all_results],
     }
 
 

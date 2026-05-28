@@ -30,7 +30,7 @@ modes:
   - id: web
     label: "Web 应用（Playwright 自动化采集）"
     requires:
-      env: [APP_BASE_URL, APP_USERNAME, APP_PASSWORD]
+      env: [APP_BASE_URL]
   - id: client
     label: "客户端应用（人工提交截图）"
     requires:
