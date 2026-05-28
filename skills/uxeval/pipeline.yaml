@@ -130,10 +130,11 @@ stages:
     outputs: [screenshots, image_analysis, evidence_assessment]
 
   # ────────────────────────────────────────────────────────────
-  # Stage 5.5: PRD-截图冲突分析
+  # Stage 5.5: PRD-截图冲突分析（仅 client 模式需要）
   # ────────────────────────────────────────────────────────────
   - id: prd-screenshot-conflict
     type: llm
+    only_when: mode == "client"
     gate:
       when: evidence_assessment.delivery_status == "blocked"
       action: pause
@@ -175,6 +176,7 @@ stages:
   # ────────────────────────────────────────────────────────────
   - id: delivery-audit
     type: tool
+    only_when: mode == "client"
     mcp_server: excel-builder
     mcp_tool: audit_delivery_readiness
     inputs: [issues, unverified_issues, evidence_assessment, delivery_assessment, capture_mission]
@@ -187,6 +189,7 @@ stages:
     type: tool
     gate:
       when: audited_delivery_assessment.delivery_status != "final_delivery_ready"
+      only_when: mode == "client"
       action: pause
       checkpoint_id: QG3
       message: "当前运行时审计尚未通过最终报告交付门槛，请先查看 bounded fallback package 并按补料清单处理。"
