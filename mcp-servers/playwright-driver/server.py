@@ -119,7 +119,17 @@ def _handle_execute_batch(args: dict) -> dict:
     from heuristic_adapter import build_detection_request
     from retry_planner import RetryPlanner
 
-    scripts_data = args["scripts"]
+    # Accept both formats: direct 'scripts' list or 'evaluation_script' from pipeline
+    if "scripts" in args:
+        scripts_data = args["scripts"]
+    elif "evaluation_script" in args:
+        raw = args["evaluation_script"]
+        if isinstance(raw, str):
+            raw = json.loads(raw)
+        scripts_data = raw.get("evaluation_scripts", [])
+    else:
+        raise ValueError("Missing 'scripts' or 'evaluation_script' in arguments")
+
     output_dir = args.get("output_dir")
     max_retries = args.get("max_retries", 2)
 
