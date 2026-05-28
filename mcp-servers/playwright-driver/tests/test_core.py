@@ -125,7 +125,7 @@ class TestServer:
 
         result = handle_request("tools/list", None)
         assert "tools" in result
-        assert len(result["tools"]) == 11
+        assert len(result["tools"]) == 12
 
     def test_handle_unknown_method(self):
         from server import handle_request

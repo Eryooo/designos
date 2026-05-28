@@ -147,15 +147,22 @@ class BrowserManager:
             """(sel) => {
                 const el = document.querySelector(sel);
                 if (!el) return {error: 'not found'};
-                const items = el.querySelectorAll('a, button, input, select, [role]');
+                const items = el.querySelectorAll('a, button, input, select, textarea, [role], label, h1, h2, h3');
                 return {
                     text: el.innerText.slice(0, 2000),
-                    elements: Array.from(items).slice(0, 100).map(e => ({
+                    elements: Array.from(items).slice(0, 150).map(e => ({
                         tag: e.tagName.toLowerCase(),
                         text: (e.innerText || e.value || '').slice(0, 80),
-                        role: e.getAttribute('role'),
-                        href: e.getAttribute('href'),
-                        type: e.getAttribute('type'),
+                        role: e.getAttribute('role') || '',
+                        href: e.getAttribute('href') || '',
+                        type: e.getAttribute('type') || '',
+                        placeholder: e.getAttribute('placeholder') || '',
+                        aria_label: e.getAttribute('aria-label') || '',
+                        classes: Array.from(e.classList).slice(0, 5),
+                        name: e.getAttribute('name') || '',
+                        id: e.getAttribute('id') || '',
+                        disabled: e.disabled || false,
+                        required: e.required || false,
                     }))
                 };
             }""",

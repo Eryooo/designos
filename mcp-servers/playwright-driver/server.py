@@ -114,6 +114,57 @@ def _handle_extract_dom(args: dict) -> dict:
     return _browser.extract_dom(args.get("selector", "body"))
 
 
+def _handle_execute_batch(args: dict) -> dict:
+    """Execute multiple evaluation scripts in sequence, return combined results."""
+    from heuristic_adapter import build_detection_request
+    from retry_planner import RetryPlanner
+
+    scripts_data = args["scripts"]
+    output_dir = args.get("output_dir")
+    max_retries = args.get("max_retries", 2)
+
+    planner = RetryPlanner()
+    all_results = []
+
+    for script_data in scripts_data:
+        steps = [ScriptStep(**s) for s in script_data["steps"]]
+        script = EvaluationScript(
+            task_id=script_data["task_id"],
+            task_title=script_data["task_title"],
+            steps=steps,
+        )
+        executor = ScriptExecutor(_browser, output_dir=output_dir)
+        result = executor.execute(script)
+        all_results.append(result)
+
+        retries = 0
+        while planner.needs_retry(result) and retries < max_retries:
+            retry_script = planner.plan_retry(script, result)
+            if retry_script is None:
+                break
+            result = executor.execute(retry_script)
+            all_results.append(result)
+            retries += 1
+
+    detection_request = build_detection_request(all_results)
+
+    total_steps = sum(r.steps_total for r in all_results)
+    total_succeeded = sum(r.steps_succeeded for r in all_results)
+
+    return {
+        "execution_summary": {
+            "tasks_executed": len(scripts_data),
+            "total_results": len(all_results),
+            "steps_total": total_steps,
+            "steps_succeeded": total_succeeded,
+            "steps_failed": total_steps - total_succeeded,
+            "coverage_pct": round(total_succeeded / total_steps * 100, 1) if total_steps else 0,
+        },
+        "results": [r.model_dump() for r in all_results],
+        "detection_request": detection_request,
+    }
+
+
 _TOOL_HANDLERS = {
     "browser_launch": _handle_browser_launch,
     "browser_close": _handle_browser_close,
@@ -123,6 +174,7 @@ _TOOL_HANDLERS = {
     "capture_screenshot": _handle_screenshot,
     "get_page_state": _handle_get_page_state,
     "execute_script": _handle_execute_script,
+    "execute_batch": _handle_execute_batch,
     "switch_page": _handle_switch_page,
     "switch_frame": _handle_switch_frame,
     "extract_dom": _handle_extract_dom,
@@ -242,6 +294,19 @@ def _tool_definitions() -> list[dict]:
                 "properties": {
                     "selector": {"type": "string", "default": "body"},
                 },
+            },
+        },
+        {
+            "name": "execute_batch",
+            "description": "Execute multiple evaluation scripts with auto-retry, return combined evidence + detection request.",
+            "inputSchema": {
+                "type": "object",
+                "properties": {
+                    "scripts": {"type": "array", "items": {"type": "object"}, "description": "List of EvaluationScript JSON objects"},
+                    "output_dir": {"type": "string"},
+                    "max_retries": {"type": "integer", "default": 2},
+                },
+                "required": ["scripts"],
             },
         },
     ]

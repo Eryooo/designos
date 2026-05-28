@@ -87,10 +87,10 @@ def _build_dom_snapshot(screenshot_id: str, ev: StepEvidence) -> dict[str, Any]:
             "tag": tag,
             "role": role,
             "text": text[:200],
-            "placeholder": "",
-            "aria_label": "",
-            "classes": [],
-            "attrs": {k: v for k, v in el.items() if k not in ("tag", "text", "role")},
+            "placeholder": el.get("placeholder", ""),
+            "aria_label": el.get("aria_label", ""),
+            "classes": el.get("classes", []),
+            "attrs": {k: v for k, v in el.items() if k not in ("tag", "text", "role", "placeholder", "aria_label", "classes")},
         })
 
     return {
