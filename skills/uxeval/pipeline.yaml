@@ -154,6 +154,7 @@ stages:
     type: llm
     gate:
       when: evidence_assessment.delivery_status in ["blocked", "supplement_required"]
+      only_when: mode == "client"
       action: pause
       checkpoint_id: QG2
       message: "当前截图证据尚未达到最终问题归因质量门槛，请先补资料再继续。"
@@ -161,7 +162,7 @@ stages:
       required_actions_from: evidence_assessment.required_actions
       resume_from_stage: screenshot-loading
     prompt: prompts/06-issue-attribution.md
-    inputs: [screenshots, image_analysis, evidence_assessment, prd_screenshot_conflicts, journey_map, journey_stages, principles, task_checklist_full, competitive_context]
+    inputs: [screenshots, image_analysis, evidence_assessment, prd_screenshot_conflicts, journey_map, journey_stages, principles, task_checklist_full, competitive_context, dom_data, detection_request]
     outputs: [raw_issues, issues, unverified_issues, delivery_assessment]
     knowledge: [reference/m06-问题归因.md]
     checkpoint:
