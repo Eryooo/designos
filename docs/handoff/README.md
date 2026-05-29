@@ -15,7 +15,10 @@
 7. `../releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json`
 8. `../releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md`
 9. `../releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md`
-10. `/Users/young/Documents/Codex/Agent-design-webmode/CLAUDE_HANDOFF_START.md`
+10. `next-skills/01-six-skills-deep-analysis.md`
+11. `next-skills/02-ADR-003-skill-matrix-convergence-and-groups.md`
+12. `next-skills/04-output-types.md`
+13. `/Users/young/Documents/Codex/Agent-design-webmode/CLAUDE_HANDOFF_START.md`
 
 ## 目录说明
 
@@ -24,6 +27,7 @@
 - `history/`：项目修复总章程、审计、修复批次历史
 - `evaluation/`：现有 client mode / benchmark / 审计结论
 - `execution/`：Claude 交接包、严格说明、主启动提示词
+- `next-skills/`：后续 6 个 skills 的矩阵、边界、产物契约、prd2proto 关键语义
 
 ## 使用原则
 
