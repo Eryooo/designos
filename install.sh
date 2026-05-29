@@ -16,7 +16,7 @@ set -euo pipefail
 #   - Cursor (IDE)      → ~/.cursor/skills-cursor/
 #   - WorkBuddy (IDE)   → ~/.workbuddy/skills/
 
-VERSION="0.2.0"
+VERSION="0.5.0a1"
 REPO="Eryooo/designos"
 BRANCH="main"
 
