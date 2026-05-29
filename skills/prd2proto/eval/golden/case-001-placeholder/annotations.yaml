@@ -1,0 +1,4 @@
+# Placeholder golden case annotations.
+case_id: case-001-placeholder
+summary: replace with the real golden-case summary
+expected_outcomes: []

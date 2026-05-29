@@ -1,0 +1,156 @@
+name: prd2proto-pipeline
+
+description: |
+  prd2proto Pipeline — PRD → 可交互前端代码。
+  按"理解 → 分析 → 规范 / DSL → 代码 → 审查"组织 stages。
+  支持 pm / designer-spec / designer-dsl 三种保真度档位。
+
+mode_prompt:
+  question: "选择保真度："
+  options:
+    - id: pm
+      label: "PM 模式（PRD → 低保真演示原型）"
+    - id: designer-spec
+      label: "设计师模式（PRD + design-spec.md → 高保真原型）"
+    - id: designer-dsl
+      label: "设计师生产模式（DSL + 组件库 → 生产代码）"
+
+upstream_refs:
+  - skill: ai-analytics
+    output_type: design_strategy
+    inject_as: design_strategy
+    required: false
+  - skill: ai-analytics
+    output_type: user_persona
+    inject_as: existing_personas
+    required: false
+
+stages:
+  # ────────────────────────────────────────────────────────────
+  # Stage 1: PRD 结构化理解
+  # ────────────────────────────────────────────────────────────
+  - id: prd-understanding
+    type: llm
+    prompt: prompts/01-prd-understanding.md
+    inputs: [prd_file, scope_md, existing_personas, design_strategy]
+    outputs: [modules, key_features, pages, user_flows, business_goal]
+    knowledge: [reference/m01-prd-understanding.md]
+    retry:
+      max_attempts: 2
+      backoff_seconds: 2.0
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 2: 设计分析（信息架构 + 组件需求）+ Checkpoint C1
+  # ────────────────────────────────────────────────────────────
+  - id: design-analysis
+    type: llm
+    prompt: prompts/02-design-analysis.md
+    inputs: [modules, key_features, pages, user_flows]
+    outputs: [information_architecture, component_spec, design_analysis_md]
+    knowledge: [reference/m02-design-analysis.md]
+    checkpoint:
+      id: C1
+      message: "请确认信息架构 / 页面拓扑 / 组件需求是否合理。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 3a: design-spec.md 生成（仅 designer-spec 模式）
+  # ────────────────────────────────────────────────────────────
+  - id: spec-generation
+    type: llm
+    only_when: mode == "designer-spec"
+    prompt: prompts/03a-spec-generation.md
+    inputs: [information_architecture, component_spec, design_analysis_md]
+    outputs: [design_spec_md]
+    knowledge: [reference/m03a-spec-generation.md]
+    checkpoint:
+      id: C2
+      message: "请审阅生成的 design-spec.md（颜色 / 字号 / 间距 / 组件规范）。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 3b: DSL 抓取（仅 designer-dsl 模式）
+  # ────────────────────────────────────────────────────────────
+  - id: dsl-fetch
+    type: tool
+    only_when: mode == "designer-dsl"
+    mcp_server: frontend-codegen
+    mcp_tool: fetch_dsl
+    inputs: [dsl_file]
+    outputs: [dsl_tree]
+    retry:
+      max_attempts: 3
+      backoff_seconds: 3.0
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 4: Token 提取（designer-spec / designer-dsl）+ Checkpoint C3
+  # ────────────────────────────────────────────────────────────
+  - id: token-extraction
+    type: tool
+    only_when: mode != "pm"
+    mcp_server: frontend-codegen
+    mcp_tool: extract_tokens
+    inputs: [dsl_tree, design_spec_md]
+    outputs: [design_tokens]
+    checkpoint:
+      id: C3
+      message: "请审阅提取的 Design Tokens（颜色 / 字号 / 间距 / 圆角 / 阴影）。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 4.5: 组件映射（仅 designer-dsl 模式）
+  # ────────────────────────────────────────────────────────────
+  - id: component-mapping
+    type: tool
+    only_when: mode == "designer-dsl"
+    mcp_server: frontend-codegen
+    mcp_tool: map_components
+    inputs: [dsl_tree, component_lib_ref]
+    outputs: [component_mapping]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 5: 代码生成
+  # ────────────────────────────────────────────────────────────
+  - id: code-generation
+    type: tool
+    mcp_server: frontend-codegen
+    mcp_tool: generate_code
+    inputs: [dsl_tree, design_tokens, component_mapping, information_architecture, component_spec]
+    outputs: [prototype_code, frontend_code, code_generation_summary]
+    retry:
+      max_attempts: 2
+      backoff_seconds: 5.0
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 6: 代码审查 + Checkpoint C4 + Gate QG_REVIEW
+  # ────────────────────────────────────────────────────────────
+  - id: review-gate
+    type: llm
+    prompt: prompts/06-review-gate.md
+    inputs: [prototype_code, frontend_code, design_tokens, component_mapping, code_generation_summary]
+    outputs: [review_report, constitution_violations, fidelity_score]
+    knowledge: [reference/m06-review-gate.md]
+    gate:
+      when: constitution_violations.count > 0
+      action: pause
+      checkpoint_id: QG_REVIEW
+      message: "代码审查发现违反代码宪法的项，请查看 review_report 并决定继续 / 修改 / 重新生成。"
+      status_reason_from: constitution_violations.summary
+      required_actions_from: constitution_violations.required_actions
+      resume_from_stage: code-generation
+    checkpoint:
+      id: C4
+      message: "请审阅生成的代码 + 4 条宪法的审查报告。"
+      allow: [continue, modify, supplement]
+
+memory:
+  read:
+    - "organization.prd2proto.golden_samples"
+    - "organization.prd2proto.failure_cases"
+    - "organization.prd2proto.design_token_library"
+    - "organization.prd2proto.component_library"
+  write:
+    - "project.prd2proto.{run_id}"
+    - "project.prd2proto.{run_id}.checkpoint_decisions"
+
+constitution: constitution.md

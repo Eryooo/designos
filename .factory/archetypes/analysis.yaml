@@ -1,0 +1,167 @@
+# Analysis Archetype — provisional spec
+#
+# ⚠️ STATUS: PROVISIONAL. Not extracted from a real implementation.
+# ⚠️ This is a planning placeholder so scaffold can produce ai-analytics
+#    skeletons before the real ai-analytics business logic is implemented.
+# ⚠️ Once ai-analytics ships, run `extract.py skills/ai-analytics` and
+#    diff against this file. Reconcile differences and remove the
+#    "provisional" label.
+#
+# Sources for this provisional spec:
+#   - docs/handoff/next-skills/01-six-skills-deep-analysis.md §6 (AI-Analytics)
+#   - ADR-003 (skill matrix)
+#   - kernel.contracts.enums.OutputType (the 4 analysis output types)
+#
+# Schema: .factory/archetypes/archetype_schema.py :: ArchetypeSpec
+
+name: analysis
+version: 0.1.0-provisional
+description: |
+  Skills that produce structured analysis reports + upstream products consumed
+  by other skills (uxeval, prd2proto, ip-design, brand-creative). Output is
+  "what we found about a competitor / market / user segment" — not issues
+  (evaluation) and not code (generation).
+
+  PROVISIONAL: extracted from product spec, not from a real implementation.
+  Treat as the seed spec for scaffold; reconcile after ai-analytics ships.
+representative_skill: ai-analytics
+
+# ─────────────────────────────────────────────────────────────────────
+# Frontmatter expectations (same baseline as other archetypes)
+# ─────────────────────────────────────────────────────────────────────
+frontmatter:
+  required_keys:
+    - name
+    - version
+    - type
+    - description
+    - requires
+    - outputs
+  required_kernel_range: ">=1.0.0,<2.0.0"
+  skill_type: pipeline
+
+# ─────────────────────────────────────────────────────────────────────
+# Required outputs — ai-analytics 4 canonical products
+# ─────────────────────────────────────────────────────────────────────
+outputs:
+  required:
+    - analysis_report
+    - design_strategy
+    - comparison_matrix
+    - user_persona
+  optional:
+    - heuristic_checklist
+    - evidence_pack
+
+# ─────────────────────────────────────────────────────────────────────
+# Stage slots — 5 段方法论：需求 → 采集 → 分析 → 策略 → 报告
+# (provisional; refine after ai-analytics ships)
+# ─────────────────────────────────────────────────────────────────────
+stage_slots:
+  - slot_id: requirement_understanding
+    purpose: "Understand the analysis brief and target market/competitor scope."
+    stage_type: llm
+    required: true
+    required_inputs: [scope_md]
+
+  - slot_id: data_collection
+    purpose: "Capture competitor data (URLs, screenshots, screenshots, public docs)."
+    stage_type: tool
+    required: true
+
+  - slot_id: methodology_selection
+    purpose: "Pick analysis methodologies (PEST/SWOT/KANO/AIPL/USO) per scenario."
+    stage_type: llm
+    required: true
+    required_outputs: [methodologies]
+
+  - slot_id: analysis
+    purpose: "Apply chosen methodologies to collected data."
+    stage_type: llm
+    required: true
+    required_outputs: [analysis_findings]
+
+  - slot_id: strategy_synthesis
+    purpose: "Synthesize design strategy + user persona from analysis."
+    stage_type: llm
+    required: true
+    required_outputs: [design_strategy, user_persona, data_completeness_assessment]
+
+  - slot_id: report_generation
+    purpose: "Render the analysis report + comparison matrix."
+    stage_type: tool
+    required: true
+    required_outputs: [analysis_report, comparison_matrix]
+
+# ─────────────────────────────────────────────────────────────────────
+# Checkpoint slots — 推断 C1/C2 (要求确认采集范围 + 方法论选择)
+# (provisional)
+# ─────────────────────────────────────────────────────────────────────
+checkpoint_slots:
+  - checkpoint_id: C1
+    after_slot: data_collection
+    purpose: "User confirms collected competitor scope is representative."
+    required: true
+
+  - checkpoint_id: C2
+    after_slot: methodology_selection
+    purpose: "User confirms chosen methodologies fit the brief."
+    required: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Gate slots — analysis 不强制 audit gate（vs evaluation 必有）
+# 但 strategy_synthesis 应有数据完整度 gate
+# (provisional)
+# ─────────────────────────────────────────────────────────────────────
+gate_slots:
+  - gate_id: QG1
+    on_slot: strategy_synthesis
+    purpose: "Block strategy when collected data coverage is insufficient."
+    required: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Mode semantics — analysis 的 mode 是数据来源（暂未启用）
+# ─────────────────────────────────────────────────────────────────────
+mode_semantics:
+  semantic_type: data_source
+  allowed_modes: []
+  must_be_single_mode: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Evidence contract — analysis 要求数据完整度但不要求 evidence trustworthy
+# 阈值通过 strategy_synthesis 的 gate 控制
+# ─────────────────────────────────────────────────────────────────────
+evidence_contract:
+  required_fields:
+    - data_completeness_assessment
+  trusted_evidence_threshold: 0.85
+  fallback_evidence_threshold: 0.70
+
+# ─────────────────────────────────────────────────────────────────────
+# Delivery contract — 复用四态语义
+# ─────────────────────────────────────────────────────────────────────
+delivery_contract:
+  required_states:
+    - final_delivery_ready
+    - fallback_safe
+    - supplement_required
+    - blocked
+
+# ─────────────────────────────────────────────────────────────────────
+# Directory expectations — 与 evaluation 一致
+# ─────────────────────────────────────────────────────────────────────
+directory:
+  required_directories:
+    - prompts
+    - reference
+    - templates
+    - eval
+    - tests
+  required_files:
+    - SKILL.md
+    - pipeline.yaml
+    - constitution.md
+    - README.md
+  eval_layout: true
+
+constitution_required: true
