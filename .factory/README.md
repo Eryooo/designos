@@ -12,7 +12,7 @@
 
 ---
 
-## 当前状态（Wave 1 已完成）
+## 当前状态（Wave 1 + Wave 2 已完成）
 
 | 组件 | 状态 | 说明 |
 |---|---|---|
@@ -21,11 +21,18 @@
 | `archetypes/archetype_schema.py` | ✅ | "什么是 archetype" 的 Pydantic 定义 |
 | `archetypes/loader.py` | ✅ | 加载并校验 archetype yaml |
 | `archetypes/evaluation.yaml` | ✅ | 从 uxeval 萃取的 evaluation 契约 |
-| `tools/extract.py` | ⏳ Wave 2 | 反向萃取 archetype |
-| `tools/validate.py` | ⏳ Wave 2 | 校验 skill 是否符合 archetype |
-| `tools/scaffold.py` | ⏳ Wave 2 | 一键装配新 skill 骨架 |
+| `archetypes/generation.yaml` | ✅ | 从 prd2proto 萃取的 generation 契约 |
+| `archetypes/analysis.yaml` | ✅ pilot | 从 ai-analytics A1 校准的 analysis 契约(已去 provisional) |
+| `tools/extract.py` | ✅ | 反向萃取 archetype |
+| `tools/validate.py` | ✅ | 校验 skill 是否符合 archetype |
+| `tools/scaffold.py` | ✅ | 一键装配新 skill 骨架 |
 
 测试基线：`9/9` 工厂回归 + `180/180` kernel 单元测试零回归。
+
+**archetype 校准状态**:
+- `evaluation.yaml`:从 uxeval 萃取,已稳定。
+- `generation.yaml`:从 prd2proto 萃取,已稳定。
+- `analysis.yaml`:从 ai-analytics A1 pilot 校准,**已去 provisional**。version `0.1.0-pilot`,反映真实 LLM-synthesis 实现(data_collection/report_generation 非真工具)。
 
 ---
 

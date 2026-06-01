@@ -1,29 +1,31 @@
-# Analysis Archetype — provisional spec
+# Analysis Archetype — pilot baseline
 #
-# ⚠️ STATUS: PROVISIONAL. Not extracted from a real implementation.
-# ⚠️ This is a planning placeholder so scaffold can produce ai-analytics
-#    skeletons before the real ai-analytics business logic is implemented.
-# ⚠️ Once ai-analytics ships, run `extract.py skills/ai-analytics` and
-#    diff against this file. Reconcile differences and remove the
-#    "provisional" label.
+# STATUS: Pilot baseline, calibrated from real ai-analytics A1 implementation.
+# This archetype is no longer provisional — it reflects the actual structure,
+# stage slots, checkpoints, and gates of the first shipped analysis skill.
 #
-# Sources for this provisional spec:
-#   - docs/handoff/next-skills/01-six-skills-deep-analysis.md §6 (AI-Analytics)
-#   - ADR-003 (skill matrix)
-#   - kernel.contracts.enums.OutputType (the 4 analysis output types)
+# Calibration source:
+#   - skills/ai-analytics (A1 pilot baseline, committed 2026-06-01)
+#   - Validated via `validate --archetype analysis` (9/9 dimensions passed)
+#
+# Known pilot boundaries (not production-grade yet):
+#   - data_collection / report_generation are LLM synthesis, not real tools
+#   - No real competitor scraping; consumes user-provided material
+#   - analysis_report / comparison_matrix are human-readable evidence only,
+#     not promised for machine consumption
 #
 # Schema: .factory/archetypes/archetype_schema.py :: ArchetypeSpec
 
 name: analysis
-version: 0.1.0-provisional
+version: 0.1.0-pilot
 description: |
   Skills that produce structured analysis reports + upstream products consumed
   by other skills (uxeval, prd2proto, ip-design, brand-creative). Output is
   "what we found about a competitor / market / user segment" — not issues
   (evaluation) and not code (generation).
 
-  PROVISIONAL: extracted from product spec, not from a real implementation.
-  Treat as the seed spec for scaffold; reconcile after ai-analytics ships.
+  Pilot baseline: calibrated from ai-analytics A1. Stage slots reflect real
+  LLM-synthesis implementation, not idealized tool automation.
 representative_skill: ai-analytics
 
 # ─────────────────────────────────────────────────────────────────────
@@ -54,8 +56,10 @@ outputs:
     - evidence_pack
 
 # ─────────────────────────────────────────────────────────────────────
-# Stage slots — 5 段方法论：需求 → 采集 → 分析 → 策略 → 报告
-# (provisional; refine after ai-analytics ships)
+# Stage slots — 6 段方法论：需求 → 采集 → 方法论 → 分析 → 策略 → 报告
+# Calibrated from ai-analytics A1 pilot: data_collection / report_generation
+# are LLM synthesis (consume user-provided material / render markdown), not
+# real tools. This reflects pilot reality, not idealized automation.
 # ─────────────────────────────────────────────────────────────────────
 stage_slots:
   - slot_id: requirement_understanding
@@ -65,8 +69,8 @@ stage_slots:
     required_inputs: [scope_md]
 
   - slot_id: data_collection
-    purpose: "Capture competitor data (URLs, screenshots, screenshots, public docs)."
-    stage_type: tool
+    purpose: "Organize user-provided competitor material (pilot: no real scraping)."
+    stage_type: llm
     required: true
 
   - slot_id: methodology_selection
@@ -88,14 +92,17 @@ stage_slots:
     required_outputs: [design_strategy, user_persona, data_completeness_assessment]
 
   - slot_id: report_generation
+    purpose: "Render analysis report + comparison matrix (pilot: LLM markdown, not tool)."
+    stage_type: llm
+    required: true
+    required_outputs: [analysis_report, comparison_matrix]
     purpose: "Render the analysis report + comparison matrix."
     stage_type: tool
     required: true
     required_outputs: [analysis_report, comparison_matrix]
 
 # ─────────────────────────────────────────────────────────────────────
-# Checkpoint slots — 推断 C1/C2 (要求确认采集范围 + 方法论选择)
-# (provisional)
+# Checkpoint slots — C1/C2 (calibrated from ai-analytics A1)
 # ─────────────────────────────────────────────────────────────────────
 checkpoint_slots:
   - checkpoint_id: C1
@@ -109,9 +116,7 @@ checkpoint_slots:
     required: true
 
 # ─────────────────────────────────────────────────────────────────────
-# Gate slots — analysis 不强制 audit gate（vs evaluation 必有）
-# 但 strategy_synthesis 应有数据完整度 gate
-# (provisional)
+# Gate slots — QG1 data-completeness gate (calibrated from ai-analytics A1)
 # ─────────────────────────────────────────────────────────────────────
 gate_slots:
   - gate_id: QG1
