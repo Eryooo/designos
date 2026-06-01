@@ -96,10 +96,6 @@ stage_slots:
     stage_type: llm
     required: true
     required_outputs: [analysis_report, comparison_matrix]
-    purpose: "Render the analysis report + comparison matrix."
-    stage_type: tool
-    required: true
-    required_outputs: [analysis_report, comparison_matrix]
 
 # ─────────────────────────────────────────────────────────────────────
 # Checkpoint slots — C1/C2 (calibrated from ai-analytics A1)
