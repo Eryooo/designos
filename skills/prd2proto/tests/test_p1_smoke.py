@@ -4,6 +4,7 @@ Verifies the prd2proto skill can be:
 - Loaded by kernel from disk
 - Mode-filtered correctly (pm / designer-spec / designer-dsl)
 - End-to-end exercised against frontend-codegen MOCK (no real LLM, no real DSL)
+- Conforms to the v0.2 SKILL.md contracts (Progress Contract / Checkpoint Behavior)
 
 These tests do NOT exercise the LLM stages — those need real prompts and an
 LLM. They guard the structural and tool-integration contracts so that when
@@ -44,7 +45,7 @@ def _ctx(mode: str | None, tmp_path: Path) -> SkillContext:
     return SkillContext(
         workspace=tmp_path,
         skill_name="prd2proto",
-        skill_version="0.1.0",
+        skill_version="0.2.0",
         run_id="smoke",
         mode=mode,  # type: ignore[arg-type]
         config=DesignOSConfig(workspace=tmp_path, global_config=GlobalConfig()),
@@ -90,7 +91,9 @@ def test_prd2proto_declares_external_mcps_for_designer_dsl() -> None:
         assert srv.required_when == 'mode == "designer-dsl"'
 
 
-def test_prd2proto_pipeline_has_eight_stages() -> None:
+def test_prd2proto_pipeline_has_stages() -> None:
+    """v0.2 topology: 8 stages total. component-mapping removed (only useful
+    for designer-dsl with real MCP, deferred); liveness-check appended."""
     skill = load_pipeline_skill(SKILL_DIR)
     stage_ids = [s.id for s in skill.get_stages()]
     expected = [
@@ -99,11 +102,19 @@ def test_prd2proto_pipeline_has_eight_stages() -> None:
         "spec-generation",
         "dsl-fetch",
         "token-extraction",
-        "component-mapping",
         "code-generation",
         "review-gate",
+        "liveness-check",
     ]
     assert stage_ids == expected
+
+
+def test_pipeline_has_liveness_check() -> None:
+    """liveness-check must be the final stage so dev server is always
+    started before declaring done (closes the 'ERR_CONNECTION_REFUSED' gap)."""
+    skill = load_pipeline_skill(SKILL_DIR)
+    stage_ids = [s.id for s in skill.get_stages()]
+    assert stage_ids[-1] == "liveness-check"
 
 
 # ---------------------------------------------------------------------------
@@ -111,56 +122,101 @@ def test_prd2proto_pipeline_has_eight_stages() -> None:
 # ---------------------------------------------------------------------------
 
 
-def test_pm_mode_skips_spec_dsl_token_component_stages(tmp_path: Path) -> None:
-    """pm mode = PRD only, no spec, no DSL, no tokens, no component mapping."""
+def test_pm_mode_runs_active_stages(tmp_path: Path) -> None:
+    """pm mode: PRD only, but spec-generation still runs (template-matched
+    design-spec) so token-extraction has a source. Skips dsl-fetch only."""
     active = _stages_for_mode("pm", tmp_path)
     assert "prd-understanding" in active
     assert "design-analysis" in active
+    assert "spec-generation" in active   # template-matched even in pm
+    assert "token-extraction" in active  # all modes get tokens
     assert "code-generation" in active
     assert "review-gate" in active
-    # All these should be skipped:
-    assert "spec-generation" not in active
+    assert "liveness-check" in active
+    # pm skips DSL fetch only
     assert "dsl-fetch" not in active
-    assert "token-extraction" not in active
-    assert "component-mapping" not in active
-    # pm mode runs exactly 4 stages
-    assert len(active) == 4
+    # 7 stages active
+    assert len(active) == 7
 
 
 def test_designer_spec_mode_runs_spec_and_token_but_not_dsl(tmp_path: Path) -> None:
-    """designer-spec = PRD + design-spec.md. No DSL, no component mapping."""
+    """designer-spec = PRD + (generated or user-provided) design-spec.md.
+    No DSL."""
     active = _stages_for_mode("designer-spec", tmp_path)
     assert "spec-generation" in active
     assert "token-extraction" in active
+    assert "liveness-check" in active
     assert "dsl-fetch" not in active
-    assert "component-mapping" not in active
-    # 6 stages: prd / design / spec / token / code / review
-    assert len(active) == 6
+    # 7 stages: prd / design / spec / token / code / review / liveness
+    assert len(active) == 7
 
 
-def test_designer_dsl_mode_runs_all_eight_stages_except_spec_generation(
-    tmp_path: Path,
-) -> None:
-    """designer-dsl: skips spec-generation (no need to generate spec, user provides DSL),
-    but runs dsl-fetch + token + component-mapping."""
+def test_designer_dsl_mode_skips_spec_generation(tmp_path: Path) -> None:
+    """designer-dsl: skips spec-generation (user provides DSL + spec),
+    but runs dsl-fetch + token-extraction."""
     active = _stages_for_mode("designer-dsl", tmp_path)
     assert "dsl-fetch" in active
     assert "token-extraction" in active
-    assert "component-mapping" in active
-    assert "spec-generation" not in active  # designer-dsl users provide spec, don't generate it
+    assert "liveness-check" in active
+    assert "spec-generation" not in active
     # 7 stages
     assert len(active) == 7
 
 
 # ---------------------------------------------------------------------------
+# SKILL.md v0.2 contract checks (Progress Contract / Checkpoint Behavior /
+# anti-regression on the deleted Step 0 boilerplate)
+# ---------------------------------------------------------------------------
+
+
+def test_skill_md_has_progress_contract() -> None:
+    """v0.2 SKILL.md must contain the Progress Contract section that
+    governs LLM behavior in chat mode."""
+    skill_md = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+    assert "Progress Contract" in skill_md, (
+        "SKILL.md missing 'Progress Contract' section — re-add it (see "
+        "REPORT-skill-iteration.md §1.3)"
+    )
+
+
+def test_skill_md_has_checkpoint_policy() -> None:
+    """v0.2 SKILL.md must contain the Checkpoint Behavior section that
+    explicitly tells the LLM not to deadlock-wait at C1/C2/C3 in chat mode."""
+    skill_md = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+    assert "Checkpoint Behavior" in skill_md, (
+        "SKILL.md missing 'Checkpoint Behavior' section — re-add it (see "
+        "REPORT-skill-iteration.md §1.2)"
+    )
+
+
+def test_no_step0_boilerplate() -> None:
+    """v0.2 SKILL.md must NOT contain the verbose Step 0 reply template
+    that duplicates command-message content. The new style is concise:
+    'mode + PRD path → preflight; otherwise ask what's missing'."""
+    skill_md = (SKILL_DIR / "SKILL.md").read_text(encoding="utf-8")
+    # The hallmark phrase from the deleted Step 0 boilerplate
+    assert "请确认：1. 哪种保真度" not in skill_md, (
+        "SKILL.md still contains the legacy Step 0 boilerplate — delete it "
+        "and replace with the concise mode-detection paragraph"
+    )
+    assert "我将用 prd2proto 把 PRD 转成前端代码" not in skill_md, (
+        "SKILL.md still contains the legacy 'reply user' opening template"
+    )
+
+
+# ---------------------------------------------------------------------------
 # frontend-codegen mock end-to-end (no LLM, no real DSL — just the codegen path)
+#
+# These tests cover the underlying mock infrastructure. The pipeline itself
+# no longer calls these tools (stages 4/5 are LLM-driven in v0.2), but the
+# mocks remain available for designer-dsl mode and for future real MCP work.
 # ---------------------------------------------------------------------------
 
 
 def test_codegen_mock_pm_mode_writes_runnable_react(tmp_path: Path) -> None:
-    """Smoke: in pm mode, the code-generation stage's tool call should produce
-    a runnable React skeleton at `output_dir`. The MCP itself is mocked, so we
-    invoke its core directly."""
+    """Smoke: frontend-codegen mock can still produce a runnable React
+    skeleton on demand. v0.2 pipeline doesn't call this directly, but
+    keeping the contract green so future MCP work stays compatible."""
     from core import generate_code as codegen_generate
     from schemas import GenerateCodeRequest
 
@@ -179,8 +235,10 @@ def test_codegen_mock_pm_mode_writes_runnable_react(tmp_path: Path) -> None:
 
 
 def test_codegen_mock_designer_dsl_mode_uses_dsl_inputs(tmp_path: Path) -> None:
-    """Smoke: designer-dsl mode threads DSL → tokens → mapping → codegen end-to-end
-    through the mock MCP."""
+    """Smoke: designer-dsl mock chain (dsl → tokens → mapping → codegen)
+    still wires through. v0.2 pipeline no longer chains these stages
+    directly (component-mapping was removed), but the mock contract is
+    preserved for future real-MCP work."""
     from core import (
         extract_tokens,
         fetch_dsl,
