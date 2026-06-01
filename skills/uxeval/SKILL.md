@@ -224,7 +224,22 @@ Stage 6 输出前必须逐条执行 8 条宪法校验，不通过的问题删除
 
 ### Playwright（仅 web 模式）
 
-自主检查 Playwright 是否可用，未安装时提示用户安装。
+自主检查 Playwright 是否可用，未安装时提示用户安装（`pip install -e ".[web]"` +
+`python -m playwright install chromium`）。Playwright 是 **optional dependency**，
+缺失时只影响 web 模式，不影响 client 模式与核心能力。
+
+web 模式产品边界（详见 `docs/releases/web-mode-baseline/`，不得把以下两类混为一谈）：
+
+**已验证可用**（web-mode-baseline 真实跑绿，可直接承诺）：
+- 单页主链路自动取证：导航 → 截图 → DOM 抽取 → 批量 JSON 脚本执行（`execute_batch`）
+- 本地可控站点上的多 tab 切换、iframe 切换与读取、表单填充（只填不提交）
+- 证据 confidence 为 `ground_truth`（URL + DOM + 截图三通道），强于 client 模式人工截图通道
+
+**已实现，但未充分验证**（不得描述为“已生产可用 / 稳定 / 已上线”）：
+- 真实登录态：持久化上下文已实现，但真账号密码登录全流程（含 SSO）未做真站点回归
+- 多 tab / iframe：仅在 mock server 上验证，真实复杂站点（跨域、懒加载、嵌套）未回归
+- heuristic-engine 集成：adapter 已能产出 DetectionRequest 并已接线，但
+  “driver → heuristic-engine → 问题清单”端到端闭环未纳入基线回归
 
 ### Excel 生成（最终报告）
 

@@ -1,10 +1,23 @@
-"""Integration tests for playwright-driver: multi-tab, iframe, end-to-end."""
+"""Integration tests for playwright-driver: multi-tab, iframe, end-to-end.
+
+Layer 2/3 of the web-mode test partition. Every test here drives a REAL browser,
+so the whole module is gated behind two markers:
+
+- `requires_playwright`: the `playwright` Python package must be importable.
+- `browser_smoke`: chromium binaries must be launchable (`playwright install`).
+
+When either condition is unmet, conftest.py SKIPS these (with an explicit reason)
+rather than letting them fail — a missing optional dependency is an environment
+fact, not a capability regression. See docs/releases/web-mode-baseline/.
+"""
 
 import http.server
 import threading
 import time
 
 import pytest
+
+pytestmark = [pytest.mark.requires_playwright, pytest.mark.browser_smoke]
 
 from core import BrowserManager
 from schemas import ActionType, EvaluationScript, ScriptStep, SelectorType

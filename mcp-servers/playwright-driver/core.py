@@ -2,21 +2,42 @@
 
 from __future__ import annotations
 
-import os
 import uuid
 from pathlib import Path
 from typing import Any
 
-from playwright.sync_api import (
-    Browser,
-    BrowserContext,
-    Frame,
-    Page,
-    Playwright,
-    sync_playwright,
-)
+try:
+    from playwright.sync_api import (
+        Browser,
+        BrowserContext,
+        Frame,
+        Page,
+        Playwright,
+        sync_playwright,
+    )
+
+    _PLAYWRIGHT_IMPORT_ERROR: ImportError | None = None
+except ImportError as exc:  # pragma: no cover - exercised via dependency-absent tests
+    # Defer the failure: importing this module must NOT require Playwright to be
+    # installed. Pure-logic consumers (schemas, evidence_builder, server tool
+    # definitions, the JSON script executor under mock browsers) can import and
+    # be unit-tested with no browser dependency. The error only surfaces when a
+    # caller actually tries to drive a real browser via BrowserManager.launch().
+    Browser = BrowserContext = Frame = Page = Playwright = object  # type: ignore[assignment,misc]
+    sync_playwright = None  # type: ignore[assignment]
+    _PLAYWRIGHT_IMPORT_ERROR = exc
 
 from schemas import PageState, SessionInfo
+
+
+def playwright_available() -> bool:
+    """Return True when the optional `playwright` package is importable.
+
+    Note: this only checks the Python package import, not whether browser
+    binaries are installed. A real launch can still fail if `playwright install`
+    has not been run; that surfaces from BrowserManager.launch() directly.
+    """
+    return sync_playwright is not None
 
 
 _DEFAULT_VIEWPORT = {"width": 1440, "height": 900}
@@ -47,6 +68,15 @@ class BrowserManager:
     ) -> SessionInfo:
         if self.is_active:
             raise RuntimeError("Browser session already active. Close first.")
+
+        if sync_playwright is None:
+            raise RuntimeError(
+                "Web mode requires Playwright, but the `playwright` package is not "
+                "installed. Install it and the chromium binaries, then retry:\n"
+                '  1. pip install -e ".[web]"\n'
+                "  2. python -m playwright install chromium\n"
+                f"(original import error: {_PLAYWRIGHT_IMPORT_ERROR})"
+            )
 
         self._playwright = sync_playwright().start()
 

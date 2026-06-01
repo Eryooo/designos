@@ -1,4 +1,12 @@
-"""Tests for playwright-driver MCP server."""
+"""Unit tests for playwright-driver MCP server.
+
+Layer 1 (`unit`): pure-logic tests that MUST pass in any environment, including
+when the optional `playwright` package is not installed. They cover schemas,
+evidence formatting, server tool definitions, and the JSON script executor under
+a mock browser. None of them launch a real browser, so a missing Playwright
+dependency must never turn these red — that is the self-contained baseline this
+module guards.
+"""
 
 from __future__ import annotations
 
@@ -6,6 +14,8 @@ import json
 from unittest.mock import MagicMock, patch
 
 import pytest
+
+pytestmark = pytest.mark.unit
 
 from schemas import (
     ActionType,
