@@ -10,6 +10,7 @@ requires:
       builtin: true
     - name: frontend-codegen
       builtin: true
+      required_when: 'mode == "designer-dsl"'   # 仅 dsl-fetch stage 用；pm/designer-spec 的 token/code 由 LLM 手写，不依赖它
     - name: figma-mcp
       builtin: false
       required_when: 'mode == "designer-dsl"'
