@@ -1,0 +1,44 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ai-analytics/user_persona",
+  "title": "user_persona",
+  "description": "ai-analytics 的上游产物。被 prd2proto stage1 通过 upstream_refs 注入为 {{existing_personas}}，用来校准 user_flows。是一个画像数组。字段名为下游契约，不得随意改名。",
+  "type": "array",
+  "minItems": 1,
+  "items": {
+    "type": "object",
+    "required": ["id", "role", "goals", "pain_points"],
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "画像唯一 id，如 PERSONA-001。"
+      },
+      "role": {
+        "type": "string",
+        "description": "角色名（如『数据运营专员』）。prd2proto stage1 用它校准 user_flows 的角色。"
+      },
+      "goals": {
+        "type": "array",
+        "description": "该角色的核心目标。",
+        "items": {"type": "string"},
+        "minItems": 1
+      },
+      "pain_points": {
+        "type": "array",
+        "description": "该角色的痛点。prd2proto 用来推断需要哪些关键流程。",
+        "items": {"type": "string"},
+        "minItems": 1
+      },
+      "scenarios": {
+        "type": "array",
+        "description": "可选。典型使用场景。",
+        "items": {"type": "string"}
+      },
+      "evidence_refs": {
+        "type": "array",
+        "description": "支撑本画像的 collected_data 来源 id（宪法规则 1：不得编造）。",
+        "items": {"type": "string"}
+      }
+    }
+  }
+}
