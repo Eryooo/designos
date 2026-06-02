@@ -175,6 +175,42 @@ _STAGE_SLOT_KEYWORDS: dict[str, list[str]] = {
         "synthesis",
         "strategy",
     ],
+    # ─── creative-generation archetype slots (ip-design, brand-creative, ...)
+    "strategy_alignment": [
+        "strategy-alignment",
+        "strategy_alignment",
+        "brand-strategy",
+        "brand_strategy",
+    ],
+    "worldview_building": [
+        "worldview-building",
+        "worldview_building",
+        "worldview",
+    ],
+    "persona_modeling": [
+        "persona-modeling",
+        "persona_modeling",
+        "persona",
+        "character-modeling",
+    ],
+    "visual_translation": [
+        "visual-translation",
+        "visual_translation",
+        "visual-system",
+        "visual_system",
+    ],
+    "narrative_planning": [
+        "narrative-planning",
+        "narrative_planning",
+        "content-planning",
+        "content_planning",
+    ],
+    "landing_spec": [
+        "landing-spec",
+        "landing_spec",
+        "material-spec",
+        "brand-material",
+    ],
 }
 
 
@@ -602,7 +638,7 @@ def main() -> int:
     parser.add_argument(
         "--archetype",
         required=True,
-        choices=["evaluation", "generation", "analysis"],
+        choices=["evaluation", "generation", "analysis", "creative-generation"],
         help="Archetype name to validate against",
     )
     args = parser.parse_args()

@@ -239,7 +239,7 @@ class ArchetypeSpec(BaseModel):
 
     model_config = ConfigDict(frozen=True)
 
-    name: Literal["evaluation", "generation", "analysis"] = Field(...)
+    name: Literal["evaluation", "generation", "analysis", "creative-generation"] = Field(...)
     version: str = Field(..., description="Semver of the archetype spec itself.")
     description: str = Field(...)
     representative_skill: str = Field(

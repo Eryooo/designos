@@ -64,6 +64,12 @@ class OutputType(str, Enum):
     PAGE_MAPPING = "page_mapping"
     FRONTEND_CODE = "frontend_code"
     DESIGN_TOKEN_SPEC = "design_token_spec"
+    # Creative-generation archetype outputs (I1.1)
+    WORLDVIEW = "worldview"
+    PERSONA_PROFILE = "persona_profile"
+    IMAGE_PROMPT_PACK = "image_prompt_pack"
+    BRAND_MATERIAL_SPEC = "brand_material_spec"
+    PROFESSIONAL_GAP_REPORT = "professional_gap_report"
 
 
 class ErrorCode(str, Enum):
