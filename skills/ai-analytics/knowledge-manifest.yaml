@@ -1,0 +1,28 @@
+skill: ai-analytics
+schema_version: "0.1.0"
+status: pilot
+purpose: 声明本 skill 复用哪些 DesignOS 共享知识资产；仅引用 shared knowledge id，不复制正文。
+
+shared_knowledge:
+  - id: research.methodology-selection
+    used_by: methodology-selection
+    use: 按目标与证据选择最小够用方法论
+  - id: research.competitor-analysis
+    used_by: data-collection, competitor-analysis, report-generation
+    use: 可追溯竞品 findings 与比较矩阵
+  - id: research.user-persona-quality
+    used_by: strategy-synthesis
+    use: 用户画像质量标准与证据要求
+  - id: research.data-completeness-rubric
+    used_by: strategy-synthesis, gate
+    use: coverage/gaps 判断与数据不足硬停
+  - id: design.design-strategy
+    used_by: strategy-synthesis
+    use: design_strategy 的质量标准与可消费性要求
+  - id: design.tone-and-visual-direction
+    used_by: strategy-synthesis
+    use: tone keywords 与视觉方向合成
+
+private_reference_boundary: |
+  skills/ai-analytics/reference/ 继续保留 pilot stage 约束、字段契约和 QG1 行为；
+  knowledge/ 只保存跨 skill 复用的通用决策知识。

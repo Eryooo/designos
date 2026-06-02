@@ -1,208 +1,244 @@
-# DesignOS 共享知识资产清单（Shared Knowledge Layer Manifest）
-#
-# 这是 DesignOS 所有 skill 共享的知识资产 source-of-truth 索引。
-# 它声明"通用方法论 / 原则 / 标准 / 模板"的归属与边界，
-# 让后续 skill 不再各自维护一套孤立的知识库。
-#
-# 边界原则：
-#   - 本层只放跨 skill 复用的通用知识（方法论、原则、标准、模板目录）。
-#   - skill 私有的 stage 绑定说明（如 reference/m0x-*.md）仍留在各自 skill 内，
-#     它们描述"该 skill 如何在自己的 pipeline 里应用这些知识"，不可复用。
-#   - 通用资产正文严禁出现项目/skill 专属词（见 do_not_claim 与结构测试）。
-#
-# 本批（K0）只建架构基线：声明结构、边界、stable id，不迁移大量旧内容。
-# 资产正文目前为 draft 占位，后续批次再做内容固化与迁移。
-
-schema_version: "0.1.0"
+schema_version: "0.2.0"
 layer: shared-knowledge
 status: pilot
 owner: designos-core
 
-# 五个领域（domain）必须全部被下方 assets 覆盖
-domains:
-  - design     # 品牌策略、视觉策略、IP 设计、设计模板、设计质量标准
-  - ux         # 体验评估原则、旅程模型、证据标准、严重等级、问题归因
-  - product    # PRD 理解、用户故事、信息架构、需求拆解、交互模式
-  - frontend   # design token、组件结构、状态覆盖、代码质量规则
-  - research   # 竞品分析、用户画像、SWOT、PEST、KANO、JTBD、AIPL 等方法论
-
-# 已登记的 skill（applicable_skills 只允许引用这些）
-known_skills:
-  - uxeval
-  - prd2proto
-  - ai-analytics
+domains: [design, ux, product, frontend, research]
+known_skills: [uxeval, prd2proto, ai-analytics]
 
 assets:
-  # ===== design =====
-  - id: design.visual-strategy-principles
-    version: 0.1.0-draft
-    domain: design
-    type: principles
-    applicable_skills: [prd2proto, ai-analytics]
-    source_of_truth: knowledge/design/visual-strategy-principles.md
-    decision_use: 指导视觉策略取舍（层级、对比、节奏、留白）的通用判断准则
-    quality_bar: 每条原则可被一个具体反例证伪；不依赖任何单一品牌
-    do_not_claim: 不规定具体色值/字号/品牌资产；不替代 design-spec.md
-    owner: designos-core
-    status: draft
-
-  - id: design.template-catalog
-    version: 0.1.0-draft
-    domain: design
-    type: catalog
-    applicable_skills: [prd2proto]
-    source_of_truth: knowledge/design/template-catalog.md
-    decision_use: 登记可复用视觉风格模板族（特征/适用场景/选择维度）的通用目录
-    quality_bar: 仅描述模板的可复用选择维度，不内嵌任一 skill 的选择算法
-    do_not_claim: 不绑定 prd2proto 的选择流程；不复制各模板的完整 token 正文
-    owner: designos-core
-    status: draft
-
-  - id: design.quality-standard
-    version: 0.1.0-draft
-    domain: design
-    type: standard
-    applicable_skills: [prd2proto, ai-analytics]
-    source_of_truth: knowledge/design/quality-standard.md
-    decision_use: 判定设计产出是否达标（一致性、可读性、可达性、品牌契合）的通用标准
-    quality_bar: 每条标准给出可观察的判定信号，不依赖具体工具链
-    do_not_claim: 不定义任何 skill 的验收 gate；不规定具体阈值由 skill 自定
-    owner: designos-core
-    status: draft
-
-  # ===== ux =====
   - id: ux.heuristic-principles
-    version: 0.1.0-draft
+    version: 0.2.0-pilot
     domain: ux
     type: principles
     applicable_skills: [uxeval]
     source_of_truth: knowledge/ux/heuristic-principles.md
-    decision_use: 体验评估的启发式原则总集（可被多 skill 引用的通用原则定义）
-    quality_bar: 每条原则有稳定编号与一句话定义，正文不含被测产品信息
-    do_not_claim: 不规定评分公式；不定义某次评估的任务清单
+    decision_use: 统一体验评估原则选择、原则映射与严重等级基础口径
+    quality_bar: 含 purpose/applies_to/decision_framework/senior_heuristics/quality_rubric/common_failure_modes/source_assets/do_not_claim
+    do_not_claim: 不规定评分公式；不定义某次评估任务清单
     owner: designos-core
-    status: draft
-
-  - id: ux.severity-scale
-    version: 0.1.0-draft
+    status: pilot
+  - id: ux.journey-modeling
+    version: 0.2.0-pilot
+    domain: ux
+    type: methodology
+    applicable_skills: [uxeval]
+    source_of_truth: knowledge/ux/journey-modeling.md
+    decision_use: 从页面视角升级到用户旅程视角，支撑任务生成与问题归因
+    quality_bar: 含六阶段模板、旅程判定、质量 rubric 与 failure modes
+    do_not_claim: 不规定输出 schema；不替代用户访谈
+    owner: designos-core
+    status: pilot
+  - id: ux.evidence-quality
+    version: 0.2.0-pilot
     domain: ux
     type: standard
     applicable_skills: [uxeval]
-    source_of_truth: knowledge/ux/severity-scale.md
-    decision_use: 问题严重等级的通用分级口径（critical/major/minor/suggestion）
-    quality_bar: 每级有可区分的判定边界，跨 skill 一致
-    do_not_claim: 不绑定任何 issue 数据结构；不规定上报渠道
+    source_of_truth: knowledge/ux/evidence-quality.md
+    decision_use: 判定评估证据是否足以支撑问题清单与交付状态
+    quality_bar: 含证据类型、充分性三属性、交付四态与失败模式
+    do_not_claim: 不规定采集工具、文件格式或路径
     owner: designos-core
-    status: draft
-
-  - id: ux.evidence-standard
-    version: 0.1.0-draft
+    status: pilot
+  - id: ux.severity-rubric
+    version: 0.2.0-pilot
     domain: ux
-    type: standard
+    type: rubric
     applicable_skills: [uxeval]
-    source_of_truth: knowledge/ux/evidence-standard.md
-    decision_use: 评估结论的证据充分性通用标准（可追溯、可复现、可定位）
-    quality_bar: 标准用证据属性表述，不依赖具体采集工具
-    do_not_claim: 不规定截图/录屏格式；不定义存储路径
+    source_of_truth: knowledge/ux/severity-rubric.md
+    decision_use: 统一 critical/major/minor/suggestion 严重等级判定
+    quality_bar: 等级由用户影响、频次、风险、可恢复性共同决定
+    do_not_claim: 不定义产品级优先级路线图或扣分公式
     owner: designos-core
-    status: draft
+    status: pilot
+  - id: ux.issue-attribution
+    version: 0.2.0-pilot
+    domain: ux
+    type: methodology
+    applicable_skills: [uxeval]
+    source_of_truth: knowledge/ux/issue-attribution.md
+    decision_use: 把 raw issue 转成可评审、可修复、可追溯的结构化问题
+    quality_bar: 含八步归因、建议模板、去重规则、功能测试偏移防线
+    do_not_claim: 不定义具体 Issue schema；不保证自动归因 100% 正确
+    owner: designos-core
+    status: pilot
+  - id: ux.ux-failure-modes
+    version: 0.2.0-pilot
+    domain: ux
+    type: failure_modes
+    applicable_skills: [uxeval]
+    source_of_truth: knowledge/ux/ux-failure-modes.md
+    decision_use: 用真实失败样例沉淀前置 calibration 与质量门控
+    quality_bar: 每个失败模式含现象、识别信号、根因、防线
+    do_not_claim: 不保证覆盖所有未来失败模式
+    owner: designos-core
+    status: pilot
 
-  # ===== product =====
-  - id: product.story-mapping
-    version: 0.1.0-draft
+  - id: product.prd-understanding
+    version: 0.2.0-pilot
     domain: product
     type: methodology
     applicable_skills: [prd2proto]
-    source_of_truth: knowledge/product/story-mapping.md
-    decision_use: 把需求拆解为 modules/features/flows 的通用故事地图方法
-    quality_bar: 方法描述与任一 PRD 无关，仅给结构与判定规则
-    do_not_claim: 不规定输出 schema；不绑定某 skill 的 stage 编号
+    source_of_truth: knowledge/product/prd-understanding.md
+    decision_use: 把非结构化 PRD 转成业务目标、模块、功能、页面、用户流
+    quality_bar: 推断显式标注，缺口写 warnings，不替 PM 发明需求
+    do_not_claim: 不替代需求评审；不保证推断真实成立
     owner: designos-core
-    status: draft
-
+    status: pilot
   - id: product.information-architecture
-    version: 0.1.0-draft
+    version: 0.2.0-pilot
     domain: product
     type: methodology
     applicable_skills: [prd2proto]
     source_of_truth: knowledge/product/information-architecture.md
-    decision_use: 页面/导航/命名的信息架构通用方法（IA 组织原则）
-    quality_bar: 仅给组织原则与命名约定，不含具体产品页面树
-    do_not_claim: 不规定路由实现；不绑定前端框架
+    decision_use: 组织 sitemap/navigation/route/critical path 四视图
+    quality_bar: 四视图一致、可直接供实现消费
+    do_not_claim: 不规定前端路由库；不生成具体页面设计稿
     owner: designos-core
-    status: draft
+    status: pilot
+  - id: product.user-story-mapping
+    version: 0.2.0-pilot
+    domain: product
+    type: methodology
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/product/user-story-mapping.md
+    decision_use: 用 story mapping 拆 modules/features/pages/flows 与关键路径
+    quality_bar: 结构可追踪，feature 满足 INVEST
+    do_not_claim: 不替代 roadmap 排期；不决定功能是否应该做
+    owner: designos-core
+    status: pilot
+  - id: product.interaction-state-coverage
+    version: 0.2.0-pilot
+    domain: product
+    type: standard
+    applicable_skills: [prd2proto, uxeval]
+    source_of_truth: knowledge/product/interaction-state-coverage.md
+    decision_use: 判断交互组件与流程是否覆盖关键状态和异常路径
+    quality_bar: 关键交互状态齐全，非适用状态有理由
+    do_not_claim: 不规定具体 CSS 实现；不替代无障碍专项审查
+    owner: designos-core
+    status: pilot
 
-  # ===== frontend =====
-  - id: frontend.design-tokens
-    version: 0.1.0-draft
+  - id: frontend.atomic-design
+    version: 0.2.0-pilot
+    domain: frontend
+    type: methodology
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/frontend/atomic-design.md
+    decision_use: 组织 atoms/molecules/organisms/templates/pages 的组件分层
+    quality_bar: 层级清晰、命名稳定、引用方向单一、复用边界明确
+    do_not_claim: 不规定具体框架或组件库 API
+    owner: designos-core
+    status: pilot
+  - id: frontend.design-token-rules
+    version: 0.2.0-pilot
     domain: frontend
     type: standard
     applicable_skills: [prd2proto]
-    source_of_truth: knowledge/frontend/design-tokens.md
-    decision_use: design token 的通用分层与命名标准（W3C 对齐的口径）
-    quality_bar: 标准与具体取值无关，只规定层级、命名、引用方式
-    do_not_claim: 不内嵌某模板的 token 取值；不规定打包工具
+    source_of_truth: knowledge/frontend/design-token-rules.md
+    decision_use: 规范 design token 三层架构、命名、引用与 CSS 变量输出
+    quality_bar: 三层清楚、引用可解析、命名语义化
+    do_not_claim: 不规定具体 token 值或构建工具
     owner: designos-core
-    status: draft
-
-  - id: frontend.component-structure
-    version: 0.1.0-draft
-    domain: frontend
-    type: principles
-    applicable_skills: [prd2proto]
-    source_of_truth: knowledge/frontend/component-structure.md
-    decision_use: 组件分层与状态覆盖的通用原则（原子化、状态完备性）
-    quality_bar: 原则可跨框架成立，不依赖具体组件库
-    do_not_claim: 不规定具体库 API；不定义代码生成实现
-    owner: designos-core
-    status: draft
-
-  - id: frontend.code-quality-rules
-    version: 0.1.0-draft
+    status: pilot
+  - id: frontend.component-state-rules
+    version: 0.2.0-pilot
     domain: frontend
     type: standard
     applicable_skills: [prd2proto]
-    source_of_truth: knowledge/frontend/code-quality-rules.md
-    decision_use: 生成代码的通用质量规则（不硬编码、可达性、状态完整）
-    quality_bar: 每条规则可被静态检查或评审验证，与语言中立
-    do_not_claim: 不复制任一 skill 的 constitution 正文；不定义 lint 配置
+    source_of_truth: knowledge/frontend/component-state-rules.md
+    decision_use: 规范交互组件 default/hover/active/focus/disabled/loading/error 覆盖
+    quality_bar: 关键交互组件状态齐全，视觉/文案/行为一致
+    do_not_claim: 不覆盖业务状态机的全部领域状态
     owner: designos-core
-    status: draft
+    status: pilot
+  - id: frontend.code-quality-constitution
+    version: 0.2.0-pilot
+    domain: frontend
+    type: standard
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/frontend/code-quality-constitution.md
+    decision_use: 定义前端生成代码质量底线和 review gate 宪法
+    quality_bar: 四条规则可定位扫描，违规有修复建议与严重等级
+    do_not_claim: 不定义 ESLint/Prettier/CI；不保证生产可上线
+    owner: designos-core
+    status: pilot
 
-  # ===== research =====
+  - id: research.methodology-selection
+    version: 0.2.0-pilot
+    domain: research
+    type: methodology
+    applicable_skills: [ai-analytics]
+    source_of_truth: knowledge/research/methodology-selection.md
+    decision_use: 按目标与证据选择最小够用分析方法论
+    quality_bar: 方法论与问题/证据/产物一一对应，缺口明确
+    do_not_claim: 不规定某 skill 的选择算法；不替代数据质量审查
+    owner: designos-core
+    status: pilot
   - id: research.competitor-analysis
-    version: 0.1.0-draft
+    version: 0.2.0-pilot
     domain: research
     type: methodology
     applicable_skills: [ai-analytics]
     source_of_truth: knowledge/research/competitor-analysis.md
-    decision_use: 竞品分析的通用框架（维度选取、对比矩阵构建、结论提炼）
-    quality_bar: 框架与任一具体竞品无关，仅给方法步骤
-    do_not_claim: 不预设行业；不规定数据来源
+    decision_use: 把竞品资料转为可追溯 findings 与比较矩阵
+    quality_bar: findings 与矩阵均可追溯，维度服务最终策略
+    do_not_claim: 不自动爬取或验证外部资料；不预设行业
     owner: designos-core
-    status: draft
-
-  - id: research.methodology-library
-    version: 0.1.0-draft
+    status: pilot
+  - id: research.user-persona-quality
+    version: 0.2.0-pilot
     domain: research
     type: methodology
     applicable_skills: [ai-analytics]
-    source_of_truth: knowledge/research/methodology-library.md
-    decision_use: SWOT/PEST/KANO/JTBD/AIPL 等方法论的通用定义与适用判定
-    quality_bar: 每个方法论给出适用前提与不适用边界，互不混淆
-    do_not_claim: 不规定选择算法；不绑定某 skill 的方法论选择 stage
+    source_of_truth: knowledge/research/user-persona-quality.md
+    decision_use: 评估 persona 是否可被设计/产品决策消费
+    quality_bar: 角色、目标、痛点、场景、证据完整且可行动
+    do_not_claim: 不替代真实用户研究；不预设具体用户群
     owner: designos-core
-    status: draft
-
-  - id: research.user-persona
-    version: 0.1.0-draft
+    status: pilot
+  - id: research.data-completeness-rubric
+    version: 0.2.0-pilot
     domain: research
-    type: methodology
+    type: rubric
     applicable_skills: [ai-analytics]
-    source_of_truth: knowledge/research/user-persona.md
-    decision_use: 用户画像构建的通用方法（要素、证据来源、可信度标注）
-    quality_bar: 方法描述与具体用户群无关，强调证据可追溯
-    do_not_claim: 不预设画像内容；不规定输出格式
+    source_of_truth: knowledge/research/data-completeness-rubric.md
+    decision_use: 判断数据是否足以支撑策略、画像与竞品结论
+    quality_bar: coverage 与 gaps 有证据依据，能决定继续/补资料
+    do_not_claim: 不保证数据来源真实可靠；不自动补齐资料
     owner: designos-core
-    status: draft
+    status: pilot
 
+  - id: design.design-strategy
+    version: 0.2.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ai-analytics, prd2proto]
+    source_of_truth: knowledge/design/design-strategy.md
+    decision_use: 把分析结论转成目标人群、商业目标、设计原则、气质关键词
+    quality_bar: 策略可执行、可取舍、有证据，能指导模板/IA/组件选择
+    do_not_claim: 不替代品牌战略；不规定最终视觉稿
+    owner: designos-core
+    status: pilot
+  - id: design.design-template-selection
+    version: 0.2.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/design/design-template-selection.md
+    decision_use: 按产品定位特征选择视觉模板并做有限微调
+    quality_bar: 选择理由可解释，微调有限且不破坏模板核心
+    do_not_claim: 不复制模板 token 全文；不替代用户 design-spec
+    owner: designos-core
+    status: pilot
+  - id: design.tone-and-visual-direction
+    version: 0.2.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ai-analytics, prd2proto]
+    source_of_truth: knowledge/design/tone-and-visual-direction.md
+    decision_use: 把目标用户、业务目标、竞品定位转成 tone keywords 与视觉方向
+    quality_bar: tone 与用户/目标/竞品定位一致，并能落到视觉决策
+    do_not_claim: 不替代品牌手册；不产出最终视觉稿
+    owner: designos-core
+    status: pilot
