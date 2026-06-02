@@ -1,10 +1,10 @@
-schema_version: "0.2.0"
+schema_version: "0.3.0"
 layer: shared-knowledge
 status: pilot
 owner: designos-core
 
 domains: [design, ux, product, frontend, research]
-known_skills: [uxeval, prd2proto, ai-analytics]
+known_skills: [uxeval, prd2proto, ai-analytics, ip-design]
 
 assets:
   - id: ux.heuristic-principles
@@ -240,5 +240,238 @@ assets:
     decision_use: 把目标用户、业务目标、竞品定位转成 tone keywords 与视觉方向
     quality_bar: tone 与用户/目标/竞品定位一致，并能落到视觉决策
     do_not_claim: 不替代品牌手册；不产出最终视觉稿
+    owner: designos-core
+    status: pilot
+
+  # ===== I0 IP design senior-decision assets =====
+  - id: design.ip.methodology
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/ip/ip-design-methodology.md
+    decision_use: IP 设计六阶段总纲与跨阶段判断逻辑
+    quality_bar: 阶段依赖、关键词传导、可评审优先三件套齐全
+    do_not_claim: 不替代法务/商标审查;不替代真实用户研究
+    owner: designos-core
+    status: pilot
+  - id: design.ip.worldview-building
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/ip/worldview-building.md
+    decision_use: 构建 IP 世界观:时空、规则、关系、文化原型、关键词
+    quality_bar: 能力边界 + 反对者 + 自洽校验
+    do_not_claim: 不替代世界观 IP 法律授权
+    owner: designos-core
+    status: pilot
+  - id: design.ip.content-narrative
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/ip/content-narrative.md
+    decision_use: IP 内容叙事:首秀/核心事件/语料/矩阵/节奏
+    quality_bar: 关系递进 + 失败语料 + 可持续节奏
+    do_not_claim: 不保证传播效果;不替代真实运营
+    owner: designos-core
+    status: pilot
+  - id: design.ip.brand-material-realization
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/ip/brand-material-realization.md
+    decision_use: 物料落地:应用规范/衍生品/宣传物料/传播指南/生产清单
+    quality_bar: 三锁(符号/坐标/色彩模式)+ 可落地性 + 成本档位
+    do_not_claim: 不替代真实生产打样与法务合规
+    owner: designos-core
+    status: pilot
+  - id: design.strategy.brand-strategy-alignment
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/strategy/brand-strategy-alignment.md
+    decision_use: M01 品牌策略对齐:北极星/画像/价值/人格词/差异化
+    quality_bar: 北极星五要素 + 情感价值 + 差异化基于空白
+    do_not_claim: 不替代真实研究与法务
+    owner: designos-core
+    status: pilot
+  - id: design.persona.persona-modeling
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/persona/persona-modeling.md
+    decision_use: M03 人格建模:行为模式为主 MBTI 仅辅助 + 动机/恐惧/成长弧/关系网
+    quality_bar: 可观测行为模式 + 分层恐惧 + 合理触发
+    do_not_claim: 不声明 MBTI 是科学测量;不替代心理画像研究
+    owner: designos-core
+    status: pilot
+  - id: design.persona.voice-and-behavior-boundary
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/persona/voice-and-behavior-boundary.md
+    decision_use: 声音库与行为红线:口头禅/场景句式/情绪表达/红线
+    quality_bar: 含失败场景 + 情绪与视觉对齐 + 红线可判定
+    do_not_claim: 不替代品牌法务对外发声合规
+    owner: designos-core
+    status: pilot
+  - id: design.visual.visual-translation
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/visual/visual-translation.md
+    decision_use: M04 视觉转化:基因继承/形态/色彩/识别度/小尺寸/状态延展/风格谱系/禁忌
+    quality_bar: 32px 可辨 + 四级简化 + 风格坐标 + ≥5 禁忌
+    do_not_claim: 不声明商用资产;不替代商标版权检索
+    owner: designos-core
+    status: pilot
+  - id: design.visual.image-prompt-system
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/visual/image-prompt-system.md
+    decision_use: AI 绘图提示词系统:四层结构/多平台/稳定性/一致性/严格避免
+    quality_bar: 量化锁定 + 基准图 + 跨图一致性检查 + 负向 prompt
+    do_not_claim: 不保证平台输出稳定;不替代人工筛选
+    owner: designos-core
+    status: pilot
+  - id: design.quality.ip-design-quality-rubric
+    version: 0.1.0-pilot
+    domain: design
+    type: rubric
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/quality/ip-design-quality-rubric.md
+    decision_use: IP 设计九维 rubric:一致性/差异化/延展/识别度/成本/法务/可控/人格/证据
+    quality_bar: 九维四档 + 一票否决 + 与 gap 衔接
+    do_not_claim: 不替代品牌方/法务终审
+    owner: designos-core
+    status: pilot
+  - id: design.quality.stage-review-checklists
+    version: 0.1.0-pilot
+    domain: design
+    type: checklist
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/quality/stage-review-checklists.md
+    decision_use: 六阶段必过项清单,放行/不放行规则
+    quality_bar: 必过项全过且每项有证据指向
+    do_not_claim: 不替代评审会决议
+    owner: designos-core
+    status: pilot
+  - id: design.quality.common-failure-modes
+    version: 0.1.0-pilot
+    domain: design
+    type: failure_modes
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/quality/common-failure-modes.md
+    decision_use: 常见跑偏与失败模式集合:现象/信号/根因/防线
+    quality_bar: 每模式四段 + 防线挂在必过项或测试上
+    do_not_claim: 不保证覆盖所有未来失败模式
+    owner: designos-core
+    status: pilot
+  - id: design.quality.professional-gap-report
+    version: 0.1.0-pilot
+    domain: design
+    type: report
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/quality/professional-gap-report.md
+    decision_use: 当不达中阶时显式记录 gap 与放行边界,不允许假装完成
+    quality_bar: 每 gap 五段 + 临时放行边界保守 + 与 rubric/失败模式自检一致
+    do_not_claim: 不替代品牌方/法务的最终风险评估
+    owner: designos-core
+    status: pilot
+  - id: design.templates.brand-brief
+    version: 0.1.0-pilot
+    domain: design
+    type: template
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/templates/brand-brief.md
+    decision_use: M01 brand brief 填空骨架,字段对应必过项
+    quality_bar: 五要素 + 推断显式 + 竞品 ≥3
+    do_not_claim: 不替代真实研究
+    owner: designos-core
+    status: pilot
+  - id: design.templates.worldview
+    version: 0.1.0-pilot
+    domain: design
+    type: template
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/templates/worldview.md
+    decision_use: M02 worldview 填空骨架
+    quality_bar: 能力边界 + 冲突来源 + 自洽校验
+    do_not_claim: 不替代世界观授权审查
+    owner: designos-core
+    status: pilot
+  - id: design.templates.persona-profile
+    version: 0.1.0-pilot
+    domain: design
+    type: template
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/templates/persona-profile.md
+    decision_use: M03 persona profile 填空骨架(行为模式为主,MBTI 辅助)
+    quality_bar: 行为模式 + 分层恐惧 + 失败话术 + 行为红线
+    do_not_claim: 不声明 MBTI 科学性
+    owner: designos-core
+    status: pilot
+  - id: design.templates.visual-spec
+    version: 0.1.0-pilot
+    domain: design
+    type: template
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/templates/visual-spec.md
+    decision_use: M04 visual spec 填空骨架(基因继承/识别度/状态延展/风格坐标/禁忌)
+    quality_bar: 三栏继承 + 32px 可辨 + 四级 + 风格坐标 + ≥5 禁忌
+    do_not_claim: 不替代视觉终稿
+    owner: designos-core
+    status: pilot
+  - id: design.templates.content-plan
+    version: 0.1.0-pilot
+    domain: design
+    type: template
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/templates/content-plan.md
+    decision_use: M05 content plan 填空骨架
+    quality_bar: 首秀 + 核心事件递进 + 失败语料 + 节奏
+    do_not_claim: 不替代真实运营
+    owner: designos-core
+    status: pilot
+  - id: design.templates.brand-material-spec
+    version: 0.1.0-pilot
+    domain: design
+    type: template
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/templates/brand-material-spec.md
+    decision_use: M06 brand material spec 填空骨架
+    quality_bar: 应用规范 + 衍生品(可落地+成本)+ CMYK/Pantone + 传播语调
+    do_not_claim: 不替代真实生产打样
+    owner: designos-core
+    status: pilot
+  - id: design.cases.xfx-ipdesign
+    version: 0.1.0-pilot
+    domain: design
+    type: case
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/cases/xfx-ipdesign/README.md
+    decision_use: 武侠原型 + 既有品牌基因继承的真实落地案例 + 跑偏与改写
+    quality_bar: 含 before/after + gap 样例 + 项目专属词清单
+    do_not_claim: 项目专属符号仅作演示,不进通用方法论
+    owner: designos-core
+    status: pilot
+  - id: design.cases.xfg-ip-kimi
+    version: 0.1.0-pilot
+    domain: design
+    type: case
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/cases/xfg-ip-kimi/README.md
+    decision_use: 企业效率场景型 IP 的提示词与状态延展精细化案例
+    quality_bar: 含 before/after + gap 样例 + 项目专属词清单
+    do_not_claim: 项目专属符号仅作演示,不进通用方法论
     owner: designos-core
     status: pilot

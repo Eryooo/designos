@@ -73,7 +73,7 @@ _REQUIRED_K1_IDS = {
     "design.design-template-selection",
     "design.tone-and-visual-direction",
 }
-_ID_PATTERN = re.compile(r"^[a-z]+\.[a-z0-9-]+$")
+_ID_PATTERN = re.compile(r"^[a-z]+(\.[a-z0-9-]+)+$")
 _VALID_STATUS = {"draft", "pilot", "stable"}
 _EXPECTED_OUTPUT_TYPES = {
     "uxeval": {
