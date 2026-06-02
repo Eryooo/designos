@@ -1,0 +1,208 @@
+# DesignOS 共享知识资产清单（Shared Knowledge Layer Manifest）
+#
+# 这是 DesignOS 所有 skill 共享的知识资产 source-of-truth 索引。
+# 它声明"通用方法论 / 原则 / 标准 / 模板"的归属与边界，
+# 让后续 skill 不再各自维护一套孤立的知识库。
+#
+# 边界原则：
+#   - 本层只放跨 skill 复用的通用知识（方法论、原则、标准、模板目录）。
+#   - skill 私有的 stage 绑定说明（如 reference/m0x-*.md）仍留在各自 skill 内，
+#     它们描述"该 skill 如何在自己的 pipeline 里应用这些知识"，不可复用。
+#   - 通用资产正文严禁出现项目/skill 专属词（见 do_not_claim 与结构测试）。
+#
+# 本批（K0）只建架构基线：声明结构、边界、stable id，不迁移大量旧内容。
+# 资产正文目前为 draft 占位，后续批次再做内容固化与迁移。
+
+schema_version: "0.1.0"
+layer: shared-knowledge
+status: pilot
+owner: designos-core
+
+# 五个领域（domain）必须全部被下方 assets 覆盖
+domains:
+  - design     # 品牌策略、视觉策略、IP 设计、设计模板、设计质量标准
+  - ux         # 体验评估原则、旅程模型、证据标准、严重等级、问题归因
+  - product    # PRD 理解、用户故事、信息架构、需求拆解、交互模式
+  - frontend   # design token、组件结构、状态覆盖、代码质量规则
+  - research   # 竞品分析、用户画像、SWOT、PEST、KANO、JTBD、AIPL 等方法论
+
+# 已登记的 skill（applicable_skills 只允许引用这些）
+known_skills:
+  - uxeval
+  - prd2proto
+  - ai-analytics
+
+assets:
+  # ===== design =====
+  - id: design.visual-strategy-principles
+    version: 0.1.0-draft
+    domain: design
+    type: principles
+    applicable_skills: [prd2proto, ai-analytics]
+    source_of_truth: knowledge/design/visual-strategy-principles.md
+    decision_use: 指导视觉策略取舍（层级、对比、节奏、留白）的通用判断准则
+    quality_bar: 每条原则可被一个具体反例证伪；不依赖任何单一品牌
+    do_not_claim: 不规定具体色值/字号/品牌资产；不替代 design-spec.md
+    owner: designos-core
+    status: draft
+
+  - id: design.template-catalog
+    version: 0.1.0-draft
+    domain: design
+    type: catalog
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/design/template-catalog.md
+    decision_use: 登记可复用视觉风格模板族（特征/适用场景/选择维度）的通用目录
+    quality_bar: 仅描述模板的可复用选择维度，不内嵌任一 skill 的选择算法
+    do_not_claim: 不绑定 prd2proto 的选择流程；不复制各模板的完整 token 正文
+    owner: designos-core
+    status: draft
+
+  - id: design.quality-standard
+    version: 0.1.0-draft
+    domain: design
+    type: standard
+    applicable_skills: [prd2proto, ai-analytics]
+    source_of_truth: knowledge/design/quality-standard.md
+    decision_use: 判定设计产出是否达标（一致性、可读性、可达性、品牌契合）的通用标准
+    quality_bar: 每条标准给出可观察的判定信号，不依赖具体工具链
+    do_not_claim: 不定义任何 skill 的验收 gate；不规定具体阈值由 skill 自定
+    owner: designos-core
+    status: draft
+
+  # ===== ux =====
+  - id: ux.heuristic-principles
+    version: 0.1.0-draft
+    domain: ux
+    type: principles
+    applicable_skills: [uxeval]
+    source_of_truth: knowledge/ux/heuristic-principles.md
+    decision_use: 体验评估的启发式原则总集（可被多 skill 引用的通用原则定义）
+    quality_bar: 每条原则有稳定编号与一句话定义，正文不含被测产品信息
+    do_not_claim: 不规定评分公式；不定义某次评估的任务清单
+    owner: designos-core
+    status: draft
+
+  - id: ux.severity-scale
+    version: 0.1.0-draft
+    domain: ux
+    type: standard
+    applicable_skills: [uxeval]
+    source_of_truth: knowledge/ux/severity-scale.md
+    decision_use: 问题严重等级的通用分级口径（critical/major/minor/suggestion）
+    quality_bar: 每级有可区分的判定边界，跨 skill 一致
+    do_not_claim: 不绑定任何 issue 数据结构；不规定上报渠道
+    owner: designos-core
+    status: draft
+
+  - id: ux.evidence-standard
+    version: 0.1.0-draft
+    domain: ux
+    type: standard
+    applicable_skills: [uxeval]
+    source_of_truth: knowledge/ux/evidence-standard.md
+    decision_use: 评估结论的证据充分性通用标准（可追溯、可复现、可定位）
+    quality_bar: 标准用证据属性表述，不依赖具体采集工具
+    do_not_claim: 不规定截图/录屏格式；不定义存储路径
+    owner: designos-core
+    status: draft
+
+  # ===== product =====
+  - id: product.story-mapping
+    version: 0.1.0-draft
+    domain: product
+    type: methodology
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/product/story-mapping.md
+    decision_use: 把需求拆解为 modules/features/flows 的通用故事地图方法
+    quality_bar: 方法描述与任一 PRD 无关，仅给结构与判定规则
+    do_not_claim: 不规定输出 schema；不绑定某 skill 的 stage 编号
+    owner: designos-core
+    status: draft
+
+  - id: product.information-architecture
+    version: 0.1.0-draft
+    domain: product
+    type: methodology
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/product/information-architecture.md
+    decision_use: 页面/导航/命名的信息架构通用方法（IA 组织原则）
+    quality_bar: 仅给组织原则与命名约定，不含具体产品页面树
+    do_not_claim: 不规定路由实现；不绑定前端框架
+    owner: designos-core
+    status: draft
+
+  # ===== frontend =====
+  - id: frontend.design-tokens
+    version: 0.1.0-draft
+    domain: frontend
+    type: standard
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/frontend/design-tokens.md
+    decision_use: design token 的通用分层与命名标准（W3C 对齐的口径）
+    quality_bar: 标准与具体取值无关，只规定层级、命名、引用方式
+    do_not_claim: 不内嵌某模板的 token 取值；不规定打包工具
+    owner: designos-core
+    status: draft
+
+  - id: frontend.component-structure
+    version: 0.1.0-draft
+    domain: frontend
+    type: principles
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/frontend/component-structure.md
+    decision_use: 组件分层与状态覆盖的通用原则（原子化、状态完备性）
+    quality_bar: 原则可跨框架成立，不依赖具体组件库
+    do_not_claim: 不规定具体库 API；不定义代码生成实现
+    owner: designos-core
+    status: draft
+
+  - id: frontend.code-quality-rules
+    version: 0.1.0-draft
+    domain: frontend
+    type: standard
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/frontend/code-quality-rules.md
+    decision_use: 生成代码的通用质量规则（不硬编码、可达性、状态完整）
+    quality_bar: 每条规则可被静态检查或评审验证，与语言中立
+    do_not_claim: 不复制任一 skill 的 constitution 正文；不定义 lint 配置
+    owner: designos-core
+    status: draft
+
+  # ===== research =====
+  - id: research.competitor-analysis
+    version: 0.1.0-draft
+    domain: research
+    type: methodology
+    applicable_skills: [ai-analytics]
+    source_of_truth: knowledge/research/competitor-analysis.md
+    decision_use: 竞品分析的通用框架（维度选取、对比矩阵构建、结论提炼）
+    quality_bar: 框架与任一具体竞品无关，仅给方法步骤
+    do_not_claim: 不预设行业；不规定数据来源
+    owner: designos-core
+    status: draft
+
+  - id: research.methodology-library
+    version: 0.1.0-draft
+    domain: research
+    type: methodology
+    applicable_skills: [ai-analytics]
+    source_of_truth: knowledge/research/methodology-library.md
+    decision_use: SWOT/PEST/KANO/JTBD/AIPL 等方法论的通用定义与适用判定
+    quality_bar: 每个方法论给出适用前提与不适用边界，互不混淆
+    do_not_claim: 不规定选择算法；不绑定某 skill 的方法论选择 stage
+    owner: designos-core
+    status: draft
+
+  - id: research.user-persona
+    version: 0.1.0-draft
+    domain: research
+    type: methodology
+    applicable_skills: [ai-analytics]
+    source_of_truth: knowledge/research/user-persona.md
+    decision_use: 用户画像构建的通用方法（要素、证据来源、可信度标注）
+    quality_bar: 方法描述与具体用户群无关，强调证据可追溯
+    do_not_claim: 不预设画像内容；不规定输出格式
+    owner: designos-core
+    status: draft
+
