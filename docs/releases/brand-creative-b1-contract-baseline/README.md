@@ -1,8 +1,8 @@
 # Brand Creative B1.0 — Contract Baseline
 
-**Release Date:** 2026-06-04  
-**Batch:** B1.0 — brand-creative 契约冻结 + 知识就绪基线  
-**Branch:** `skills-pilot-wave2`  
+**Release Date:** 2026-06-04
+**Batch:** B1.0 — brand-creative 契约冻结 + 知识就绪基线
+**Branch:** `skills-pilot-wave2`
 **Scope:** 契约冻结 + P0 知识资产就绪;不交付子技能 runtime(留给 B1.1+)
 
 ---
@@ -11,23 +11,23 @@
 
 ### 1. 契约冻结(13 子技能)
 - **文件:** `skills/brand-creative/contracts/sub-skill-contracts.yaml`
-- **子技能:** brand-strategy / competitive-analysis / logo-design / color-system / 
-  typography-system / visual-identity / brand-voice / content-strategy / 
+- **子技能:** brand-strategy / competitive-analysis / logo-design / color-system /
+  typography-system / visual-identity / brand-voice / content-strategy /
   campaign-creative / brand-collateral / digital-assets / brand-guidelines / brand-audit
 - **契约状态:**
   - 7 `ready_for_parallel`(P0 知识 gap=0,schema 完整,无未开发强制上游)
   - 1 `ready_after_upstream`(知识/schema 就绪,运行时等上游先开发)
   - 5 `blocked_by_knowledge`(依赖 partial_reuse 或缺专有资产,需 B1.1+ 补)
-- **契约完整性:** 每个子技能 18 必填字段齐全(purpose / trigger_examples / 
-  required_inputs / optional_inputs / upstream_contracts / public_outputs / 
-  internal_outputs / output_schema_refs / downstream_consumers / runtime_dependencies / 
+- **契约完整性:** 每个子技能 18 必填字段齐全(purpose / trigger_examples /
+  required_inputs / optional_inputs / upstream_contracts / public_outputs /
+  internal_outputs / output_schema_refs / downstream_consumers / runtime_dependencies /
   knowledge_ids / quality_gate / fallback_behavior / do_not_claim / contract_status / owner)。
 
 ### 2. 产物 Schema(16 个)
 - **目录:** `skills/brand-creative/contracts/schemas/`
-- **文件:** brand_brief / competitor_matrix / market_gap_report / logo_spec / 
-  logo_prompt_pack / color_palette / typography_spec / vi_manual / brand_voice_guide / 
-  content_strategy / campaign_brief / creative_concepts / collateral_spec / 
+- **文件:** brand_brief / competitor_matrix / market_gap_report / logo_spec /
+  logo_prompt_pack / color_palette / typography_spec / vi_manual / brand_voice_guide /
+  content_strategy / campaign_brief / creative_concepts / collateral_spec /
   digital_asset_kit / brand_guidelines / brand_audit_report(全部 .schema.json)
 - **标准:** 全部合法 JSON Schema draft-07(含 $schema / type=object / properties / required)。
 
@@ -49,8 +49,8 @@
 - **design.quality.brand-creative-failure-modes**
   - 品牌创意失败模式库(现象/可检测信号/根因/返工条件)
 
-**资产标准(守则 4):** 每个资产 11 段结构(purpose / applies_to / input_contract / 
-decision_framework / senior_heuristics / output_contract / quality_rubric / 
+**资产标准(守则 4):** 每个资产 11 段结构(purpose / applies_to / input_contract /
+decision_framework / senior_heuristics / output_contract / quality_rubric /
 common_failure_modes / senior_review_checklist / source_assets / do_not_claim),
 含真实的资深判断能力(量化标准/冲突取舍/失败信号/一票否决/返工条件)。
 
@@ -67,8 +67,8 @@ common_failure_modes / senior_review_checklist / source_assets / do_not_claim),
 
 ### 6. 测试覆盖
 - **文件:** `skills/brand-creative/tests/test_brand_creative_contracts.py`
-- **覆盖:** 批次第六节 10 条要求全部落地为自动化测试(契约完整性 / public_outputs 
-  合法性 / Kernel 不改 / schema 存在与合法 / workflow 依赖一致 / active 知识存在 / 
+- **覆盖:** 批次第六节 10 条要求全部落地为自动化测试(契约完整性 / public_outputs
+  合法性 / Kernel 不改 / schema 存在与合法 / workflow 依赖一致 / active 知识存在 /
   planned 不被 ready 消费 / ready 子技能 P0 gap=0 / 不用 IP rubric 冒充 / 无过度承诺)。
 - **结果:** 23 passed。
 
@@ -94,7 +94,7 @@ common_failure_modes / senior_review_checklist / source_assets / do_not_claim),
 - ✅ 所有 source_assets 仅引用真实仓库文件或明确标注 pilot synthesis。
 
 ### 守则 3:契约状态诚实性
-- ❌ 修正前:visual-identity 标 `ready_for_parallel`,但运行时依赖 logo/color/typography 
+- ❌ 修正前:visual-identity 标 `ready_for_parallel`,但运行时依赖 logo/color/typography
   三个尚未开发的上游。
 - ✅ 修正后:visual-identity 改为 `ready_after_upstream`(知识/schema 就绪,但不能与上游
   同批并行)。
@@ -113,7 +113,7 @@ common_failure_modes / senior_review_checklist / source_assets / do_not_claim),
 
 - 任何子技能的 SKILL.md / pipeline.yaml / prompts(留给 B1.1+)。
 - partial_reuse 资产的私有 adapter(留给对应子技能开发批次)。
-- content-strategy / campaign-creative / brand-collateral / digital-assets / 
+- content-strategy / campaign-creative / brand-collateral / digital-assets /
   brand-guidelines 的 P0 知识资产(5 个 blocked 子技能留给 B1.1+)。
 - 不修改 Kernel / Factory。
 - 两个本地 commit(先 knowledge 后 contracts),不 push。
@@ -137,7 +137,7 @@ common_failure_modes / senior_review_checklist / source_assets / do_not_claim),
 ## 🔄 后续批次(B1.1+)
 
 ### B1.1(可选):第一波 7 子技能 runtime
-- brand-strategy / competitive-analysis / logo-design / color-system / 
+- brand-strategy / competitive-analysis / logo-design / color-system /
   typography-system / brand-voice / brand-audit
 - 交付每个子技能的 SKILL.md / pipeline.yaml / prompts / smoke test。
 

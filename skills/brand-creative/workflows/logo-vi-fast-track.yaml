@@ -2,13 +2,7 @@ name: logo-vi-fast-track
 description: |
   Logo+VI 快速通道:仅视觉识别系统。适合已有品牌策略,只需视觉执行。
   并行边界:logo/color/typography 三者并行,visual-identity 汇总串行。
-
-external_inputs:
-  required:
-    - name: brand_brief
-      type: brand_brief
-      description: 外部提供的品牌策略基线(北极星/定位/人格关键词)
-      provider: user_or_upstream_workflow
+  外部输入契约见 contracts/workflow-input-contracts.yaml。
 
 steps:
   # logo-design / color-system / typography-system 三者并行

@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "brand-creative/typography_spec",
+  "x-output-type": "visual_spec",
   "title": "typography_spec",
   "description": "字体系统规范(internal,也作 visual_spec 公开)。typography-system 产出。",
   "type": "object",

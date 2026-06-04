@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "brand-creative/logo_spec",
+  "x-output-type": "visual_spec",
   "title": "logo_spec",
   "description": "Logo 设计规范(internal,也作 visual_spec 公开)。logo-design 产出。不含最终商用图形。",
   "type": "object",

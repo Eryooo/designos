@@ -1,6 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "brand-creative/vi_manual",
+  "x-output-type": "style_guide",
   "title": "vi_manual",
   "description": "完整 VI 手册(internal,也作 style_guide 公开)。visual-identity 汇总产出。",
   "type": "object",

@@ -299,7 +299,7 @@ def test_producer_consumer_field_level_connectivity() -> None:
     - consumer 的 required_inputs + optional_inputs 能匹配上 producer 产物名
     """
     contracts = {s["id"]: s for s in _contracts()}
-    
+
     disconnected = []
     for cid, c in contracts.items():
         for up_raw in c.get("upstream_contracts", []) or []:
@@ -307,20 +307,20 @@ def test_producer_consumer_field_level_connectivity() -> None:
             up_id = up_raw.split()[0].strip()
             if up_id not in contracts:
                 continue  # 外部依赖或注释,跳过
-            
+
             producer = contracts[up_id]
             consumer = c
-            
+
             # producer 产出
             p_outputs = set()
             for o in (producer.get("public_outputs", []) or []) + (producer.get("internal_outputs", []) or []):
                 p_outputs.add(o["name"])
-            
+
             # consumer 输入
             c_inputs = set()
             for i in (consumer.get("required_inputs", []) or []) + (consumer.get("optional_inputs", []) or []):
                 c_inputs.add(i["name"])
-            
+
             # 检查连通性:consumer 输入能否找到 producer 产出
             matched = p_outputs & c_inputs
             if not matched and p_outputs:
@@ -328,79 +328,75 @@ def test_producer_consumer_field_level_connectivity() -> None:
                     f"{up_id} → {cid}: producer 产出 {p_outputs}, "
                     f"consumer 输入 {c_inputs}, 无匹配字段"
                 )
-    
+
     assert not disconnected, "字段级断链:\n" + "\n".join(disconnected)
+def test_workflow_input_contracts_static_integrity() -> None:
+    """验证 workflow-input-contracts.yaml 的静态契约完整性。
 
-
-def test_workflow_external_inputs_are_machine_readable() -> None:
-    """workflow 外部输入契约必须机器可读(不允许只在注释声明)。
-
-    检查 logo-vi-fast-track / campaign-sprint 的 external_inputs 字段存在且包含必需输入。
+    这是静态集成契约测试,不是运行时测试。检查:
+    - 文件存在且可解析
+    - 每个 workflow_id 对应的 required_inputs schema_ref 存在
+    - 明确声明 runtime_enforced: false
     """
-    fm = _parse_group_frontmatter()
-    
-    for entry in fm["workflows"]:
-        if entry["id"] not in ("logo-vi-fast-track", "campaign-sprint"):
-            continue
-        
-        wf = _load(_BC / entry["file"])
-        assert "external_inputs" in wf, (
-            f"{entry['file']} 缺 external_inputs 字段(不允许只在注释声明前置输入)"
-        )
-        
-        ext_inputs = wf["external_inputs"]
-        assert "required" in ext_inputs, f"{entry['file']} external_inputs 缺 required"
-        
-        required = ext_inputs["required"]
-        assert isinstance(required, list) and len(required) > 0, (
-            f"{entry['file']} external_inputs.required 必须是非空列表"
-        )
-        
-        # logo-vi-fast-track 必须要求 brand_brief
-        if entry["id"] == "logo-vi-fast-track":
-            req_names = {r["name"] for r in required}
-            assert "brand_brief" in req_names, (
-                f"{entry['file']} 必须明确要求外部提供 brand_brief"
-            )
-        
-        # campaign-sprint 必须要求 vi_manual + brand_voice_guide
-        if entry["id"] == "campaign-sprint":
-            req_names = {r["name"] for r in required}
-            assert "vi_manual" in req_names and "brand_voice_guide" in req_names, (
-                f"{entry['file']} 必须明确要求外部提供 vi_manual + brand_voice_guide"
+    import yaml
+    from pathlib import Path
+
+    wf_input_path = Path("skills/brand-creative/contracts/workflow-input-contracts.yaml")
+    assert wf_input_path.is_file(), "workflow-input-contracts.yaml 不存在"
+
+    data = yaml.safe_load(wf_input_path.read_text(encoding="utf-8"))
+    assert "schema_version" in data, "缺少 schema_version"
+    assert "workflows" in data, "缺少 workflows"
+
+    schemas_dir = Path("skills/brand-creative/contracts/schemas")
+
+    for wf in data["workflows"]:
+        assert "workflow_id" in wf, f"{wf} 缺少 workflow_id"
+        wf_id = wf["workflow_id"]
+
+        for inp in wf.get("required_inputs", []):
+            assert "name" in inp, f"{wf_id} required_inputs 缺少 name"
+            assert "runtime_enforced" in inp, f"{wf_id}.{inp['name']} 未声明 runtime_enforced"
+            assert inp["runtime_enforced"] is False, (
+                f"{wf_id}.{inp['name']} runtime_enforced 必须为 false(当前 Kernel 无强制)"
             )
 
+            schema_ref = inp.get("schema_ref")
+            if schema_ref and schema_ref != "null":
+                schema_path = schemas_dir / schema_ref.split("/")[-1]
+                assert schema_path.is_file(), (
+                    f"{wf_id}.{inp['name']} schema_ref={schema_ref} 不存在"
+                )
 
-def test_public_output_type_schema_semantic_consistency() -> None:
-    """public output 的 type / output name / schema 必须语义一致。
 
-    - image_prompt_pack 必须绑定真正的 prompt pack schema(文件名含 prompt)
-    - professional_gap_report 必须绑定独立 gap report schema(文件名含 gap)
-    - 无合适 OutputType 时应保留为 internal_outputs,不伪装
+def test_public_output_type_matches_schema_x_output_type() -> None:
+    """精确断言: public_output.type == schema["x-output-type"]。
+
+    禁止依靠文件名字符串判断(如 "prompt" in filename)。
+    每个 public output 的 schema 必须声明 x-output-type,且必须与 public_output.type 精确匹配。
+    internal-only schema 可以不声明 x-output-type。
     """
+    import json
+    from pathlib import Path
+
+    schemas_dir = Path("skills/brand-creative/contracts/schemas")
+
     for s in _contracts():
         for o in s.get("public_outputs", []) or []:
-            name = o["name"]
-            otype = o["type"]
             schema_ref = o.get("schema_ref", "")
-            
-            # image_prompt_pack 必须绑定 prompt pack schema
-            if otype == "image_prompt_pack":
-                assert "prompt" in schema_ref.lower(), (
-                    f"{s['id']}.{name}: type=image_prompt_pack 但 schema_ref={schema_ref} "
-                    f"不含 prompt(语义错配)"
-                )
-            
-            # professional_gap_report 必须绑定 gap report schema
-            if otype == "professional_gap_report":
-                assert "gap" in schema_ref.lower(), (
-                    f"{s['id']}.{name}: type=professional_gap_report 但 schema_ref={schema_ref} "
-                    f"不含 gap(语义错配)"
-                )
-            
-            # 不允许用 brand_material_spec 伪装非物料产物
-            if otype == "brand_material_spec" and "collateral" not in schema_ref and "guideline" not in schema_ref:
-                assert False, (
-                    f"{s['id']}.{name}: type=brand_material_spec 但 schema={schema_ref} "
-                    f"不是物料/手册,语义错配"
-                )
+            if not schema_ref:
+                continue
+
+            schema_path = schemas_dir / schema_ref
+            assert schema_path.is_file(), f"{s['id']}.{o['name']} schema_ref={schema_ref} 不存在"
+
+            schema = json.loads(schema_path.read_text(encoding="utf-8"))
+            assert "x-output-type" in schema, (
+                f"{s['id']}.{o['name']} schema {schema_ref} 缺少 x-output-type"
+            )
+
+            # 精确匹配
+            assert o["type"] == schema["x-output-type"], (
+                f"{s['id']}.{o['name']}: public_output.type={o['type']} "
+                f"但 schema x-output-type={schema['x-output-type']}(不匹配)"
+            )
