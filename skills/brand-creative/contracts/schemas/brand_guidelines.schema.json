@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/brand_guidelines",
+  "title": "brand_guidelines",
+  "description": "完整品牌手册(internal 聚合,也作 brand_material_spec 公开)。brand-guidelines 产出。",
+  "type": "object",
+  "required": [
+    "strategy_section",
+    "vi_section",
+    "voice_section",
+    "gap_report"
+  ],
+  "properties": {
+    "strategy_section": {
+      "type": "object"
+    },
+    "vi_section": {
+      "type": "object"
+    },
+    "voice_section": {
+      "type": "object"
+    },
+    "content_section": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "collateral_section": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "gap_report": {
+      "type": "object"
+    },
+    "consistency_check": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

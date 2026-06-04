@@ -324,7 +324,8 @@ def test_workflow_yaml_has_no_unknown_fields_silently_dropped() -> None:
         raw_yaml = yaml.safe_load(wf_path.read_text(encoding="utf-8"))
 
         # 检查 workflow 顶层字段
-        unknown_top = set(raw_yaml.keys()) - workflow_known_fields
+        # B1.0.1: 允许 external_inputs(机器可读外部输入契约)
+        unknown_top = set(raw_yaml.keys()) - workflow_known_fields - {"external_inputs"}
         assert not unknown_top, (
             f"{entry['file']} 顶层含未知字段(将被 WorkflowConfig 静默丢弃): "
             f"{unknown_top}"

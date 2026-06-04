@@ -1,0 +1,59 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/logo_spec",
+  "title": "logo_spec",
+  "description": "Logo 设计规范(internal,也作 visual_spec 公开)。logo-design 产出。不含最终商用图形。",
+  "type": "object",
+  "required": [
+    "form",
+    "black_white_usable",
+    "min_size_px"
+  ],
+  "properties": {
+    "form": {
+      "type": "object",
+      "description": "形态方向",
+      "properties": {
+        "primary_shape": {
+          "type": "string"
+        },
+        "rationale": {
+          "type": "string"
+        }
+      }
+    },
+    "color_refs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "black_white_usable": {
+      "type": "boolean",
+      "description": "黑白可用性验证"
+    },
+    "min_size_px": {
+      "type": "integer",
+      "description": "最小可识别尺寸"
+    },
+    "auxiliary_graphics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "trademark_risk_signals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "application_scenarios": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

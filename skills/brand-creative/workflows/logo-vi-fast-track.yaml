@@ -3,9 +3,16 @@ description: |
   Logo+VI 快速通道:仅视觉识别系统。适合已有品牌策略,只需视觉执行。
   并行边界:logo/color/typography 三者并行,visual-identity 汇总串行。
 
+external_inputs:
+  required:
+    - name: brand_brief
+      type: brand_brief
+      description: 外部提供的品牌策略基线(北极星/定位/人格关键词)
+      provider: user_or_upstream_workflow
+
 steps:
   # logo-design / color-system / typography-system 三者并行
-  # (本 workflow 假设品牌策略已存在,作为输入提供)
+  # (消费外部提供的 brand_brief)
   - type: parallel
     sub_skills: [logo-design, color-system, typography-system]
     on_failure: abort

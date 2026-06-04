@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/digital_asset_kit",
+  "title": "digital_asset_kit",
+  "description": "数字资产套件规范(internal)。digital-assets 产出。",
+  "type": "object",
+  "required": [
+    "asset_types"
+  ],
+  "properties": {
+    "asset_types": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object"
+      }
+    },
+    "responsive_specs": {
+      "type": "object"
+    },
+    "prompt_pack": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

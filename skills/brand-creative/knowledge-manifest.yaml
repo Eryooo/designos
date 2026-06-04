@@ -1,97 +1,114 @@
 skill: brand-creative
-schema_version: "0.1.0"
-status: group-architecture-baseline   # B0: Skill Group 架构基线;子技能 runtime 留给 B1+
+schema_version: "0.2.0"
+status: contract-frozen   # B1.0: 契约冻结 + 知识就绪;子技能 runtime 留给 B1.1+
 purpose: |
   声明 brand-creative Skill Group 的子技能复用哪些 DesignOS 共享设计决策资产;
-  仅引用 shared knowledge id,不复制正文。本批(B0)只建 Group 架构骨架,
-  不开发子技能 runtime;子技能 runtime 留给 B1+。
+  仅引用 shared knowledge id,不复制正文。B1.0 冻结契约 + 补齐 P0 知识资产,
+  不开发子技能 runtime。
 
 # ─────────────────────────────────────────────────────────────────────
-# 共享决策资产引用 — 标注每个资产被哪些子技能消费
+# Active shared knowledge — 已实现且真实存在于 knowledge/manifest.yaml
+# ready_for_parallel 子技能只能消费 active 资产(P0 gap = 0)
 # ─────────────────────────────────────────────────────────────────────
 shared_knowledge:
-  - id: design.strategy.brand-strategy-alignment
+  # B1.0 新增的品牌创意专业资产
+  - id: design.strategy.brand-strategy-methodology
     used_by: [brand-strategy]
-    use: 品牌策略对齐:定位/差异化/核心价值/人格关键词
-  - id: design.visual.visual-translation
-    used_by: [logo-design, color-system, visual-identity]
-    use: 视觉转化(形态/色彩/识别度/小尺寸/风格坐标/禁忌),子技能各取所需子集
-  - id: design.visual.image-prompt-system
-    used_by: [logo-design, campaign-creative, digital-assets]
-    use: AI 绘图提示词系统(四层/多平台/稳定/一致/负向)
+    use: 通用品牌策略决策(北极星/定位/价值分层/人格关键词/差异化)
+  - id: design.visual.logo-design-methodology
+    used_by: [logo-design]
+    use: Logo 设计决策(类型/黑白/缩放/组合/辅助图形/商标风险)
+  - id: design.visual.color-system-methodology
+    used_by: [color-system]
+    use: 色彩系统决策(角色/对比度/明暗/介质差异/可访问性)
+  - id: design.visual.typography-system-methodology
+    used_by: [typography-system]
+    use: 字体系统决策(配对/字重/比例/行高/授权/跨端)
+  - id: design.strategy.brand-audit-methodology
+    used_by: [brand-audit]
+    use: 品牌审计决策(健康度/差距/对标/优先级)
+  - id: design.strategy.brand-voice-methodology
+    used_by: [brand-voice]
+    use: 通用品牌声音决策(语调/口头禅/场景话术/内容原则/红线)
+  - id: design.quality.brand-identity-quality-rubric
+    used_by: [brand-strategy, logo-design, color-system, typography-system, visual-identity, brand-voice, brand-audit]
+    use: 品牌识别专用质量 rubric(三档 + 一票否决);禁用 IP rubric 冒充
+  - id: design.quality.brand-creative-failure-modes
+    used_by: [brand-strategy, logo-design, color-system, typography-system, campaign-creative]
+    use: 品牌创意失败模式库(现象/信号/根因/返工)
+  # 复用既有共享资产(直接可用)
+  - id: research.competitor-analysis
+    used_by: [competitive-analysis]
+    use: 竞品分析方法(K1 已有,直接复用)
   - id: design.persona.voice-and-behavior-boundary
     used_by: [brand-voice]
-    use: 品牌声音边界:语调/口头禅/场景话术/红线
-  - id: design.ip.content-narrative
-    used_by: [content-strategy, campaign-creative]
-    use: 内容叙事:支柱/矩阵/节奏(品牌层,非 IP 人格层)
-  - id: design.ip.brand-material-realization
-    used_by: [brand-collateral, digital-assets, brand-guidelines]
-    use: 物料落地与传播指南
-  - id: design.quality.ip-design-quality-rubric
-    used_by: [visual-identity, brand-guidelines]
-    use: 质量 rubric(品牌识别维度子集)+ 一票否决
-  - id: design.quality.stage-review-checklists
-    used_by: [brand-strategy, logo-design, visual-identity, brand-guidelines]
-    use: 阶段放行必过项
-  - id: design.quality.common-failure-modes
-    used_by: [logo-design, visual-identity, campaign-creative]
-    use: 失败模式自检
+    use: 声音边界(K1 已有,品牌层直接适用)
+  - id: design.visual.image-prompt-system
+    used_by: [logo-design, campaign-creative, digital-assets]
+    use: AI 绘图 prompt 系统(I0 已有)
   - id: design.quality.professional-gap-report
-    used_by: [visual-identity, brand-guidelines, brand-audit]
-    use: 不达中阶时的诚实声明
+    used_by: [visual-identity, brand-guidelines]
+    use: 不达中阶时的诚实 gap 声明(I0 已有)
 
 # ─────────────────────────────────────────────────────────────────────
-# 模板引用 — 子技能产出物结构参考
+# Partial reuse — 仅可通过私有 adapter 部分复用,不可直接当完整覆盖
+# 消费这些资产的子技能不得标 ready_for_parallel(需 B1.1+ 建 adapter)
+# ─────────────────────────────────────────────────────────────────────
+partial_reuse:
+  - id: design.strategy.brand-strategy-alignment
+    used_by: [brand-strategy]
+    caveat: IP Design 偏向,仅策略对齐框架可部分参考;通用品牌策略以 brand-strategy-methodology 为准
+  - id: design.visual.visual-translation
+    used_by: [logo-design, color-system]
+    caveat: IP 角色形态偏向,仅形态/色彩/识别度通用部分可参考
+  - id: design.ip.content-narrative
+    used_by: [content-strategy, campaign-creative]
+    caveat: IP 叙事偏向,仅内容支柱/矩阵/节奏方法可部分复用;非完整品牌内容覆盖
+  - id: design.ip.brand-material-realization
+    used_by: [brand-collateral, digital-assets, brand-guidelines]
+    caveat: IP 物料偏向,仅通用物料/数字规范可部分复用
+  - id: design.quality.ip-design-quality-rubric
+    used_by: []
+    caveat: IP 专用 rubric,brand-creative 一律改用 brand-identity-quality-rubric,禁止直接冒充
+  - id: design.quality.common-failure-modes
+    used_by: [campaign-creative]
+    caveat: IP 偏向失败模式,brand-creative 以 brand-creative-failure-modes 为主
+
+# ─────────────────────────────────────────────────────────────────────
+# Shared templates — 产出物结构参考
 # ─────────────────────────────────────────────────────────────────────
 shared_templates:
   - id: design.templates.brand-brief
     used_by: [brand-strategy]
     use: 品牌策略产出结构
   - id: design.templates.visual-spec
-    used_by: [logo-design, color-system, visual-identity]
+    used_by: [logo-design, color-system, typography-system, visual-identity]
     use: 视觉规范产出结构(品牌识别子集)
   - id: design.templates.content-plan
-    used_by: [content-strategy]
-    use: 内容策略产出结构
+    used_by: [brand-voice, content-strategy]
+    use: 内容/声音产出结构
   - id: design.templates.brand-material-spec
     used_by: [brand-collateral, brand-guidelines]
     use: 物料规格产出结构
 
 # ─────────────────────────────────────────────────────────────────────
-# Planned assets — B0 识别但尚未实现的共享决策资产(不在 active/required 列表)
-# 这些 id 当前不存在于 knowledge/manifest.yaml,B1+ 开发对应子技能前必须先补。
+# Planned assets — 尚未实现的资产(B1.0 已清零 P0 阻塞项)
+# B1.0 把原 3 个 planned(logo/typography/audit methodology)全部实现并移入 active。
+# 当前无 P0 planned 阻塞项;以下为 B1.1+ 可选增强(非阻塞)。
 # ─────────────────────────────────────────────────────────────────────
-planned_assets:
-  - id: design.visual.logo-design-methodology
-    status: planned   # 尚未实现,不在 active shared_knowledge 列表
-    needed_by: [logo-design]
-    reason: |
-      logo 设计有独立于 IP 视觉转化的方法论(标志类型/可缩放矢量/黑白可用性/
-      商标查重信号),M04 只覆盖部分。B1 开发 logo-design 前需补此资产。
-  - id: design.visual.typography-system-methodology
-    status: planned
-    needed_by: [typography-system]
-    reason: |
-      字体系统(字体配对/字号比例/行高/中西文混排/授权)无现有资产覆盖。
-      B1 开发 typography-system 前需补此资产。
-  - id: design.strategy.brand-audit-methodology
-    status: planned
-    needed_by: [brand-audit]
-    reason: |
-      品牌审计(健康度评估/差距分析/竞品对标)无现有资产覆盖。
-      B1 开发 brand-audit 前需补此资产。
+planned_assets: []
 
 # ─────────────────────────────────────────────────────────────────────
-# B0 范围声明
+# B1.0 范围声明
 # ─────────────────────────────────────────────────────────────────────
 baseline_scope:
   delivered:
-    - GROUP.md(13 子技能 + 4 workflows 声明)
-    - knowledge-manifest.yaml(本文件)
-    - workflows/*.yaml(4 个 workflow 草图)
-    - sub-skills/*/README.md(13 个占位)
-    - tests + release baseline
+    - contracts/sub-skill-contracts.yaml(13 子技能契约冻结)
+    - contracts/schemas/*.schema.json(16 个产物 schema)
+    - contracts/knowledge-readiness-matrix.yaml(知识就绪审计)
+    - 7 个 brand-creative 专业决策资产(已登记 knowledge/manifest.yaml)
+    - knowledge-manifest.yaml(本文件,active/partial/planned 分离)
+    - 契约与知识就绪测试
   not_delivered:
-    - 任何子技能的 SKILL.md / pipeline.yaml / prompts(留给 B1+)
-    - planned_assets 中的 3 个尚未实现资产(B1+ 开发对应子技能前必须先补)
+    - 任何子技能的 SKILL.md / pipeline.yaml / prompts(留给 B1.1+)
+    - partial_reuse 资产的私有 adapter(留给对应子技能开发批次)

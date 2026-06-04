@@ -9,6 +9,17 @@ description: |
   - 用户已有 competitor_matrix 时,competitive-analysis 负责验证、规范化和补充。
   生产者(competitive-analysis)与消费者(brand-strategy)绝不放在同一 parallel step。
 
+external_inputs:
+  required:
+    - name: vi_manual
+      type: vi_manual
+      description: 外部提供的视觉识别手册(logo/色彩/字体规范)
+      provider: user_or_upstream_workflow
+    - name: brand_voice_guide
+      type: brand_voice_guide
+      description: 外部提供的品牌声音指南(语调/口头禅/话术原则)
+      provider: user_or_upstream_workflow
+
 steps:
   # 竞品分析(串行先行)
   - type: sequential
