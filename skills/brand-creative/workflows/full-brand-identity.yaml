@@ -1,0 +1,56 @@
+name: full-brand-identity
+description: |
+  完整品牌识别全链路:从品牌策略到完整品牌手册。适合从零建立品牌。
+  并行边界(运行时):同 phase 内无运行时依赖的子技能并行;跨 phase 串行(下游依赖上游产物)。
+  注意:开发并行 ≠ 运行时依赖。本文件描述运行时调度。
+
+  竞品分析策略:
+  - workflow 始终先运行 competitive-analysis,后运行 brand-strategy。
+  - 用户已有 competitor_matrix 时,competitive-analysis 负责验证、规范化和补充。
+  - 用户直接调用 brand-strategy 子技能时,可使用已有 competitor_matrix,不要求先执行 competitive-analysis。
+  生产者(competitive-analysis)与消费者(brand-strategy)绝不放在同一 parallel step。
+
+steps:
+  # ── Phase 1a: 竞品分析(串行先行)──
+  - type: sequential
+    sub_skills: [competitive-analysis]
+    on_failure: continue   # 失败时 brand-strategy 用 [inferred] 兜底
+
+  # ── Phase 1b: 品牌策略(消费 competitor_matrix,串行)──
+  - type: sequential
+    sub_skills: [brand-strategy]
+    on_failure: abort   # 策略是后续一切的基础,失败必须中止
+
+  # ── Phase 2: 视觉识别系统 ──
+  # color-system / typography-system / logo-design 可并行
+  # (都依赖 Phase 1 策略,但三者之间无依赖)
+  - type: parallel
+    sub_skills: [logo-design, color-system, typography-system]
+    on_failure: abort
+
+  # visual-identity 必须串行在后(依赖 logo/color/typography 三者产出)
+  - type: sequential
+    sub_skills: [visual-identity]
+    on_failure: abort
+
+  # ── Phase 3: 品牌内容与传播 ──
+  # brand-voice / content-strategy 可并行(都依赖策略,互不依赖)
+  - type: parallel
+    sub_skills: [brand-voice, content-strategy]
+    on_failure: continue   # 内容层失败不阻断物料层,可后补
+
+  # campaign-creative 依赖 brand-voice + visual-identity,串行
+  - type: sequential
+    sub_skills: [campaign-creative]
+    on_failure: continue
+
+  # ── Phase 4: 物料与落地 ──
+  # brand-collateral / digital-assets 可并行(都依赖 VI,互不依赖)
+  - type: parallel
+    sub_skills: [brand-collateral, digital-assets]
+    on_failure: continue
+
+  # brand-guidelines 必须最后串行(汇总所有上游产出)
+  - type: sequential
+    sub_skills: [brand-guidelines]
+    on_failure: abort   # 手册是最终交付物,失败需中止并报告
