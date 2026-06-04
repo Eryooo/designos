@@ -8,46 +8,46 @@ requires:
 sub_skills:
   # Phase 1: 策略与定位
   - id: brand-strategy
-    path: sub-skills/brand-strategy
+    path: sub-skills/brand-strategy/SKILL.md
     description: 品牌策略基线(定位/差异化/核心价值/人格关键词)
   - id: competitive-analysis
-    path: sub-skills/competitive-analysis
+    path: sub-skills/competitive-analysis/SKILL.md
     description: 竞品分析(视觉风格/传播策略/市场空白)
   # Phase 2: 视觉识别系统
   - id: logo-design
-    path: sub-skills/logo-design
+    path: sub-skills/logo-design/SKILL.md
     description: Logo 设计(形态/色彩/辅助图形/应用规范)
   - id: color-system
-    path: sub-skills/color-system
+    path: sub-skills/color-system/SKILL.md
     description: 品牌色彩系统(主色/辅色/色彩情绪/应用场景)
   - id: typography-system
-    path: sub-skills/typography-system
+    path: sub-skills/typography-system/SKILL.md
     description: 字体系统(主字体/辅助字体/字号层级/排版规范)
   - id: visual-identity
-    path: sub-skills/visual-identity
+    path: sub-skills/visual-identity/SKILL.md
     description: 完整 VI 手册(logo/色彩/字体/辅助图形/应用规范)
   # Phase 3: 品牌内容与传播
   - id: brand-voice
-    path: sub-skills/brand-voice
+    path: sub-skills/brand-voice/SKILL.md
     description: 品牌声音(语调/口头禅/场景话术/内容原则)
   - id: content-strategy
-    path: sub-skills/content-strategy
+    path: sub-skills/content-strategy/SKILL.md
     description: 内容策略(内容支柱/渠道矩阵/节奏日历)
   - id: campaign-creative
-    path: sub-skills/campaign-creative
+    path: sub-skills/campaign-creative/SKILL.md
     description: 营销创意(campaign 主题/视觉方向/传播素材)
   # Phase 4: 物料与落地
   - id: brand-collateral
-    path: sub-skills/brand-collateral
+    path: sub-skills/brand-collateral/SKILL.md
     description: 品牌物料(名片/信头/包装/宣传册)
   - id: digital-assets
-    path: sub-skills/digital-assets
+    path: sub-skills/digital-assets/SKILL.md
     description: 数字资产(网站视觉/社交媒体模板/H5 规范)
   - id: brand-guidelines
-    path: sub-skills/brand-guidelines
+    path: sub-skills/brand-guidelines/SKILL.md
     description: 完整品牌手册(策略/VI/声音/内容/物料)
   - id: brand-audit
-    path: sub-skills/brand-audit
+    path: sub-skills/brand-audit/SKILL.md
     description: 品牌审计(当前品牌健康度/差距/优化建议)
 workflows:
   - id: full-brand-identity

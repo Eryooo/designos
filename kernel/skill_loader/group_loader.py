@@ -8,7 +8,7 @@ directory. Sub-skills are loaded lazily via :func:`load_pipeline_skill` when
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import yaml
 
@@ -24,6 +24,9 @@ from kernel.errors import ConfigError
 
 from .frontmatter import parse_frontmatter
 from .pipeline_loader import PipelineSkill, load_pipeline_skill
+
+if TYPE_CHECKING:
+    from kernel.contracts.interfaces import ILLMClient, IMCPClient, IPipelineEngine
 
 
 class SkillGroup(ISkillGroup):
@@ -45,6 +48,10 @@ class SkillGroup(ISkillGroup):
         self._sub_skill_paths: dict[str, Path] = sub_skill_paths
         self._workflows: dict[str, WorkflowConfig] = workflows
         self._cache: dict[str, PipelineSkill] = {}
+        # Runtime dependencies attached after construction (B1.1 runtime fix)
+        self._engine: "IPipelineEngine | None" = None
+        self._llm: "ILLMClient | None" = None
+        self._mcp: "IMCPClient | None" = None
 
     @property
     def config(self) -> SkillConfig:
@@ -68,6 +75,29 @@ class SkillGroup(ISkillGroup):
             status=RunStatus.COMPLETED,
         )
 
+    def attach(
+        self,
+        *,
+        engine: "IPipelineEngine | None" = None,
+        llm: "ILLMClient | None" = None,
+        mcp: "IMCPClient | None" = None,
+    ) -> None:
+        """Attach runtime dependencies to this SkillGroup and all cached sub-skills.
+
+        B1.1 runtime fix: SkillGroup now stores engine/llm/mcp and attaches them
+        to lazily-loaded sub-skills. Already-cached sub-skills are also attached.
+        """
+        if engine is not None:
+            self._engine = engine
+        if llm is not None:
+            self._llm = llm
+        if mcp is not None:
+            self._mcp = mcp
+
+        # Attach to already-cached sub-skills
+        for skill in self._cache.values():
+            skill.attach(engine=self._engine, llm=self._llm, mcp=self._mcp)
+
     def _load_sub_skill(self, name: str) -> PipelineSkill:
         if name in self._cache:
             return self._cache[name]
@@ -78,7 +108,14 @@ class SkillGroup(ISkillGroup):
                 f"unknown sub-skill: {name}",
                 context={"group": self.name, "available": self.list_sub_skills()},
             )
-        skill: PipelineSkill = load_pipeline_skill(path.parent)
+        # B1.1 fix: GROUP.md path can be "sub-skills/<id>/SKILL.md" or "sub-skills/<id>"
+        if path.name == "SKILL.md":
+            skill_dir = path.parent
+        else:
+            skill_dir = path
+        skill: PipelineSkill = load_pipeline_skill(skill_dir)
+        # B1.1 runtime fix: attach group's runtime dependencies to newly-loaded sub-skill
+        skill.attach(engine=self._engine, llm=self._llm, mcp=self._mcp)
         self._cache[name] = skill
         return skill
 
