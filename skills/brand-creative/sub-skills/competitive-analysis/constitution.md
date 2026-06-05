@@ -103,4 +103,3 @@ description: |
 - ❌ 不把推断结论当作 observed 事实使用
 - ❌ 不在证据不足时编造 market_gap_report 的具体空白
 - ❌ 不把项目/产品/行业专属词写入 constitution(通用决策在 knowledge/)
-

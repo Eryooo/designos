@@ -1,7 +1,7 @@
 # Brand Creative B1.1 — Foundation Runtime Vertical Slice
 
-**Release Date**: 2026-06-04  
-**Batch**: B1.1 (Foundation Runtime)  
+**Release Date**: 2026-06-04
+**Batch**: B1.1 (Foundation Runtime)
 **Status**: Ready for verification
 
 ## 目标
@@ -244,8 +244,8 @@ PYTHONPATH="$PWD" python3 -m pytest \
 
 ## Git Status
 
-**分支**: skills-pilot-wave2  
-**Base**: 3a89c2d (B1.0.2)  
+**分支**: skills-pilot-wave2
+**Base**: 3a89c2d (B1.0.2)
 **状态**: 待拆分 3 个 commit，未 push
 
 ---
@@ -282,5 +282,5 @@ PYTHONPATH="$PWD" python3 -m pytest \
 
 ## B1.1 未 push
 
-**当前状态**: 所有工作已在本地完成，待验收后再 push  
+**当前状态**: 所有工作已在本地完成，待验收后再 push
 **Push 命令**: `git push origin skills-pilot-wave2` (需用户明确指示)

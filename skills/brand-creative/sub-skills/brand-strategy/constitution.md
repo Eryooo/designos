@@ -174,6 +174,6 @@
 
 ---
 
-**Constitution 版本**: 0.1.0-pilot  
-**对应 Contract**: B1.0 sub-skill-contracts.yaml#brand-strategy  
+**Constitution 版本**: 0.1.0-pilot
+**对应 Contract**: B1.0 sub-skill-contracts.yaml#brand-strategy
 **强制执行**: 所有 pipeline stages 必须遵守上述约束,违反即视为 runtime error。

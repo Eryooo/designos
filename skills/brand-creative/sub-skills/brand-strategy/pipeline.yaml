@@ -10,15 +10,10 @@ inputs:
 outputs:
   - brand_brief
 
-knowledge:
-  - ../../../../knowledge/design/strategy/brand-strategy-methodology.md
-  - ../../../../knowledge/design/quality/brand-identity-quality-rubric.md
-  - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
-
 stages:
   - id: analyze_context
     type: llm
-    purpose: 分析产品定位/目标用户/竞品态势,识别品牌战略机会点
+    # 分析产品定位/目标用户/竞品态势,识别品牌战略机会点
     prompt: prompts/01-analyze-context.md
     inputs:
       - product_brief
@@ -27,13 +22,14 @@ stages:
       - brand_audit_report
     outputs:
       - context_analysis
-    config:
-      model: gpt-4
-      temperature: 0.3
+    knowledge:
+      - ../../../../knowledge/design/strategy/brand-strategy-methodology.md
+      - ../../../../knowledge/design/quality/brand-identity-quality-rubric.md
+      - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
 
   - id: generate_brand_brief
     type: llm
-    purpose: 产出品牌策略基线(北极星/定位/差异化/核心价值/人格关键词)
+    # 产出品牌策略基线(北极星/定位/差异化/核心价值/人格关键词)
     prompt: prompts/02-generate-brand-brief.md
     inputs:
       - context_analysis
@@ -42,11 +38,10 @@ stages:
       - competitor_matrix
     outputs:
       - brand_brief
-    config:
-      model: gpt-4
-      temperature: 0.4
-      output_format: json_schema
-      schema_ref: ../../contracts/schemas/brand_brief.schema.json
+    knowledge:
+      - ../../../../knowledge/design/strategy/brand-strategy-methodology.md
+      - ../../../../knowledge/design/quality/brand-identity-quality-rubric.md
+      - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
 
 quality_checks:
   - checkpoint: C1-brand-strategy

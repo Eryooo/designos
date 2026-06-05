@@ -18,10 +18,9 @@ stages:
     outputs: [competitor_raw_data]
     knowledge:
       - ../../../../knowledge/research/competitor-analysis.md
-    description: |
-      整合用户提供的产品简介、目标市场、竞品线索,
-      识别至少 3 个直接竞品,采集可用资料。
-      每条 fact 标注 observed / inferred / unknown。
+    # 整合用户提供的产品简介、目标市场、竞品线索,
+    # 识别至少 3 个直接竞品,采集可用资料。
+    # 每条 fact 标注 observed / inferred / unknown。
 
   # ────────────────────────────────────────────────────────────
   # Stage 2: 竞品矩阵生成与市场空白识别
@@ -33,13 +32,12 @@ stages:
     outputs: [competitor_matrix, comparison_matrix, market_gap_report]
     knowledge:
       - ../../../../knowledge/research/competitor-analysis.md
-    description: |
-      从整合后的竞品资料产出:
-      1. competitor_matrix(至少 3 个竞品,必含 visual_style)
-      2. comparison_matrix(competitor_matrix 别名)
-      3. market_gap_report(至少 1 个有证据基础的市场空白)
-
-      未验证结论标 [inferred],输入不足时 status: insufficient_data。
+    # 从整合后的竞品资料产出:
+    # 1. competitor_matrix(至少 3 个竞品,必含 visual_style)
+    # 2. comparison_matrix(competitor_matrix 别名)
+    # 3. market_gap_report(至少 1 个有证据基础的市场空白)
+    #
+    # 未验证结论标 [inferred],输入不足时 status: insufficient_data。
 
 outputs:
   - competitor_matrix

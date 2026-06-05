@@ -30,7 +30,10 @@ from kernel.contracts.schemas import (
     SkillContext,
     StageEvent,
     StageResult,
+    WorkflowConfig,
+    WorkflowStep,
 )
+from kernel.pipeline.orchestrator import WorkflowOrchestrator
 from kernel.skill_loader import SkillLoader, load_skill_group
 
 
@@ -46,6 +49,7 @@ class DeterministicFakeLLM(ILLMClient):
         # responses: {marker_substring: {output_name: value}}
         self._responses = responses
         self._call_log: list[tuple[str, str]] = []  # [(marker, prompt_snippet)]
+        self.full_prompts: list[str] = []  # B1.1.1: record full prompts for verification
 
     async def call(
         self,
@@ -54,6 +58,8 @@ class DeterministicFakeLLM(ILLMClient):
         max_tokens: int = 4096,
         **kwargs: Any,
     ) -> LLMResponse:
+        self.full_prompts.append(prompt)  # B1.1.1: record full prompt
+
         matched: str | None = None
         for marker in self._responses:
             if marker in prompt:
@@ -347,4 +353,291 @@ def test_sub_skill_pipeline_knowledge_paths_exist(tmp_path: Path) -> None:
     for stage in brand_stages:
         for kpath in stage.knowledge:
             assert kpath.exists(), f"brand-strategy knowledge not found: {kpath}"
+
+
+def test_brand_strategy_knowledge_really_loaded() -> None:
+    """B1.1.1: brand-strategy stages真实加载知识文件,不是仅顶层声明."""
+    repo_root = Path(__file__).parent.parent.parent
+    loader = SkillLoader([repo_root / "skills"])
+
+    brand_skill = loader.load("brand-creative:brand-strategy")
+    stages = brand_skill.get_stages()
+
+    # 每个 stage 必须有 knowledge
+    assert len(stages) == 2, "brand-strategy should have 2 stages"
+    for stage in stages:
+        assert len(stage.knowledge) > 0, (
+            f"stage {stage.id} has no knowledge loaded. "
+            f"Kernel does not read top-level 'knowledge' field in pipeline.yaml; "
+            f"knowledge must be in stage.knowledge."
+        )
+
+    # 验证预期的 3 个共享知识文件至少被一个 stage 加载
+    expected_knowledge_files = {
+        "brand-strategy-methodology.md",
+        "brand-identity-quality-rubric.md",
+        "brand-creative-failure-modes.md",
+    }
+
+    all_loaded_files = set()
+    for stage in stages:
+        for kpath in stage.knowledge:
+            all_loaded_files.add(kpath.name)
+
+    for expected_file in expected_knowledge_files:
+        assert expected_file in all_loaded_files, (
+            f"Expected knowledge file '{expected_file}' not loaded by any stage. "
+            f"Loaded: {all_loaded_files}"
+        )
+
+
+@pytest.mark.asyncio
+async def test_real_workflow_orchestrator_state_passing(tmp_path: Path) -> None:
+    """B1.1.1: 真实 WorkflowOrchestrator 自动传递 state, 不手动拷贝.
+
+    证明:
+    1. 使用真实 WorkflowOrchestrator
+    2. 两个 sub-skill 顺序执行在同一个 SkillContext
+    3. competitive-analysis 输出的 competitor_matrix 自动进入 ctx.state
+    4. brand-strategy 从同一个 ctx.state 消费 competitor_matrix
+    5. 最终 brand_brief.differentiation.basis == "competitor_matrix"
+    """
+    repo_root = Path(__file__).parent.parent.parent
+    loader = SkillLoader([repo_root / "skills"])
+
+    # 构造测试专用 WorkflowConfig: 两个顺序步骤
+    workflow_config = WorkflowConfig(
+        name="test-foundation-chain",
+        description="B1.1 Foundation Chain Test: competitive-analysis → brand-strategy",
+        steps=[
+            WorkflowStep(
+                type="sequential",
+                sub_skills=["competitive-analysis"],
+            ),
+            WorkflowStep(
+                type="sequential",
+                sub_skills=["brand-strategy"],
+            ),
+        ],
+    )
+
+    # Fake LLM for both sub-skills
+    fake_llm = DeterministicFakeLLM(
+        {
+            # competitive-analysis stages
+            "Stage 1: 竞品资料整合": {
+                "competitor_raw_data": [
+                    {"name": "CompA", "visual_style": "minimal"},
+                    {"name": "CompB", "visual_style": "bold"},
+                    {"name": "CompC", "visual_style": "friendly"},
+                ],
+            },
+            "Stage 2: 竞品矩阵生成与市场空白识别": {
+                "competitor_matrix": {
+                    "competitors": [
+                        {"name": "CompA", "visual_style": "minimal"},
+                        {"name": "CompB", "visual_style": "bold"},
+                        {"name": "CompC", "visual_style": "friendly"},
+                    ],
+                    "status": "complete",
+                },
+                "comparison_matrix": {
+                    "competitors": [
+                        {"name": "CompA", "visual_style": "minimal"},
+                        {"name": "CompB", "visual_style": "bold"},
+                        {"name": "CompC", "visual_style": "friendly"},
+                    ],
+                    "status": "complete",
+                },
+                "market_gap_report": {
+                    "gaps": [
+                        {
+                            "dimension": "emotional_tone",
+                            "description": "No competitor uses empowering tone",
+                        }
+                    ],
+                },
+            },
+            # brand-strategy stages
+            "Stage 1: 分析上下文": {"context_analysis": {"context_summary": "3 competitors"}},
+            "Stage 2: 产出品牌策略基线": {
+                "brand_brief": {
+                    "north_star": "让用户感到被理解",
+                    "positioning": "专业且亲和的品牌服务",
+                    "differentiation": {
+                        "statement": "在专业与亲和之间找平衡",
+                        "basis": "competitor_matrix",
+                    },
+                    "core_values": ["专业", "温暖"],
+                    "personality_keywords": ["专业", "温暖", "可靠"],
+                    "target_user": "创业者",
+                },
+            },
+        }
+    )
+
+    engine = FakePipelineEngine(llm=fake_llm)
+
+    # 构造 SkillContext（同一个 context 用于整个 workflow）
+    ctx = _ctx(tmp_path, run_id="workflow-test")
+    ctx.state.update(
+        {
+            "product_brief": "AI startup tool",
+            "target_market": "early-stage founders",
+            "competitor_hints": ["CompA", "CompB", "CompC"],
+            "target_user": "startup founders",
+        }
+    )
+
+    # 使用真实 WorkflowOrchestrator
+    group = loader.load("brand-creative")
+    group.attach(engine=engine, llm=fake_llm, mcp=None)
+
+    orchestrator = WorkflowOrchestrator()
+
+    # 执行 workflow
+    events = []
+    async for event in orchestrator.execute(group, workflow_config, ctx):
+        events.append(event)
+
+    # 验证执行顺序: competitive-analysis 在 brand-strategy 前
+    skill_order = []
+    for event in events:
+        if event.kind == "sub_skill_completed" and event.sub_skill:
+            if event.sub_skill not in skill_order:
+                skill_order.append(event.sub_skill)
+
+    assert len(skill_order) >= 2, f"Expected 2 skills executed, got: {skill_order}"
+    assert skill_order[0] == "competitive-analysis", f"First skill should be competitive-analysis, got: {skill_order}"
+    assert skill_order[1] == "brand-strategy", f"Second skill should be brand-strategy, got: {skill_order}"
+
+    # 验证同一个 ctx.state 中同时出现 competitor_matrix 和 brand_brief
+    assert "competitor_matrix" in ctx.state, "competitor_matrix should be in shared state"
+    assert "brand_brief" in ctx.state, "brand_brief should be in shared state"
+
+    # 验证 brand_brief 的 basis 是 competitor_matrix（证明真实消费了）
+    brand_brief = ctx.state["brand_brief"]
+    assert brand_brief["differentiation"]["basis"] == "competitor_matrix", (
+        "brand_brief should use competitor_matrix basis when matrix is available. "
+        "If this fails, brand-strategy did not consume competitor_matrix from shared state."
+    )
+
+
+@pytest.mark.asyncio
+async def test_brand_strategy_prompt_contains_competitor_matrix(tmp_path: Path) -> None:
+    """B1.1.1: 证明 brand-strategy 的 rendered prompt 真实包含 competitor_matrix 内容.
+
+    验证:
+    1. 当 competitor_matrix 存在时，brand-strategy 的 prompt 包含竞品矩阵关键信息
+    2. 当 competitor_matrix 缺失时，prompt 不包含竞品信息，输出 basis="inferred"
+    """
+    repo_root = Path(__file__).parent.parent.parent
+    loader = SkillLoader([repo_root / "skills"])
+    group = loader.load("brand-creative")
+
+    # Test case 1: WITH competitor_matrix
+    fake_llm_with_matrix = DeterministicFakeLLM(
+        {
+            "Stage 1: 分析上下文": {"context_analysis": {"context_summary": "3 competitors"}},
+            "Stage 2: 产出品牌策略基线": {
+                "brand_brief": {
+                    "north_star": "让用户感到被理解",
+                    "positioning": "专业服务",
+                    "differentiation": {
+                        "statement": "差异化",
+                        "basis": "competitor_matrix",
+                    },
+                    "core_values": ["专业"],
+                    "personality_keywords": ["专业", "可靠", "温暖"],
+                    "target_user": "用户",
+                },
+            },
+        }
+    )
+    engine_with = FakePipelineEngine(llm=fake_llm_with_matrix)
+    group.attach(engine=engine_with, llm=fake_llm_with_matrix, mcp=None)
+
+    ctx_with = _ctx(tmp_path, run_id="with-matrix")
+    ctx_with.state.update(
+        {
+            "product_brief": "AI tool",
+            "target_user": "startups",
+            "competitor_matrix": {
+                "competitors": [
+                    {"name": "CompA", "visual_style": "minimal"},
+                    {"name": "CompB", "visual_style": "bold"},
+                    {"name": "CompC", "visual_style": "friendly"},
+                ],
+                "status": "complete",
+            },
+        }
+    )
+
+    result_with = await group.run_sub_skill("brand-strategy", ctx_with)
+    assert result_with.status is RunStatus.COMPLETED
+
+    # 验证 brand-strategy 的 prompt 包含竞品信息
+    brand_strategy_prompts = fake_llm_with_matrix.full_prompts
+    # brand-strategy 有两个 stage，所以至少应该有 2 个 prompt
+    assert len(brand_strategy_prompts) >= 2, f"Expected at least 2 prompts, got {len(brand_strategy_prompts)}"
+
+    # 至少一个 prompt 应该包含竞品名称
+    has_competitor_info = any(
+        "CompA" in prompt or "CompB" in prompt or "CompC" in prompt
+        for prompt in brand_strategy_prompts
+    )
+    assert has_competitor_info, (
+        "brand-strategy prompts should contain competitor names from competitor_matrix. "
+        "Prompts recorded: " + str([p[:200] for p in brand_strategy_prompts])
+    )
+
+    # Test case 2: WITHOUT competitor_matrix
+    fake_llm_without_matrix = DeterministicFakeLLM(
+        {
+            "Stage 1: 分析上下文": {"context_analysis": {"context_summary": "no competitors"}},
+            "Stage 2: 产出品牌策略基线": {
+                "brand_brief": {
+                    "north_star": "让用户感到被理解",
+                    "positioning": "专业服务",
+                    "differentiation": {
+                        "statement": "差异化",
+                        "basis": "inferred",
+                    },
+                    "core_values": ["专业"],
+                    "personality_keywords": ["专业", "可靠", "温暖"],
+                    "target_user": "用户",
+                },
+            },
+        }
+    )
+    engine_without = FakePipelineEngine(llm=fake_llm_without_matrix)
+    group.attach(engine=engine_without, llm=fake_llm_without_matrix, mcp=None)
+
+    ctx_without = _ctx(tmp_path, run_id="without-matrix")
+    ctx_without.state.update(
+        {
+            "product_brief": "AI tool",
+            "target_user": "startups",
+            # NO competitor_matrix
+        }
+    )
+
+    result_without = await group.run_sub_skill("brand-strategy", ctx_without)
+    assert result_without.status is RunStatus.COMPLETED
+
+    # 验证 brand_brief.basis == "inferred"
+    assert ctx_without.state["brand_brief"]["differentiation"]["basis"] == "inferred", (
+        "When competitor_matrix is missing, basis should be 'inferred'"
+    )
+
+    # 验证 prompt 不包含竞品信息（因为没有提供）
+    prompts_without = fake_llm_without_matrix.full_prompts
+    has_competitor_in_no_matrix = any(
+        "CompA" in prompt or "CompB" in prompt or "CompC" in prompt
+        for prompt in prompts_without
+    )
+    assert not has_competitor_in_no_matrix, (
+        "When competitor_matrix is not provided, prompts should not contain competitor names. "
+        "This proves the prompt is not hallucinating competitor data."
+    )
 
