@@ -640,4 +640,3 @@ async def test_brand_strategy_prompt_contains_competitor_matrix(tmp_path: Path) 
         "When competitor_matrix is not provided, prompts should not contain competitor names. "
         "This proves the prompt is not hallucinating competitor data."
     )
-

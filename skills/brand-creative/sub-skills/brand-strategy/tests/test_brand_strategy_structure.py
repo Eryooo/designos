@@ -91,30 +91,47 @@ class TestKnowledgeDependencies:
             return yaml.safe_load(f)
 
     def test_knowledge_paths_exist(self, pipeline_config):
-        """knowledge 路径真实存在"""
-        assert "knowledge" in pipeline_config, "pipeline.yaml 缺少 knowledge"
-        knowledge_paths = pipeline_config["knowledge"]
+        """knowledge 通过 SkillLoader 读取 StageConfig 验证(B1.1.1 起 knowledge 在 stage 级)。
 
-        # 必须有 3 个 knowledge 资产
-        assert len(knowledge_paths) == 3, \
-            "knowledge 必须包含 3 个资产(brand-strategy-methodology / brand-identity-quality-rubric / brand-creative-failure-modes)"
+        Kernel 不读取 pipeline.yaml 顶层 knowledge,只读取 stage.knowledge。
+        本测试通过真实 load 验证:
+        - 每个关键 stage 的 knowledge 非空
+        - 3 份共享知识文件都至少被一个 stage 加载
+        - 所有 stage.knowledge 路径真实存在
+        """
+        from kernel.skill_loader import SkillLoader
 
-        # 验证每个路径真实存在
-        for rel_path in knowledge_paths:
-            # 相对于 SKILL_DIR 的路径
-            abs_path = (SKILL_DIR / rel_path).resolve()
-            assert abs_path.exists(), \
-                f"knowledge 路径不存在: {rel_path} (resolved: {abs_path})"
+        repo_root = SKILL_DIR.resolve().parents[3]
+        loader = SkillLoader([repo_root / "skills"])
+        skill = loader.load("brand-creative:brand-strategy")
+        stages = skill.get_stages()
 
-        # 验证必需的 3 个资产
+        assert len(stages) > 0, "brand-strategy 没有 stages"
+
+        # 每个 stage 的 knowledge 非空
+        for stage in stages:
+            assert len(stage.knowledge) > 0, (
+                f"stage {stage.id} 的 knowledge 为空;"
+                f"Kernel 不读取顶层 knowledge,必须放在 stage.knowledge"
+            )
+
+        # 收集所有 stage 加载的 knowledge 文件名
+        loaded_files = set()
+        for stage in stages:
+            for kpath in stage.knowledge:
+                assert kpath.exists(), f"knowledge 路径不存在: {kpath}"
+                loaded_files.add(kpath.name)
+
+        # 3 份共享知识文件都至少被一个 stage 加载
         expected_files = [
             "brand-strategy-methodology.md",
             "brand-identity-quality-rubric.md",
-            "brand-creative-failure-modes.md"
+            "brand-creative-failure-modes.md",
         ]
         for expected_file in expected_files:
-            found = any(expected_file in path for path in knowledge_paths)
-            assert found, f"knowledge 缺少必需资产: {expected_file}"
+            assert expected_file in loaded_files, (
+                f"knowledge 缺少必需资产: {expected_file};已加载: {loaded_files}"
+            )
 
 
 class TestContractCompliance:

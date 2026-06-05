@@ -83,11 +83,52 @@ def test_all_sub_skill_dirs_exist_with_readme() -> None:
 
 
 def test_sub_skill_paths_in_group_md_resolve() -> None:
-    """GROUP.md 声明的子技能 path 都真实存在。"""
+    """GROUP.md 声明的子技能 path 都真实存在。
+
+    B1.1 起 path 指向 sub-skills/<id>/SKILL.md(file),Kernel 从此解析 pipeline skill。
+    兼容三种状态:
+    - path 指向 SKILL.md 文件且文件存在(已实现子技能):assert path.is_file()
+    - path 指向 SKILL.md 文件但子技能仅占位:父目录必须存在且有 README.md
+    - path 指向目录(legacy 格式):assert path.is_dir() 且目录下有 SKILL.md
+    """
     fm = _parse_group_frontmatter()
     for entry in fm["sub_skills"]:
+        sub_id = entry["id"]
         path = _GROUP_DIR / entry["path"]
-        assert path.is_dir(), f"子技能 path 不存在: {entry['path']}"
+        if path.suffix == ".md":
+            assert path.name == "SKILL.md", f"path 必须指向 SKILL.md: {entry['path']}"
+            parent = path.parent
+            assert parent.is_dir(), f"子技能目录缺失: {sub_id}"
+            if path.is_file():
+                # 已实现子技能:SKILL.md 必须可加载为 PipelineSkill
+                continue
+            # 占位子技能:父目录必须有 README.md
+            assert (parent / "README.md").is_file(), (
+                f"占位子技能 {sub_id} 必须有 README.md: {parent}"
+            )
+        else:
+            assert path.is_dir(), f"子技能目录不存在: {entry['path']}"
+            assert (path / "SKILL.md").is_file() or (path / "README.md").is_file(), (
+                f"子技能 {sub_id} 目录下缺 SKILL.md 或 README.md"
+            )
+
+
+def test_implemented_sub_skills_loadable_via_skill_loader() -> None:
+    """B1.1.2: SkillLoader.load("brand-creative:<sub-id>") 真实加载已实现的子技能。
+
+    本批仅 brand-strategy 和 competitive-analysis 已实现;其余子技能仅占位 README,
+    不要求 loadable。
+    """
+    from kernel.skill_loader import SkillLoader
+
+    loader = SkillLoader([_REPO_ROOT / "skills"])
+
+    for sub_id in ("brand-strategy", "competitive-analysis"):
+        skill = loader.load(f"brand-creative:{sub_id}")
+        assert skill is not None, f"SkillLoader 无法加载 brand-creative:{sub_id}"
+        # 真实加载产生 PipelineSkill,有 stages
+        assert hasattr(skill, "get_stages"), f"{sub_id} 加载结果不是 PipelineSkill"
+        assert len(skill.get_stages()) > 0, f"{sub_id} 没有 stages"
 
 
 def test_workflow_files_exist_and_valid() -> None:
