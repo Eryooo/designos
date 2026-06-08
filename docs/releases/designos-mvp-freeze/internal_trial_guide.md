@@ -4,10 +4,22 @@
 
 ## 安装
 
-### 首次安装（从 npm）
+> `npx` 从 npm registry 拉取最新发布版。安装与更新用同一组命令——`@latest` 始终指向最新版本，无需改命令。
+
+### 首次安装 / 更新到最新版（从 npm）
+
+两种命令方式都支持，按需要选：
+
 ```bash
-npx designos@0.6.0-mvp-trial
+# 方式 A：标准（首次运行会提示确认安装）
+npx designos@latest
+
+# 方式 B：跳过确认（适合脚本 / CI / 想强制无交互拉最新）
+npx --yes designos@latest
 ```
+
+> 不要用 `npx designos`（不带 `@latest`）——本地有旧缓存时会直接复用、不升级。
+> 始终带 `@latest` 才能保证拿到最新发布版。
 
 ### 首次安装（本地开发模式）
 ```bash
@@ -21,12 +33,15 @@ npm link
 
 ## 重新安装最新版
 
-### 从 npm 更新
+### 从 npm 更新（与首次安装相同命令）
 ```bash
+# 方式 A
 npx designos@latest
-# 或强制重装
-npm uninstall -g designos
-npx designos@latest
+
+# 方式 B（若被本地缓存挡住，先清缓存再拉）
+npx --yes designos@latest
+# 或
+npm cache clean --force && npx designos@latest
 ```
 
 ### 从本地更新
