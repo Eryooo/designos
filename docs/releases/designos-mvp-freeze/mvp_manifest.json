@@ -2,8 +2,8 @@
   "version_candidate": "0.6.0-mvp-trial",
   "current_package_version": "0.5.0",
   "branch": "skills-pilot-wave2",
-  "commit": "c60fa1e",
-  "commit_full": "c60fa1e test(brand-creative): prove visual identity end-to-end aggregation (B1.3)",
+  "commit": "6e6e25f",
+  "commit_full": "6e6e25f docs(release): freeze DesignOS MVP trial baseline",
   "generated_at": "2026-06-08T10:00:00Z",
   "included_skills": [
     {
@@ -78,7 +78,7 @@
           "note": "aggregation layer"
         }
       ],
-      "test_coverage": "71 tests passed (brand-creative + integration)"
+      "test_coverage": "72 tests passed (brand-creative + integration)"
     }
   ],
   "excluded_skills": [
@@ -101,12 +101,12 @@
     "cd .factory && python3 -m tools.validate ../skills/ip-design --archetype creative-generation"
   ],
   "validation_results": {
-    "brand_creative_suite": "71 passed",
+    "brand_creative_suite": "72 passed",
     "kernel_and_foundation": "25 passed",
     "other_skills_regression": "101 passed",
     "factory_tests": "61 passed, 1 warning",
     "archetype_validation": "4/4 passed",
-    "total_tests": "258 passed",
+    "total_tests": "259 passed",
     "whitespace_check": "passed (git diff --check)"
   },
   "known_limits": [

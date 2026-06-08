@@ -210,7 +210,7 @@ npx designos --version
 
 ### 7.2 发布后验证（发布后）
 ```bash
-npm install -g @anthropic-ai/designos@0.6.0
+npx --yes designos@0.6.0
 designos --version
 # 预期: 0.6.0
 ```
@@ -237,7 +237,7 @@ git push origin skills-pilot-wave2 --force
 ### 8.2 npm 回滚
 ```bash
 # 若已发布到 npm 但有问题
-npm unpublish @anthropic-ai/designos@0.6.0
+npm unpublish designos@0.6.0
 # 或发布修复版本 0.6.1
 ```
 **限制**: npm unpublish 有时间窗口限制（72 小时内）。
@@ -348,7 +348,7 @@ git add CHANGELOG.md  # 如有修改
 ### 阶段 4: npm 发布（待用户确认）
 1. 更新 package.json version 为 `0.6.0`
 2. `npm publish --access public`（或 `--access restricted` 若内部发布）
-3. 验证: `npm install -g @anthropic-ai/designos@0.6.0`
+3. 验证: `npx --yes designos@0.6.0`
 
 ---
 

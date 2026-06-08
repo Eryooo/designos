@@ -6,7 +6,7 @@
 
 ### 首次安装（从 npm）
 ```bash
-npm install -g @anthropic-ai/designos@0.6.0-mvp-trial
+npx --yes designos@0.6.0-mvp-trial
 ```
 
 ### 首次安装（本地开发模式）
@@ -23,10 +23,10 @@ npm link
 
 ### 从 npm 更新
 ```bash
-npm update -g @anthropic-ai/designos
+npx --yes designos@latest
 # 或强制重装
-npm uninstall -g @anthropic-ai/designos
-npm install -g @anthropic-ai/designos@latest
+npm uninstall -g designos
+npx --yes designos@latest
 ```
 
 ### 从本地更新
