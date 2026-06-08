@@ -285,3 +285,177 @@ async def test_parallel_visual_identity_three_sub_skills(tmp_path: Path) -> None
     # Verify brand_brief still exists (not overwritten)
     assert "brand_brief" in ctx.state
     assert ctx.state["brand_brief"]["north_star"] == "让专业人士感到被支持"
+
+
+@pytest.mark.asyncio
+async def test_parallel_visual_system_then_visual_identity_sequential(tmp_path: Path) -> None:
+    """B1.3: visual-identity runs after the three visual sub-skills.
+
+    Real runtime proof:
+    - logo-design / color-system / typography-system run in a parallel step
+    - visual-identity runs in the following sequential step
+    - Final state contains visual_spec + image_prompt_pack + color_palette + typography_spec + vi_manual
+    - visual-identity does not overwrite upstream outputs
+    """
+    repo_root = Path(__file__).parent.parent.parent
+    loader = SkillLoader([repo_root / "skills"])
+    group = loader.load("brand-creative")
+
+    fake_llm = DeterministicFakeLLM(
+        {
+            # logo-design stages
+            "Stage: analyze_brand_form": {
+                "form_direction": {
+                    "primary_shape": "geometric",
+                    "rationale": "品牌人格关键词:专业/现代,推导几何形态",
+                    "cognitive_chain": {
+                        "cognitive_schema": "Verticality",
+                        "mother_shape": "upward arc",
+                    },
+                },
+            },
+            "Stage: generate_logo_spec": {
+                "visual_spec": {
+                    "form": {"primary_shape": "geometric", "rationale": "专业现代"},
+                    "cognitive_schema": "Verticality",
+                    "mother_shape": "upward arc",
+                    "black_white_usable": True,
+                    "min_size_px": 16,
+                    "trademark_risk_signals": ["low_risk"],
+                    "color_refs": ["#0066CC"],
+                    "application_scenarios": ["website", "social", "business_card"],
+                },
+            },
+            "Stage: generate_prompt_pack": {
+                "image_prompt_pack": {
+                    "prompts": [
+                        {"platform": "midjourney", "positive": "geometric logo", "negative": "cluttered"},
+                    ],
+                    "status": "available",
+                },
+            },
+            # color-system stages
+            "Stage 1: 色彩情绪分析": {
+                "color_emotion_analysis": {"primary_emotion": "专业可靠", "color_roles": ["主色:蓝"]},
+            },
+            "Stage 2: 色彩系统产出": {
+                "color_palette": {
+                    "primary": {"hex": "#0066CC", "role": "品牌主色/信赖"},
+                    "secondary": [{"hex": "#6C757D", "role": "辅助灰"}],
+                    "contrast_ratios": {"primary_on_white": 4.5},
+                    "accessibility": "pass",
+                    "print_color_risk": "需印刷打样验证",
+                    "dark_light_usage": {"light": "主色点缀", "dark": "反白 logo"},
+                },
+            },
+            # typography-system stages
+            "Stage 1: 字体气质方向分析": {
+                "typography_direction": {
+                    "primary_font_personality": "几何现代",
+                    "primary_font_role": "标题",
+                    "tone_keywords": ["专业", "现代", "清晰"],
+                },
+            },
+            "Stage 2: 字体系统产出": {
+                "typography_spec": {
+                    "primary_font": {"family": "Inter", "license": "SIL OFL"},
+                    "weight_hierarchy": ["Regular", "Medium", "Bold"],
+                    "size_scale": [12, 14, 16, 20, 32],
+                    "cjk_latin_pairing": "中文:思源黑体,西文:Inter",
+                    "license_status": "needs_verification",
+                    "cross_platform": {"web": {"fallback": "sans-serif"}, "ios": {}, "android": {}},
+                },
+            },
+            # visual-identity stages
+            "Stage: integrate_visual_system": {
+                "integration_analysis": {
+                    "consistency_check": {
+                        "personality_alignment": "consistent",
+                        "personality_detail": "logo 几何现代、蓝色专业可靠、Inter 清晰现代，三者一致",
+                        "technical_alignment": "minor_deviation",
+                        "technical_detail": "字体 license needs_verification，需继承警告",
+                        "conflict_resolution": ["保留现有方向，但字体授权需人工确认"],
+                    },
+                    "inherited_warnings": ["typography: license needs_verification", "color: print color needs proofing"],
+                    "gaps": ["字体授权未确认", "印刷色值未经打样验证"],
+                    "auxiliary_graphics_direction": "从 upward arc 提炼辅助弧形图案",
+                },
+            },
+            "Stage: generate_vi_manual": {
+                "vi_manual": {
+                    "logo": {"form_direction": "geometric upward arc", "black_white_usable": True, "min_size_px": 16},
+                    "color": {"primary": {"hex": "#0066CC", "role": "品牌主色/信赖"}, "accessibility": "pass"},
+                    "typography": {
+                        "primary_font": {"family": "Inter", "license": "SIL OFL"},
+                        "weight_hierarchy": ["Regular", "Medium", "Bold"],
+                        "license_status": "needs_verification",
+                    },
+                    "auxiliary_graphics": ["从 upward arc 提炼辅助弧形图案"],
+                    "application_rules": [
+                        {"scenario": "名片", "logo_rule": "横版锁版", "color_rule": "主色点缀", "typography_rule": "Inter Medium"},
+                        {"scenario": "网站", "logo_rule": "header 120px", "color_rule": "浅色背景", "typography_rule": "Inter 16px"},
+                        {"scenario": "社交媒体", "logo_rule": "纯图标", "color_rule": "暗色适配", "typography_rule": "Inter Bold"},
+                        {"scenario": "包装", "logo_rule": "最小 20mm", "color_rule": "需打样", "typography_rule": "印刷字体确认"},
+                        {"scenario": "海报", "logo_rule": "大尺寸", "color_rule": "主色大面积", "typography_rule": "标题层级"},
+                    ],
+                    "taboos": ["拉伸变形", "更改比例", "未经确认使用商业字体"],
+                    "consistency_check": {"personality_alignment": "consistent", "technical_alignment": "minor_deviation"},
+                    "inherited_warnings": ["typography: license needs_verification", "color: print color needs proofing"],
+                    "gaps": ["字体授权未确认", "印刷色值未经打样验证"],
+                },
+            },
+        }
+    )
+
+    engine = FakePipelineEngine(llm=fake_llm)
+    group.attach(engine=engine, llm=fake_llm, mcp=None)
+
+    workflow_config = WorkflowConfig(
+        name="test-visual-parallel-then-vi",
+        description="B1.3 visual-identity aggregation after B1.2 parallel visual system",
+        steps=[
+            WorkflowStep(type="parallel", sub_skills=["logo-design", "color-system", "typography-system"]),
+            WorkflowStep(type="sequential", sub_skills=["visual-identity"]),
+        ],
+    )
+
+    ctx = _ctx(tmp_path, run_id="parallel-then-vi")
+    ctx.state.update(
+        {
+            "brand_brief": {
+                "north_star": "让专业人士感到被支持",
+                "positioning": "专业工具提供商",
+                "personality_keywords": ["专业", "现代", "可靠", "清晰"],
+                "target_user": "专业人士",
+            },
+        }
+    )
+
+    from kernel.pipeline.orchestrator import WorkflowOrchestrator
+    orchestrator = WorkflowOrchestrator()
+
+    events = []
+    async for event in orchestrator.execute(group, workflow_config, ctx):
+        events.append(event)
+
+    completed = [event.sub_skill for event in events if event.kind == "sub_skill_completed" and event.sub_skill]
+    assert completed[:3] == ["logo-design", "color-system", "typography-system"]
+    assert completed[-1] == "visual-identity"
+
+    assert "visual_spec" in ctx.state
+    assert "image_prompt_pack" in ctx.state
+    assert "color_palette" in ctx.state
+    assert "typography_spec" in ctx.state
+    assert "vi_manual" in ctx.state
+
+    # Preserve upstream snapshots: visual-identity must not overwrite them.
+    assert ctx.state["visual_spec"]["mother_shape"] == "upward arc"
+    assert ctx.state["color_palette"]["primary"]["hex"] == "#0066CC"
+    assert ctx.state["typography_spec"]["license_status"] == "needs_verification"
+
+    vi_manual = ctx.state["vi_manual"]
+    assert "logo" in vi_manual
+    assert "color" in vi_manual
+    assert "typography" in vi_manual
+    assert "gaps" in vi_manual and vi_manual["gaps"]
+    assert "inherited_warnings" in vi_manual
