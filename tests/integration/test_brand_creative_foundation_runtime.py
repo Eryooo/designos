@@ -322,37 +322,55 @@ async def test_foundation_chain_without_competitor_matrix_marks_inferred(tmp_pat
 
 
 def test_brand_creative_sub_skills_loadable(tmp_path: Path) -> None:
-    """B1.1: SkillLoader can load brand-creative:competitive-analysis and brand-strategy."""
+    """B1.1: SkillLoader can load brand-creative:competitive-analysis and brand-strategy.
+    B1.2: Also load logo-design, color-system, typography-system."""
     repo_root = Path(__file__).parent.parent.parent
     loader = SkillLoader([repo_root / "skills"])
 
-    # Load competitive-analysis via group:sub-id syntax
+    # B1.1 sub-skills
     comp_skill = loader.load("brand-creative:competitive-analysis")
     assert comp_skill.name == "Competitive Analysis"
 
-    # Load brand-strategy via group:sub-id syntax
     brand_skill = loader.load("brand-creative:brand-strategy")
-    assert brand_skill.name == "brand-strategy"  # Actual name from SKILL.md
+    assert brand_skill.name == "brand-strategy"
+
+    # B1.2 visual identity sub-skills
+    logo_skill = loader.load("brand-creative:logo-design")
+    assert logo_skill.name == "logo-design"
+
+    color_skill = loader.load("brand-creative:color-system")
+    assert color_skill.name == "color-system"
+
+    typo_skill = loader.load("brand-creative:typography-system")
+    assert typo_skill.name == "typography-system"
 
 
 def test_sub_skill_pipeline_knowledge_paths_exist(tmp_path: Path) -> None:
-    """B1.1: Both sub-skills' pipeline.yaml knowledge paths resolve to real files."""
+    """B1.1: Both sub-skills' pipeline.yaml knowledge paths resolve to real files.
+    B1.2: Also check logo-design, color-system, typography-system."""
     repo_root = Path(__file__).parent.parent.parent
     loader = SkillLoader([repo_root / "skills"])
 
-    # competitive-analysis
+    # B1.1 sub-skills
     comp_skill = loader.load("brand-creative:competitive-analysis")
     comp_stages = comp_skill.get_stages()
     for stage in comp_stages:
         for kpath in stage.knowledge:
             assert kpath.exists(), f"competitive-analysis knowledge not found: {kpath}"
 
-    # brand-strategy
     brand_skill = loader.load("brand-creative:brand-strategy")
     brand_stages = brand_skill.get_stages()
     for stage in brand_stages:
         for kpath in stage.knowledge:
             assert kpath.exists(), f"brand-strategy knowledge not found: {kpath}"
+
+    # B1.2 visual identity sub-skills
+    for sub_id in ["logo-design", "color-system", "typography-system"]:
+        skill = loader.load(f"brand-creative:{sub_id}")
+        stages = skill.get_stages()
+        for stage in stages:
+            for kpath in stage.knowledge:
+                assert kpath.exists(), f"{sub_id} knowledge not found: {kpath}"
 
 
 def test_brand_strategy_knowledge_really_loaded() -> None:
