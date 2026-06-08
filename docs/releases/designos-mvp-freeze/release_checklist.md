@@ -210,7 +210,7 @@ npx designos --version
 
 ### 7.2 发布后验证（发布后）
 ```bash
-npx --yes designos@0.6.0
+npx designos@0.6.0
 designos --version
 # 预期: 0.6.0
 ```
@@ -348,7 +348,7 @@ git add CHANGELOG.md  # 如有修改
 ### 阶段 4: npm 发布（待用户确认）
 1. 更新 package.json version 为 `0.6.0`
 2. `npm publish --access public`（或 `--access restricted` 若内部发布）
-3. 验证: `npx --yes designos@0.6.0`
+3. 验证: `npx designos@0.6.0`
 
 ---
 

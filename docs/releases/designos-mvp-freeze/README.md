@@ -75,7 +75,7 @@ DesignOS MVP 是首个内部可试用基线，包含 6 个完整 skill：
 
 ### 安装（首次）
 ```bash
-npx --yes designos@latest
+npx designos@latest
 # 或本地开发模式
 cd /path/to/Agent-design-webmode
 npm link
@@ -83,7 +83,7 @@ npm link
 
 ### 重新安装最新版（已安装过）
 ```bash
-npx --yes designos@latest
+npx designos@latest
 # 或本地开发模式
 cd /path/to/Agent-design-webmode
 git pull origin skills-pilot-wave2

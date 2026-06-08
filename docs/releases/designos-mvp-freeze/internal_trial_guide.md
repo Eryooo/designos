@@ -6,7 +6,7 @@
 
 ### 首次安装（从 npm）
 ```bash
-npx --yes designos@0.6.0-mvp-trial
+npx designos@0.6.0-mvp-trial
 ```
 
 ### 首次安装（本地开发模式）
@@ -23,10 +23,10 @@ npm link
 
 ### 从 npm 更新
 ```bash
-npx --yes designos@latest
+npx designos@latest
 # 或强制重装
 npm uninstall -g designos
-npx --yes designos@latest
+npx designos@latest
 ```
 
 ### 从本地更新
