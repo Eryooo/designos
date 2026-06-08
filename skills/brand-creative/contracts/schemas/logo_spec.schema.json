@@ -11,6 +11,32 @@
     "min_size_px"
   ],
   "properties": {
+    "cognitive_schema": {
+      "type": "string",
+      "description": "认知结构(如 Verticality/Path/Container),来自 logo-cognitive-translation"
+    },
+    "mother_shape": {
+      "type": "string",
+      "description": "母形几何描述(如 upward-opening arc),来自认知链路"
+    },
+    "first_impression_prediction": {
+      "type": "string",
+      "description": "预测受众 3 秒内第一感知"
+    },
+    "likely_misread": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "可能的误读场景"
+    },
+    "avoidance_rule": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "严格禁止事项(进入 prompt 负向控制)"
+    },
     "form": {
       "type": "object",
       "description": "形态方向",

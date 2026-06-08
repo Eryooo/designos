@@ -497,6 +497,17 @@ assets:
     do_not_claim: 不替代真实视觉总监人工审核;不提供商标注册法律咨询
     owner: designos-core
     status: pilot
+  - id: design.visual.logo-cognitive-translation
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [brand-creative]
+    source_of_truth: knowledge/design/visual/logo-cognitive-translation.md
+    decision_use: Logo 概念从关键词到认知结构再到母形的翻译链路,避免 literal symbol jump
+    quality_bar: 含认知 schema + 图形关系 + 视觉变量 + 母形 + 误读预测 + 禁跳模式
+    do_not_claim: 不替代真实品牌语义测试;不提供商标注册或文化语义普适性保证
+    owner: designos-core
+    status: pilot
   - id: design.visual.color-system-methodology
     version: 0.1.0-pilot
     domain: design

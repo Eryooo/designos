@@ -18,6 +18,9 @@ shared_knowledge:
   - id: design.visual.logo-design-methodology
     used_by: [logo-design]
     use: Logo 设计决策(类型/黑白/缩放/组合/辅助图形/商标风险)
+  - id: design.visual.logo-cognitive-translation
+    used_by: [logo-design]
+    use: Logo 从关键词到认知结构/图形关系/母形的翻译链路,避免字面符号跳跃
   - id: design.visual.color-system-methodology
     used_by: [color-system]
     use: 色彩系统决策(角色/对比度/明暗/介质差异/可访问性)
