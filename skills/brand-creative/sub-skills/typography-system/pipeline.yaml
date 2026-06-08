@@ -1,0 +1,45 @@
+version: "1.0"
+type: pipeline
+
+inputs:
+  - brand_brief
+
+outputs:
+  - typography_spec
+
+stages:
+  - id: analyze_typography_direction
+    type: llm
+    # 从品牌人格推导字体气质,确定主辅字体角色与中西文配对方向
+    prompt: prompts/01-analyze-typography-direction.md
+    inputs:
+      - brand_brief
+    outputs:
+      - typography_direction
+    knowledge:
+      - ../../../../knowledge/design/visual/typography-system-methodology.md
+      - ../../../../knowledge/design/quality/brand-identity-quality-rubric.md
+      - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
+
+  - id: generate_typography_spec
+    type: llm
+    # 产出完整字体系统(字重/字号/行高/授权/跨端)
+    prompt: prompts/02-generate-typography-spec.md
+    inputs:
+      - typography_direction
+      - brand_brief
+    outputs:
+      - typography_spec
+    knowledge:
+      - ../../../../knowledge/design/visual/typography-system-methodology.md
+      - ../../../../knowledge/design/quality/brand-identity-quality-rubric.md
+      - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
+
+quality_checks:
+  - checkpoint: C4-typography-system
+    rules:
+      - primary_font.family 必须存在
+      - weight_hierarchy 必须 3-4 个字重
+      - cjk_latin_pairing 必须存在(中西文配对说明)
+      - license_status 必须是 "verified" 或 "needs_verification"
+      - cross_platform 必须包含至少 Web/iOS/Android 三端可用性说明
