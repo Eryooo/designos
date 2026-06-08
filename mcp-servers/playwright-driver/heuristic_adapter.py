@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Any
 
-from schemas import ExecutionResult, StepEvidence, ActionType
+from schemas import ExecutionResult, StepEvidence
 
 
 def build_detection_request(

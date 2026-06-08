@@ -10,7 +10,6 @@ from core import BrowserManager
 from schemas import EvaluationScript, ScriptStep
 from script_executor import ScriptExecutor
 
-
 _browser = BrowserManager()
 
 

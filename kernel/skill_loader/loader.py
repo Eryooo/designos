@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from kernel.contracts.enums import ErrorCode
 from kernel.contracts.interfaces import ISkill, ISkillLoader
@@ -10,6 +11,9 @@ from kernel.errors import ConfigError
 
 from .group_loader import load_skill_group
 from .pipeline_loader import load_pipeline_skill
+
+if TYPE_CHECKING:
+    from kernel.skill_loader.models import SkillGroup
 
 
 class SkillLoader(ISkillLoader):
