@@ -1,29 +1,51 @@
-# visual-identity(占位 · B0 baseline)
+# visual-identity
 
-> Phase 2 视觉识别系统 · 本批(B0)只建目录占位,不开发 runtime。
+品牌视觉识别系统聚合子技能。
 
-## 定位
+## 快速定位
 
-完整 VI 手册(logo/色彩/字体/辅助图形/应用规范)
+- **职责**：聚合 logo-design / color-system / typography-system 三者产出，做一致性判断，产出 VI 手册
+- **不做**：不重新生成 logo / 色彩 / 字体，不覆盖上游产物
+- **输入**：visual_spec + color_palette + typography_spec（全部来自上游）
+- **输出**：vi_manual（对齐 vi_manual.schema.json）
 
-## 核心产出
+## 使用方式
 
-- `vi_manual`
+通过 SkillLoader 加载：`brand-creative:visual-identity`
 
-## 复用共享决策资产
+### 前置条件
 
-- design.visual.visual-translation + design.quality.*
+必须先完成以下三个子技能：
+1. `brand-creative:logo-design` → 产出 visual_spec
+2. `brand-creative:color-system` → 产出 color_palette
+3. `brand-creative:typography-system` → 产出 typography_spec
 
-## 并行开发边界
+### 典型 workflow 位置
 
-- 必须串行(依赖 logo/color/typography 三者产出)
+```
+brand-strategy → [logo-design | color-system | typography-system](parallel) → visual-identity(sequential)
+```
 
-## B0 范围
+## Pipeline 结构
 
-本目录在 B0 只有本 README 占位。后续批次(B1+)开发:
-- SKILL.md(frontmatter + 定位边界)
-- pipeline.yaml(stages + 引用共享 knowledge)
-- prompts/(各 stage prompt)
-- tests/(结构与契约测试)
+| Stage | 职责 | 输出 |
+|---|---|---|
+| integrate_visual_system | 三者一致性检查 + 冲突识别 + 警告继承 | integration_analysis |
+| generate_vi_manual | 聚合产出 VI 手册 | vi_manual |
 
-开发前若 `new_knowledge_needed`(见 ../../knowledge-manifest.yaml)中列出本子技能依赖的新资产,需先补共享决策库再开发。
+## 核心判断维度
+
+1. **气质一致性**：logo 形态 / color 情绪 / typography 气质 是否指向同一品牌人格
+2. **技术兼容性**：色彩引用 / 尺寸兼容 / 跨端覆盖 是否同步
+3. **缺口诚实声明**：上游警告全部继承，不吞掉
+
+## 能力边界
+
+- 不声称最终商用、不声称商标已确认、不声称字体授权已确认、不声称印刷色已验证
+- 不覆盖上游产物、不重新生成视觉方案
+
+## 测试
+
+```bash
+PYTHONPATH="$PWD" python3 -m pytest -q skills/brand-creative/sub-skills/visual-identity/tests/ --import-mode=importlib
+```

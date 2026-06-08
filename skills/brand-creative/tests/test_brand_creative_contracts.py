@@ -101,6 +101,48 @@ def test_public_outputs_are_existing_output_types() -> None:
             )
 
 
+def test_visual_system_contract_outputs_match_runtime_state_keys() -> None:
+    """B1.3: visual-system 子技能契约字段必须匹配 pipeline 实际 state key。"""
+    contracts = {s["id"]: s for s in _contracts()}
+    expected_outputs = {
+        "logo-design": {"visual_spec", "image_prompt_pack"},
+        "color-system": {"color_palette"},
+        "typography-system": {"typography_spec"},
+        "visual-identity": {"vi_manual"},
+    }
+    expected_inputs = {
+        "visual-identity": {"visual_spec", "color_palette", "typography_spec"},
+    }
+
+    for sub_id, outputs in expected_outputs.items():
+        pipeline = _load(_BC / "sub-skills" / sub_id / "pipeline.yaml")
+        runtime_outputs = set(pipeline.get("outputs", []) or [])
+        contract_outputs = {
+            o["name"]
+            for o in (contracts[sub_id].get("public_outputs", []) or [])
+        }
+        contract_outputs |= {
+            o["name"]
+            for o in (contracts[sub_id].get("internal_outputs", []) or [])
+        }
+        assert runtime_outputs == outputs, f"{sub_id} pipeline outputs drifted"
+        assert contract_outputs == runtime_outputs, (
+            f"{sub_id} contract outputs {contract_outputs} != runtime {runtime_outputs}"
+        )
+
+    for sub_id, inputs in expected_inputs.items():
+        pipeline = _load(_BC / "sub-skills" / sub_id / "pipeline.yaml")
+        runtime_inputs = set(pipeline.get("inputs", []) or [])
+        contract_inputs = {
+            i["name"]
+            for i in (contracts[sub_id].get("required_inputs", []) or [])
+        }
+        assert runtime_inputs == inputs, f"{sub_id} pipeline inputs drifted"
+        assert contract_inputs == runtime_inputs, (
+            f"{sub_id} contract inputs {contract_inputs} != runtime {runtime_inputs}"
+        )
+
+
 def test_kernel_output_type_not_modified() -> None:
     """3. 不修改 Kernel OutputType(枚举集合与冻结基线一致)。"""
     from kernel.contracts.enums import OutputType

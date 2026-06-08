@@ -217,17 +217,14 @@ sub_skills:
         description: AI 绘图 prompt pack
         schema_ref: logo_prompt_pack.schema.json
 
-    internal_outputs:
-      - name: logo_spec
-        description: Logo 设计规范(内部流转产物,供 visual-identity 消费)
-        schema_ref: logo_spec.schema.json
+    internal_outputs: []
 
     output_schema_refs:
       - logo_spec.schema.json
       - logo_prompt_pack.schema.json
 
     downstream_consumers:
-      - visual-identity (消费 logo_spec)
+      - visual-identity (消费 visual_spec)
 
     runtime_dependencies:
       sequential_upstream:
@@ -254,7 +251,7 @@ sub_skills:
       failure_modes_ref: design.quality.brand-creative-failure-modes
 
     fallback_behavior: |
-      若 AI 绘图 prompt 生成失败,logo_spec 仍产出(文字描述 + 形态方向),
+      若 AI 绘图 prompt 生成失败,visual_spec 仍产出(文字描述 + 形态方向),
       image_prompt_pack 标注 status: unavailable,下游可基于文字规范继续。
 
     do_not_claim:
@@ -289,15 +286,12 @@ sub_skills:
       - brand-strategy
 
     public_outputs:
-      - name: visual_spec
+      - name: color_palette
         type: visual_spec
-        description: 色彩视觉规范(复用 kernel OutputType,聚焦色彩部分)
+        description: 品牌色彩调色板(复用 kernel OutputType,聚焦色彩部分)
         schema_ref: color_palette.schema.json
 
-    internal_outputs:
-      - name: color_palette
-        description: 品牌色彩调色板(内部流转,供 visual-identity 消费)
-        schema_ref: color_palette.schema.json
+    internal_outputs: []
 
     output_schema_refs:
       - color_palette.schema.json
@@ -361,15 +355,12 @@ sub_skills:
       - brand-strategy
 
     public_outputs:
-      - name: visual_spec
+      - name: typography_spec
         type: visual_spec
-        description: 字体视觉规范(复用 kernel OutputType,聚焦字体部分)
+        description: 字体系统规范(复用 kernel OutputType,聚焦字体部分)
         schema_ref: typography_spec.schema.json
 
-    internal_outputs:
-      - name: typography_spec
-        description: 字体系统规范(内部流转,供 visual-identity 消费)
-        schema_ref: typography_spec.schema.json
+    internal_outputs: []
 
     output_schema_refs:
       - typography_spec.schema.json
@@ -422,7 +413,7 @@ sub_skills:
       - logo-vi-fast-track workflow 最终汇总
 
     required_inputs:
-      - name: logo_spec
+      - name: visual_spec
         type: object
         schema_ref: logo_spec.schema.json
       - name: color_palette
@@ -440,15 +431,12 @@ sub_skills:
       - typography-system (必须先完成)
 
     public_outputs:
-      - name: style_guide
+      - name: vi_manual
         type: style_guide
-        description: VI 手册(复用 kernel OutputType)
+        description: 完整 VI 手册(复用 kernel OutputType,供 brand-guidelines 消费)
         schema_ref: vi_manual.schema.json
 
-    internal_outputs:
-      - name: vi_manual
-        description: 完整 VI 手册(内部流转,供 brand-guidelines 消费)
-        schema_ref: vi_manual.schema.json
+    internal_outputs: []
 
     output_schema_refs:
       - vi_manual.schema.json
@@ -467,6 +455,7 @@ sub_skills:
 
     knowledge_ids:
       active:
+        - design.visual.visual-identity-integration-methodology  # B1.3 新增
         - design.quality.brand-identity-quality-rubric  # B1.0 新增
         - design.quality.professional-gap-report
       partial_reuse:
@@ -491,6 +480,8 @@ sub_skills:
     do_not_claim:
       - 不声称 VI 已完成所有场景应用设计
       - 不声称已达"高阶可评审"(默认中阶可用)
+      - 不声称已完成法务/印刷/字体授权确认
+      - 不声称是最终品牌手册(brand-guidelines 才是最终交付物)
 
     contract_status: ready_after_upstream  # 知识/schema 就绪,但运行时必须等 logo/color/typography 三者先开发,不能与之同批并行
     owner: brand-creative-group

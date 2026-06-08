@@ -530,6 +530,17 @@ assets:
     do_not_claim: 不替代真实字体设计师人工调试;不提供字体授权法律咨询
     owner: designos-core
     status: pilot
+  - id: design.visual.visual-identity-integration-methodology
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [brand-creative]
+    source_of_truth: knowledge/design/visual/visual-identity-integration-methodology.md
+    decision_use: VI 聚合层一致性判断(logo/color/typography 冲突处理与缺口声明)
+    quality_bar: 含聚合判断规则 + 冲突处理 + 质量门 + 失败模式
+    do_not_claim: 不替代真实资深设计总监人工评审;不声称覆盖完整品牌手册
+    owner: designos-core
+    status: pilot
   - id: design.strategy.brand-audit-methodology
     version: 0.1.0-pilot
     domain: design

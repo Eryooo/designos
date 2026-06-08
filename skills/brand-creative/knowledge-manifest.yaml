@@ -27,6 +27,9 @@ shared_knowledge:
   - id: design.visual.typography-system-methodology
     used_by: [typography-system]
     use: 字体系统决策(配对/字重/比例/行高/授权/跨端)
+  - id: design.visual.visual-identity-integration-methodology
+    used_by: [visual-identity]
+    use: VI 聚合层一致性判断(logo/color/typography 冲突处理与缺口声明)
   - id: design.strategy.brand-audit-methodology
     used_by: [brand-audit]
     use: 品牌审计决策(健康度/差距/对标/优先级)
