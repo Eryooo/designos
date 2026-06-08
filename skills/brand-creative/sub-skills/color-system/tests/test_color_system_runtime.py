@@ -76,22 +76,22 @@ def test_output_schema_alignment():
     """验证输出字段对齐 color_palette.schema.json"""
     skill_dir = Path(__file__).parent.parent
     schema_path = skill_dir.parent.parent / "contracts/schemas/color_palette.schema.json"
-    
+
     assert schema_path.exists(), f"schema 文件不存在: {schema_path}"
-    
+
     import json
     with open(schema_path) as f:
         schema = json.load(f)
-    
+
     # 验证 schema 必需字段
     assert "required" in schema
     assert "primary" in schema["required"]
     assert "accessibility" in schema["required"]
-    
+
     # 验证 properties
     assert "properties" in schema
     expected_props = [
-        "primary", "secondary", "contrast_ratios", 
+        "primary", "secondary", "contrast_ratios",
         "accessibility", "print_color_risk", "dark_light_usage"
     ]
     for prop in expected_props:
@@ -101,20 +101,20 @@ def test_output_schema_alignment():
 def test_quality_checks_defined():
     """验证 quality_checks 定义了对比度等硬约束"""
     skill_dir = Path(__file__).parent.parent
-    
+
     import yaml
     pipeline_path = skill_dir / "pipeline.yaml"
     with open(pipeline_path) as f:
         pipeline = yaml.safe_load(f)
-    
+
     assert "quality_checks" in pipeline
     quality_checks = pipeline["quality_checks"]
     assert len(quality_checks) > 0
-    
+
     checkpoint = quality_checks[0]
     assert checkpoint["checkpoint"] == "C3-color-system"
     assert "rules" in checkpoint
-    
+
     rules_text = " ".join(checkpoint["rules"])
     # 验证包含核心质量约束
     assert "4.5:1" in rules_text or "WCAG AA" in rules_text

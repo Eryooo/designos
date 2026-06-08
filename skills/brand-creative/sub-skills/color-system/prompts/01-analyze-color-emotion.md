@@ -71,4 +71,3 @@
 - [ ] emotion_mapping 可追溯到 brand_brief.personality_keywords
 - [ ] role_requirements 每个角色有明确使用场景
 - [ ] conflicts 识别了人格关键词间的色彩冲突并给出取舍
-

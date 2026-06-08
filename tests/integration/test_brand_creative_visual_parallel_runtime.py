@@ -285,4 +285,3 @@ async def test_parallel_visual_identity_three_sub_skills(tmp_path: Path) -> None
     # Verify brand_brief still exists (not overwritten)
     assert "brand_brief" in ctx.state
     assert ctx.state["brand_brief"]["north_star"] == "让专业人士感到被支持"
-

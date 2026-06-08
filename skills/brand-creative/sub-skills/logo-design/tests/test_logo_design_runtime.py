@@ -65,19 +65,19 @@ def test_pipeline_yaml_exists():
 def test_stage_knowledge_files_exist():
     """验证所有 stage.knowledge 路径真实存在"""
     import yaml
-    
+
     skill_dir = Path(__file__).parent.parent
     pipeline_file = skill_dir / "pipeline.yaml"
-    
+
     with open(pipeline_file) as f:
         pipeline = yaml.safe_load(f)
-    
+
     # 收集所有 knowledge 路径
     knowledge_paths = []
     for stage in pipeline.get("stages", []):
         if "knowledge" in stage:
             knowledge_paths.extend(stage["knowledge"])
-    
+
     # 验证每个路径存在
     repo_root = skill_dir.parent.parent.parent.parent
     for rel_path in knowledge_paths:
@@ -89,7 +89,7 @@ def test_schema_files_exist():
     """验证 schema 文件存在"""
     skill_dir = Path(__file__).parent.parent
     schema_dir = skill_dir.parent.parent / "contracts" / "schemas"
-    
+
     assert (schema_dir / "logo_spec.schema.json").exists()
     assert (schema_dir / "logo_prompt_pack.schema.json").exists()
 
@@ -133,17 +133,17 @@ def test_output_aligns_with_logo_spec_schema():
 def test_output_aligns_with_logo_prompt_pack_schema():
     """验证输出字段对齐 logo_prompt_pack.schema.json"""
     import json
-    
+
     skill_dir = Path(__file__).parent.parent
     schema_file = skill_dir.parent.parent / "contracts" / "schemas" / "logo_prompt_pack.schema.json"
-    
+
     with open(schema_file) as f:
         schema = json.load(f)
-    
+
     # 验证必需字段
     required = schema.get("required", [])
     assert "prompts" in required
-    
+
     # 验证 prompts 数组项结构
     prompts_items = schema["properties"]["prompts"]["items"]
     assert "platform" in prompts_items["required"]
@@ -169,7 +169,7 @@ def test_prompts_exist():
     """验证所有 stage prompt 文件存在"""
     skill_dir = Path(__file__).parent.parent
     prompts_dir = skill_dir / "prompts"
-    
+
     assert (prompts_dir / "01-analyze-brand-form.md").exists()
     assert (prompts_dir / "02-generate-logo-spec.md").exists()
     assert (prompts_dir / "03-generate-prompt-pack.md").exists()
