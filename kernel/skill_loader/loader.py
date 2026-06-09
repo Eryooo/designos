@@ -13,7 +13,7 @@ from .group_loader import load_skill_group
 from .pipeline_loader import load_pipeline_skill
 
 if TYPE_CHECKING:
-    from kernel.skill_loader.models import SkillGroup
+    from kernel.skill_loader.group_loader import SkillGroup
 
 
 class SkillLoader(ISkillLoader):
