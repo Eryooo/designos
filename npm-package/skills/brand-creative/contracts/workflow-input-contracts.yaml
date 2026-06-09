@@ -1,0 +1,110 @@
+# Workflow 外部输入静态集成契约
+#
+# 本文件定义 brand-creative workflow 的外部输入要求。
+#
+# **Runtime 边界声明**:
+# - 当前 Kernel WorkflowOrchestrator 不消费此文件。
+# - 这是静态集成契约,用于文档/测试/调用方集成准备。
+# - 调用方必须在执行 workflow 前准备输入,Kernel 不提供 preflight check。
+# - runtime_enforced: false 表示无运行时强制,enforcement_boundary: caller。
+#
+# **禁止声称**:
+# - 不声称 Kernel 已具备 preflight/runtime enforcement。
+# - 不声称此文件被 WorkflowOrchestrator 加载或验证。
+
+schema_version: "0.1.0-static"
+
+workflows:
+  # ─────────────────────────────────────────────────────────────────────
+  # logo-vi-fast-track
+  # ─────────────────────────────────────────────────────────────────────
+  - workflow_id: logo-vi-fast-track
+    description: Logo+VI 快速通道,适合已有品牌策略,只需视觉执行
+
+    required_inputs:
+      - name: brand_brief
+        type: brand_brief
+        schema_ref: contracts/schemas/brand_brief.schema.json
+        description: 外部提供的品牌策略基线(北极星/定位/人格关键词)
+        provider: user_or_upstream_workflow
+        runtime_enforced: false
+        enforcement_boundary: caller
+
+    optional_inputs: []
+
+    notes: |
+      调用方必须在执行此 workflow 前准备 brand_brief 输入。
+      logo-design/color-system/typography-system 子技能的 required_inputs 均声明
+      需要 brand_brief,但 Kernel 当前不提供 workflow 级 preflight check。
+
+  # ─────────────────────────────────────────────────────────────────────
+  # campaign-sprint
+  # ─────────────────────────────────────────────────────────────────────
+  - workflow_id: campaign-sprint
+    description: 营销创意冲刺,快速策略 → campaign 概念 → 传播素材
+
+    required_inputs:
+      - name: vi_manual
+        type: vi_manual
+        schema_ref: contracts/schemas/vi_manual.schema.json
+        description: 外部提供的视觉识别手册(logo/色彩/字体规范)
+        provider: user_or_upstream_workflow
+        runtime_enforced: false
+        enforcement_boundary: caller
+
+      - name: brand_voice_guide
+        type: brand_voice_guide
+        schema_ref: contracts/schemas/brand_voice_guide.schema.json
+        description: 外部提供的品牌声音指南(语调/口头禅/话术原则)
+        provider: user_or_upstream_workflow
+        runtime_enforced: false
+        enforcement_boundary: caller
+
+    optional_inputs: []
+
+    notes: |
+      调用方必须在执行此 workflow 前准备 vi_manual + brand_voice_guide 输入。
+      campaign-creative 子技能的 required_inputs 均声明需要这两项,但 Kernel
+      当前不提供 workflow 级 preflight check。
+
+  # ─────────────────────────────────────────────────────────────────────
+  # full-brand-identity
+  # ─────────────────────────────────────────────────────────────────────
+  - workflow_id: full-brand-identity
+    description: 完整品牌识别全链路,从品牌策略到完整品牌手册
+
+    required_inputs: []
+
+    optional_inputs:
+      - name: competitor_matrix
+        type: comparison_matrix
+        schema_ref: contracts/schemas/competitor_matrix.schema.json
+        description: 用户已有竞品矩阵时,competitive-analysis 负责验证/规范化/补充
+        provider: user
+        runtime_enforced: false
+        enforcement_boundary: caller
+
+    notes: |
+      full-brand-identity 从零建立品牌,无强制外部输入。
+      用户可选提供 competitor_matrix,competitive-analysis 会消费并补充。
+
+  # ─────────────────────────────────────────────────────────────────────
+  # brand-refresh
+  # ─────────────────────────────────────────────────────────────────────
+  - workflow_id: brand-refresh
+    description: 品牌焕新,基于现有品牌审计优化 VI/声音/内容
+
+    required_inputs:
+      - name: current_brand_assets
+        type: object
+        schema_ref: null
+        description: 现有品牌资产(logo/VI/声音指南等)
+        provider: user
+        runtime_enforced: false
+        enforcement_boundary: caller
+
+    optional_inputs: []
+
+    notes: |
+      brand-refresh 依赖现有品牌资产输入,但 B1.0 未完整定义其 schema。
+      调用方需根据 brand-audit 子技能的 required_inputs 准备输入。

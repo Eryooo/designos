@@ -1,0 +1,55 @@
+name: Feature Request
+description: 提出新功能建议
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你的建议！请详细描述你期望的功能。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题背景
+      description: 你遇到了什么问题或痛点？
+      placeholder: 例如：在评估移动端 APP 时，希望能自动检测触控区域大小是否符合规范
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 期望的解决方案
+      description: 你希望 DesignOS 如何解决这个问题？
+      placeholder: 例如：新增 `/uxeval --mobile` 参数，自动检查触控热区尺寸
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 替代方案
+      description: 你考虑过哪些其他解决方案？
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: 使用场景
+      description: 这个功能会在什么场景下使用？
+      placeholder: 例如：移动端产品的 UX 评估，特别是触控交互密集的界面
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 参与贡献
+      description: 你是否愿意参与开发这个功能？
+      options:
+        - label: 我愿意提交 PR 实现这个功能
+        - label: 我可以提供测试用例或反馈
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 其他信息
+      description: 其他可能有帮助的信息（参考资料、竞品对比等）

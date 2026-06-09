@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/brand_brief",
+  "x-output-type": "brand_brief",
+  "title": "brand_brief",
+  "description": "品牌策略基线。brand-strategy 子技能产出,kernel OutputType=brand_brief。",
+  "type": "object",
+  "required": [
+    "north_star",
+    "positioning",
+    "differentiation",
+    "personality_keywords"
+  ],
+  "properties": {
+    "north_star": {
+      "type": "string",
+      "description": "品牌北极星(情感化价值,非功能描述)"
+    },
+    "positioning": {
+      "type": "string",
+      "description": "品牌定位"
+    },
+    "differentiation": {
+      "type": "object",
+      "description": "差异化判定",
+      "properties": {
+        "statement": {
+          "type": "string"
+        },
+        "basis": {
+          "type": "string",
+          "enum": [
+            "competitor_matrix",
+            "inferred"
+          ]
+        }
+      },
+      "required": [
+        "statement",
+        "basis"
+      ]
+    },
+    "core_values": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1
+    },
+    "personality_keywords": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 3,
+      "maxItems": 5
+    },
+    "target_user": {
+      "type": "string"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/content_strategy",
+  "x-output-type": "content_plan",
+  "title": "content_strategy",
+  "description": "内容策略。content-strategy 产出,kernel OutputType=content_plan。",
+  "type": "object",
+  "required": [
+    "content_pillars",
+    "channel_matrix",
+    "cadence_calendar"
+  ],
+  "properties": {
+    "content_pillars": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object"
+      }
+    },
+    "channel_matrix": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "cadence_calendar": {
+      "type": "object",
+      "description": "至少一季度"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,31 @@
+skill: uxeval
+schema_version: "0.1.0"
+status: pilot
+purpose: 声明本 skill 复用哪些 DesignOS 共享知识资产；仅引用 shared knowledge id，不复制正文。
+
+shared_knowledge:
+  - id: ux.heuristic-principles
+    used_by: principle-mapping
+    use: 选择适用启发式原则并映射到模块/任务
+  - id: ux.journey-modeling
+    used_by: journey-modeling
+    use: 建立用户旅程阶段与关键路径
+  - id: ux.evidence-quality
+    used_by: evidence-planning, evidence-collection, delivery-audit
+    use: 判断证据是否足够支撑最终交付
+  - id: ux.severity-rubric
+    used_by: issue-attribution
+    use: 判定 issue 严重等级
+  - id: ux.issue-attribution
+    used_by: issue-attribution
+    use: 把 raw issue 归因成结构化问题
+  - id: ux.ux-failure-modes
+    used_by: eval, review
+    use: 防止功能测试偏移、无原则/无证据 issue 等失败模式
+  - id: product.interaction-state-coverage
+    used_by: task-generation, evidence-collection
+    use: 识别关键交互状态覆盖要求
+
+private_reference_boundary: |
+  skills/uxeval/reference/ 继续保留 stage 绑定说明、输出约束和执行细节；
+  knowledge/ 只保存跨 skill 复用的通用决策知识。

@@ -10,6 +10,7 @@
     "bin/",
     "skills/",
     "AGENTS.md",
+    "README.md",
     "install.sh"
   ],
   "keywords": [

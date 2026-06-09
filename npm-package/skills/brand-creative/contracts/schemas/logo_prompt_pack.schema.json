@@ -1,0 +1,43 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/logo_prompt_pack",
+  "x-output-type": "image_prompt_pack",
+  "title": "logo_prompt_pack",
+  "description": "Logo AI 绘图 prompt pack。logo-design 产出,kernel OutputType=image_prompt_pack。",
+  "type": "object",
+  "required": [
+    "prompts"
+  ],
+  "properties": {
+    "prompts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "platform": {
+            "type": "string"
+          },
+          "positive": {
+            "type": "string"
+          },
+          "negative": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "platform",
+          "positive",
+          "negative"
+        ]
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "unavailable"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

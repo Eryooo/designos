@@ -83,7 +83,7 @@ stages:
     mcp_server: image-analyzer
     mcp_tool: plan_required_evidence
     inputs: [modules, key_features, task_checklist_lite, journey_map, journey_stages, screenshots_dir]
-    outputs: [required_evidence_plan, critical_page_requirements, critical_state_requirements, evidence_input_guidance]
+    outputs: [capture_mission, required_evidence_plan, critical_page_requirements, critical_state_requirements, evidence_input_guidance]
 
   # ────────────────────────────────────────────────────────────
   # Stage 5a: 评估脚本生成（仅 web 模式）
@@ -103,9 +103,9 @@ stages:
     type: tool
     only_when: mode == "web"
     mcp_server: playwright-driver
-    mcp_tool: run_evaluation
+    mcp_tool: execute_batch
     inputs: [evaluation_script]
-    outputs: [screenshots, dom_data, automated_eval_trace]
+    outputs: [screenshots, dom_data, detection_request, execution_summary]
     retry:
       max_attempts: 2
       backoff_seconds: 5.0
@@ -130,10 +130,11 @@ stages:
     outputs: [screenshots, image_analysis, evidence_assessment]
 
   # ────────────────────────────────────────────────────────────
-  # Stage 5.5: PRD-截图冲突分析
+  # Stage 5.5: PRD-截图冲突分析（仅 client 模式需要）
   # ────────────────────────────────────────────────────────────
   - id: prd-screenshot-conflict
     type: llm
+    only_when: mode == "client"
     gate:
       when: evidence_assessment.delivery_status == "blocked"
       action: pause
@@ -154,6 +155,7 @@ stages:
     type: llm
     gate:
       when: evidence_assessment.delivery_status in ["blocked", "supplement_required"]
+      only_when: mode == "client"
       action: pause
       checkpoint_id: QG2
       message: "当前截图证据尚未达到最终问题归因质量门槛，请先补资料再继续。"
@@ -161,7 +163,7 @@ stages:
       required_actions_from: evidence_assessment.required_actions
       resume_from_stage: screenshot-loading
     prompt: prompts/06-issue-attribution.md
-    inputs: [screenshots, image_analysis, evidence_assessment, prd_screenshot_conflicts, journey_map, journey_stages, principles, task_checklist_full, competitive_context]
+    inputs: [screenshots, image_analysis, evidence_assessment, prd_screenshot_conflicts, journey_map, journey_stages, principles, task_checklist_full, competitive_context, dom_data, detection_request]
     outputs: [raw_issues, issues, unverified_issues, delivery_assessment]
     knowledge: [reference/m06-问题归因.md]
     checkpoint:
@@ -174,9 +176,10 @@ stages:
   # ────────────────────────────────────────────────────────────
   - id: delivery-audit
     type: tool
+    only_when: mode == "client"
     mcp_server: excel-builder
     mcp_tool: audit_delivery_readiness
-    inputs: [issues, unverified_issues, evidence_assessment, delivery_assessment]
+    inputs: [issues, unverified_issues, evidence_assessment, delivery_assessment, capture_mission]
     outputs: [audited_delivery_assessment, delivery_audit_bundle]
 
   # ────────────────────────────────────────────────────────────
@@ -186,6 +189,7 @@ stages:
     type: tool
     gate:
       when: audited_delivery_assessment.delivery_status != "final_delivery_ready"
+      only_when: mode == "client"
       action: pause
       checkpoint_id: QG3
       message: "当前运行时审计尚未通过最终报告交付门槛，请先查看 bounded fallback package 并按补料清单处理。"

@@ -56,3 +56,4 @@ runs/
 .designos/
 *.log
 trace.jsonl
+.private/

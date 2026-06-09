@@ -1,0 +1,82 @@
+# Golden Case 01: 有竞品矩阵支撑的品牌策略产出
+
+description: |
+  workflow 场景,competitive-analysis 已产出充分竞品矩阵,brand-strategy 基于证据产出品牌策略基线。
+  验证:差异化判定基于 competitor_matrix,北极星是情感化价值,人格关键词覆盖三维度。
+
+inputs:
+  product_brief: |
+    FlowForge 是一款面向技术创业者的项目管理工具,核心功能包括任务管理/团队协作/进度追踪。
+    目标市场:早期创业团队(3-15人)。
+    价值主张:在功能之上提供情感支持,理解创业者的心理压力与不确定性。
+
+  target_user: |
+    25-40岁技术背景创业者,正在经历高不确定性与心理压力。
+    已尝试多款项目管理工具,但感觉"冰冷",只关注任务完成。
+    需要工具之外的情感认同与支持。
+
+  competitor_matrix:
+    competitors:
+      - name: Asana
+        visual_style: 清爽简洁,蓝白主色,理性
+        communication: 效率导向,强调"团队高效协作""任务不遗漏"
+        market_position: 企业级项目管理,覆盖大中小团队
+      - name: Monday.com
+        visual_style: 多彩活泼,视觉化看板
+        communication: 灵活性导向,强调"适应任何工作流""自定义"
+        market_position: 通用工作平台,多行业适用
+      - name: Linear
+        visual_style: 极简黑白,现代感
+        communication: 速度导向,强调"极速体验""工程师最爱"
+        market_position: 技术团队专用,聚焦软件开发
+    status: complete
+
+expected_output:
+  brand_brief:
+    north_star: 让创业者在不确定性中感到被理解与支持
+    positioning: 面向技术创业者的情感支持型项目管理工具,在功能之上提供心理陪伴
+    differentiation:
+      statement: 竞品普遍采用理性功能叙事(Asana 强调效率、Monday 强调灵活、Linear 强调速度),我们选择情感共鸣路线,强调创业者心理支持与陪伴,从"冰冷工具"转向"温暖伙伴"
+      basis: competitor_matrix
+    core_values:
+      - 同理心
+      - 诚实透明
+      - 持续进化
+    personality_keywords:
+      - 温暖
+      - 进取
+      - 直接
+      - 可信赖
+    target_user: 25-40岁技术背景创业者,面临高不确定性与心理压力,需要工具之外的情感支持
+
+quality_checks:
+  - name: north_star_is_emotional_value
+    description: 北极星是情感化价值,不是功能描述
+    assertion: |
+      north_star 包含"感到"/"体验"/"关系"等情感关键词,不包含"提供"/"工具"/"功能"等功能词
+
+  - name: differentiation_basis_is_competitor_matrix
+    description: 差异化判定基于 competitor_matrix
+    assertion: |
+      differentiation.basis == "competitor_matrix"
+
+  - name: differentiation_cites_evidence
+    description: 差异化声明引用竞品证据
+    assertion: |
+      differentiation.statement 包含至少一个竞品名称(Asana/Monday/Linear)
+
+  - name: personality_keywords_count
+    description: 人格关键词 3-5 个
+    assertion: |
+      personality_keywords.length >= 3 && personality_keywords.length <= 5
+
+  - name: personality_keywords_dimensions
+    description: 人格关键词覆盖情感/价值/行为维度
+    assertion: |
+      至少包含一个情感维度词(温暖/冷静/活力等)
+      至少包含一个价值维度词(进取/稳健/开放等)
+      至少包含一个行为维度词(直接/细腻/幽默等)
+
+test_type: golden
+priority: P0
+contract_version: B1.0

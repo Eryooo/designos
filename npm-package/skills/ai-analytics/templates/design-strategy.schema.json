@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "ai-analytics/design_strategy",
+  "title": "design_strategy",
+  "description": "ai-analytics 的上游产物。被 prd2proto stage1 通过 upstream_refs 注入为 {{design_strategy}}，用来校准 business_goal。字段名为下游契约，不得随意改名。",
+  "type": "object",
+  "required": ["target_audience", "business_goal", "design_principles", "tone_keywords"],
+  "properties": {
+    "target_audience": {
+      "type": "string",
+      "description": "目标人群一句话描述。prd2proto 用它与 PRD 交叉校验，冲突时以 PRD 为准并写 warnings。"
+    },
+    "business_goal": {
+      "type": "string",
+      "description": "产品要达成的核心商业目标。prd2proto stage1 用它校准 business_goal 字段。"
+    },
+    "design_principles": {
+      "type": "array",
+      "description": "3-6 条设计原则（如『信息密度优先』『移动端单手可达』）。",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "tone_keywords": {
+      "type": "array",
+      "description": "气质关键词（如 专业 / 克制 / 高效），供下游 design-spec 选模板风格。",
+      "items": {"type": "string"},
+      "minItems": 1
+    },
+    "competitive_positioning": {
+      "type": "string",
+      "description": "可选。相对竞品的差异化定位。"
+    },
+    "evidence_refs": {
+      "type": "array",
+      "description": "支撑本策略的 collected_data 来源 id 列表（宪法规则 1：不得编造）。",
+      "items": {"type": "string"}
+    }
+  }
+}

@@ -1,0 +1,999 @@
+# Brand Creative Sub-Skill Contracts (B1.0 Contract Freeze)
+#
+# 冻结 13 个子技能的机器可读输入输出契约、运行时依赖、知识资产和质量门槛。
+# 本批不开发任何子技能 runtime,只冻结契约以支持多 Agent 并行开发。
+
+schema_version: "0.1.0"
+contract_freeze_date: "2026-06-04"
+group: brand-creative
+purpose: |
+  定义 brand-creative Skill Group 的 13 个子技能契约,每个契约包含:
+  - 触发场景 / 输入输出 / 上下游依赖 / 运行时依赖
+  - 知识资产消费 / 质量门 / 降级行为 / 不得声称
+  契约冻结后,子技能可由不同 Agent 基于契约并行开发。
+
+# ═══════════════════════════════════════════════════════════════════════
+# Phase 1: 策略与定位 (2 个)
+# ═══════════════════════════════════════════════════════════════════════
+
+sub_skills:
+  # ─────────────────────────────────────────────────────────────────────
+  # 1. brand-strategy — 品牌策略基线
+  # ─────────────────────────────────────────────────────────────────────
+  - id: brand-strategy
+    purpose: |
+      产出品牌策略基线(定位/差异化/核心价值/人格关键词),作为所有下游子技能的策略锚点。
+      聚焦通用品牌战略决策,适用于企业品牌/产品品牌/服务品牌。
+
+    trigger_examples:
+      - 用户输入产品简介与目标用户,需要建立品牌策略框架
+      - 品牌焕新场景,基于 brand-audit 产出重定策略
+      - workflow 始终先运行 competitive-analysis 后调用本子技能
+
+    required_inputs:
+      - name: product_brief
+        type: string
+        description: 产品/服务简介(核心功能/目标市场/价值主张)
+      - name: target_user
+        type: string
+        description: 目标用户画像(人口统计/痛点/期待)
+
+    optional_inputs:
+      - name: competitor_matrix
+        type: object
+        schema_ref: competitor_matrix.schema.json
+        description: 竞品矩阵(由 competitive-analysis 产出或用户自带)
+      - name: brand_audit_report
+        type: object
+        schema_ref: brand_audit_report.schema.json
+        description: 品牌审计报告(brand-refresh workflow 场景)
+
+    upstream_contracts:
+      - competitive-analysis (workflow 运行时;直接调用本子技能时可选)
+      - brand-audit (brand-refresh workflow 场景)
+
+    public_outputs:
+      - name: brand_brief
+        type: brand_brief
+        description: 品牌策略产出(定位/差异化/核心价值/人格关键词/北极星)
+        schema_ref: brand_brief.schema.json  # 复用 kernel OutputType
+
+    internal_outputs: []
+
+    output_schema_refs:
+      - brand_brief.schema.json
+
+    downstream_consumers:
+      - logo-design
+      - color-system
+      - typography-system
+      - brand-voice
+      - content-strategy
+
+    runtime_dependencies:
+      sequential_upstream:
+        - competitive-analysis (workflow 场景;若用户直接调用本子技能则无)
+      parallel_downstream:
+        - logo-design / color-system / typography-system 可三路并行(都消费 brand_brief)
+
+    knowledge_ids:
+      active:
+        - design.strategy.brand-strategy-methodology  # B1.0 新增
+        - design.templates.brand-brief
+      partial_reuse:
+        - design.strategy.brand-strategy-alignment  # IP Design 偏向,仅部分复用
+
+    quality_gate:
+      checkpoint_id: C1-brand-strategy
+      rubric_ref: design.quality.brand-identity-quality-rubric  # B1.0 新增
+      must_pass:
+        - 北极星是情感化价值,不是功能描述
+        - 差异化判定基于 competitor_matrix 或显式标注 [inferred]
+        - 人格关键词 3-5 个,覆盖情感/价值/行为维度
+      failure_modes_ref: design.quality.brand-creative-failure-modes  # B1.0 新增
+
+    fallback_behavior: |
+      若 competitive-analysis 失败(workflow on_failure: continue 场景),
+      brand-strategy 差异化判定标注 [inferred],基于用户输入推断差异点并声明未经竞品验证。
+
+    do_not_claim:
+      - 不声称产出的品牌策略即可最终商用,需资深品牌经理评审
+      - 不声称已覆盖完整品牌战略(营销/财务/组织不在范围)
+      - 差异化标 [inferred] 时,不声称已完成竞品对标
+
+    contract_status: ready_for_parallel  # P0 knowledge gap = 0
+    owner: brand-creative-group
+
+  # ─────────────────────────────────────────────────────────────────────
+  # 2. competitive-analysis — 竞品分析
+  # ─────────────────────────────────────────────────────────────────────
+  - id: competitive-analysis
+    purpose: |
+      分析竞品视觉风格/传播策略/市场空白,产出结构化竞品矩阵与市场差距报告。
+      workflow 运行时始终先行,验证/规范化/补充用户输入的竞品资料;
+      用户直接调用时,从零产出竞品分析。
+
+    trigger_examples:
+      - full-brand-identity / campaign-sprint workflow 始终串行先行
+      - 用户已有竞品清单但需结构化分析与补充
+      - 品牌策略需要竞品对标数据
+
+    required_inputs:
+      - name: product_brief
+        type: string
+        description: 产品/服务简介
+      - name: target_market
+        type: string
+        description: 目标市场(地域/行业/细分)
+
+    optional_inputs:
+      - name: competitor_hints
+        type: array
+        description: 用户提供的竞品线索(品牌名/网址/已知特点)
+
+    upstream_contracts: []  # 无上游,独立起点
+
+    public_outputs:
+      - name: competitor_matrix
+        type: comparison_matrix
+        description: 竞品对比矩阵(品牌/视觉/传播/市场)
+        schema_ref: competitor_matrix.schema.json
+
+    internal_outputs:
+      - name: market_gap_report
+        description: 市场空白报告(未被竞品覆盖的情感/价值/视觉空间)
+        schema_ref: market_gap_report.schema.json
+
+    output_schema_refs:
+      - competitor_matrix.schema.json
+      - market_gap_report.schema.json
+
+    downstream_consumers:
+      - brand-strategy (消费 competitor_matrix 产出差异化判定)
+
+    runtime_dependencies:
+      sequential_downstream:
+        - brand-strategy (workflow 场景;必须等本子技能完成)
+
+    knowledge_ids:
+      active:
+        - research.competitor-analysis  # K1 已有
+      must_create: []  # 无 P0 gap
+
+    quality_gate:
+      checkpoint_id: C0-competitive-analysis
+      must_pass:
+        - 竞品矩阵至少覆盖 3 个直接竞品
+        - 视觉风格维度(色彩/形态/辅助图形)必须填充
+        - market_gap_report 指出至少 1 个未被竞品占据的情感/视觉空间
+
+    fallback_behavior: |
+      若用户未提供 competitor_hints 且市场搜索失败,
+      产出 competitor_matrix 标注 status: insufficient_data,
+      brand-strategy 消费时会标注差异化为 [inferred]。
+
+    do_not_claim:
+      - 不声称完成深度竞品审计(专利/财务/组织不在范围)
+      - 不声称市场空白已被完全识别(仅基于公开信息)
+
+    contract_status: ready_for_parallel
+    owner: brand-creative-group
+
+# ═══════════════════════════════════════════════════════════════════════
+# Phase 2: 视觉识别系统 (4 个)
+# ═══════════════════════════════════════════════════════════════════════
+
+  # ─────────────────────────────────────────────────────────────────────
+  # 3. logo-design — Logo 设计
+  # ─────────────────────────────────────────────────────────────────────
+  - id: logo-design
+    purpose: |
+      产出 Logo 设计规范(形态/色彩/应用场景/辅助图形)与 AI 绘图 prompt pack。
+      不声称交付最终商标可注册/版权清洁的商用 Logo;产出的是结构化设计方向与规范。
+
+    trigger_examples:
+      - brand-strategy 完成后,需要 Logo 视觉方向
+      - 品牌焕新场景,更新 Logo 系统
+      - 与 color-system / typography-system 并行开发(基于冻结的 brand_brief 契约)
+
+    required_inputs:
+      - name: brand_brief
+        type: object
+        schema_ref: brand_brief.schema.json
+        description: 品牌策略基线(由 brand-strategy 产出)
+
+    optional_inputs: []
+
+    upstream_contracts:
+      - brand-strategy (必须先完成)
+
+    public_outputs:
+      - name: visual_spec
+        type: visual_spec
+        description: Logo 视觉规范(复用 kernel OutputType,聚焦 logo 部分)
+        schema_ref: logo_spec.schema.json
+      - name: image_prompt_pack
+        type: image_prompt_pack
+        description: AI 绘图 prompt pack
+        schema_ref: logo_prompt_pack.schema.json
+
+    internal_outputs: []
+
+    output_schema_refs:
+      - logo_spec.schema.json
+      - logo_prompt_pack.schema.json
+
+    downstream_consumers:
+      - visual-identity (消费 visual_spec)
+
+    runtime_dependencies:
+      sequential_upstream:
+        - brand-strategy
+      parallel_peers:
+        - color-system / typography-system (三者并行,都依赖 brand-strategy)
+      sequential_downstream:
+        - visual-identity (必须等三者全部完成)
+
+    knowledge_ids:
+      active:
+        - design.visual.logo-design-methodology  # B1.0 新增
+        - design.visual.image-prompt-system
+      partial_reuse:
+        - design.visual.visual-translation  # IP 偏向,仅形态/色彩/识别度部分可复用
+
+    quality_gate:
+      checkpoint_id: C2-logo-design
+      rubric_ref: design.quality.brand-identity-quality-rubric
+      must_pass:
+        - 黑白可用性验证(logo 转灰度后仍可识别)
+        - 小尺寸验证(16x16px 轮廓清晰)
+        - 商标风险信号检查(通用符号/行业禁忌/相似度)
+      failure_modes_ref: design.quality.brand-creative-failure-modes
+
+    fallback_behavior: |
+      若 AI 绘图 prompt 生成失败,visual_spec 仍产出(文字描述 + 形态方向),
+      image_prompt_pack 标注 status: unavailable,下游可基于文字规范继续。
+
+    do_not_claim:
+      - 不声称 Logo 已商标查重/版权清洁/可直接注册
+      - 不声称已生成最终视觉资产(仅产出规范与 prompt,非最终图形)
+      - 不声称辅助图形已完整设计(仅产出方向与约束)
+
+    contract_status: ready_for_parallel
+    owner: brand-creative-group
+
+  # ─────────────────────────────────────────────────────────────────────
+  # 4. color-system — 品牌色彩系统
+  # ─────────────────────────────────────────────────────────────────────
+  - id: color-system
+    purpose: |
+      产出品牌色彩系统(主色/辅色/色彩情绪/应用场景/对比度/可访问性规范)。
+      覆盖数字/印刷双介质,明暗背景,色差风险信号。
+
+    trigger_examples:
+      - brand-strategy 完成后,需要色彩系统
+      - 与 logo-design / typography-system 并行开发
+      - 品牌焕新场景,更新色彩体系
+
+    required_inputs:
+      - name: brand_brief
+        type: object
+        schema_ref: brand_brief.schema.json
+
+    optional_inputs: []
+
+    upstream_contracts:
+      - brand-strategy
+
+    public_outputs:
+      - name: color_palette
+        type: visual_spec
+        description: 品牌色彩调色板(复用 kernel OutputType,聚焦色彩部分)
+        schema_ref: color_palette.schema.json
+
+    internal_outputs: []
+
+    output_schema_refs:
+      - color_palette.schema.json
+
+    downstream_consumers:
+      - visual-identity
+
+    runtime_dependencies:
+      sequential_upstream:
+        - brand-strategy
+      parallel_peers:
+        - logo-design / typography-system
+      sequential_downstream:
+        - visual-identity
+
+    knowledge_ids:
+      active:
+        - design.visual.color-system-methodology  # B1.0 新增
+      partial_reuse:
+        - design.visual.visual-translation  # IP 偏向,仅色彩情绪部分可复用
+
+    quality_gate:
+      checkpoint_id: C3-color-system
+      rubric_ref: design.quality.brand-identity-quality-rubric
+      must_pass:
+        - 主色/辅色对比度 ≥ 4.5:1 (WCAG AA)
+        - 明暗背景可用性验证
+        - 数字/印刷色差风险标注(RGB → CMYK 转换)
+
+    fallback_behavior: |
+      若对比度计算失败,产出 color_palette 标注 accessibility: needs_manual_check,
+      下游 visual-identity 会提示人工验证可访问性。
+
+    do_not_claim:
+      - 不声称色彩已完成印刷打样验证
+      - 不声称已覆盖所有可访问性场景(如色盲模式)
+
+    contract_status: ready_for_parallel
+    owner: brand-creative-group
+
+  # ─────────────────────────────────────────────────────────────────────
+  # 5. typography-system — 字体系统
+  # ─────────────────────────────────────────────────────────────────────
+  - id: typography-system
+    purpose: |
+      产出字体系统(主/辅字体/字重层级/字号比例/行高/中西文配对/授权风险信号)。
+      覆盖跨端可用性(Web/iOS/Android/印刷)。
+
+    trigger_examples:
+      - brand-strategy 完成后,需要字体系统
+      - 与 logo-design / color-system 并行开发
+
+    required_inputs:
+      - name: brand_brief
+        type: object
+        schema_ref: brand_brief.schema.json
+
+    optional_inputs: []
+
+    upstream_contracts:
+      - brand-strategy
+
+    public_outputs:
+      - name: typography_spec
+        type: visual_spec
+        description: 字体系统规范(复用 kernel OutputType,聚焦字体部分)
+        schema_ref: typography_spec.schema.json
+
+    internal_outputs: []
+
+    output_schema_refs:
+      - typography_spec.schema.json
+
+    downstream_consumers:
+      - visual-identity
+
+    runtime_dependencies:
+      sequential_upstream:
+        - brand-strategy
+      parallel_peers:
+        - logo-design / color-system
+      sequential_downstream:
+        - visual-identity
+
+    knowledge_ids:
+      active:
+        - design.visual.typography-system-methodology  # B1.0 新增
+      must_create: []
+
+    quality_gate:
+      checkpoint_id: C4-typography-system
+      rubric_ref: design.quality.brand-identity-quality-rubric
+      must_pass:
+        - 中西文配对验证(字重/字号协调)
+        - 跨端可用性检查(Web font / iOS / Android / 印刷)
+        - 授权风险信号(商用授权/开源协议/fallback 字体)
+
+    fallback_behavior: |
+      若授权信息查询失败,typography_spec 标注 license: needs_verification,
+      下游需人工确认商用授权。
+
+    do_not_claim:
+      - 不声称字体已完成商用授权采购
+      - 不声称已覆盖所有语言场景
+
+    contract_status: ready_for_parallel
+    owner: brand-creative-group
+
+  # ─────────────────────────────────────────────────────────────────────
+  # 6. visual-identity — 完整 VI 手册
+  # ─────────────────────────────────────────────────────────────────────
+  - id: visual-identity
+    purpose: |
+      汇总 logo / color / typography 三者产出完整 VI 手册,补充辅助图形/应用规范/禁忌。
+      这是视觉识别系统的最终交付物。
+
+    trigger_examples:
+      - logo-design / color-system / typography-system 三者全部完成后
+      - logo-vi-fast-track workflow 最终汇总
+
+    required_inputs:
+      - name: visual_spec
+        type: object
+        schema_ref: logo_spec.schema.json
+      - name: color_palette
+        type: object
+        schema_ref: color_palette.schema.json
+      - name: typography_spec
+        type: object
+        schema_ref: typography_spec.schema.json
+
+    optional_inputs: []
+
+    upstream_contracts:
+      - logo-design (必须先完成)
+      - color-system (必须先完成)
+      - typography-system (必须先完成)
+
+    public_outputs:
+      - name: vi_manual
+        type: style_guide
+        description: 完整 VI 手册(复用 kernel OutputType,供 brand-guidelines 消费)
+        schema_ref: vi_manual.schema.json
+
+    internal_outputs: []
+
+    output_schema_refs:
+      - vi_manual.schema.json
+
+    downstream_consumers:
+      - campaign-creative
+      - brand-collateral
+      - digital-assets
+      - brand-guidelines
+
+    runtime_dependencies:
+      sequential_upstream:
+        - logo-design AND color-system AND typography-system (三者全部完成)
+      parallel_downstream:
+        - brand-collateral / digital-assets 可并行(都消费 vi_manual)
+
+    knowledge_ids:
+      active:
+        - design.visual.visual-identity-integration-methodology  # B1.3 新增
+        - design.quality.brand-identity-quality-rubric  # B1.0 新增
+        - design.quality.professional-gap-report
+      partial_reuse:
+        - design.visual.visual-translation
+        - design.quality.ip-design-quality-rubric  # 仅品牌识别维度可复用
+
+    quality_gate:
+      checkpoint_id: C5-visual-identity
+      rubric_ref: design.quality.brand-identity-quality-rubric
+      must_pass:
+        - logo / color / typography 三者一致性检查
+        - 辅助图形与主 logo 协调性
+        - 应用规范覆盖至少 5 个场景(名片/网站/社交媒体/包装/海报)
+      one_vote_veto:
+        - logo 黑白不可用
+        - 主色对比度 < 3:1
+
+    fallback_behavior: |
+      若任一上游产物标注 needs_verification / needs_manual_check,
+      vi_manual 继承这些警告,professional_gap_report 标注相关风险。
+
+    do_not_claim:
+      - 不声称 VI 已完成所有场景应用设计
+      - 不声称已达"高阶可评审"(默认中阶可用)
+      - 不声称已完成法务/印刷/字体授权确认
+      - 不声称是最终品牌手册(brand-guidelines 才是最终交付物)
+
+    contract_status: ready_after_upstream  # 知识/schema 就绪,但运行时必须等 logo/color/typography 三者先开发,不能与之同批并行
+    owner: brand-creative-group
+
+# ═══════════════════════════════════════════════════════════════════════
+# Phase 3: 品牌内容与传播 (3 个)
+# ═══════════════════════════════════════════════════════════════════════
+
+  # ─────────────────────────────────────────────────────────────────────
+  # 7. brand-voice — 品牌声音
+  # ─────────────────────────────────────────────────────────────────────
+  - id: brand-voice
+    purpose: |
+      产出品牌声音指南(语调/口头禅/场景话术/内容原则/红线)。
+      品牌层声音(非 IP 人格层),适用于企业/产品/服务品牌对外沟通。
+
+    trigger_examples:
+      - brand-strategy 完成后,需要品牌声音定义
+      - 与 content-strategy 并行开发
+
+    required_inputs:
+      - name: brand_brief
+        type: object
+        schema_ref: brand_brief.schema.json
+
+    optional_inputs: []
+
+    upstream_contracts:
+      - brand-strategy
+
+    public_outputs: []
+
+    internal_outputs:
+      - name: brand_voice_guide
+        description: 品牌声音指南(内部流转,供 campaign-creative/brand-guidelines 消费)
+        schema_ref: brand_voice_guide.schema.json
+
+    output_schema_refs:
+      - brand_voice_guide.schema.json
+
+    downstream_consumers:
+      - campaign-creative
+      - brand-guidelines
+
+    runtime_dependencies:
+      sequential_upstream:
+        - brand-strategy
+      parallel_peers:
+        - content-strategy
+
+    knowledge_ids:
+      active:
+        - design.strategy.brand-voice-methodology  # B1.0.1 新增,通用品牌声音方法论
+      partial_reuse: []
+
+    quality_gate:
+      checkpoint_id: C6-brand-voice
+      rubric_ref: design.quality.brand-identity-quality-rubric
+      must_pass:
+        - 语调维度至少 3 组(如正式↔亲和/专业↔活泼)
+        - 场景话术覆盖至少 4 场景(欢迎/道歉/促销/客服)
+        - 红线清单(绝不使用的措辞/语气)
+
+    fallback_behavior: |
+      若 brand_brief 人格关键词不足,brand-voice 基于品牌定位推断声音方向并标注 [inferred]。
+
+    do_not_claim:
+      - 不声称已生成全部对外文案(仅产出指南与原则)
+      - 不声称声音指南已经过用户测试验证
+
+    contract_status: ready_for_parallel
+    owner: brand-creative-group
+
+  # ─────────────────────────────────────────────────────────────────────
+  # 8. content-strategy — 内容策略
+  # ─────────────────────────────────────────────────────────────────────
+  - id: content-strategy
+    purpose: |
+      产出内容策略(内容支柱/渠道矩阵/节奏日历)。品牌层内容规划。
+
+    trigger_examples:
+      - brand-strategy 完成后,需要内容策略
+      - 与 brand-voice 并行开发
+
+    required_inputs:
+      - name: brand_brief
+        type: object
+        schema_ref: brand_brief.schema.json
+
+    optional_inputs:
+      - name: target_channels
+        type: array
+        description: 目标渠道(可选,缺失则推断)
+
+    upstream_contracts:
+      - brand-strategy
+
+    public_outputs:
+      - name: content_plan
+        type: content_plan
+        description: 内容策略(复用 kernel OutputType)
+        schema_ref: content_plan.schema.json
+
+    internal_outputs: []
+
+    output_schema_refs:
+      - content_plan.schema.json
+
+    downstream_consumers:
+      - brand-guidelines
+
+    runtime_dependencies:
+      sequential_upstream:
+        - brand-strategy
+      parallel_peers:
+        - brand-voice
+
+    knowledge_ids:
+      active: []
+      partial_reuse:
+        - design.ip.content-narrative  # IP 叙事偏向,仅内容支柱/矩阵/节奏方法可部分复用
+
+    quality_gate:
+      checkpoint_id: C7-content-strategy
+      rubric_ref: design.quality.brand-identity-quality-rubric
+      must_pass:
+        - 内容支柱至少 3 个,每个对应品牌核心价值
+        - 渠道矩阵明确每渠道的内容类型与频率
+        - 节奏日历至少覆盖一个季度
+
+    fallback_behavior: |
+      若未提供 target_channels,基于目标用户推断主渠道并标注 [inferred]。
+
+    do_not_claim:
+      - 不声称已产出具体内容素材(仅产出策略框架)
+      - 不声称渠道选择已经过 ROI 验证
+
+    contract_status: blocked_by_knowledge  # 依赖 partial_reuse,需私有 adapter
+    owner: brand-creative-group
+
+  # ─────────────────────────────────────────────────────────────────────
+  # 9. campaign-creative — 营销创意
+  # ─────────────────────────────────────────────────────────────────────
+  - id: campaign-creative
+    purpose: |
+      产出营销创意(campaign 主题/视觉方向/传播素材方向 + prompt pack)。
+      不声称生成最终营销视觉资产。
+
+    trigger_examples:
+      - visual-identity + brand-voice 完成后,需要营销战役创意
+      - campaign-sprint workflow 核心步骤
+
+    required_inputs:
+      - name: brand_brief
+        type: object
+        schema_ref: brand_brief.schema.json
+      - name: vi_manual
+        type: object
+        schema_ref: vi_manual.schema.json
+      - name: brand_voice_guide
+        type: object
+        schema_ref: brand_voice_guide.schema.json
+
+    optional_inputs:
+      - name: campaign_goal
+        type: string
+        description: 战役目标(可选)
+
+    upstream_contracts:
+      - visual-identity (必须先完成)
+      - brand-voice (必须先完成)
+
+    public_outputs: []
+
+    internal_outputs:
+      - name: campaign_brief
+        description: campaign 创意简报(内部流转)
+        schema_ref: campaign_brief.schema.json
+      - name: creative_concepts
+        description: 创意概念集合(内部流转)
+        schema_ref: creative_concepts.schema.json
+
+    output_schema_refs:
+      - campaign_brief.schema.json
+      - creative_concepts.schema.json
+
+    downstream_consumers:
+      - digital-assets
+
+    runtime_dependencies:
+      sequential_upstream:
+        - visual-identity AND brand-voice (生产者/消费者不同步,串行后行)
+      sequential_downstream:
+        - digital-assets
+
+    knowledge_ids:
+      active:
+        - design.visual.image-prompt-system
+      partial_reuse:
+        - design.ip.content-narrative  # 仅 campaign 叙事结构可部分复用
+        - design.quality.common-failure-modes
+
+    quality_gate:
+      checkpoint_id: C8-campaign-creative
+      rubric_ref: design.quality.brand-identity-quality-rubric
+      must_pass:
+        - campaign 主题与品牌定位一致
+        - 创意概念至少 3 个,与 VI 视觉一致
+        - prompt pack 含负向控制
+      failure_modes_ref: design.quality.brand-creative-failure-modes
+
+    fallback_behavior: |
+      若 prompt pack 生成失败,creative_concepts 仍以文字方向产出,
+      image_prompt_pack 标注 status: unavailable。
+
+    do_not_claim:
+      - 不声称已生成最终营销视觉资产(仅产出方向与 prompt)
+      - 不声称 campaign 效果已经过市场验证
+
+    contract_status: blocked_by_knowledge
+    owner: brand-creative-group
+
+# ═══════════════════════════════════════════════════════════════════════
+# Phase 4: 物料与落地 (4 个)
+# ═══════════════════════════════════════════════════════════════════════
+
+  # ─────────────────────────────────────────────────────────────────────
+  # 10. brand-collateral — 品牌物料
+  # ─────────────────────────────────────────────────────────────────────
+  - id: brand-collateral
+    purpose: |
+      产出品牌物料规格(名片/信头/包装/宣传册的版式/尺寸/工艺/印刷规范)。
+
+    trigger_examples:
+      - visual-identity 完成后,需要物料规格
+      - 与 digital-assets 并行开发
+
+    required_inputs:
+      - name: vi_manual
+        type: object
+        schema_ref: vi_manual.schema.json
+
+    optional_inputs: []
+
+    upstream_contracts:
+      - visual-identity
+
+    public_outputs:
+      - name: brand_material_spec
+        type: brand_material_spec
+        description: 品牌物料规格(复用 kernel OutputType)
+        schema_ref: collateral_spec.schema.json
+
+    internal_outputs:
+      - name: collateral_spec
+        description: 物料规格(内部流转,供 brand-guidelines 消费)
+        schema_ref: collateral_spec.schema.json
+
+    output_schema_refs:
+      - collateral_spec.schema.json
+
+    downstream_consumers:
+      - brand-guidelines
+
+    runtime_dependencies:
+      sequential_upstream:
+        - visual-identity
+      parallel_peers:
+        - digital-assets
+
+    knowledge_ids:
+      active: []
+      partial_reuse:
+        - design.ip.brand-material-realization  # IP 物料偏向,仅通用物料规范可部分复用
+
+    quality_gate:
+      checkpoint_id: C9-brand-collateral
+      rubric_ref: design.quality.brand-identity-quality-rubric
+      must_pass:
+        - 物料清单至少 4 类(名片/信头/包装/宣传册)
+        - 印刷规范(出血/色彩模式/分辨率)
+        - 与 vi_manual 视觉一致
+
+    fallback_behavior: |
+      若印刷工艺信息不足,collateral_spec 标注 print_spec: needs_vendor_confirmation。
+
+    do_not_claim:
+      - 不声称物料已完成印刷打样
+      - 不声称工艺规格已经供应商确认
+
+    contract_status: blocked_by_knowledge
+    owner: brand-creative-group
+
+  # ─────────────────────────────────────────────────────────────────────
+  # 11. digital-assets — 数字资产
+  # ─────────────────────────────────────────────────────────────────────
+  - id: digital-assets
+    purpose: |
+      产出数字资产规范(网站视觉/社交媒体模板/H5 规范 + prompt pack)。
+
+    trigger_examples:
+      - visual-identity 完成后,需要数字资产规范
+      - campaign-creative 完成后,产出战役数字素材
+      - 与 brand-collateral 并行开发
+
+    required_inputs:
+      - name: vi_manual
+        type: object
+        schema_ref: vi_manual.schema.json
+
+    optional_inputs:
+      - name: campaign_brief
+        type: object
+        schema_ref: campaign_brief.schema.json
+        description: 战役简报(campaign-sprint 场景)
+
+    upstream_contracts:
+      - visual-identity
+      - campaign-creative (campaign-sprint 场景)
+
+    public_outputs: []
+
+    internal_outputs:
+      - name: digital_asset_kit
+        description: 数字资产套件规范(内部流转)
+        schema_ref: digital_asset_kit.schema.json
+
+    output_schema_refs:
+      - digital_asset_kit.schema.json
+
+    downstream_consumers:
+      - brand-guidelines
+
+    runtime_dependencies:
+      sequential_upstream:
+        - visual-identity (campaign-sprint 场景还需 campaign-creative)
+      parallel_peers:
+        - brand-collateral
+
+    knowledge_ids:
+      active:
+        - design.visual.image-prompt-system
+      partial_reuse:
+        - design.ip.brand-material-realization  # 仅数字物料规范可部分复用
+
+    quality_gate:
+      checkpoint_id: C10-digital-assets
+      rubric_ref: design.quality.brand-identity-quality-rubric
+      must_pass:
+        - 数字资产类型至少 3 类(网站/社交媒体/H5)
+        - 响应式/多尺寸规范
+        - prompt pack 含负向控制
+
+    fallback_behavior: |
+      若 prompt pack 生成失败,digital_asset_kit 以文字规范产出,prompt 标注 unavailable。
+
+    do_not_claim:
+      - 不声称已生成最终数字视觉资产
+      - 不声称已完成跨浏览器/设备兼容测试
+
+    contract_status: blocked_by_knowledge
+    owner: brand-creative-group
+
+  # ─────────────────────────────────────────────────────────────────────
+  # 12. brand-guidelines — 完整品牌手册
+  # ─────────────────────────────────────────────────────────────────────
+  - id: brand-guidelines
+    purpose: |
+      汇总策略/VI/声音/内容/物料产出完整品牌手册。最终汇总交付物。
+
+    trigger_examples:
+      - 几乎所有上游子技能完成后
+      - full-brand-identity workflow 最终汇总
+
+    required_inputs:
+      - name: brand_brief
+        type: object
+        schema_ref: brand_brief.schema.json
+      - name: vi_manual
+        type: object
+        schema_ref: vi_manual.schema.json
+      - name: brand_voice_guide
+        type: object
+        schema_ref: brand_voice_guide.schema.json
+
+    optional_inputs:
+      - name: content_plan
+        type: object
+        schema_ref: content_plan.schema.json
+      - name: collateral_spec
+        type: object
+        schema_ref: collateral_spec.schema.json
+      - name: digital_asset_kit
+        type: object
+        schema_ref: digital_asset_kit.schema.json
+
+    upstream_contracts:
+      - brand-strategy
+      - visual-identity
+      - brand-voice
+      - content-strategy (可选)
+      - brand-collateral (可选)
+      - digital-assets (可选)
+
+    public_outputs: []
+
+    internal_outputs:
+      - name: brand_guidelines
+        description: 完整品牌手册(最终交付物)
+        schema_ref: brand_guidelines.schema.json
+
+    output_schema_refs:
+      - brand_guidelines.schema.json
+
+    downstream_consumers: []  # 最终交付物
+
+    runtime_dependencies:
+      sequential_upstream:
+        - 几乎所有上游(brand-strategy/visual-identity/brand-voice 必需,其余可选)
+
+    knowledge_ids:
+      active:
+        - design.quality.brand-identity-quality-rubric  # B1.0 新增
+        - design.quality.professional-gap-report
+      partial_reuse:
+        - design.ip.brand-material-realization
+
+    quality_gate:
+      checkpoint_id: C11-brand-guidelines
+      rubric_ref: design.quality.brand-identity-quality-rubric
+      must_pass:
+        - 手册覆盖策略/VI/声音(必需章节)
+        - 各上游警告已在 gap_report 汇总
+        - 一致性检查(各部分无冲突)
+      one_vote_veto:
+        - 缺失 VI 或品牌策略核心章节
+
+    fallback_behavior: |
+      可选上游缺失时,brand_guidelines 标注对应章节为 not_included,
+      professional_gap_report 说明缺失影响。
+
+    do_not_claim:
+      - 不声称品牌手册已可最终商用,需资深品牌经理终审
+      - 不声称已达高阶可评审(默认中阶可用)
+
+    contract_status: blocked_by_knowledge
+    owner: brand-creative-group
+
+  # ─────────────────────────────────────────────────────────────────────
+  # 13. brand-audit — 品牌审计
+  # ─────────────────────────────────────────────────────────────────────
+  - id: brand-audit
+    purpose: |
+      产出品牌审计报告(当前品牌健康度/差距分析/竞品对标/优化建议)。
+      独立子技能,brand-refresh workflow 先行步骤。
+
+    trigger_examples:
+      - 品牌焕新场景,审计现有品牌
+      - 独立调用,评估品牌健康度
+
+    required_inputs:
+      - name: existing_brand_materials
+        type: object
+        description: 现有品牌资料(logo/色彩/物料/传播现状)
+
+    optional_inputs:
+      - name: competitor_matrix
+        type: object
+        schema_ref: competitor_matrix.schema.json
+
+    upstream_contracts: []  # 独立起点
+
+    public_outputs:
+      - name: analysis_report
+        type: analysis_report
+        description: 品牌审计报告(复用 kernel OutputType)
+        schema_ref: brand_audit_report.schema.json
+
+    internal_outputs:
+      - name: brand_audit_report
+        description: 品牌审计报告(内部流转,brand-refresh 中供 brand-strategy 消费)
+        schema_ref: brand_audit_report.schema.json
+
+    output_schema_refs:
+      - brand_audit_report.schema.json
+
+    downstream_consumers:
+      - brand-strategy (brand-refresh workflow 场景)
+
+    runtime_dependencies:
+      sequential_downstream:
+        - brand-strategy (brand-refresh 场景)
+
+    knowledge_ids:
+      active:
+        - design.strategy.brand-audit-methodology  # B1.0 新增
+      must_create: []
+
+    quality_gate:
+      checkpoint_id: C12-brand-audit
+      rubric_ref: design.quality.brand-identity-quality-rubric
+      must_pass:
+        - 健康度评估维度至少 5 个(一致性/识别度/差异化/可延展/可访问性)
+        - 差距分析明确当前 vs 目标
+        - 优化建议可执行且优先级排序
+
+    fallback_behavior: |
+      若现有品牌资料不足,审计报告标注 confidence: low 并列出缺失资料清单。
+
+    do_not_claim:
+      - 不声称审计已覆盖商业表现/市场份额维度
+      - 不声称优化建议已经过 ROI 验证
+
+    contract_status: ready_for_parallel
+    owner: brand-creative-group
