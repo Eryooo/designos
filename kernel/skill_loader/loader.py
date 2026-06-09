@@ -82,15 +82,6 @@ class SkillLoader(ISkillLoader):
         Raises:
             ConfigError: If sub_id not declared or SKILL.md missing.
         """
-        from .group_loader import SkillGroup
-
-        if not isinstance(group, SkillGroup):
-            raise ConfigError(
-                ErrorCode.E1001,
-                f"expected SkillGroup, got {type(group).__name__}",
-                context={"sub_id": sub_id},
-            )
-
         # GROUP.md declares path as "sub-skills/<id>/SKILL.md" (B1.1 fixed)
         # or just "sub-skills/<id>" (legacy). Either way, _sub_skill_paths[sub_id]
         # resolves to the absolute path from GROUP.md frontmatter.
