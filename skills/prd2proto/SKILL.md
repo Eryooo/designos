@@ -1,8 +1,14 @@
 ---
 name: prd2proto
-version: 0.2.0
+version: 0.2.0-p0-refactor
 type: pipeline
-description: PRD → 可交互前端代码。当用户说 PRD 转原型、原型生成、PRD 转代码、prd2proto 时使用。支持三种保真度档位：pm（PM 演示用低保真）/ designer-spec（设计师高保真原型）/ designer-dsl（DSL + 组件库 + 设计规范，生产级代码）。
+status: pilot
+runtime_reliability: llm_assisted
+enterprise_ready: false
+description: |
+  PRD → 设计推理资产 → 受约束的原型代码。
+  P0 重构后，不再直接从 PRD 生成代码，而是先生成设计推理资产（design objectives, user task map, journey map, IA, page flow, component strategy, state matrix, interaction rules），再基于这些资产生成代码。
+  支持三种保真度档位：pm（PM 演示用低保真）/ designer-spec（设计师高保真原型）/ designer-dsl（DSL + 组件库 + 设计规范，生产级代码）。
 requires:
   kernel: ">=1.0.0,<2.0.0"
   mcp_servers:
