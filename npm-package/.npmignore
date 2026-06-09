@@ -1,10 +1,11 @@
-.git
-.github
-tests
-docs
-legacy
-kernel
-mcp-servers
-tools
-*.pyc
-__pycache__
+# Python cache
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+
+# Tests
+**/tests/
+
+# Development files
+**/.pytest_cache/
+**/.ruff_cache/

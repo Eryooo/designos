@@ -9,25 +9,49 @@
   "files": [
     "bin/",
     "skills/",
+    "!skills/**/tests",
+    "!skills/**/__pycache__",
+    "!skills/**/*.pyc",
     "AGENTS.md",
     "README.md",
     "install.sh"
   ],
   "keywords": [
-    "designos",
+    "design",
     "ux",
-    "evaluation",
-    "heuristic",
-    "usability",
+    "ui",
+    "design-tools",
+    "design-system",
+    "ai",
+    "ai-tools",
+    "artificial-intelligence",
+    "llm",
+    "claude",
     "claude-code",
     "cursor",
-    "trae"
+    "ai-assistant",
+    "brand",
+    "branding",
+    "logo-design",
+    "color-palette",
+    "prototype",
+    "prototyping",
+    "heuristic-evaluation",
+    "usability",
+    "workflow",
+    "automation",
+    "design-ops",
+    "figma"
   ],
   "author": "Eryooo",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Eryooo/designos.git"
+  },
+  "homepage": "https://github.com/Eryooo/designos#readme",
+  "bugs": {
+    "url": "https://github.com/Eryooo/designos/issues"
   },
   "engines": {
     "node": ">=16"
