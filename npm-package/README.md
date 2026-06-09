@@ -88,6 +88,18 @@ Then use in any AI coding assistant:
 
 ---
 
+## ⭐ Star History
+
+<a href="https://star-history.com/#Eryooo/designos&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Eryooo/designos&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Eryooo/designos&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Eryooo/designos&type=Date" />
+ </picture>
+</a>
+
+---
+
 ## 🤝 Contributing
 
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
