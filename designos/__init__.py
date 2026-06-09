@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 
 
 def bundled_resource_path(*parts: str) -> Path:
