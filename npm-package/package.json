@@ -1,6 +1,6 @@
 {
   "name": "designos",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "DesignOS - AI-powered UX evaluation skills for Claude Code, Cursor, Trae, and more",
   "bin": {
     "designos": "bin/cli.mjs"
