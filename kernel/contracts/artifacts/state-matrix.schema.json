@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/state-matrix.schema.json",
+  "title": "State Matrix",
+  "description": "状态矩阵，定义页面状态、组件状态、业务状态和 AI 执行状态",
+  "allOf": [
+    {"$ref": "./artifact-base.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "page_states": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "page_id": {"type": "string"},
+              "states": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "state_name": {"type": "string"},
+                    "triggers": {"type": "array", "items": {"type": "string"}},
+                    "ui_changes": {"type": "string"},
+                    "data_requirements": {"type": "array", "items": {"type": "string"}}
+                  }
+                }
+              }
+            }
+          }
+        },
+        "component_states": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "component_id": {"type": "string"},
+              "states": {"type": "array", "items": {"type": "string"}},
+              "state_transitions": {"type": "array", "items": {"type": "object"}}
+            }
+          }
+        },
+        "business_states": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "entity": {"type": "string"},
+              "states": {"type": "array", "items": {"type": "string"}},
+              "state_machine": {"type": "object"}
+            }
+          }
+        }
+      },
+      "required": ["page_states"]
+    }
+  ]
+}

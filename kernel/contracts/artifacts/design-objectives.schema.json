@@ -1,0 +1,330 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/design-objectives.schema.json",
+  "title": "Design Objectives",
+  "description": "设计目标分解，包含业务目标、用户目标、体验目标和设计约束",
+  "allOf": [
+    {
+      "$ref": "./artifact-base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "business_goals": {
+          "type": "array",
+          "description": "业务目标列表，必须可衡量",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "goal_id": {
+                "type": "string",
+                "pattern": "^BG-\\d{3}$",
+                "description": "业务目标 ID"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 10,
+                "description": "业务目标描述"
+              },
+              "success_metric": {
+                "type": "string",
+                "description": "成功指标，必须可量化",
+                "example": "Q2 GMV >= 1,000,000 RMB"
+              },
+              "priority": {
+                "type": "string",
+                "enum": ["P0", "P1", "P2"],
+                "description": "优先级"
+              },
+              "traceable_to_prd": {
+                "type": "string",
+                "description": "追溯到 PRD 的章节引用，或标注 [inferred]"
+              },
+              "inferred": {
+                "type": "boolean",
+                "description": "是否为推断得出"
+              },
+              "target_date": {
+                "type": "string",
+                "format": "date",
+                "description": "目标达成日期"
+              },
+              "related_user_goals": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "关联的用户目标 ID"
+              }
+            },
+            "required": ["goal_id", "description", "success_metric", "priority", "inferred"]
+          }
+        },
+        "user_goals": {
+          "type": "array",
+          "description": "用户目标列表，按角色组织",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "goal_id": {
+                "type": "string",
+                "pattern": "^UG-\\d{3}$"
+              },
+              "user_role": {
+                "type": "string",
+                "description": "用户角色"
+              },
+              "goal_description": {
+                "type": "string",
+                "minLength": 10,
+                "description": "用户目标描述"
+              },
+              "job_to_be_done": {
+                "type": "string",
+                "description": "要完成的任务（JTBD 格式）"
+              },
+              "expected_outcome": {
+                "type": "string",
+                "description": "期望结果"
+              },
+              "pain_points": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "当前痛点"
+              },
+              "frequency": {
+                "type": "string",
+                "enum": ["daily", "weekly", "monthly", "occasional"],
+                "description": "使用频率"
+              },
+              "priority": {
+                "type": "string",
+                "enum": ["primary", "secondary", "edge_case"]
+              },
+              "inferred": {
+                "type": "boolean"
+              },
+              "traceable_to_prd": {
+                "type": "string"
+              }
+            },
+            "required": ["goal_id", "user_role", "goal_description", "job_to_be_done", "priority", "inferred"]
+          }
+        },
+        "experience_goals": {
+          "type": "array",
+          "description": "体验目标，基于 Nielsen 可用性维度",
+          "items": {
+            "type": "object",
+            "properties": {
+              "dimension": {
+                "type": "string",
+                "enum": [
+                  "efficiency",
+                  "learnability",
+                  "memorability",
+                  "error_prevention",
+                  "satisfaction",
+                  "accessibility",
+                  "performance"
+                ],
+                "description": "体验维度"
+              },
+              "target": {
+                "type": "string",
+                "description": "可验证的目标",
+                "example": "新用户 10 分钟内完成首次操作"
+              },
+              "rationale": {
+                "type": "string",
+                "description": "设定此目标的理由"
+              },
+              "measurement_method": {
+                "type": "string",
+                "description": "如何验证此目标"
+              },
+              "baseline": {
+                "type": "string",
+                "description": "当前基线（如果有）"
+              }
+            },
+            "required": ["dimension", "target", "rationale"]
+          }
+        },
+        "design_constraints": {
+          "type": "object",
+          "description": "设计约束",
+          "properties": {
+            "technical": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "constraint": {"type": "string"},
+                  "rationale": {"type": "string"},
+                  "severity": {"type": "string", "enum": ["must", "should", "nice_to_have"]}
+                }
+              },
+              "description": "技术约束"
+            },
+            "business": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "constraint": {"type": "string"},
+                  "rationale": {"type": "string"},
+                  "severity": {"type": "string", "enum": ["must", "should", "nice_to_have"]}
+                }
+              },
+              "description": "业务约束"
+            },
+            "user": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "constraint": {"type": "string"},
+                  "rationale": {"type": "string"},
+                  "severity": {"type": "string", "enum": ["must", "should", "nice_to_have"]}
+                }
+              },
+              "description": "用户约束"
+            },
+            "regulatory": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "constraint": {"type": "string"},
+                  "regulation": {"type": "string"},
+                  "compliance_requirement": {"type": "string"}
+                }
+              },
+              "description": "监管约束"
+            },
+            "timeline": {
+              "type": "object",
+              "properties": {
+                "mvp_deadline": {"type": "string", "format": "date"},
+                "milestones": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "milestone": {"type": "string"},
+                      "deadline": {"type": "string", "format": "date"}
+                    }
+                  }
+                }
+              }
+            },
+            "budget": {
+              "type": "object",
+              "properties": {
+                "development_cost_limit": {"type": "string"},
+                "resource_constraints": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "scope_boundaries": {
+          "type": "object",
+          "description": "范围边界",
+          "properties": {
+            "in_scope": {
+              "type": "array",
+              "items": {"type": "string"},
+              "minItems": 1,
+              "description": "MVP 必须包含的功能和体验"
+            },
+            "out_of_scope": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "明确不做的功能"
+            },
+            "future_consideration": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "feature": {"type": "string"},
+                  "target_version": {"type": "string"},
+                  "dependency": {"type": "string"}
+                }
+              },
+              "description": "未来版本考虑的功能"
+            },
+            "scope_risks": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "risk": {"type": "string"},
+                  "likelihood": {"type": "string", "enum": ["high", "medium", "low"]},
+                  "mitigation": {"type": "string"}
+                }
+              },
+              "description": "范围蔓延风险"
+            }
+          },
+          "required": ["in_scope", "out_of_scope"]
+        },
+        "goal_conflicts": {
+          "type": "array",
+          "description": "识别的目标冲突",
+          "items": {
+            "type": "object",
+            "properties": {
+              "conflict_id": {
+                "type": "string",
+                "pattern": "^CONF-\\d{3}$"
+              },
+              "goal_a": {"type": "string"},
+              "goal_b": {"type": "string"},
+              "conflict_description": {"type": "string"},
+              "tradeoff_recommendation": {"type": "string"},
+              "decision_maker": {"type": "string"},
+              "resolution_status": {
+                "type": "string",
+                "enum": ["unresolved", "resolved", "deferred"]
+              }
+            },
+            "required": ["conflict_id", "goal_a", "goal_b", "conflict_description"]
+          }
+        },
+        "success_criteria": {
+          "type": "object",
+          "description": "整体成功标准",
+          "properties": {
+            "business_success": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "业务维度的成功标准"
+            },
+            "user_success": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "用户维度的成功标准"
+            },
+            "technical_success": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "技术维度的成功标准"
+            }
+          }
+        }
+      },
+      "required": [
+        "business_goals",
+        "user_goals",
+        "experience_goals",
+        "design_constraints",
+        "scope_boundaries"
+      ]
+    }
+  ]
+}

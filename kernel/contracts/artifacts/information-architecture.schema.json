@@ -1,0 +1,194 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/information-architecture.schema.json",
+  "title": "Information Architecture",
+  "description": "信息架构，定义站点地图、导航结构、内容分组和路由表",
+  "allOf": [
+    {
+      "$ref": "./artifact-base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "sitemap": {
+          "type": "object",
+          "description": "站点地图",
+          "properties": {
+            "pages": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "page_id": {
+                    "type": "string",
+                    "pattern": "^PG-\\d{3}$"
+                  },
+                  "page_name": {"type": "string"},
+                  "route": {"type": "string"},
+                  "parent_page_id": {"type": "string"},
+                  "level": {"type": "integer"},
+                  "page_type": {
+                    "type": "string",
+                    "enum": ["landing", "list", "detail", "form", "dashboard", "modal", "error"]
+                  },
+                  "priority": {"type": "string", "enum": ["P0", "P1", "P2"]},
+                  "auth_required": {"type": "boolean"},
+                  "roles_allowed": {
+                    "type": "array",
+                    "items": {"type": "string"}
+                  },
+                  "related_tasks": {
+                    "type": "array",
+                    "items": {"type": "string"}
+                  },
+                  "inferred": {"type": "boolean"}
+                },
+                "required": ["page_id", "page_name", "route", "page_type", "inferred"]
+              }
+            },
+            "hierarchy": {
+              "type": "object",
+              "description": "层级结构（树形）",
+              "additionalProperties": true
+            }
+          }
+        },
+        "navigation": {
+          "type": "object",
+          "properties": {
+            "primary_nav": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {"type": "string"},
+                  "target_page_id": {"type": "string"},
+                  "icon": {"type": "string"},
+                  "position": {"type": "integer"}
+                }
+              }
+            },
+            "secondary_nav": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "label": {"type": "string"},
+                  "target_page_id": {"type": "string"}
+                }
+              }
+            },
+            "footer_nav": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "section": {"type": "string"},
+                  "links": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "label": {"type": "string"},
+                        "target": {"type": "string"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "route_table": {
+          "type": "array",
+          "description": "完整路由表",
+          "items": {
+            "type": "object",
+            "properties": {
+              "route": {"type": "string"},
+              "page_id": {"type": "string"},
+              "method": {"type": "string", "enum": ["GET", "POST"]},
+              "params": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "param_name": {"type": "string"},
+                    "param_type": {"type": "string"},
+                    "required": {"type": "boolean"}
+                  }
+                }
+              },
+              "redirect_from": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            },
+            "required": ["route", "page_id", "method"]
+          }
+        },
+        "content_grouping": {
+          "type": "object",
+          "description": "内容分组",
+          "properties": {
+            "groups": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "group_id": {"type": "string"},
+                  "group_name": {"type": "string"},
+                  "pages": {
+                    "type": "array",
+                    "items": {"type": "string"}
+                  },
+                  "rationale": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
+        "information_priority": {
+          "type": "object",
+          "description": "信息优先级",
+          "properties": {
+            "high_priority_pages": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "entry_points": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "page_id": {"type": "string"},
+                  "source": {"type": "string", "enum": ["external_link", "search", "direct_url", "notification"]}
+                }
+              }
+            },
+            "exit_points": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        },
+        "search_strategy": {
+          "type": "object",
+          "description": "搜索策略（如果需要）",
+          "properties": {
+            "search_required": {"type": "boolean"},
+            "searchable_entities": {
+              "type": "array",
+              "items": {"type": "string"}
+            },
+            "search_filters": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        }
+      },
+      "required": ["sitemap", "navigation", "route_table"]
+    }
+  ]
+}

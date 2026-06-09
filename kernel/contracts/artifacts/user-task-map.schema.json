@@ -1,0 +1,258 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/user-task-map.schema.json",
+  "title": "User Task Map",
+  "description": "用户任务地图，分解用户角色的主要任务、次要任务和边缘任务",
+  "allOf": [
+    {
+      "$ref": "./artifact-base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "user_roles": {
+          "type": "array",
+          "description": "用户角色列表",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "role_id": {
+                "type": "string",
+                "pattern": "^ROLE-\\d{3}$"
+              },
+              "role_name": {
+                "type": "string",
+                "description": "角色名称"
+              },
+              "description": {
+                "type": "string",
+                "description": "角色描述"
+              },
+              "characteristics": {
+                "type": "object",
+                "properties": {
+                  "expertise_level": {
+                    "type": "string",
+                    "enum": ["novice", "intermediate", "expert"]
+                  },
+                  "tech_savviness": {
+                    "type": "string",
+                    "enum": ["low", "medium", "high"]
+                  },
+                  "primary_device": {
+                    "type": "string",
+                    "enum": ["mobile", "desktop", "tablet", "mixed"]
+                  },
+                  "usage_frequency": {
+                    "type": "string",
+                    "enum": ["daily", "weekly", "monthly", "occasional"]
+                  }
+                }
+              },
+              "goals": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "此角色的目标（引用 design_objectives 中的 user_goals）"
+              }
+            },
+            "required": ["role_id", "role_name", "description"]
+          }
+        },
+        "primary_tasks": {
+          "type": "array",
+          "description": "主要任务（高频、核心价值）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "task_id": {
+                "type": "string",
+                "pattern": "^PT-\\d{3}$"
+              },
+              "task_name": {
+                "type": "string"
+              },
+              "user_role": {
+                "type": "string",
+                "description": "执行此任务的角色"
+              },
+              "job_to_be_done": {
+                "type": "string",
+                "description": "用户要完成的任务"
+              },
+              "trigger": {
+                "type": "string",
+                "description": "任务触发条件"
+              },
+              "frequency": {
+                "type": "string",
+                "enum": ["multiple_per_day", "daily", "weekly", "monthly"]
+              },
+              "duration_estimate": {
+                "type": "string",
+                "description": "预计完成时间"
+              },
+              "steps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "step_number": {"type": "integer"},
+                    "action": {"type": "string"},
+                    "system_response": {"type": "string"},
+                    "pain_point": {"type": "string"},
+                    "current_solution": {"type": "string"}
+                  }
+                },
+                "description": "任务步骤"
+              },
+              "success_criteria": {
+                "type": "string",
+                "description": "任务成功的标准"
+              },
+              "failure_modes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "failure": {"type": "string"},
+                    "impact": {"type": "string", "enum": ["critical", "high", "medium", "low"]},
+                    "prevention_strategy": {"type": "string"}
+                  }
+                }
+              },
+              "related_user_goals": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "inferred": {
+                "type": "boolean"
+              }
+            },
+            "required": ["task_id", "task_name", "user_role", "job_to_be_done", "frequency", "inferred"]
+          }
+        },
+        "secondary_tasks": {
+          "type": "array",
+          "description": "次要任务（较低频率，但必需）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "task_id": {
+                "type": "string",
+                "pattern": "^ST-\\d{3}$"
+              },
+              "task_name": {"type": "string"},
+              "user_role": {"type": "string"},
+              "job_to_be_done": {"type": "string"},
+              "trigger": {"type": "string"},
+              "frequency": {
+                "type": "string",
+                "enum": ["weekly", "monthly", "quarterly", "occasional"]
+              },
+              "steps": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "step_number": {"type": "integer"},
+                    "action": {"type": "string"}
+                  }
+                }
+              },
+              "inferred": {"type": "boolean"}
+            },
+            "required": ["task_id", "task_name", "user_role", "frequency", "inferred"]
+          }
+        },
+        "edge_tasks": {
+          "type": "array",
+          "description": "边缘任务（低频，异常场景）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "task_id": {
+                "type": "string",
+                "pattern": "^ET-\\d{3}$"
+              },
+              "task_name": {"type": "string"},
+              "user_role": {"type": "string"},
+              "scenario": {"type": "string"},
+              "frequency": {
+                "type": "string",
+                "enum": ["rare", "exceptional"]
+              },
+              "complexity": {
+                "type": "string",
+                "enum": ["low", "medium", "high"]
+              },
+              "mvp_support_required": {
+                "type": "boolean",
+                "description": "MVP 是否必须支持"
+              },
+              "inferred": {"type": "boolean"}
+            },
+            "required": ["task_id", "task_name", "user_role", "frequency", "inferred"]
+          }
+        },
+        "task_priority_matrix": {
+          "type": "object",
+          "description": "任务优先级矩阵",
+          "properties": {
+            "must_have": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "P0 任务 ID 列表"
+            },
+            "should_have": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "P1 任务 ID 列表"
+            },
+            "nice_to_have": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "P2 任务 ID 列表"
+            }
+          }
+        },
+        "task_dependencies": {
+          "type": "array",
+          "description": "任务依赖关系",
+          "items": {
+            "type": "object",
+            "properties": {
+              "task_id": {"type": "string"},
+              "depends_on": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "dependency_type": {
+                "type": "string",
+                "enum": ["prerequisite", "sequential", "parallel"]
+              }
+            }
+          }
+        },
+        "task_flow_diagram": {
+          "type": "object",
+          "description": "任务流程图（可选，ASCII 或 Mermaid 格式）",
+          "properties": {
+            "format": {
+              "type": "string",
+              "enum": ["ascii", "mermaid", "plantuml"]
+            },
+            "content": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "required": [
+        "user_roles",
+        "primary_tasks",
+        "task_priority_matrix"
+      ]
+    }
+  ]
+}

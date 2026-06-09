@@ -1,0 +1,128 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/journey-map.schema.json",
+  "title": "User Journey Map",
+  "description": "用户旅程地图，记录用户完成任务的完整路径、接触点、情绪曲线和痛点",
+  "allOf": [
+    {
+      "$ref": "./artifact-base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "journey_name": {
+          "type": "string",
+          "description": "旅程名称"
+        },
+        "user_role": {
+          "type": "string",
+          "description": "用户角色"
+        },
+        "related_task": {
+          "type": "string",
+          "description": "关联的任务 ID"
+        },
+        "stages": {
+          "type": "array",
+          "description": "旅程阶段",
+          "minItems": 3,
+          "items": {
+            "type": "object",
+            "properties": {
+              "stage_id": {
+                "type": "string",
+                "pattern": "^STG-\\d{3}$"
+              },
+              "stage_name": {
+                "type": "string",
+                "description": "阶段名称"
+              },
+              "user_actions": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "用户行为"
+              },
+              "touchpoints": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "touchpoint": {"type": "string"},
+                    "channel": {"type": "string", "enum": ["web", "mobile", "desktop", "email", "notification"]},
+                    "interaction_type": {"type": "string"}
+                  }
+                },
+                "description": "接触点"
+              },
+              "system_feedback": {
+                "type": "array",
+                "items": {"type": "string"},
+                "description": "系统反馈"
+              },
+              "emotions": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "emotion": {"type": "string"},
+                    "valence": {"type": "string", "enum": ["positive", "neutral", "negative"]},
+                    "intensity": {"type": "integer", "minimum": 1, "maximum": 5}
+                  }
+                }
+              },
+              "pain_points": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "pain_point_id": {"type": "string"},
+                    "description": {"type": "string"},
+                    "severity": {"type": "string", "enum": ["critical", "high", "medium", "low"]},
+                    "frequency": {"type": "string", "enum": ["always", "often", "sometimes", "rarely"]},
+                    "evidence": {"type": "string"}
+                  }
+                }
+              },
+              "opportunities": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "opportunity": {"type": "string"},
+                    "potential_impact": {"type": "string", "enum": ["high", "medium", "low"]}
+                  }
+                }
+              },
+              "duration_estimate": {
+                "type": "string"
+              }
+            },
+            "required": ["stage_id", "stage_name", "user_actions"]
+          }
+        },
+        "overall_sentiment": {
+          "type": "object",
+          "properties": {
+            "pre_journey": {"type": "string", "enum": ["positive", "neutral", "negative"]},
+            "post_journey": {"type": "string", "enum": ["positive", "neutral", "negative"]},
+            "sentiment_shift": {"type": "string"}
+          }
+        },
+        "critical_moments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "moment": {"type": "string"},
+              "stage_id": {"type": "string"},
+              "importance": {"type": "string", "enum": ["critical", "high", "medium"]},
+              "current_experience": {"type": "string"},
+              "desired_experience": {"type": "string"}
+            }
+          }
+        }
+      },
+      "required": ["journey_name", "user_role", "stages"]
+    }
+  ]
+}
