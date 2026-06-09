@@ -1,0 +1,133 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/prd2proto/requirement-inventory.schema.json",
+  "title": "Requirement Inventory",
+  "description": "PRD 需求清单，input-diagnosis stage 输出",
+  "allOf": [
+    {
+      "$ref": "../../kernel/contracts/artifacts/artifact-base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "input_materials": {
+          "type": "object",
+          "properties": {
+            "primary": {
+              "type": "object",
+              "properties": {
+                "type": {"type": "string", "enum": ["prd", "user_story", "design_brief"]},
+                "file_path": {"type": "string"},
+                "file_size": {"type": "integer"},
+                "format": {"type": "string"},
+                "quality_score": {"type": "number", "minimum": 0.0, "maximum": 1.0"},
+                "readability": {"type": "string", "enum": ["high", "medium", "low"]}
+              },
+              "required": ["type", "file_path", "quality_score"]
+            },
+            "secondary": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "type": {"type": "string"},
+                  "file_path": {"type": "string"},
+                  "availability": {"type": "string", "enum": ["complete", "partial", "missing"]}
+                }
+              }
+            }
+          },
+          "required": ["primary"]
+        },
+        "completeness_assessment": {
+          "type": "object",
+          "properties": {
+            "overall_score": {"type": "number", "minimum": 0.0, "maximum": 1.0},
+            "dimensions": {
+              "type": "object",
+              "properties": {
+                "business_goals_clarity": {"type": "number"},
+                "user_definition_clarity": {"type": "number"},
+                "functional_requirements_completeness": {"type": "number"},
+                "non_functional_requirements_completeness": {"type": "number"},
+                "constraints_clarity": {"type": "number"}
+              },
+              "required": ["business_goals_clarity", "user_definition_clarity", "functional_requirements_completeness"]
+            }
+          },
+          "required": ["overall_score", "dimensions"]
+        },
+        "functional_requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "req_id": {"type": "string"},
+              "description": {"type": "string"},
+              "priority": {"type": "string", "enum": ["P0", "P1", "P2"]},
+              "source": {"type": "string"}
+            },
+            "required": ["req_id", "description", "priority"]
+          }
+        },
+        "non_functional_requirements": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "category": {"type": "string", "enum": ["performance", "security", "scalability", "compatibility", "usability"]},
+              "requirement": {"type": "string"},
+              "metric": {"type": "string"}
+            }
+          }
+        },
+        "ambiguities": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ambiguity_id": {"type": "string", "pattern": "^AMB-\\d{3}$"},
+              "description": {"type": "string"},
+              "affected_areas": {"type": "array", "items": {"type": "string"}},
+              "clarification_needed": {"type": "string"},
+              "default_interpretation": {"type": "string"},
+              "risk_if_wrong": {"type": "string", "enum": ["critical", "high", "medium", "low"]}
+            },
+            "required": ["ambiguity_id", "description", "risk_if_wrong"]
+          }
+        },
+        "conflicts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "conflict_id": {"type": "string", "pattern": "^CONF-\\d{3}$"},
+              "description": {"type": "string"},
+              "conflicting_statements": {"type": "array", "items": {"type": "string"}},
+              "resolution_recommendation": {"type": "string"},
+              "requires_stakeholder_decision": {"type": "boolean"}
+            }
+          }
+        },
+        "readiness_decision": {
+          "type": "object",
+          "properties": {
+            "decision": {"type": "string", "enum": ["proceed", "fallback_safe", "blocked"]},
+            "rationale": {"type": "string"},
+            "blockers": {"type": "array", "items": {"type": "string"}},
+            "mitigation_strategy": {"type": "string"}
+          },
+          "required": ["decision", "rationale"]
+        }
+      },
+      "required": [
+        "input_materials",
+        "completeness_assessment",
+        "functional_requirements",
+        "ambiguities",
+        "conflicts",
+        "readiness_decision"
+      ]
+    }
+  ]
+}
