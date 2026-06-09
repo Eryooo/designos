@@ -1,0 +1,23 @@
+[project]
+name = "designos-mcp-frontend-codegen"
+version = "0.1.0-mock"
+requires-python = ">=3.11"
+description = "MCP Server for prd2proto code generation. Currently a mock implementation; real DSL parsing / token extraction / component mapping arrives in P3."
+dependencies = [
+    "mcp>=1.0",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

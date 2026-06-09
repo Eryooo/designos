@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/color_palette",
+  "x-output-type": "visual_spec",
+  "title": "color_palette",
+  "description": "品牌色彩调色板(internal,也作 visual_spec 公开)。color-system 产出。",
+  "type": "object",
+  "required": [
+    "primary",
+    "accessibility"
+  ],
+  "properties": {
+    "primary": {
+      "type": "object",
+      "properties": {
+        "hex": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string"
+        }
+      }
+    },
+    "secondary": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "contrast_ratios": {
+      "type": "object",
+      "description": "对比度(WCAG)"
+    },
+    "accessibility": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "needs_manual_check"
+      ]
+    },
+    "print_color_risk": {
+      "type": "string",
+      "description": "RGB→CMYK 色差风险"
+    },
+    "dark_light_usage": {
+      "type": "object"
+    }
+  },
+  "additionalProperties": true
+}

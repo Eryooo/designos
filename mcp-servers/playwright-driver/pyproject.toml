@@ -1,0 +1,19 @@
+[project]
+name = "designos-mcp-playwright-driver"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "MCP Server for Playwright-based web automation and evidence collection"
+dependencies = [
+    "playwright>=1.40",
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

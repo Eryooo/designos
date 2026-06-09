@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/brand_audit_report",
+  "x-output-type": "analysis_report",
+  "title": "brand_audit_report",
+  "description": "品牌审计报告(internal,也作 analysis_report 公开)。brand-audit 产出。",
+  "type": "object",
+  "required": [
+    "health_scores",
+    "gap_analysis",
+    "recommendations"
+  ],
+  "properties": {
+    "health_scores": {
+      "type": "object",
+      "description": "至少 5 维度",
+      "minProperties": 5
+    },
+    "gap_analysis": {
+      "type": "object",
+      "properties": {
+        "current": {
+          "type": "string"
+        },
+        "target": {
+          "type": "string"
+        }
+      }
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "high",
+        "medium",
+        "low"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

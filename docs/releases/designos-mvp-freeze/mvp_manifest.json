@@ -1,0 +1,133 @@
+{
+  "version_candidate": "0.6.0-mvp-trial",
+  "current_package_version": "0.5.0",
+  "branch": "skills-pilot-wave2",
+  "commit": "6e6e25f",
+  "commit_full": "6e6e25f docs(release): freeze DesignOS MVP trial baseline",
+  "generated_at": "2026-06-08T10:00:00Z",
+  "included_skills": [
+    {
+      "id": "uxeval",
+      "archetype": "evaluation",
+      "status": "runtime_ready",
+      "version": "1.0.0",
+      "test_coverage": "101 tests passed"
+    },
+    {
+      "id": "prd2proto",
+      "archetype": "generation",
+      "status": "runtime_ready",
+      "version": "0.1.0-provisional",
+      "test_coverage": "101 tests passed"
+    },
+    {
+      "id": "ai-analytics",
+      "archetype": "analysis",
+      "status": "runtime_ready",
+      "version": "0.1.0-pilot",
+      "test_coverage": "101 tests passed"
+    },
+    {
+      "id": "ip-design",
+      "archetype": "creative-generation",
+      "status": "runtime_ready",
+      "version": "0.1.0-pilot",
+      "test_coverage": "101 tests passed"
+    },
+    {
+      "id": "brand-creative",
+      "type": "skill_group",
+      "status": "mvp_baseline",
+      "version": "0.1.0-baseline",
+      "sub_skills": [
+        {
+          "id": "brand-strategy",
+          "status": "runtime_ready",
+          "version": "0.1.0-pilot",
+          "phase": "1-strategy"
+        },
+        {
+          "id": "competitive-analysis",
+          "status": "runtime_ready",
+          "version": "0.1.0-pilot",
+          "phase": "1-strategy"
+        },
+        {
+          "id": "logo-design",
+          "status": "runtime_ready",
+          "version": "0.1.0-pilot",
+          "phase": "2-visual-identity"
+        },
+        {
+          "id": "color-system",
+          "status": "runtime_ready",
+          "version": "0.1.0-pilot",
+          "phase": "2-visual"
+        },
+        {
+          "id": "typography-system",
+          "status": "runtime_ready",
+          "version": "0.1.0-pilot",
+          "phase": "2-visual-identity"
+        },
+        {
+          "id": "visual-identity",
+          "status": "runtime_ready",
+          "version": "0.1.0-pilot",
+          "phase": "2-visual-identity",
+          "note": "aggregation layer"
+        }
+      ],
+      "test_coverage": "72 tests passed (brand-creative + integration)"
+    }
+  ],
+  "excluded_skills": [
+    "brand-voice",
+    "content-strategy",
+    "campaign-creative",
+    "brand-collateral",
+    "digital-assets",
+    "brand-guidelines",
+    "brand-audit"
+  ],
+  "test_commands": [
+    "PYTHONPATH=\"$PWD\" python3 -m pytest -q skills/brand-creative/tests/ skills/brand-creative/sub-skills/*/tests/ tests/integration/test_brand_creative_visual_parallel_runtime.py --import-mode=importlib",
+    "PYTHONPATH=\"$PWD\" python3 -m pytest -q tests/unit/test_stage_field_compliance.py tests/unit/test_kernel_skill_loader.py tests/unit/test_kernel_orchestrator.py tests/integration/test_brand_creative_foundation_runtime.py --import-mode=importlib",
+    "PYTHONPATH=\"$PWD\" python3 -m pytest -q skills/ip-design/tests/ skills/prd2proto/tests/ skills/ai-analytics/tests/ --import-mode=importlib",
+    "cd .factory && python3 -m pytest tests/ -q",
+    "cd .factory && python3 -m tools.validate ../skills/uxeval --archetype evaluation",
+    "cd .factory && python3 -m tools.validate ../skills/prd2proto --archetype generation",
+    "cd .factory && python3 -m tools.validate ../skills/ai-analytics --archetype analysis",
+    "cd .factory && python3 -m tools.validate ../skills/ip-design --archetype creative-generation"
+  ],
+  "validation_results": {
+    "brand_creative_suite": "72 passed",
+    "kernel_and_foundation": "25 passed",
+    "other_skills_regression": "101 passed",
+    "factory_tests": "61 passed, 1 warning",
+    "archetype_validation": "4/4 passed",
+    "total_tests": "259 passed",
+    "whitespace_check": "passed (git diff --check)"
+  },
+  "known_limits": [
+    "brand-creative 只到 visual-identity，不含完整 brand-guidelines",
+    "brand-creative 仍是 pilot，不声称替代资深品牌总监最终评审",
+    "logo 不声称商标可注册/版权清洁/可直接商用",
+    "color 不声称已完成印刷打样验证",
+    "typography 不声称字体授权已确认",
+    "uxeval client mode 依赖截图证据质量",
+    "uxeval web mode 依赖 Playwright/浏览器环境",
+    "prd2proto 仍需人工 review 和 liveness check",
+    "ai-analytics 当前是 LLM synthesis，不是真自动爬取",
+    "ip-design 需要人工确认业务语境和最终设计判断"
+  ],
+  "release_blockers": [],
+  "npm_publish_status": "not_published_yet",
+  "next_steps": [
+    "用户确认版本号（建议 0.6.0-mvp-trial 或 0.6.0）",
+    "用户确认是否推送 skills-pilot-wave2",
+    "用户确认是否开 PR 合并 main",
+    "用户确认是否打 tag",
+    "用户确认是否发布 npm"
+  ]
+}

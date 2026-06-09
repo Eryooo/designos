@@ -279,11 +279,18 @@ def test_delivery_audit_rejects_llm_claimed_final_when_main_issue_is_not_verifie
     audited = result["audited_delivery_assessment"]
     assert audited["delivery_status"] == "fallback_safe"
     assert audited["final_delivery_ready"] is False
+    assert audited["delivery_readiness_breakdown"]["fallback_gate_pass"] is True
+    assert "issue_qualification" in audited["delivery_readiness_breakdown"]["failing_final_gates"]
     assert "failed deterministic verification" in " ".join(audited["audit_failures"])
+    benchmark = result["client_mode_benchmark_summary"]
+    assert benchmark["delivery_status"] == "fallback_safe"
+    assert benchmark["metrics"]["trust_metrics"]["unverified_leakage_rate"] > 0.0
     bundle = Path(result["delivery_audit_bundle"]["path"])
     assert (bundle / "bounded_issue_pass.md").exists()
     assert (bundle / "unverified_issues.json").exists()
     assert (bundle / "supplement_request.md").exists()
+    assert (temp_output_dir / "benchmark" / "client_mode_benchmark_summary.json").exists()
+    assert (temp_output_dir / "benchmark" / "client_mode_benchmark_summary.md").exists()
 
 
 def test_delivery_audit_creates_bounded_fallback_package(temp_output_dir):
@@ -315,23 +322,48 @@ def test_delivery_audit_creates_bounded_fallback_package(temp_output_dir):
             "required_actions": ["补导出成功状态截图"],
             "missing_coverage": ["关键状态覆盖不足"],
             "verification_gaps": ["导出成功状态未覆盖"],
+            "fusion_summary": {
+                "trusted_page_mappings": [{"relative_path": "screen-01.png"}],
+                "provisional_mappings": [{"relative_path": "screen-02.png"}],
+                "conflicting_evidence_groups": [{"relative_path": "screen-03.png"}],
+                "unresolved_ambiguities": [{"relative_path": "screen-04.png"}],
+            },
             "coverage_summary": {
+                "capture_mission_version": "2026-05-25",
                 "missing_state_categories": ["success"],
                 "missing_tasks": ["导出成功"],
+                "fusion_conflicting_paths": ["screen-03.png"],
+                "fusion_unresolved_paths": ["screen-04.png"],
             },
         },
         delivery_assessment={
             "delivery_status": "fallback_safe",
+        },
+        capture_mission={
+            "mission_version": "2026-05-25",
+            "critical_flows": ["导出报表"],
+            "capture_order": ["导出入口", "导出成功反馈"],
+            "final_delivery_pass_line": ["must_capture_states 覆盖率 >= 80%。"],
+            "fallback_pass_line": ["must_capture_states 覆盖率 >= 40%。"],
         },
         output_dir=str(temp_output_dir),
     )
 
     audited = result["audited_delivery_assessment"]
     assert audited["delivery_status"] == "fallback_safe"
+    assert audited["capture_mission_version"] == "2026-05-25"
+    assert audited["fusion_summary"]["conflict_count"] == 1
+    assert audited["delivery_readiness_breakdown"]["fallback_gate_pass"] is True
+    assert "trusted_evidence_sufficiency" in audited["delivery_readiness_breakdown"]["failing_final_gates"]
+    benchmark = result["client_mode_benchmark_summary"]
+    assert benchmark["delivery_status"] == "fallback_safe"
+    assert benchmark["metrics"]["success_metrics"]["fallback_safe_rate"] == 1.0
     bundle = Path(result["delivery_audit_bundle"]["path"])
     supplement_request = (bundle / "supplement_request.md").read_text(encoding="utf-8")
     bounded_issue_pass = (bundle / "bounded_issue_pass.md").read_text(encoding="utf-8")
+    assert "Delivery readiness breakdown" in supplement_request
     assert "success" in supplement_request
+    assert "Capture Mission pass lines" in supplement_request
     assert "Primary CTA is buried" in bounded_issue_pass
 
 
@@ -366,8 +398,159 @@ def test_delivery_audit_allows_final_ready_when_all_rules_pass(temp_output_dir):
     audited = result["audited_delivery_assessment"]
     assert audited["delivery_status"] == "final_delivery_ready"
     assert audited["final_delivery_ready"] is True
+    assert audited["delivery_readiness_breakdown"]["final_gate_pass"] is True
+    assert audited["delivery_readiness_breakdown"]["failing_final_gates"] == []
+    benchmark = result["client_mode_benchmark_summary"]
+    assert benchmark["delivery_status"] == "final_delivery_ready"
+    assert benchmark["metrics"]["success_metrics"]["final_delivery_ready_rate"] == 1.0
+    assert benchmark["metrics"]["trust_metrics"]["unverified_leakage_rate"] == 0.0
     bundle = Path(result["delivery_audit_bundle"]["path"])
     assert (bundle / "audited_delivery_assessment.json").exists()
+
+
+def test_delivery_audit_downgrades_claimed_final_when_critical_path_final_gate_fails(temp_output_dir):
+    issues = [
+        {
+            "id": "I-001",
+            "title": "Primary CTA is buried",
+            "severity": "major",
+            "description": "CTA is below the fold.",
+            "user_impact": "User misses the primary action.",
+            "suggestion": "Move CTA above the fold.",
+            "evidence_refs": ["E-001"],
+            "evidence_basis": ["ocr CTA cue"],
+            "verification_status": "verified",
+        }
+    ]
+    result = audit_delivery_readiness(
+        issues=issues,
+        unverified_issues=[],
+        evidence_assessment={
+            "delivery_status": "final_delivery_ready",
+            "required_actions": ["补设置页关键状态截图"],
+            "missing_coverage": ["P1 设置页主链路未过 final line"],
+            "verification_gaps": ["设置页主链路缺少高置信覆盖"],
+            "coverage_summary": {
+                "final_delivery_missing_critical_paths": ["[P1] 设置页"],
+                "fallback_missing_critical_paths": [],
+                "missing_critical_pages": ["设置页"],
+            },
+            "critical_path_coverage_summary": {
+                "critical_paths": [
+                    {
+                        "path_name": "设置页",
+                        "priority": "P1",
+                        "final_delivery_pass": False,
+                        "fallback_pass": True,
+                    }
+                ],
+                "failing_final_paths": ["[P1] 设置页"],
+                "failing_fallback_paths": [],
+            },
+        },
+        delivery_assessment={"delivery_status": "final_delivery_ready"},
+        capture_mission={
+            "mission_version": "2026-05-25",
+            "critical_flows": ["设置保存"],
+            "final_delivery_pass_line": ["所有 P0/P1 critical path 必须过线。"],
+            "fallback_pass_line": ["所有 P0 critical path 至少要过 fallback 线。"],
+        },
+        output_dir=str(temp_output_dir),
+    )
+
+    audited = result["audited_delivery_assessment"]
+    assert audited["delivery_status"] == "fallback_safe"
+    assert audited["final_delivery_ready"] is False
+    assert audited["critical_path_coverage_summary"]["failing_final_paths"] == ["[P1] 设置页"]
+    assert "critical_path_coverage" in audited["delivery_readiness_breakdown"]["failing_final_gates"]
+    bundle = Path(result["delivery_audit_bundle"]["path"])
+    supplement_request = (bundle / "supplement_request.md").read_text(encoding="utf-8")
+    assert "[P1] 设置页" in supplement_request
+
+
+def test_delivery_audit_downgrades_claimed_final_when_trusted_evidence_gate_fails(temp_output_dir):
+    issues = [
+        {
+            "id": "I-001",
+            "title": "Primary CTA is buried",
+            "severity": "major",
+            "description": "CTA is below the fold.",
+            "user_impact": "User misses the primary action.",
+            "suggestion": "Move CTA above the fold.",
+            "evidence_refs": ["E-001"],
+            "evidence_basis": ["ocr CTA cue"],
+            "verification_status": "verified",
+        }
+    ]
+    result = audit_delivery_readiness(
+        issues=issues,
+        unverified_issues=[],
+        evidence_assessment={
+            "delivery_status": "final_delivery_ready",
+            "required_actions": ["补设置页成功态截图"],
+            "missing_coverage": [],
+            "verification_gaps": ["trusted evidence still insufficient for 设置页成功态"],
+            "coverage_summary": {
+                "final_delivery_page_coverage_ratio": 0.75,
+                "final_delivery_state_coverage_ratio": 0.5,
+                "final_delivery_trusted_mapping_count": 2,
+                "final_delivery_missing_planned_states": ["设置页:success"],
+                "fallback_missing_critical_paths": [],
+                "final_delivery_missing_critical_paths": [],
+            },
+        },
+        delivery_assessment={"delivery_status": "final_delivery_ready"},
+        output_dir=str(temp_output_dir),
+    )
+
+    audited = result["audited_delivery_assessment"]
+    assert audited["delivery_status"] == "fallback_safe"
+    assert audited["final_delivery_ready"] is False
+    assert "trusted_evidence_sufficiency" in audited["delivery_readiness_breakdown"]["failing_final_gates"]
+
+
+def test_delivery_audit_clarification_residue_blocks_final_release(temp_output_dir):
+    issues = [
+        {
+            "id": "I-001",
+            "title": "Primary CTA is buried",
+            "severity": "major",
+            "description": "CTA is below the fold.",
+            "user_impact": "User misses the primary action.",
+            "suggestion": "Move CTA above the fold.",
+            "evidence_refs": ["E-001"],
+            "evidence_basis": ["ocr CTA cue"],
+            "verification_status": "verified",
+        }
+    ]
+    result = audit_delivery_readiness(
+        issues=issues,
+        unverified_issues=[],
+        evidence_assessment={
+            "delivery_status": "final_delivery_ready",
+            "required_actions": ["先确认 1 张歧义截图的页面/状态"],
+            "missing_coverage": [],
+            "verification_gaps": ["clarification residue still remains"],
+            "coverage_summary": {
+                "final_delivery_page_coverage_ratio": 1.0,
+                "final_delivery_state_coverage_ratio": 1.0,
+                "final_delivery_trusted_mapping_count": 5,
+                "clarification_needed_count": 1,
+                "clarification_unlocks_final_count": 1,
+                "clarification_relative_paths": ["IMG2303.png"],
+                "fusion_unresolved_ambiguity_count": 1,
+                "fallback_missing_critical_paths": [],
+                "final_delivery_missing_critical_paths": [],
+            },
+        },
+        delivery_assessment={"delivery_status": "final_delivery_ready"},
+        output_dir=str(temp_output_dir),
+    )
+
+    audited = result["audited_delivery_assessment"]
+    assert audited["delivery_status"] == "fallback_safe"
+    assert audited["final_delivery_ready"] is False
+    assert "clarification_residue" in audited["delivery_readiness_breakdown"]["failing_final_gates"]
 
 
 __all__ = []

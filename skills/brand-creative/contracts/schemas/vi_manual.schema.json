@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/vi_manual",
+  "x-output-type": "style_guide",
+  "title": "vi_manual",
+  "description": "完整 VI 手册(internal,也作 style_guide 公开)。visual-identity 汇总产出。",
+  "type": "object",
+  "required": [
+    "logo",
+    "color",
+    "typography",
+    "application_rules"
+  ],
+  "properties": {
+    "logo": {
+      "type": "object",
+      "description": "引用 logo_spec"
+    },
+    "color": {
+      "type": "object",
+      "description": "引用 color_palette"
+    },
+    "typography": {
+      "type": "object",
+      "description": "引用 typography_spec"
+    },
+    "auxiliary_graphics": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "application_rules": {
+      "type": "array",
+      "minItems": 5,
+      "items": {
+        "type": "object"
+      }
+    },
+    "taboos": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "consistency_check": {
+      "type": "object"
+    },
+    "inherited_warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "additionalProperties": true
+}

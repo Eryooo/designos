@@ -1,6 +1,6 @@
 [project]
 name = "designos"
-version = "0.4.0"
+version = "0.5.0a1"
 requires-python = ">=3.11"
 license = {text = "Apache-2.0"}
 description = "DesignOS — AI-native 设计能力包，封装高级设计专家方法论为可共享 Skill 矩阵"
@@ -45,9 +45,13 @@ uxeval = [
     "openpyxl>=3.1",
     "Pillow>=10.0",
 ]
+web = [
+    "playwright>=1.40",
+]
 all = [
     "designos[uxeval]",
     "designos[trace]",
+    "designos[web]",
 ]
 
 [project.scripts]
@@ -92,4 +96,7 @@ markers = [
     "e2e: end-to-end smoke tests (slow, requires external dependencies)",
     "integration: cross-module integration tests",
     "slow: tests that take >5s to run",
+    "unit: pure-logic tests that need no optional runtime dependency (any environment).",
+    "requires_playwright: needs the `playwright` Python package importable (web mode).",
+    "browser_smoke: needs chromium binaries launchable (real-browser web-mode smoke).",
 ]

@@ -213,6 +213,7 @@ def test_screenshot_loading_declares_evidence_assessment_output(uxeval_skill_dir
     stages = {s.id: s for s in skill.get_stages()}
 
     assert stages["evidence-planning"].outputs == [
+        "capture_mission",
         "required_evidence_plan",
         "critical_page_requirements",
         "critical_state_requirements",
@@ -319,6 +320,13 @@ def test_client_evidence_quality_gates_are_declared(uxeval_skill_dir: Path) -> N
     assert audit_stage.type.value == "tool"
     assert audit_stage.mcp_server == "excel-builder"
     assert audit_stage.mcp_tool == "audit_delivery_readiness"
+    assert audit_stage.inputs == [
+        "issues",
+        "unverified_issues",
+        "evidence_assessment",
+        "delivery_assessment",
+        "capture_mission",
+    ]
     assert audit_stage.outputs == [
         "audited_delivery_assessment",
         "delivery_audit_bundle",

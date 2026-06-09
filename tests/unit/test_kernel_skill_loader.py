@@ -382,3 +382,63 @@ def test_load_skill_group(tmp_path: Path) -> None:
     wf = group.get_workflow("wf")
     assert wf is not None
     assert wf.steps[0].sub_skills == ["competitor"]
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# B1.1 runtime tests — SkillGroup loadability, attach, sub-skill resolution
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def test_skill_group_attach_propagates_to_cached_sub_skills(tmp_path: Path) -> None:
+    """B1.1: SkillGroup.attach() attaches engine/llm/mcp to already-cached sub-skills."""
+    group_dir = tmp_path / "brand-creative"
+    group_dir.mkdir()
+    sub_skills_dir = group_dir / "sub-skills"
+    sub_skills_dir.mkdir()
+    _make_pipeline_skill(sub_skills_dir, "competitive-analysis")
+    (group_dir / "GROUP.md").write_text(
+        "---\n"
+        "name: brand-creative\n"
+        "version: 1.0.0\n"
+        "type: group\n"
+        "sub_skills:\n"
+        "  - id: competitive-analysis\n"
+        "    path: sub-skills/competitive-analysis/SKILL.md\n"
+        "---\n",
+        encoding="utf-8",
+    )
+    group = load_skill_group(group_dir)
+    # Load sub-skill before attach
+    sub_skill = group._load_sub_skill("competitive-analysis")
+    assert sub_skill._engine is None
+
+    # Attach group
+    fake_engine = FakePipelineEngine(events=[], results=[])
+    group.attach(engine=fake_engine)
+
+    # Already-cached sub-skill should now have engine
+    assert sub_skill._engine is fake_engine
+
+
+def test_skill_loader_resolves_sub_skill_from_group_md(tmp_path: Path) -> None:
+    """B1.1: SkillLoader resolves brand-creative:competitive-analysis from GROUP.md path."""
+    group_dir = tmp_path / "brand-creative"
+    group_dir.mkdir()
+    sub_skills_dir = group_dir / "sub-skills"
+    sub_skills_dir.mkdir()
+    _make_pipeline_skill(sub_skills_dir, "competitive-analysis")
+    (group_dir / "GROUP.md").write_text(
+        "---\n"
+        "name: brand-creative\n"
+        "version: 1.0.0\n"
+        "type: group\n"
+        "sub_skills:\n"
+        "  - id: competitive-analysis\n"
+        "    path: sub-skills/competitive-analysis/SKILL.md\n"
+        "---\n",
+        encoding="utf-8",
+    )
+    loader = SkillLoader([tmp_path])
+    skill = loader.load("brand-creative:competitive-analysis")
+    assert skill.name == "competitive-analysis"
+    assert skill.skill_type is SkillType.PIPELINE

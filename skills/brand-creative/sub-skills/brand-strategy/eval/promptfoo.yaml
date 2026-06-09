@@ -1,0 +1,108 @@
+# promptfoo 评测配置:brand-strategy 子技能
+
+description: brand-strategy 子技能评测,验证契约合规性与质量标准
+
+prompts:
+  - file://prompts/01-analyze-context.md
+  - file://prompts/02-generate-brand-brief.md
+
+providers:
+  - openai:gpt-4
+
+tests:
+  # Golden Case 01: 有竞品矩阵支撑
+  - description: Golden - 有竞品矩阵支撑的品牌策略产出
+    vars:
+      product_brief: |
+        FlowForge 是一款面向技术创业者的项目管理工具,核心功能包括任务管理/团队协作/进度追踪。
+        目标市场:早期创业团队(3-15人)。
+        价值主张:在功能之上提供情感支持,理解创业者的心理压力与不确定性。
+      target_user: |
+        25-40岁技术背景创业者,正在经历高不确定性与心理压力。
+        已尝试多款项目管理工具,但感觉"冰冷",只关注任务完成。
+        需要工具之外的情感认同与支持。
+      competitor_matrix: |
+        {
+          "competitors": [
+            {"name": "Asana", "visual_style": "清爽简洁,蓝白主色,理性", "communication": "效率导向", "market_position": "企业级"},
+            {"name": "Monday.com", "visual_style": "多彩活泼", "communication": "灵活性导向", "market_position": "通用工作平台"},
+            {"name": "Linear", "visual_style": "极简黑白", "communication": "速度导向", "market_position": "技术团队专用"}
+          ],
+          "status": "complete"
+        }
+    assert:
+      - type: javascript
+        value: |
+          output.includes("competitor_matrix") || output.includes("竞品")
+      - type: javascript
+        value: |
+          const hasEmotionalValue = output.match(/感到|体验|关系|支持|理解|陪伴/);
+          return !!hasEmotionalValue;
+      - type: not-contains
+        value: "inferred"
+
+  # Failure Case 01: 竞品矩阵缺失必须标注 [inferred]
+  - description: Failure - 竞品矩阵缺失时必须标注 [inferred]
+    vars:
+      product_brief: |
+        EduFlow 是一款面向 K12 教师的备课助手,核心功能:AI 生成教案/知识点图谱/学情分析。
+        目标市场:公立学校一线教师。
+        价值主张:减轻教师备课负担,让教师有更多时间关注学生。
+      target_user: |
+        30-50岁公立学校教师,教学任务重,备课时间不足。
+        对 AI 工具有兴趣但不熟悉,希望工具真正理解教学场景。
+      competitor_matrix: |
+        {
+          "competitors": [],
+          "status": "insufficient_data"
+        }
+    assert:
+      - type: contains
+        value: "inferred"
+      - type: javascript
+        value: |
+          const hasDisclaimer = output.match(/未经验证|推断|初步/);
+          return !!hasDisclaimer;
+      - type: not-contains
+        value: "唯一"
+      - type: not-contains
+        value: "绝对"
+
+  # Additional test: north_star 必须是情感化价值
+  - description: Quality - north_star 必须是情感化价值
+    vars:
+      product_brief: "测试产品,提供高效的数据分析工具"
+      target_user: "数据分析师,需要快速洞察"
+      competitor_matrix: '{"competitors": [], "status": "insufficient_data"}'
+    assert:
+      - type: javascript
+        value: |
+          // north_star 不能只是功能描述
+          const hasFunctionalOnly = output.match(/north_star.*提供.*工具/);
+          return !hasFunctionalOnly;
+      - type: javascript
+        value: |
+          // 必须包含情感关键词
+          const hasEmotional = output.match(/感到|体验|信心|从容|热情|支持|理解/);
+          return !!hasEmotional;
+
+  # Additional test: personality_keywords 必须 3-5 个
+  - description: Quality - personality_keywords 必须 3-5 个
+    vars:
+      product_brief: "测试产品"
+      target_user: "测试用户"
+      competitor_matrix: '{"competitors": [], "status": "insufficient_data"}'
+    assert:
+      - type: javascript
+        value: |
+          const match = output.match(/"personality_keywords"\s*:\s*\[([^\]]+)\]/);
+          if (!match) return false;
+          const keywords = match[1].split(',').filter(k => k.trim());
+          return keywords.length >= 3 && keywords.length <= 5;
+
+outputPath: ./eval-results.json
+
+defaultTest:
+  options:
+    provider: openai:gpt-4
+    temperature: 0.4

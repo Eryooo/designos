@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from kernel.contracts.enums import ErrorCode
 from kernel.contracts.interfaces import ISkill, ISkillLoader
@@ -10,6 +11,9 @@ from kernel.errors import ConfigError
 
 from .group_loader import load_skill_group
 from .pipeline_loader import load_pipeline_skill
+
+if TYPE_CHECKING:
+    from kernel.skill_loader.group_loader import SkillGroup
 
 
 class SkillLoader(ISkillLoader):
@@ -23,8 +27,8 @@ class SkillLoader(ISkillLoader):
             group_id, _, sub_id = skill_name.partition(":")
             group_dir: Path = self._find_group(group_id)
             # Validate the group manifest parses cleanly before resolving the sub-skill.
-            load_skill_group(group_dir)
-            sub_skill_dir: Path = self._sub_skill_dir(group_dir, sub_id)
+            group = load_skill_group(group_dir)
+            sub_skill_dir: Path = self._sub_skill_dir(group, sub_id)
             return load_pipeline_skill(sub_skill_dir)
         skill_dir: Path = self._find_skill(skill_name)
         if (skill_dir / "GROUP.md").exists():
@@ -65,15 +69,49 @@ class SkillLoader(ISkillLoader):
             context={"name": name},
         )
 
-    def _sub_skill_dir(self, group_dir: Path, sub_id: str) -> Path:
-        candidate: Path = group_dir / "skills" / sub_id
-        if (candidate / "SKILL.md").exists():
-            return candidate
-        raise ConfigError(
-            ErrorCode.E1001,
-            f"sub-skill not found: {sub_id}",
-            context={"group_dir": str(group_dir), "sub_id": sub_id},
-        )
+    def _sub_skill_dir(self, group: "SkillGroup", sub_id: str) -> Path:
+        """Resolve sub-skill directory from GROUP.md declaration.
+
+        Args:
+            group: The loaded SkillGroup (contains parsed sub_skill_paths).
+            sub_id: Sub-skill identifier.
+
+        Returns:
+            Absolute path to the sub-skill directory.
+
+        Raises:
+            ConfigError: If sub_id not declared or SKILL.md missing.
+        """
+        # GROUP.md declares path as "sub-skills/<id>/SKILL.md" (B1.1 fixed)
+        # or just "sub-skills/<id>" (legacy). Either way, _sub_skill_paths[sub_id]
+        # resolves to the absolute path from GROUP.md frontmatter.
+        skill_md_path: Path | None = group._sub_skill_paths.get(sub_id)
+        if skill_md_path is None:
+            raise ConfigError(
+                ErrorCode.E1001,
+                f"sub-skill not declared in GROUP.md: {sub_id}",
+                context={"group": group.name, "available": group.list_sub_skills()},
+            )
+
+        # If GROUP.md path points to SKILL.md, parent is the skill dir.
+        # If it points to the dir itself (legacy), use it as-is.
+        if skill_md_path.name == "SKILL.md":
+            skill_dir = skill_md_path.parent
+        else:
+            skill_dir = skill_md_path
+
+        if not (skill_dir / "SKILL.md").exists():
+            raise ConfigError(
+                ErrorCode.E1001,
+                f"sub-skill SKILL.md not found: {sub_id}",
+                context={
+                    "group": group.name,
+                    "sub_id": sub_id,
+                    "expected_path": str(skill_dir / "SKILL.md"),
+                },
+            )
+
+        return skill_dir
 
 
 __all__ = ["SkillLoader"]

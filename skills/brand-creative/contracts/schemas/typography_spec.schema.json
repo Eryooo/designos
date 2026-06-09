@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/typography_spec",
+  "x-output-type": "visual_spec",
+  "title": "typography_spec",
+  "description": "字体系统规范(internal,也作 visual_spec 公开)。typography-system 产出。",
+  "type": "object",
+  "required": [
+    "primary_font",
+    "weight_hierarchy",
+    "license_status"
+  ],
+  "properties": {
+    "primary_font": {
+      "type": "object",
+      "properties": {
+        "family": {
+          "type": "string"
+        },
+        "license": {
+          "type": "string"
+        }
+      }
+    },
+    "secondary_font": {
+      "type": "object"
+    },
+    "weight_hierarchy": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "size_scale": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    },
+    "line_height": {
+      "type": "object"
+    },
+    "cjk_latin_pairing": {
+      "type": "string",
+      "description": "中西文配对"
+    },
+    "license_status": {
+      "type": "string",
+      "enum": [
+        "verified",
+        "needs_verification"
+      ]
+    },
+    "cross_platform": {
+      "type": "object",
+      "description": "跨端可用性"
+    }
+  },
+  "additionalProperties": true
+}

@@ -1,0 +1,41 @@
+# Failure Case: Insufficient Data
+
+description: |
+  展示 status: insufficient_data 场景。
+  用户未提供 competitor_hints,仅有 product_brief 与 target_market,
+  无法产出完整 competitor_matrix,需标注 insufficient_data。
+
+input:
+  product_brief: |
+    AI 法律咨询助手,面向律师事务所,支持案例检索/合同审查/法律文书生成。
+  target_market: "中国市场,律师事务所,中小型律所为主"
+  competitor_hints: []  # 用户未提供竞品线索
+
+expected_output:
+  competitor_matrix:
+    competitors:
+      # 仅基于 target_market 推断,少于 3 个或全部标 [inferred]
+      - name: "通用 AI 法律助手[inferred]"
+        visual_style: "专业冷色调(蓝/灰)[inferred],缺少具体视觉描述"
+        communication: "专业理性语调[inferred]"
+        market_position: "面向律师事务所[inferred]"
+    status: "insufficient_data"
+
+  market_gap_report_contains:
+    - dimension: "visual"
+      description_keywords: ["insufficient data", "competitor_hints", "视觉风格资料"]
+    - dimension: "communication"
+      description_keywords: ["insufficient data", "传播策略", "所需信息"]
+
+quality_signals:
+  - "status: insufficient_data"
+  - "competitors 数量可能少于 3 个"
+  - "所有竞品事实标注 [inferred]"
+  - "market_gap_report 明确标注所需信息"
+  - "不编造具体竞品品牌名或视觉细节"
+
+anti_patterns:
+  - "假装自动识别真实竞品品牌"
+  - "编造具体色号/形态描述"
+  - "声称完成深度竞品分析"
+  - "status 标注为 complete"

@@ -1,11 +1,7 @@
 {
   "include": [
     "kernel",
-    "designos",
-    "mcp-servers/excel-builder",
-    "mcp-servers/image-analyzer",
-    "mcp-servers/pdf-parser",
-    "mcp-servers/heuristic-engine"
+    "designos"
   ],
   "exclude": [
     "**/__pycache__",

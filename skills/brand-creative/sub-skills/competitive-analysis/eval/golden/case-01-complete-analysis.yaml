@@ -1,0 +1,45 @@
+# Golden Case: Complete Competitor Analysis
+
+description: |
+  完整竞品分析 golden case,展示 status: complete 场景。
+  用户提供足够的 competitor_hints,产出完整 competitor_matrix 与 market_gap_report。
+
+input:
+  product_brief: |
+    云笔记应用,面向知识工作者,支持 Markdown/多端同步/协作编辑。
+    核心卖点:极简编辑体验、本地优先、开放格式。
+  target_market: "全球市场,知识工作者/程序员/写作者,25-45 岁"
+  competitor_hints:
+    - "Notion,黑白极简风格,all-in-one 工作空间,主色调浅灰#F7F6F3"
+    - "Obsidian,深色主题,知识图谱,面向高级用户,紫色强调色#7C3AED"
+    - "Evernote,绿色品牌色#00A82D,传统笔记应用,TO-C 大众市场"
+
+expected_output:
+  competitor_matrix:
+    competitors:
+      - name: "Notion"
+        visual_style: "黑白极简风格,浅灰背景#F7F6F3,无衬线字体,块状卡片布局"
+        communication: "all-in-one 工作空间叙事,面向团队协作与生产力[部分 inferred]"
+        market_position: "面向团队与个人知识工作者,freemium 模式[inferred]"
+      - name: "Obsidian"
+        visual_style: "深色主题为主,紫色强调色#7C3AED,知识图谱可视化,极客风格"
+        communication: "本地优先/隐私/高级功能导向,面向程序员与重度用户[部分 inferred]"
+        market_position: "面向高级用户,freemium+插件生态[inferred]"
+      - name: "Evernote"
+        visual_style: "绿色品牌色#00A82D,传统工具栏设计,图标写实风格"
+        communication: "大众化笔记叙事,记录生活与工作[inferred]"
+        market_position: "TO-C 大众市场,订阅模式,价格区间 $7.99-14.99/月[inferred]"
+    status: "complete"
+
+  market_gap_report_contains:
+    - dimension: "visual"
+      description_keywords: ["暖色调", "有机形态", "冷静极简", "市场空白"]
+    - dimension: "communication"
+      description_keywords: ["开放格式", "数据主权", "竞品", "叙事空白"]
+
+quality_signals:
+  - "至少 3 个竞品"
+  - "每个竞品 visual_style 包含色彩/形态/辅助图形"
+  - "status: complete"
+  - "market_gap_report 至少 1 个有证据 gap"
+  - "[inferred] 标注清晰"

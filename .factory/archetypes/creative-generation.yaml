@@ -1,0 +1,194 @@
+# Creative Generation Archetype — pilot spec (extracted from ip-design I1)
+#
+# ⚠️ STATUS: PILOT. Extracted from ip-design I1 pilot implementation.
+# ⚠️ This archetype serves creative-generation skills (IP design / brand creative)
+#    that produce structured design assets rather than executable code.
+# ⚠️ Differs from 'generation' archetype: no code_generation/review_gate,
+#    uses creative-specific stage_slots (strategy/worldview/persona/visual/
+#    narrative/landing) and creative outputs (brand_brief/worldview/
+#    persona_profile/visual_spec/image_prompt_pack/content_plan/
+#    brand_material_spec).
+#
+# Sources for this pilot spec:
+#   - skills/ip-design/ (I1 baseline)
+#   - knowledge/design/ (I0 shared decision library)
+#   - Batch I1 requirement: "creative-generation 与 generation 边界明确"
+#
+# Schema: .factory/archetypes/archetype_schema.py :: ArchetypeSpec
+
+name: creative-generation
+version: 0.1.0-pilot
+description: |
+  Skills that produce structured creative assets (IP design / brand identity /
+  visual systems / narrative content) rather than executable code. Output is
+  consumable by designers, brand managers, or content creators.
+
+  Differs from 'generation' archetype:
+  - No code_generation / review_gate / prototype_code / frontend_code.
+  - Uses creative-specific stage_slots (strategy-alignment / worldview-building /
+    persona-modeling / visual-translation / narrative-planning / landing-spec).
+  - Outputs are design artifacts (brand_brief / worldview / persona_profile /
+    visual_spec / image_prompt_pack / content_plan / brand_material_spec).
+  - Quality gates focus on creative quality (recognizability / brand consistency /
+    rubric self-eval / gap report) rather than code fidelity.
+
+  PILOT: extracted from ip-design I1 baseline. Expect refinement as more
+  creative-generation skills ship (brand-creative / illustration-guide).
+representative_skill: ip-design
+
+# ─────────────────────────────────────────────────────────────────────
+# Frontmatter expectations
+# ─────────────────────────────────────────────────────────────────────
+frontmatter:
+  required_keys:
+    - name
+    - version
+    - type
+    - description
+    - requires
+    - outputs
+  required_kernel_range: ">=1.0.0,<2.0.0"
+  skill_type: pipeline
+
+# ─────────────────────────────────────────────────────────────────────
+# Required outputs — creative-generation core products
+# ─────────────────────────────────────────────────────────────────────
+outputs:
+  required:
+    - brand_brief
+    - visual_spec
+    - image_prompt_pack
+  optional:
+    - worldview
+    - persona_profile
+    - content_plan
+    - brand_material_spec
+    - design_strategy
+    - user_persona
+    - style_guide
+
+# ─────────────────────────────────────────────────────────────────────
+# Stage slots — creative-generation 六阶段 (pilot from ip-design)
+# ─────────────────────────────────────────────────────────────────────
+stage_slots:
+  - slot_id: strategy_alignment
+    purpose: "Parse product brief / user / competitors into brand strategy (north star / personality keywords / differentiation)."
+    stage_type: llm
+    required: true
+    required_inputs: [product_brief, target_user, competitors]
+    required_outputs: [brand_brief]
+
+  - slot_id: worldview_building
+    purpose: "Build IP worldview (spacetime / rules / relationships / cultural archetype / keywords)."
+    stage_type: llm
+    required: false
+    required_outputs: [worldview]
+
+  - slot_id: persona_modeling
+    purpose: "Model IP persona (behavior-first + MBTI aux / motivation-fear / growth arc / voice boundary)."
+    stage_type: llm
+    required: false
+    required_outputs: [persona_profile]
+
+  - slot_id: visual_translation
+    purpose: "Translate brand strategy + persona into visual system (shape / color / recognizability / state / style spectrum / strict avoidance) + AI image prompt pack (four-layer + negative + multi-platform)."
+    stage_type: llm
+    required: true
+    required_outputs: [visual_spec, image_prompt_pack]
+
+  - slot_id: narrative_planning
+    purpose: "Plan IP content narrative (debut / core events / dialogue corpus / content matrix / cadence calendar)."
+    stage_type: llm
+    required: false
+    required_outputs: [content_plan]
+
+  - slot_id: landing_spec
+    purpose: "Produce brand material spec (application rules / derivatives / promotion materials / communication guide / production list) + professional gap report (nine-dimension rubric self-eval / failure mode checklist / gaps)."
+    stage_type: llm
+    required: true
+    required_outputs: [brand_material_spec, professional_gap_report]
+
+# ─────────────────────────────────────────────────────────────────────
+# Checkpoint slots — C1/C2/C3/C4 (pilot from ip-design)
+# ─────────────────────────────────────────────────────────────────────
+checkpoint_slots:
+  - checkpoint_id: C1
+    after_slot: strategy_alignment
+    purpose: "User confirms brand strategy (north star / personality keywords / differentiation) before worldview."
+    required: true
+
+  - checkpoint_id: C2
+    after_slot: worldview_building
+    purpose: "User confirms worldview (rules / relationships / archetype) before persona."
+    required: false
+
+  - checkpoint_id: C3
+    after_slot: persona_modeling
+    purpose: "User confirms persona (behavior model / voice boundary) before visual."
+    required: false
+
+  - checkpoint_id: C4
+    after_slot: narrative_planning
+    purpose: "User confirms narrative plan (debut / events / content matrix) before landing."
+    required: false
+
+# ─────────────────────────────────────────────────────────────────────
+# Gate slots — creative-generation 用 QG1/QG2 替代 generation 的 QG_REVIEW
+# ─────────────────────────────────────────────────────────────────────
+gate_slots:
+  - gate_id: QG1
+    on_slot: visual_translation
+    purpose: "Block when visual quality not met (32px blur / missing four-tier simplification / no style spectrum lock / <5 strict avoidance / prompt not four-layer / <2 platforms)."
+    required: true
+
+  - gate_id: QG2
+    on_slot: landing_spec
+    purpose: "Block when creative quality not met (nine-dimension rubric any below mid-tier / one-vote-veto failed / failure mode unchecked / gap not written when triggered)."
+    required: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Mode semantics — creative-generation 通常单模式(无需 mode 切换)
+# ─────────────────────────────────────────────────────────────────────
+mode_semantics:
+  semantic_type: none
+  allowed_modes: []
+  must_be_single_mode: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Evidence contract — creative-generation 用 professional_gap_report
+# 代替 generation 的 review_report
+# ─────────────────────────────────────────────────────────────────────
+evidence_contract:
+  required_fields:
+    - professional_gap_report
+  trusted_evidence_threshold: 0.85   # 高阶可评审
+  fallback_evidence_threshold: 0.60  # 中阶可用
+
+# ─────────────────────────────────────────────────────────────────────
+# Delivery contract — 复用四态
+# ─────────────────────────────────────────────────────────────────────
+delivery_contract:
+  required_states:
+    - final_delivery_ready
+    - fallback_safe
+    - supplement_required
+    - blocked
+
+# ─────────────────────────────────────────────────────────────────────
+# Directory expectations
+# ─────────────────────────────────────────────────────────────────────
+directory:
+  required_directories:
+    - prompts
+    - reference
+    - templates
+    - eval
+    - tests
+  required_files:
+    - SKILL.md
+    - pipeline.yaml
+    - constitution.md
+    - README.md
+  eval_layout: true
+
+constitution_required: true
