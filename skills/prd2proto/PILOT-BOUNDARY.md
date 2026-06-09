@@ -1,11 +1,11 @@
 # prd2proto 试点边界说明（Pilot Boundary）
 
-> **版本**：P0 Paradigm Engine (v0.2.0-p0-refactor)  
+> **版本**：P1 Baseline (v0.2.0-p1)  
 > **日期**：2026-06-09  
-> **状态**：Pilot（设计推理驱动重构）  
+> **状态**：Pilot（设计推理驱动重构 + 质量门 + 追溯性）  
 > **适用**：内部试点 + 外部试用
 
-本文件回答一个问题：**prd2proto 经过 P0 设计推理驱动重构后，能信到哪、不能信到哪。**
+本文件回答一个问题：**prd2proto 经过 P0+P1 重构后，能信到哪、不能信到哪。**
 
 ---
 
@@ -319,9 +319,92 @@ A: **人工复核**。当前 pilot 阶段，所有设计推理资产都需要人
 
 ---
 
-## 10. 联系与反馈
+## 10. P1 更新（2026-06-09）
+
+### P1.1: 质量门完整实现 ✅
+
+**新增**：
+- `kernel/quality-gates/gates.py` - 5 个质量门完整实现
+- `kernel/quality-gates/gate-config.yaml` - 15 stages 配置
+- `tests/quality_gates/test_gates.py` - 单元测试
+
+**状态**：
+- ✅ 5 个 gates 核心逻辑完整（schema, traceability, gap_transparency, inference_limit, code_constraint）
+- ✅ GateResult, QualityGateBlocked, QualityGateExecutor 完整
+- ⚠️ 辅助方法为简化实现（_extract_pages_from_code 需要真实代码解析）
+- ❌ Runtime 集成未实现（pipeline executor 需要调用 gates）
+
+### P1.2: Traceability 完整实现 ✅
+
+**新增**：
+- `kernel/traceability/tracer.py` - 追溯生成和验证
+- `kernel/traceability/README.md` - 使用文档
+
+**状态**：
+- ✅ TraceabilityGenerator 核心逻辑完整
+- ✅ 字段级追溯生成（auto_trace_from_reasoning_assets）
+- ✅ TraceabilityValidator 完整性和一致性验证
+- ⚠️ 只实现了 IA 的字段级追溯，其他类型为简化实现
+- ⚠️ detect_inferred_fields 为关键字匹配，非语义匹配
+
+### P1.3: Prompts 补充 ⚠️
+
+**新增**：
+- `skills/prd2proto/prompts-v2/README.md`
+- `skills/prd2proto/prompts-v2/01-input-diagnosis.md` (✅ 完整)
+- `skills/prd2proto/prompts-v2/02-17-*.md` (⚠️ 框架)
+
+**状态**：
+- ✅ 01-input-diagnosis.md 完整（评分规则、决策规则、示例、失败模式）
+- ⚠️ 02-17 为框架版本，包含基础结构但缺少详细内容
+- ❌ 框架版 prompts 不可直接用于生产
+
+### P1 Critical 修复 ✅
+
+**新增**：
+- `skills/prd2proto/pipeline-v2.yaml` - 集成 quality gates 和 traceability
+- `skills/prd2proto/PIPELINE-INTEGRATION.md` - Runtime 集成指南
+
+**状态**：
+- ✅ pipeline-v2.yaml 定义了完整的 17 stages + quality gates
+- ✅ 明确标注每个 stage 的状态（complete / framework）
+- ⚠️ Runtime executor 未实现，pipeline-v2.yaml 为定义文档
+- ⚠️ 需要在 P2 实现 PipelineExecutor 调用 gates 和 tracer
+
+---
+
+## 11. P1 已知限制
+
+### Critical 限制（必须在使用前了解）
+
+1. **❌ pipeline-v2.yaml 不会自动执行**
+   - 当前 pipeline executor 仍然使用旧的 pipeline.yaml
+   - pipeline-v2.yaml 是定义文档，需要手动集成
+
+2. **❌ 质量门不会真的阻塞**
+   - gates.py 是独立模块，未被 pipeline executor 调用
+   - 需要在 runtime 中集成（见 PIPELINE-INTEGRATION.md）
+
+3. **❌ 16/17 prompts 为框架版**
+   - 只有 01-input-diagnosis.md 可直接使用
+   - 其余需要在 P2 补充完整内容
+
+### High 限制（影响质量但不阻塞使用）
+
+4. **⚠️ 字段级追溯不完整**
+   - 只实现了 IA 类型的字段追溯
+   - component_strategy, state_matrix 等为简化实现
+
+5. **⚠️ 代码约束验证为简化实现**
+   - _extract_pages_from_code 需要真实的 AST 解析
+   - 当前为 mock 实现
+
+---
+
+## 12. 联系与反馈
 
 如遇到问题或有改进建议，请：
 - 提交 Issue: https://github.com/Eryooo/designos/issues
 - 查看文档: [knowledge/design-work-paradigm](../../knowledge/design-work-paradigm/)
 - 查看 Skill Status: [skills/status.matrix.yaml](../status.matrix.yaml)
+- 查看集成指南: [PIPELINE-INTEGRATION.md](PIPELINE-INTEGRATION.md)
