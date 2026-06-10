@@ -177,10 +177,28 @@ def traceability_gate(
             })
 
     # 检查 3: 输入覆盖率
+    #
+    # 设计分级（2026-06-10 Phase 3.5 修复）：
+    # - 中间 stage（如 user-task-modeling）不强制产出完整 traceability_map，
+    #   其追溯由最终 Stage 16 (traceability-generation) 统一生成。
+    # - 因此：traceability_map 为空 = "尚未生成追溯地图"，降级为 warning（不阻塞）。
+    # - 只有当 traceability_map 已存在 coverage_analysis 但覆盖率确实低时，
+    #   才视为真问题并 block。
+    has_traceability = bool(traceability_map) and 'coverage_analysis' in traceability_map
     coverage_analysis = traceability_map.get('coverage_analysis', {})
     input_coverage = coverage_analysis.get('input_coverage', 0)
 
-    if input_coverage < 0.5:
+    if not has_traceability:
+        # 中间 stage 未生成追溯地图：warning 提示，不阻塞
+        issues.append({
+            "type": "traceability_not_generated",
+            "severity": "low",
+            "message": (
+                "本 stage 未产出 coverage_analysis（中间 stage 正常现象）；"
+                "完整追溯将由 Stage 16 traceability-generation 统一生成"
+            )
+        })
+    elif input_coverage < 0.5:
         issues.append({
             "type": "low_input_coverage",
             "severity": "critical",
