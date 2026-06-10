@@ -151,10 +151,22 @@ def traceability_gate(
     """
     issues = []
 
+    # 类型守卫（2026-06-10 Phase 3.5）：
+    # LLM 输出的 traceability 字段可能是 str/None 而非 dict，
+    # gate 必须容错，否则 .get() 会抛 'str' object has no attribute 'get'。
+    if not isinstance(traceability_map, dict):
+        traceability_map = {}
+    if not isinstance(reasoning_assets, dict):
+        reasoning_assets = {}
+    if output_artifact is not None and not isinstance(output_artifact, dict):
+        output_artifact = None
+
     # 检查 1: 如果是 IA，验证所有页面是否可追溯到 user_task
     if output_artifact and output_artifact.get('artifact_type') == 'information_architecture':
         user_task_map = reasoning_assets.get('user_task_map', {})
         for page in output_artifact.get('pages', []):
+            if not isinstance(page, dict):
+                continue
             if not _has_task_mapping(page, user_task_map):
                 issues.append({
                     "type": "unauthorized_page",
@@ -166,6 +178,8 @@ def traceability_gate(
 
     # 检查 2: 关键决策是否有追溯依据
     for decision in traceability_map.get('decision_trace', []):
+        if not isinstance(decision, dict):
+            continue
         based_on = decision.get('based_on', [])
         if not based_on:
             issues.append({
