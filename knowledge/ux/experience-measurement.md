@@ -31,6 +31,8 @@
 - 每个体验目标走GSM推导：Goal → Signal → Metric + Why this number。
 - B端不要盲目套用C端方法论（如用Engagement/Retention），反之亦然。
 - 方法论选择写明理由（基于产品类型/用户群/业务特性）。
+- **数量平衡**：不要为了追求每个EG都极度详尽而导致总数不足，遗漏关键目标；也不要为了凑数而产出通用指标。正确做法：识别所有关键目标，每个目标有足够的GSM推导+PRD绑定（80-150字/目标），覆盖全面优先于单个极致。合理数量：BG 3-5个，PG 5-8个，UG 5-8个，EG 10-15个。
+- **PG是关键**：BG→UG之间必须有PG桥梁，PG是Driver Tree的input metrics，可被团队直接影响。若只有BG/UG/EG三层，说明缺了产品能力分解。
 
 ## quality_rubric
 

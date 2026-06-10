@@ -31,7 +31,12 @@ def resolve_token() -> str | None:
 
 
 def load_prompt(stage_prompt_file: str) -> str:
-    path = PROMPTS_DIR / stage_prompt_file
+    # If absolute path or relative to current dir, use as-is
+    path = Path(stage_prompt_file)
+    if not path.is_absolute():
+        # Try relative to PROMPTS_DIR only if it's a simple filename
+        if '/' not in stage_prompt_file:
+            path = PROMPTS_DIR / stage_prompt_file
     if not path.exists():
         raise FileNotFoundError(f"prompt not found: {path}")
     return path.read_text(encoding="utf-8")
@@ -77,18 +82,23 @@ async def call_llm(full_input: str, model: str, max_tokens: int) -> dict[str, An
     client = AsyncAnthropic(api_key=token, base_url=base_url)
 
     t0 = time.time()
-    resp = await client.messages.create(
+    # Use streaming to avoid 10min timeout
+    full_text = ""
+    async with client.messages.stream(
         model=model,
         max_tokens=max_tokens,
         temperature=0.3,
         messages=[{"role": "user", "content": full_input}],
-    )
+    ) as stream:
+        async for text in stream.text_stream:
+            full_text += text
+
     elapsed_ms = int((time.time() - t0) * 1000)
-    text = "".join(b.text for b in resp.content if hasattr(b, "text"))
+    final_msg = await stream.get_final_message()
     return {
-        "text": text,
-        "input_tokens": resp.usage.input_tokens,
-        "output_tokens": resp.usage.output_tokens,
+        "text": full_text,
+        "input_tokens": final_msg.usage.input_tokens,
+        "output_tokens": final_msg.usage.output_tokens,
         "elapsed_ms": elapsed_ms,
         "model": model,
     }

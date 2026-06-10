@@ -365,6 +365,7 @@ PG-003: 扩展技能覆盖岗位 (影响"使用频次"维度)
 
 输出前自检：
 - [ ] BG/PG/UG/EG/design_constraints/scope_boundaries/goal_derivation_map 全非空
+- [ ] **数量充足**：BG≥3个，PG≥5个，UG≥5个，EG≥10个（根据PRD复杂度调整）
 - [ ] experience_methodology 已选择并说明理由
 - [ ] 每个BG/PG的success_metric有数字+时间
 - [ ] 每个UG用JTBD句式
@@ -374,6 +375,24 @@ PG-003: 扩展技能覆盖岗位 (影响"使用频次"维度)
 - [ ] goal_id符合正则（BG-/PG-/UG-/EG-/J-）
 - [ ] 推断项:inferred:true + 列入inferred_fields
 - [ ] confidence与输入质量匹配（PRD缺指标→≤0.8）
+
+### 数量指引（Quantity Guidance）
+
+**合理目标数量**（根据PRD复杂度调整）:
+- **business_goals**: 3-5个（增长/效率/生态/品质/时间约束等维度）
+- **product_goals**: 5-8个（每个BG拆解1-3个PG，Driver Tree的input metrics）
+- **user_goals**: 5-8个（覆盖核心用户角色×主要场景）
+- **experience_goals**: 10-15个（每个UG拆解2-3个EG，按UES/HEART维度展开）
+- **key_user_journeys**: 3-5条（覆盖核心转化路径）
+- **feature_priority_matrix**: 覆盖所有核心功能（10-20项）
+- **goal_conflicts**: 2-4个（识别真正的隐性矛盾）
+
+**质量 > 数量，但数量不足会漏关键目标**：
+- 若BG只有1-2个，检查是否遗漏品牌/生态/时间维度
+- 若EG<10个，检查是否每个UG都拆到了体验层（易用/性能/满意度都要覆盖）
+- 若PG缺失，说明BG→UG之间缺桥梁，无法追溯业务价值
+
+**小飞侠PRD复杂度评估**：5大模块（新手指引/智语堂/武艺库/人物设定/江湖通告），属于中等复杂度，建议：BG≥3，PG≥5，UG≥5，EG≥12
 
 ---
 

@@ -9,7 +9,12 @@
       "TaskCreate(*)",
       "TaskUpdate(*)",
       "TaskList(*)",
-      "TaskGet(*)"
+      "TaskGet(*)",
+      "WebSearch",
+      "WebFetch(domain:www.interaction-design.org)",
+      "WebFetch(domain:ixdf.org)",
+      "WebFetch(domain:outmn.medium.com)",
+      "WebFetch(domain:www.larksuite.com)"
     ]
   }
 }
