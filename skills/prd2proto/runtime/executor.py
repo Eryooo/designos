@@ -288,8 +288,8 @@ def main():
     """测试 PipelineExecutor"""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Run prd2proto pipeline v2')
-    parser.add_argument('--pipeline', default='skills/prd2proto/pipeline-v2.yaml')
+    parser = argparse.ArgumentParser(description='Run prd2proto pipeline')
+    parser.add_argument('--pipeline', default='skills/prd2proto/pipeline.yaml')
     parser.add_argument('--mode', default='pm', choices=['pm', 'designer-spec'])
 
     args = parser.parse_args()

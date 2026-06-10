@@ -1,10 +1,18 @@
-name: prd2proto-pipeline
+name: prd2proto-pipeline-v2
 
 description: |
-  prd2proto Pipeline — PRD → 可交互前端代码。
-  按"理解 → 分析 → 规范/DSL → Token → 代码 → 审查 → 启动"组织 8 个 stages。
-  支持 pm / designer-spec / designer-dsl 三种保真度档位；每种模式实际跑 7 个 stage
-  （pm/designer-spec 跳过 dsl-fetch，designer-dsl 跳过 spec-generation）。
+  prd2proto Pipeline v2 — 基于 P0/P1 Senior Designer Work Paradigm Engine 重构。
+
+  核心变更：
+  - 不再从 PRD 直接生成代码
+  - 必须先生成 12 个设计推理资产
+  - 所有代码生成受推理资产约束
+  - 所有 stage 都有质量门验证
+  - 最终产物包含 traceability_map 和 professional_gap_report
+
+  状态：P1 Baseline（部分实现）
+
+version: "2.0.0-p1"
 
 mode_prompt:
   question: "选择保真度："
@@ -13,8 +21,6 @@ mode_prompt:
       label: "PM 模式（PRD → 低保真演示原型）"
     - id: designer-spec
       label: "设计师模式（PRD + design-spec.md → 高保真原型）"
-    - id: designer-dsl
-      label: "设计师生产模式（DSL + 组件库 → 生产代码）"
 
 upstream_refs:
   - skill: ai-analytics
@@ -27,143 +33,346 @@ upstream_refs:
     required: false
 
 stages:
-  # ────────────────────────────────────────────────────────────
-  # Stage 1: PRD 结构化理解
-  # ────────────────────────────────────────────────────────────
-  - id: prd-understanding
-    type: llm
-    prompt: prompts/01-prd-understanding.md
-    inputs: [prd_file, scope_md, existing_personas, design_strategy]
-    outputs: [modules, key_features, pages, user_flows, business_goal, auto_decisions]
-    knowledge: [reference/m01-prd-understanding.md]
-    retry:
-      max_attempts: 2
-      backoff_seconds: 2.0
+  # ========================================================================
+  # Phase 1: 输入诊断与目标分解
+  # ========================================================================
 
-  # ────────────────────────────────────────────────────────────
-  # Stage 2: 设计分析（信息架构 + 组件需求）+ Checkpoint C1
-  # ────────────────────────────────────────────────────────────
-  - id: design-analysis
+  - id: input-diagnosis
     type: llm
-    prompt: prompts/02-design-analysis.md
-    inputs: [modules, key_features, pages, user_flows]
-    outputs: [information_architecture, component_spec, design_analysis_md]
-    knowledge: [reference/m02-design-analysis.md]
+    prompt: prompts-v2/01-input-diagnosis.md
+    inputs: [prd_file, prd_content, scope_md, existing_personas, design_strategy]
+    outputs: [requirement_inventory]
+    quality_gates:
+      - gap_transparency_gate
+    knowledge: [knowledge/design-work-paradigm/01-input-diagnosis.md]
+    schema: kernel/contracts/artifacts/requirement-inventory.schema.json
     checkpoint:
-      id: C1
-      message: "信息架构 + 组件清单已建。要改告诉我，否则继续。"
+      id: C1-input
+      message: "输入诊断完成。completeness_score={{requirement_inventory.completeness_assessment.overall_score}}，decision={{requirement_inventory.readiness_decision.decision}}。要改告诉我，否则继续。"
       allow: [continue, modify, supplement]
 
-  # ────────────────────────────────────────────────────────────
-  # Stage 3a: design-spec.md 生成（pm + designer-spec 都跑）
-  #   - designer-dsl 模式跳过：用户自带 design-spec.md
-  #   - 若用户提供了 inputs/design-spec.md，prompt 会跳过模板匹配直接读
-  # ────────────────────────────────────────────────────────────
-  - id: spec-generation
+  - id: design-objectives
     type: llm
+    prompt: prompts-v2/02-design-objectives.md
+    inputs: [requirement_inventory]
+    outputs: [design_objectives]
+    quality_gates:
+      - schema_gate
+      - inference_limit_gate
+    knowledge: [knowledge/design-work-paradigm/02-objective-decomposition.md]
+    schema: kernel/contracts/artifacts/design-objectives.schema.json
+    status: framework  # P1.3 prompt 为框架版
+
+  # ========================================================================
+  # Phase 2: 用户与任务建模
+  # ========================================================================
+
+  - id: product-archetype
+    type: llm
+    prompt: prompts-v2/03-product-archetype.md
+    inputs: [requirement_inventory, design_objectives]
+    outputs: [product_archetype]
+    quality_gates:
+      - schema_gate
+    schema: kernel/contracts/artifacts/product-archetype.schema.json
+    status: framework
+
+  - id: user-task-modeling
+    type: llm
+    prompt: prompts-v2/04-user-task-modeling.md
+    inputs: [design_objectives, requirement_inventory]
+    outputs: [user_task_map]
+    quality_gates:
+      - schema_gate
+      - inference_limit_gate
+      - traceability_gate
+    knowledge: [knowledge/design-work-paradigm/03-user-task-modeling.md]
+    schema: kernel/contracts/artifacts/user-task-map.schema.json
+    status: framework
+
+  - id: business-flow-modeling
+    type: llm
+    prompt: prompts-v2/05-business-flow-modeling.md
+    inputs: [requirement_inventory, user_task_map]
+    outputs: [business_flow]
+    quality_gates:
+      - schema_gate
+      - inference_limit_gate
+    knowledge: [knowledge/design-work-paradigm/05-business-flow-modeling.md]
+    schema: kernel/contracts/artifacts/business-flow.schema.json
+    status: framework
+
+  - id: user-journey-mapping
+    type: llm
+    prompt: prompts-v2/06-user-journey-mapping.md
+    inputs: [user_task_map, design_objectives]
+    outputs: [user_journey_map]
+    quality_gates:
+      - schema_gate
+      - traceability_gate
+    knowledge: [knowledge/design-work-paradigm/06-user-journey-mapping.md]
+    schema: kernel/contracts/artifacts/journey-map.schema.json
+    status: framework
+
+  # ========================================================================
+  # Phase 3: 信息架构与页面设计
+  # ========================================================================
+
+  - id: information-architecture
+    type: llm
+    prompt: prompts-v2/07-information-architecture.md
+    inputs: [user_task_map, user_journey_map, design_objectives]
+    outputs: [information_architecture]
+    quality_gates:
+      - schema_gate
+      - traceability_gate  # 验证所有页面可追溯到 user_task
+    knowledge: [knowledge/design-work-paradigm/07-information-architecture.md]
+    schema: kernel/contracts/artifacts/information-architecture.schema.json
+    checkpoint:
+      id: C2-ia
+      message: "信息架构已生成。pages={{information_architecture.pages.length}}，要改告诉我，否则继续。"
+      allow: [continue, modify, supplement]
+    status: framework
+
+  - id: page-flow
+    type: llm
+    prompt: prompts-v2/08-page-flow.md
+    inputs: [information_architecture, user_journey_map]
+    outputs: [page_flow]
+    quality_gates:
+      - schema_gate
+    schema: kernel/contracts/artifacts/page-flow.schema.json
+    status: framework
+
+  - id: page-structure
+    type: llm
+    prompt: prompts-v2/09-page-structure.md
+    inputs: [information_architecture, page_flow]
+    outputs: [page_structure]
+    quality_gates:
+      - schema_gate
+    schema: kernel/contracts/artifacts/page-structure.schema.json
+    status: framework
+
+  # ========================================================================
+  # Phase 4: 组件与交互设计
+  # ========================================================================
+
+  - id: component-strategy
+    type: llm
+    prompt: prompts-v2/10-component-strategy.md
+    inputs: [page_structure, design_objectives]
+    outputs: [component_strategy]
+    quality_gates:
+      - schema_gate
+    knowledge: [knowledge/design-work-paradigm/10-component-strategy.md]
+    schema: kernel/contracts/artifacts/component-strategy.schema.json
+    status: framework
+
+  - id: state-matrix
+    type: llm
+    prompt: prompts-v2/11-state-matrix.md
+    inputs: [business_flow, page_structure]
+    outputs: [state_matrix]
+    quality_gates:
+      - schema_gate
+      - inference_limit_gate
+    knowledge: [knowledge/design-work-paradigm/11-state-matrix.md]
+    schema: kernel/contracts/artifacts/state-matrix.schema.json
+    status: framework
+
+  - id: interaction-rules
+    type: llm
+    prompt: prompts-v2/12-interaction-rules.md
+    inputs: [page_structure, component_strategy]
+    outputs: [interaction_rules]
+    quality_gates:
+      - schema_gate
+    knowledge: [knowledge/design-work-paradigm/12-interaction-rules.md]
+    schema: kernel/contracts/artifacts/interaction-rules.schema.json
+    status: framework
+
+  # ========================================================================
+  # Phase 5: 受约束的代码生成
+  # ========================================================================
+
+  - id: design-spec-generation
+    type: llm
+    prompt: prompts-v2/13-design-spec-generation.md
     only_when: mode != "designer-dsl"
-    prompt: prompts/03a-spec-generation.md
-    inputs: [information_architecture, component_spec, design_analysis_md, business_goal]
-    outputs: [design_spec_md, design_spec_template_used]
-    knowledge: [reference/m03a-spec-generation.md]
-    checkpoint:
-      id: C2
-      message: "design-spec.md 已生成（含选用的模板风格）。要改告诉我，否则继续。"
-      allow: [continue, modify, supplement]
+    inputs: [information_architecture, component_strategy, interaction_rules, design_objectives]
+    outputs: [design_spec_md]
+    status: framework
 
-  # ────────────────────────────────────────────────────────────
-  # Stage 3b: DSL 抓取（仅 designer-dsl 模式）
-  # ────────────────────────────────────────────────────────────
-  - id: dsl-fetch
-    type: tool
-    only_when: mode == "designer-dsl"
-    mcp_server: frontend-codegen
-    mcp_tool: fetch_dsl
-    inputs: [dsl_file]
-    outputs: [dsl_tree]
-    retry:
-      max_attempts: 3
-      backoff_seconds: 3.0
-
-  # ────────────────────────────────────────────────────────────
-  # Stage 4: Token 提取（所有模式都跑，输出 W3C DTCG JSON + tokens.css）
-  # + Checkpoint C3
-  # ────────────────────────────────────────────────────────────
   - id: token-extraction
     type: llm
-    prompt: prompts/04-token-extraction.md
-    inputs: [design_spec_md, dsl_tree]
+    prompt: prompts-v2/14-token-extraction.md
+    inputs: [design_spec_md]
     outputs: [design_tokens, tokens_css]
-    knowledge: [reference/m04-token-extraction.md]
-    checkpoint:
-      id: C3
-      message: "Design Tokens 已提取（DTCG JSON + tokens.css）。要改告诉我，否则继续。"
-      allow: [continue, modify, supplement]
+    status: framework
 
-  # ────────────────────────────────────────────────────────────
-  # Stage 5: 代码生成（LLM 主导，prompt 钉死项目结构 / 状态管理 / mock 规模）
-  # ────────────────────────────────────────────────────────────
-  - id: code-generation
+  - id: constrained-code-generation
     type: llm
-    prompt: prompts/05-code-generation.md
-    inputs:
-      - information_architecture
-      - component_spec
-      - design_tokens
-      - tokens_css
-      - design_spec_md
-      - dsl_tree
-      - auto_decisions
-    outputs: [prototype_code, frontend_code, code_generation_summary]
-    knowledge: [reference/m05-code-generation.md]
-    retry:
-      max_attempts: 2
-      backoff_seconds: 5.0
-
-  # ────────────────────────────────────────────────────────────
-  # Stage 6: 代码审查 + Checkpoint C4 + Gate QG_REVIEW
-  # ────────────────────────────────────────────────────────────
-  - id: review-gate
-    type: llm
-    prompt: prompts/06-review-gate.md
-    inputs: [prototype_code, frontend_code, design_tokens, code_generation_summary, design_spec_md]
-    outputs: [review_report, constitution_violations, fidelity_score]
-    knowledge: [reference/m06-review-gate.md]
-    gate:
-      when: constitution_violations.count > 0
-      action: pause
-      checkpoint_id: QG_REVIEW
-      message: "代码审查发现违反代码宪法的项，请查看 review_report 并决定继续 / 修改 / 重新生成。"
-      status_reason_from: constitution_violations.summary
-      required_actions_from: constitution_violations.required_actions
-      resume_from_stage: code-generation
+    prompt: prompts-v2/15-constrained-code-generation.md
+    inputs: [
+      information_architecture,
+      page_flow,
+      page_structure,
+      component_strategy,
+      state_matrix,
+      interaction_rules,
+      design_tokens
+    ]
+    outputs: [prototype_code]
+    quality_gates:
+      - code_constraint_gate  # 验证代码受推理资产约束
     checkpoint:
-      id: C4
-      message: "审查通过，已展示 review_report + violations 数量。要改告诉我，否则进入 liveness-check。"
-      allow: [continue, modify, supplement]
+      id: C3-code
+      message: "代码已生成。要改告诉我，否则继续。"
+      allow: [continue, modify]
+    status: framework
 
-  # ────────────────────────────────────────────────────────────
-  # Stage 7: liveness-check（启动验证 / 闭环用户期待）
-  #   实装：LLM 引导用户跑 npm install + dev / build，回报 URL 或错误。
-  #   未来：frontend-codegen 真 MCP 实装 launch_preview 后，可改 type: tool。
-  # ────────────────────────────────────────────────────────────
+  # ========================================================================
+  # Phase 6: 追溯性与质量评估
+  # ========================================================================
+
+  - id: traceability-generation
+    type: llm
+    prompt: prompts-v2/16-traceability-generation.md
+    inputs: [
+      prototype_code,
+      requirement_inventory,
+      design_objectives,
+      user_task_map,
+      information_architecture,
+      component_strategy,
+      state_matrix
+    ]
+    outputs: [design_traceability_map]
+    quality_gates:
+      - schema_gate
+      - traceability_gate
+    knowledge: [knowledge/design-work-paradigm/19-traceability.md]
+    schema: kernel/contracts/artifacts/traceability-map.schema.json
+    status: framework
+
+  - id: professional-gap-assessment
+    type: llm
+    prompt: prompts-v2/17-professional-gap-assessment.md
+    inputs: [
+      prototype_code,
+      design_traceability_map,
+      requirement_inventory,
+      all_reasoning_assets
+    ]
+    outputs: [professional_gap_report]
+    quality_gates:
+      - schema_gate
+    knowledge: [knowledge/design-work-paradigm/17-quality-rubrics.md]
+    schema: kernel/contracts/artifacts/professional-gap-report.schema.json
+    status: framework
+
+  # ========================================================================
+  # Phase 7: 启动与交付
+  # ========================================================================
+
   - id: liveness-check
-    type: llm
-    prompt: prompts/07-liveness-check.md
-    inputs: [prototype_code, code_generation_summary]
-    outputs: [dev_url, liveness_report]
-    retry:
-      max_attempts: 2
-      backoff_seconds: 3.0
+    type: tool
+    inputs: [prototype_code]
+    outputs: [dev_url]
+    description: "启动开发服务器"
 
-memory:
-  read:
-    - "organization.prd2proto.golden_samples"
-    - "organization.prd2proto.failure_cases"
-    - "organization.prd2proto.design_token_library"
-    - "organization.prd2proto.component_library"
-  write:
-    - "project.prd2proto.{run_id}"
-    - "project.prd2proto.{run_id}.checkpoint_decisions"
+# ============================================================================
+# Quality Gates Configuration
+# ============================================================================
 
-constitution: constitution.md
+quality_gates_config: kernel/quality-gates/gate-config.yaml
+
+quality_gates_enforcement:
+  blocked:
+    action: stop_execution
+    generate_blocker_report: true
+    notify_user: true
+
+  fallback_safe:
+    action: downgrade_mode
+    target_mode: pm
+    target_fidelity: low
+    notify_user: true
+
+  warning:
+    action: continue_with_flag
+    mark_for_review: true
+    log: true
+
+# ============================================================================
+# Traceability Configuration
+# ============================================================================
+
+traceability_config:
+  enable_auto_trace: true
+  enable_field_level_trace: true
+  enable_inference_detection: true
+
+# ============================================================================
+# Output Configuration
+# ============================================================================
+
+outputs:
+  reasoning_assets_dir: "output/prd2proto/design-reasoning/"
+  prototype_dir: "output/prd2proto/prototype/"
+  quality_reports_dir: "output/prd2proto/quality/"
+
+  required_outputs:
+    - requirement_inventory.json
+    - design_objectives.json
+    - user_task_map.json
+    - information_architecture.json
+    - component_strategy.json
+    - state_matrix.json
+    - design_traceability_map.json
+    - professional_gap_report.json
+    - prototype_code/
+
+# ============================================================================
+# Known Limitations (P1 Baseline)
+# ============================================================================
+
+limitations:
+  prompts:
+    - "01-input-diagnosis.md: ✅ 完整"
+    - "02-17: ⚠️ 框架版本，P2 补充"
+
+  quality_gates:
+    - "5 个 gates 实现完整"
+    - "辅助方法为简化实现（如 _extract_pages_from_code）"
+    - "需要在 runtime 中完善代码解析逻辑"
+
+  traceability:
+    - "字段级追溯仅实现 IA 类型"
+    - "其他 artifact 类型（component_strategy, state_matrix）为简化实现"
+    - "inference detection 为关键字匹配，非语义匹配"
+
+  runtime:
+    - "pipeline executor 需要集成 quality gates"
+    - "pipeline executor 需要集成 traceability generator"
+    - "质量门失败处理需要完整实现"
+
+# ============================================================================
+# Version History
+# ============================================================================
+
+version_history:
+  - version: "2.0.0-p1"
+    date: "2026-06-09"
+    changes:
+      - "基于 P0 Senior Designer Work Paradigm Engine 重构"
+      - "新增 12 个设计推理 stages"
+      - "集成 quality gates"
+      - "集成 traceability"
+      - "1 个完整 prompt + 16 个框架 prompts"
+
+  - version: "1.0.0"
+    date: "2026-05-15"
+    changes:
+      - "初始版本（已弃用）"

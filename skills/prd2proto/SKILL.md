@@ -1,14 +1,30 @@
 ---
 name: prd2proto
-version: 0.2.0-p0-refactor
+version: 0.3.0-capability-pilot
 type: pipeline
-status: pilot
+status: capability-pilot
 runtime_reliability: llm_assisted
 enterprise_ready: false
 description: |
-  PRD → 设计推理资产 → 受约束的原型代码。
-  P0 重构后，不再直接从 PRD 生成代码，而是先生成设计推理资产（design objectives, user task map, journey map, IA, page flow, component strategy, state matrix, interaction rules），再基于这些资产生成代码。
-  支持三种保真度档位：pm（PM 演示用低保真）/ designer-spec（设计师高保真原型）/ designer-dsl（DSL + 组件库 + 设计规范，生产级代码）。
+  PRD → 设计推理资产 → 受约束的原型代码。基于 Senior Designer Work Paradigm Engine。
+  
+  Pipeline v2 (17 stages):
+  - Stage 01-12: 设计推理资产生成 (design objectives, user tasks, journey, IA, page flow, component strategy, state matrix, interaction rules, etc.)
+  - Stage 13: 设计规范生成 (design-spec.md)
+  - Stage 14: Token提取 (框架级占位)
+  - Stage 15: 约束代码生成 (框架级占位)
+  - Stage 16: 可追溯性生成 (traceability map)
+  - Stage 17: 专业差距评估 (professional gap report)
+  
+  当前状态 (2026-06-10):
+  - ✅ Pipeline架构: v2主线 (pipeline.yaml), v1保留 (pipeline.v1.yaml)
+  - 🔄 Prompts: 框架完成, 资深设计师逻辑补全中
+  - 🔄 LLM Execution: 从mock向真实执行迁移中
+  - 🔄 Schema Gates: 接入中
+  - ❌ Code Generation: 框架级占位 (非本轮P0)
+  - ❌ Production Ready: 否
+  
+  本版本不支持 designer-dsl 模式,仅保留 pm / designer-spec。
 requires:
   kernel: ">=1.0.0,<2.0.0"
   mcp_servers:
