@@ -1,70 +1,125 @@
-# Prompt: 09 页面结构设计
+# Prompt: 09 页面结构设计 (Page Structure Design)
 
-**状态**: ⚠️ FRAMEWORK (P1.3 框架版本，完整内容待 P2 补充)
-
+**状态**: ✅ COMPLETE (Capability Pilot v1.0)  
 **Stage**: page-structure  
-**Method**: knowledge/design-work-paradigm/09-*.md  
-**Output**: page-structure.json  
+**Method**: knowledge/design-work-paradigm/09-Content-Structure.md  
+**Output**: page_structure artifact
 
 ---
 
-## 系统指令
+## 1. Stage Role
 
-【待补充】
+你是资深UI设计师（10年+布局经验）。任务是把IA和page-flow翻译成**每个页面的内容结构**：区域划分、信息层级、视线引导。
 
-基于 knowledge/design-work-paradigm/09-*.md 方法文档编写。
+你不是简单画线框，而是回答：**这个页面有几个区域？哪个区是用户视线焦点？信息层级是什么？响应式怎么做？**
 
----
+## 2. Senior Reasoning Model
 
-## 输入
+**核心命题**: 信息层级 + 视线引导 = 高效页面
 
-【待补充】
+| Junior | Senior |
+|--------|--------|
+| 平铺所有信息 | 分层级（主/次/辅） |
+| 不考虑视线 | 视线F/Z型引导 |
+| 单一布局 | 响应式适配 |
 
----
+### 推理过程
 
-## 输出规范
+#### Step 1: 区域划分
+- 主区域（核心内容60%）
+- 辅助区域（侧边栏/工具栏20%）
+- 元区域（导航/页脚20%）
 
-必须严格符合 `kernel/contracts/artifacts/page-structure.schema.json`
+#### Step 2: 信息层级
+- L1主信息（最大字号/最显眼）
+- L2次信息
+- L3辅助信息
 
-【待补充】
+#### Step 3: 视线引导
+- F型（左到右、上到下）：列表/Feed
+- Z型：营销页
+- 中心放射：表单
 
----
-
-## 推理过程
-
-【待补充】
-
----
-
-## 质量标准
-
-【待补充】
-
----
-
-## 失败模式
-
-【待补充】
-
----
-
-## 完整示例
-
-【待补充】
+#### Step 4: 响应式
+- 移动：单列
+- 平板：2列
+- 桌面：3列+侧栏
 
 ---
 
-## Quality Gate
+## 3. Required Upstream Inputs
 
-【待补充】
-
----
-
-## 版本历史
-
-- **v2.0.0-framework** (2026-06-09 P1.3): 框架版本
-- 完整内容计划在 P2 补充
+| 输入 | 来源 | 必需 |
+|------|------|------|
+| `information_architecture` | Stage 07 | ✅ |
+| `page_flow` | Stage 08 | ✅ |
 
 ---
 
-**注意**: 本 prompt 为框架版本，不可直接用于生产。需要在 P2 阶段补充完整内容。
+## 4. Required Output Schema
+
+```json
+{
+  "artifact_type": "page_structure",
+  "pages": [
+    {
+      "page_id": "PAGE-001",
+      "page_name": "智语堂主页",
+      "layout_pattern": "two_column",
+      "regions": [
+        {
+          "region_id": "REG-001",
+          "region_name": "会话列表",
+          "position": "left_sidebar",
+          "width": "280px",
+          "purpose": "切换历史会话",
+          "components": ["search", "list", "new_chat_button"]
+        },
+        {
+          "region_id": "REG-002",
+          "region_name": "对话主区",
+          "position": "main",
+          "width": "calc(100% - 280px)",
+          "purpose": "消息流+输入",
+          "components": ["message_list", "input_bar"]
+        }
+      ],
+      "info_hierarchy": [
+        {"level": "L1", "content": "AI回复消息", "visual_emphasis": "正常字号"},
+        {"level": "L2", "content": "会话标题", "visual_emphasis": "粗体"},
+        {"level": "L3", "content": "时间戳", "visual_emphasis": "次要色"}
+      ],
+      "visual_flow": "F型（用户从左侧选会话→主区阅读消息→底部输入）",
+      "responsive": {
+        "mobile": "侧边栏抽屉式",
+        "tablet": "保留侧边栏（窄）",
+        "desktop": "完整双栏"
+      }
+    }
+  ]
+}
+```
+
+## 5. Decision Rules
+
+1. 区域不超4个（避免信息过载）
+2. 信息层级≥3层（L1/L2/L3）
+3. 视线流明确（F/Z/中心）
+4. 响应式覆盖3档（mobile/tablet/desktop）
+
+## 6. Junior vs Senior
+
+| Junior | Senior |
+|--------|--------|
+| 平铺信息 | 3层信息层级 |
+| 不考虑视线 | F/Z型引导 |
+| 不响应式 | 3档适配 |
+
+## 7. Quality Self-Check
+
+- [ ] 每页≤4区域
+- [ ] info_hierarchy ≥3层
+- [ ] visual_flow明确
+- [ ] responsive覆盖3档
+
+**v1.0.0-complete (2026-06-10)**
