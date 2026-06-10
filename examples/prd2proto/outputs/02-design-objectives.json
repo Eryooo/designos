@@ -1,0 +1,701 @@
+{
+  "artifact_type": "design_objectives",
+  "maturity": "draft",
+  "confidence": 0.82,
+  "business_goals": [
+    {
+      "goal_id": "BG-001",
+      "description": "成为集团全员AI入口，建立职场智能助手心智占位",
+      "success_metric": "上线后1个月内周活跃员工数≥40%集团全员基数",
+      "priority": "P0",
+      "traceable_to_prd": "PRD §1.2 品牌核心定位：为集团全员量身打造的专属职场侠士",
+      "inferred": false,
+      "related_user_goals": [
+        "UG-001",
+        "UG-002",
+        "UG-003"
+      ],
+      "gsm_signal": "员工自愿打开小飞侠并持续使用（非强制推广）",
+      "gsm_why": "周活是业务增长的先导指标，反映产品心智占位成功度"
+    },
+    {
+      "goal_id": "BG-002",
+      "description": "4月15日按时灰度上线MVP版本，验证核心价值假设",
+      "success_metric": "4月15日完成灰度发布，无P0级线上故障",
+      "priority": "P0",
+      "traceable_to_prd": "PRD §1.4 上线时间：4月15日（设计定稿4月9日）",
+      "inferred": false,
+      "related_user_goals": [
+        "UG-001",
+        "UG-002",
+        "UG-004",
+        "UG-005"
+      ],
+      "gsm_signal": "按计划时间节点完成设计评审、开发提测、灰度发布",
+      "gsm_why": "时间约束是MVP阶段的核心目标，决定资源投入和功能优先级"
+    },
+    {
+      "goal_id": "BG-003",
+      "description": "建立AI能力生态，通过技能市场扩展产品边界",
+      "success_metric": "MVP上线时技能市场≥10个可用技能，上线后1个月人均安装技能数≥2.5个",
+      "priority": "P1",
+      "traceable_to_prd": "PRD §1.3 武艺库：AI能力全生命周期管理，通过技能市场扩展功能",
+      "inferred": false,
+      "related_user_goals": [
+        "UG-004"
+      ],
+      "gsm_signal": "用户主动浏览技能市场并安装多个技能",
+      "gsm_why": "技能安装数反映生态价值，是长期竞争力基础"
+    },
+    {
+      "goal_id": "BG-004",
+      "description": "提升职场办公效率，解决实际业务卡点",
+      "success_metric": "上线后1个月内用户问卷调研：≥60%认为小飞侠提升了工作效率",
+      "priority": "P0",
+      "traceable_to_prd": "PRD §1.2 以AI为刃、以效率为锋，破除办公卡点、摆脱低效内耗",
+      "inferred": false,
+      "related_user_goals": [
+        "UG-002",
+        "UG-003",
+        "UG-004"
+      ],
+      "gsm_signal": "用户在实际工作场景中使用小飞侠完成任务（如审批咨询、文档处理）",
+      "gsm_why": "效率提升是产品核心价值主张，决定长期留存"
+    }
+  ],
+  "product_goals": [
+    {
+      "goal_id": "PG-001",
+      "description": "降低首次激活门槛，让新用户快速完成首次对话体验核心价值",
+      "serves_business_goal": "BG-001",
+      "success_metric": "新用户首次对话转化率≥55%（从打开到发送首条消息）",
+      "priority": "P0",
+      "related_user_goals": [
+        "UG-001"
+      ],
+      "related_experience_goals": [
+        "EG-001",
+        "EG-002",
+        "EG-003"
+      ],
+      "feature_scope": [
+        "新手指引4步流程",
+        "智语堂默认聚焦",
+        "首次对话引导卡片"
+      ],
+      "out_of_scope": [
+        "个性化推荐话术",
+        "多轮交互式引导"
+      ],
+      "inferred": false,
+      "traceable_to_prd": "PRD §4.1 新手指引：帮助新用户快速熟悉平台核心功能与操作流程",
+      "gsm_signal": "新用户看完新手指引后立即进入智语堂并发送首条消息",
+      "gsm_why": "首次对话是激活的关键转化点，决定用户是否建立使用习惯"
+    },
+    {
+      "goal_id": "PG-002",
+      "description": "提供流畅的实时对话体验，支撑高频使用场景",
+      "serves_business_goal": "BG-004",
+      "success_metric": "对话响应首字延迟≤1.5秒，流式输出流畅度（无明显卡顿）≥95%会话",
+      "priority": "P0",
+      "related_user_goals": [
+        "UG-002"
+      ],
+      "related_experience_goals": [
+        "EG-004",
+        "EG-005",
+        "EG-006",
+        "EG-007"
+      ],
+      "feature_scope": [
+        "流式SSE对话",
+        "Markdown渲染",
+        "附件上传",
+        "会话历史管理"
+      ],
+      "out_of_scope": [
+        "语音输入",
+        "多模态图片识别",
+        "实时协作编辑"
+      ],
+      "inferred": false,
+      "traceable_to_prd": "PRD §4.2 智语堂：核心交互入口，承载实时对话",
+      "gsm_signal": "用户在对话中持续追问（多轮对话），且不因响应慢放弃",
+      "gsm_why": "对话流畅度直接影响用户感知效率，是高频使用的基础"
+    },
+    {
+      "goal_id": "PG-003",
+      "description": "简化技能管理流程，让用户轻松扩展AI能力",
+      "serves_business_goal": "BG-003",
+      "success_metric": "技能安装成功率≥98%，平均安装时长≤10秒（从点击到完成）",
+      "priority": "P1",
+      "related_user_goals": [
+        "UG-004"
+      ],
+      "related_experience_goals": [
+        "EG-008",
+        "EG-009",
+        "EG-010"
+      ],
+      "feature_scope": [
+        "技能市场浏览",
+        "一键安装/卸载",
+        "环境变量配置"
+      ],
+      "out_of_scope": [
+        "技能搜索（v1.1）",
+        "技能评分评论",
+        "自定义技能开发"
+      ],
+      "inferred": false,
+      "traceable_to_prd": "PRD §4.3 武艺库：AI能力全生命周期管理（安装/配置/卸载）",
+      "gsm_signal": "用户主动浏览技能市场并安装多个技能，配置成功率高",
+      "gsm_why": "安装流畅度决定技能生态能否规模化"
+    },
+    {
+      "goal_id": "PG-004",
+      "description": "支持个性化人设配置，满足不同场景的交互风格需求",
+      "serves_business_goal": "BG-004",
+      "success_metric": "MVP上线后1个月≥30%用户修改过默认人设（编辑或切换预设）",
+      "priority": "P1",
+      "related_user_goals": [
+        "UG-005"
+      ],
+      "related_experience_goals": [
+        "EG-011",
+        "EG-012"
+      ],
+      "feature_scope": [
+        "预设人设选择",
+        "自定义人设编辑",
+        "实时预览"
+      ],
+      "out_of_scope": [
+        "多人设并行切换",
+        "人设模板市场",
+        "AI自动生成人设"
+      ],
+      "inferred": false,
+      "traceable_to_prd": "PRD §4.4 人物设定：自定义AI助手的身份、能力与行事风格",
+      "gsm_signal": "用户编辑人设内容并保存，后续对话体现人设特征",
+      "gsm_why": "个性化是差异化体验的关键，提升用户掌控感"
+    },
+    {
+      "goal_id": "PG-005",
+      "description": "建立产品更新通知机制，保持用户对新功能的感知",
+      "serves_business_goal": "BG-001",
+      "success_metric": "公告平均点击率≥40%（有新公告时），用户对新功能的感知率≥50%",
+      "priority": "P2",
+      "related_user_goals": [
+        "UG-006"
+      ],
+      "related_experience_goals": [
+        "EG-013",
+        "EG-014"
+      ],
+      "feature_scope": [
+        "公告列表浮层",
+        "未读红点提示",
+        "分类展示"
+      ],
+      "out_of_scope": [
+        "推送通知",
+        "公告评论互动",
+        "个性化推荐公告"
+      ],
+      "inferred": false,
+      "traceable_to_prd": "PRD §4.5 江湖通告：及时同步产品版本更新、功能升级、新技能上线",
+      "gsm_signal": "用户看到红点后主动点击查看公告",
+      "gsm_why": "公告感知率影响新功能的传播效率和用户期待管理"
+    },
+    {
+      "goal_id": "PG-006",
+      "description": "保障会话历史完整管理，支持长期使用积累",
+      "serves_business_goal": "BG-001",
+      "success_metric": "会话列表加载速度≤0.8秒，会话搜索准确率≥90%",
+      "priority": "P1",
+      "related_user_goals": [
+        "UG-003"
+      ],
+      "related_experience_goals": [
+        "EG-006",
+        "EG-015"
+      ],
+      "feature_scope": [
+        "会话列表展示",
+        "搜索历史会话",
+        "新建/删除会话"
+      ],
+      "out_of_scope": [
+        "会话标签分类",
+        "跨设备同步",
+        "会话导出"
+      ],
+      "inferred": false,
+      "traceable_to_prd": "PRD §4.2 智语堂：历史会话管理与快捷操作",
+      "gsm_signal": "用户能快速找到历史会话并继续对话",
+      "gsm_why": "会话管理效率影响长期使用体验和数据价值感知"
+    }
+  ],
+  "user_goals": [
+    {
+      "goal_id": "UG-001",
+      "user_role": "首次使用的集团员工",
+      "goal_description": "快速了解小飞侠的核心功能并完成首次对话",
+      "job_to_be_done": "当我首次打开小飞侠时，我想用最少的步骤和时间了解它能做什么，并立即体验核心对话功能，以便判断是否值得继续使用、不被复杂的引导劝退",
+      "pain_points": [
+        "不知道从哪开始",
+        "担心学习成本高",
+        "害怕操作复杂浪费时间"
+      ],
+      "frequency": "one-time",
+      "priority": "primary",
+      "inferred": false,
+      "supports_product_goal": "PG-001",
+      "gsm_signal": "用户看完新手指引后直接进入智语堂并发送首条消息，无中途退出",
+      "gsm_why": "首次体验决定用户是否建立使用习惯，是激活的关键"
+    },
+    {
+      "goal_id": "UG-002",
+      "user_role": "日常办公的集团员工",
+      "goal_description": "通过对话快速解决工作中的实际问题",
+      "job_to_be_done": "当我遇到工作卡点（如审批流程咨询、文档处理、数据查询）时，我想通过自然对话快速获得准确答案或解决方案，以便不被繁琐流程阻塞、提升工作效率",
+      "pain_points": [
+        "找不到负责人",
+        "流程文档难找",
+        "等待人工回复太慢",
+        "重复性问题浪费时间"
+      ],
+      "frequency": "daily",
+      "priority": "primary",
+      "inferred": false,
+      "supports_product_goal": "PG-002",
+      "gsm_signal": "用户在对话中提出具体业务问题，获得满意回复后继续使用",
+      "gsm_why": "解决实际问题是产品核心价值，决定高频使用和留存"
+    },
+    {
+      "goal_id": "UG-003",
+      "user_role": "长期使用的集团员工",
+      "goal_description": "高效管理历史会话，快速回溯和延续之前的对话",
+      "job_to_be_done": "当我需要回顾之前与小飞侠的对话内容或继续某个未完成的任务时，我想快速找到相关会话并继续，以便不重复描述背景、节省沟通成本",
+      "pain_points": [
+        "历史对话难找",
+        "记不清之前聊过什么",
+        "切换会话繁琐"
+      ],
+      "frequency": "frequent",
+      "priority": "secondary",
+      "inferred": false,
+      "supports_product_goal": "PG-006",
+      "gsm_signal": "用户通过搜索或浏览快速定位历史会话并继续对话",
+      "gsm_why": "会话管理效率影响长期使用体验和数据价值感知"
+    },
+    {
+      "goal_id": "UG-004",
+      "user_role": "有特定业务需求的集团员工",
+      "goal_description": "扩展小飞侠的能力以满足岗位特定需求",
+      "job_to_be_done": "当我发现小飞侠默认功能无法满足我的岗位需求（如人力审批、财务报销）时，我想轻松找到并安装相关技能，配置后立即使用，以便小飞侠真正适配我的工作场景",
+      "pain_points": [
+        "不知道有哪些可用技能",
+        "担心安装配置复杂",
+        "配置错误导致无法使用"
+      ],
+      "frequency": "occasional",
+      "priority": "primary",
+      "inferred": false,
+      "supports_product_goal": "PG-003",
+      "gsm_signal": "用户主动进入武艺库浏览技能，安装并成功配置环境变量",
+      "gsm_why": "技能扩展是生态价值的体现，决定产品长期适配性"
+    },
+    {
+      "goal_id": "UG-005",
+      "user_role": "对交互风格有偏好的集团员工",
+      "goal_description": "定制AI助手的交互风格以匹配个人偏好",
+      "job_to_be_done": "当我觉得默认的AI回复风格不符合我的偏好（如过于正式/不够专业/缺少幽默感）时，我想调整人设配置，让AI的回答更符合我的期待，以便获得更舒适的交互体验",
+      "pain_points": [
+        "默认风格不适合",
+        "不知道如何调整",
+        "担心调整后效果不好"
+      ],
+      "frequency": "occasional",
+      "priority": "secondary",
+      "inferred": false,
+      "supports_product_goal": "PG-004",
+      "gsm_signal": "用户编辑人设内容，通过预览验证效果后保存并应用",
+      "gsm_why": "个性化配置提升用户掌控感和满意度"
+    },
+    {
+      "goal_id": "UG-006",
+      "user_role": "长期使用的集团员工",
+      "goal_description": "及时了解产品的新功能和技能更新",
+      "job_to_be_done": "当产品上线新功能或有新技能发布时，我想快速了解这些更新是否对我有用，以便第一时间尝试并享受新能力",
+      "pain_points": [
+        "不知道有新功能",
+        "错过重要更新",
+        "公告内容难找"
+      ],
+      "frequency": "occasional",
+      "priority": "tertiary",
+      "inferred": false,
+      "supports_product_goal": "PG-005",
+      "gsm_signal": "用户看到未读公告红点后主动点击查看",
+      "gsm_why": "公告感知率影响新功能的传播效率和用户期待管理"
+    }
+  ],
+  "experience_goals": [
+    {
+      "goal_id": "EG-001",
+      "methodology": "UES-ease_of_use",
+      "dimension": "learnability",
+      "target": "新手指引4步流程总时长≤60秒，完成率（未点击跳过）≥70%",
+      "rationale": "降低首次上手门槛是PG-001的核心体验抓手",
+      "measurement_method": "可用性测试记录每步停留时长与跳过率",
+      "baseline": "无（新功能）",
+      "supports_user_goal": "UG-001",
+      "context_from_prd": "PRD §4.1.2 新手指引4步流程（侠影初现/功法加持/侠骨塑型/智语破局）",
+      "gsm_signal": "用户在每步停留时间适中（≤15秒/步）且不点击跳过",
+      "why_this_number": "可用性研究显示单步超过15秒注意力涣散，跳过率>30%则首次对话转化腰斩"
+    },
+    {
+      "goal_id": "EG-002",
+      "methodology": "UES-ease_of_use",
+      "dimension": "clarity",
+      "target": "新手指引各步核心信息识别准确率≥85%（可用性测试回忆测试）",
+      "rationale": "信息传达清晰度决定用户是否理解产品核心价值",
+      "measurement_method": "可用性测试后让用户复述各步核心信息，计算准确率",
+      "baseline": "无（新功能）",
+      "supports_user_goal": "UG-001",
+      "context_from_prd": "PRD §4.1.2 各步骤核心内容（武艺升级/专属定制/全场景办公等）",
+      "gsm_signal": "用户能准确复述各步骤的核心价值点",
+      "why_this_number": "信息识别率<80%说明视觉层级或文案有问题，影响后续功能探索"
+    },
+    {
+      "goal_id": "EG-003",
+      "methodology": "UES-consistency",
+      "dimension": "visual_consistency",
+      "target": "新手指引与主界面的视觉风格一致性评分≥4.0/5.0（用户问卷）",
+      "rationale": "一致性降低认知负荷，提升品牌连贯性",
+      "measurement_method": "问卷调查用户对引导页与主界面风格统一性的感知",
+      "baseline": "无（新功能）",
+      "supports_user_goal": "UG-001",
+      "context_from_prd": "PRD §4.1 新手指引设计需与整体武侠风格保持一致",
+      "gsm_signal": "用户从引导页进入主界面时无视觉割裂感",
+      "why_this_number": "一致性<4.0说明设计语言未统一，影响品牌认知"
+    },
+    {
+      "goal_id": "EG-004",
+      "methodology": "UES-performance",
+      "dimension": "response_time",
+      "target": "对话首字响应延迟≤1.5秒（P95），流式输出流畅无卡顿≥95%会话",
+      "rationale": "响应速度是实时对话体验的基础，直接影响用户感知效率",
+      "measurement_method": "客户端埋点统计首字延迟和流式输出帧率",
+      "baseline": "无（新功能，但参考行业基准ChatGPT首字<2秒）",
+      "supports_user_goal": "UG-002",
+      "context_from_prd": "PRD §5 非功能需求：首屏加载时间<1.5秒，支持流式输出SSE",
+      "gsm_signal": "用户发送消息后快速看到回复首字，流式输出无明显停顿",
+      "why_this_number": "超过2秒用户会怀疑是否卡死，卡顿会打断阅读节奏"
+    },
+    {
+      "goal_id": "EG-005",
+      "methodology": "UES-ease_of_use",
+      "dimension": "operability",
+      "target": "对话输入框发送成功率≥99.5%，附件上传成功率≥98%",
+      "rationale": "核心操作的可靠性是高频使用的基础",
+      "measurement_method": "客户端埋点统计发送/上传成功率",
+      "baseline": "无（新功能）",
+      "supports_user_goal": "UG-002",
+      "context_from_prd": "PRD §4.2.5 发送消息时序图，支持文本+附件上传",
+      "gsm_signal": "用户点击发送后消息立即进入消息流，附件上传显示进度且成功",
+      "why_this_number": "核心操作失败率>0.5%会严重影响信任度"
+    },
+    {
+      "goal_id": "EG-006",
+      "methodology": "UES-performance",
+      "dimension": "loading_speed",
+      "target": "会话列表加载时长≤0.8秒（P90），会话内容加载≤1.2秒（P90）",
+      "rationale": "快速加载历史数据支持流畅的会话切换体验",
+      "measurement_method": "客户端埋点统计加载时长",
+      "baseline": "无（新功能）",
+      "supports_user_goal": "UG-003",
+      "context_from_prd": "PRD §4.2 智语堂左侧边栏会话列表加载",
+      "gsm_signal": "用户点击会话后快速看到历史消息，无明显等待感",
+      "why_this_number": "超过1秒会产生明显等待感，影响切换效率"
+    },
+    {
+      "goal_id": "EG-007",
+      "methodology": "UES-ease_of_use",
+      "dimension": "clarity",
+      "target": "消息流Markdown渲染准确率≥99%，代码块/表格等格式识别率≥95%",
+      "rationale": "内容呈现准确性影响信息可读性和专业感",
+      "measurement_method": "自动化测试覆盖常见Markdown语法，人工抽检复杂格式",
+      "baseline": "无（新功能）",
+      "supports_user_goal": "UG-002",
+      "context_from_prd": "PRD §4.2.3 消息内容支持Markdown",
+      "gsm_signal": "AI回复中的格式化内容（列表/代码/表格）正确渲染",
+      "why_this_number": "格式渲染错误会导致信息难以理解，影响专业性"
+    },
+    {
+      "goal_id": "EG-008",
+      "methodology": "UES-ease_of_use",
+      "dimension": "operability",
+      "target": "技能安装流程操作步骤≤3步，平均完成时长≤10秒",
+      "rationale": "简化安装流程降低扩展能力的门槛",
+      "measurement_method": "埋点统计安装操作步骤数和耗时",
+      "baseline": "无（新功能）",
+      "supports_user_goal": "UG-004",
+      "context_from_prd": "PRD §4.3.3 技能安装流程：点击安装→调用API→提示成功",
+      "gsm_signal": "用户从点击安装到看到成功提示的时间短且无需额外操作",
+      "why_this_number": "超过3步或15秒会让用户觉得复杂而放弃"
+    },
+    {
+      "goal_id": "EG-009",
+      "methodology": "UES-task_efficiency",
+      "dimension": "success_rate",
+      "target": "技能安装成功率≥98%，环境变量配置保存成功率≥97%",
+      "rationale": "高成功率保障生态扩展的可靠性",
+      "measurement_method": "后端日志统计安装/配置成功率",
+      "baseline": "无（新功能）",
+      "supports_user_goal": "UG-004",
+      "context_from_prd": "PRD §4.3.3 技能安装/卸载流程，§4.3.4 环境变量配置",
+      "gsm_signal": "用户点击安装后成功提示出现，配置保存后技能正常工作",
+      "why_this_number": "安装失败率>2%会严重影响生态信任度"
+    },
+    {
+      "goal_id": "EG-010",
+      "methodology": "UES-ease_of_use",
+      "dimension": "error_prevention",
+      "target": "环境变量敏感字段脱敏显示准确率100%，配置错误提示清晰度≥4.0/5.0",
+      "rationale": "安全性和容错性提升配置体验的可靠感",
+      "measurement_method": "自动化测试验证脱敏逻辑，用户问卷评估错误提示清晰度",
+      "baseline": "无（新功能）",
+      "supports_user_goal": "UG-004",
+      "context_from_prd": "PRD §4.3.4 敏感字段加密存储前端显示脱敏，§5 非功能需求",
+      "gsm_signal": "用户配置API Key等敏感信息时看到脱敏显示，配置错误时清楚知道如何修正",
+      "why_this_number": "敏感信息泄漏0容忍，错误提示不清晰会导致反复试错"
+    },
+    {
+      "goal_id": "EG-011",
+      "methodology": "UES-ease_of_use",
+      "dimension": "operability",
+      "target": "人设配置实时预览延迟≤0.3秒，保存成功率≥99%",
+      "rationale": "实时反馈提升配置效率和信心",
+      "measurement_method": "客户端埋点统计预览延迟和保存成功率",
+      "baseline": "无（新功能）",
+      "supports_user_goal": "UG-005",
+      "context_from_prd": "PRD §4.4.1 右侧预览区实时展示配置内容",
+      "gsm_signal": "用户编辑人设文本时右侧预览立即更新，无明显延迟",
+      "why_this_number": "超过0.5秒会产生卡顿感，影响配置流畅度"
+    },
+    {
+      "goal_id": "EG-012",
+      "methodology": "UES-satisfaction",
+      "dimension": "subjective_satisfaction",
+      "target": "人设配置满意度≥4.0/5.0（用户问卷：配置界面是否易用/预览是否有帮助）",
+      "rationale": "主观满意度反映个性化功能的价值感知",
+      "measurement_method": "产品内问卷或回访调研",
+      "baseline": "无（新功能）",
+      "supports_user_goal": "UG-005",
+      "context_from_prd": "PRD §4.4 人物设定：自定义AI助手的身份、能力与行事风格",
+      "gsm_signal": "用户愿意花时间调整人设配置并持续使用",
+      "why_this_number": "满意度<4.0说明功能价值感知不足，难以激发使用意愿"
+    }
+  ],
+  "goal_derivation_map": {
+    "business_to_product": {
+      "BG-001": [
+        "PG-001",
+        "PG-002",
+        "PG-003",
+        "PG-004"
+      ],
+      "BG-002": [
+        "PG-001",
+        "PG-002"
+      ]
+    },
+    "product_to_user": {
+      "PG-001": [
+        "UG-001"
+      ],
+      "PG-002": [
+        "UG-002"
+      ],
+      "PG-003": [
+        "UG-003",
+        "UG-005"
+      ],
+      "PG-004": [
+        "UG-004"
+      ]
+    },
+    "user_to_experience": {
+      "UG-001": [
+        "EG-001"
+      ],
+      "UG-002": [
+        "EG-002"
+      ],
+      "UG-003": [
+        "EG-003"
+      ],
+      "UG-004": [
+        "EG-004"
+      ],
+      "UG-005": [
+        "EG-005"
+      ]
+    }
+  },
+  "experience_methodology": {
+    "primary_methodology": "UES",
+    "rationale": "小飞侠是面向集团全员的B端内部工具，部署于飞书工作台，核心诉求是办公效率而非娱乐参与。UES五度（易用/一致/满意/任务效率/性能）覆盖了从新手引导可学性、对话响应性能到技能/人设操作反馈一致性的全部体验关切，最契合企业级工具场景。",
+    "product_type": "B2B_internal",
+    "secondary_methodologies": [
+      "CES费力度（用于技能环境变量配置等较复杂流程的费力度评估）"
+    ]
+  },
+  "feature_priority_matrix": [
+    {
+      "feature": "智语堂对话（实时+历史会话+流式输出）",
+      "supports_product_goal": "PG-002",
+      "priority": "P0",
+      "rationale": "核心交互入口，承载产品根本价值，缺失则产品不成立",
+      "mvp_scope": true
+    },
+    {
+      "feature": "新手指引4步流程",
+      "supports_product_goal": "PG-001",
+      "priority": "P0",
+      "rationale": "直接服务首次激活，是BG-001的关键路径",
+      "mvp_scope": true
+    },
+    {
+      "feature": "武艺库技能安装/卸载/配置",
+      "supports_product_goal": "PG-003",
+      "priority": "P1",
+      "rationale": "扩展能力覆盖岗位，重要但不阻塞首次激活与基础对话",
+      "mvp_scope": true
+    },
+    {
+      "feature": "技能市场搜索",
+      "supports_product_goal": "PG-003",
+      "priority": "P2",
+      "rationale": "可降级为分类浏览，搜索延至v1.1不阻塞MVP",
+      "mvp_scope": false
+    },
+    {
+      "feature": "人物设定（预设+自定义+实时预览）",
+      "supports_product_goal": "PG-004",
+      "priority": "P2",
+      "rationale": "提升粘性的个性化能力，非首次激活关键路径",
+      "mvp_scope": true
+    },
+    {
+      "feature": "江湖通告",
+      "supports_product_goal": "PG-003",
+      "priority": "P2",
+      "rationale": "信息触达驱动新能力采纳，可用最简红点+列表满足",
+      "mvp_scope": true
+    }
+  ],
+  "key_user_journeys": [
+    {
+      "journey_id": "J-001",
+      "name": "首次用户完成首次对话",
+      "supports_product_goal": "PG-001",
+      "user_role": "首次使用的普通员工",
+      "critical_path": [
+        "飞书工作台打开小飞侠",
+        "看新手指引4步或跳过",
+        "进入智语堂",
+        "输入并发送消息",
+        "获得流式回复"
+      ],
+      "success_criteria": "首次对话转化率≥50%，引导+首条消息总时长≤2分钟",
+      "pain_points": [
+        "不知道从哪开始",
+        "担心学习成本高",
+        "引导太长想跳过"
+      ]
+    },
+    {
+      "journey_id": "J-002",
+      "name": "日常对话解决办公卡点",
+      "supports_product_goal": "PG-002",
+      "user_role": "日常办公的普通员工",
+      "critical_path": [
+        "进入智语堂",
+        "选历史会话或新建对话",
+        "发送问题/附件",
+        "接收流式回复",
+        "继续多轮追问"
+      ],
+      "success_criteria": "任务成功率≥70%，流式首字节<2秒",
+      "pain_points": [
+        "回复慢打断思路",
+        "上下文丢失要重复描述",
+        "找不到历史会话"
+      ]
+    },
+    {
+      "journey_id": "J-003",
+      "name": "安装并配置岗位技能",
+      "supports_product_goal": "PG-003",
+      "user_role": "有特定岗位需求的普通员工",
+      "critical_path": [
+        "进入武艺库技能市场",
+        "按分类浏览技能",
+        "查看技能详情",
+        "点击安装",
+        "配置环境变量",
+        "在我的武艺确认状态"
+      ],
+      "success_criteria": "安装成功率≥95%，需配置技能的配置完成率≥80%",
+      "pain_points": [
+        "不确定技能是否需要配置",
+        "安装失败无明确反馈",
+        "配置项含义不清"
+      ]
+    }
+  ],
+  "design_constraints": {
+    "technical": []
+  },
+  "scope_boundaries": {
+    "in_scope": []
+  },
+  "goal_conflicts": [
+    {
+      "conflict_id": "CONF-001",
+      "goal_a": "BG-002 按期上线（设计定稿4月9日、上线4月15日）",
+      "goal_b": "EG-001 新手指引精致化体验",
+      "conflict_description": "设计定稿到上线仅6天且提测待定，难以打磨引导动效与智能提示",
+      "tradeoff_recommendation": "优先保按期上线，引导用静态分步页+跳过按钮，动效与智能提示延至v1.1补全",
+      "decision_maker": "产品负责人",
+      "resolution_status": "unresolved"
+    },
+    {
+      "conflict_id": "CONF-002",
+      "goal_a": "PG-003 扩展技能覆盖（含技能市场搜索）",
+      "goal_b": "BG-002 MVP档期收敛",
+      "conflict_description": "技能市场搜索增加交互与联调成本，挤占有限工期",
+      "tradeoff_recommendation": "MVP仅保留分类标签浏览，搜索能力降级至v1.1",
+      "decision_maker": "产品负责人",
+      "resolution_status": "proposed"
+    },
+    {
+      "conflict_id": "CONF-003",
+      "goal_a": "EG-002 对话响应性能（首屏<1.5秒）",
+      "goal_b": "飞书工作台容器平台加载耗时不可控",
+      "conflict_description": "首屏1.5秒目标包含飞书容器初始化时间，前端难以完全保障",
+      "tradeoff_recommendation": "将1.5秒约束界定为『应用自身可控部分』，飞书容器耗时单独监控并向平台反馈",
+      "decision_maker": "前端负责人",
+      "resolution_status": "unresolved"
+    }
+  ],
+  "success_criteria": {},
+  "inferred_fields": [],
+  "assumptions": [],
+  "gaps": [],
+  "warnings": []
+}
