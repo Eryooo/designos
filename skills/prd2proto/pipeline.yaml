@@ -61,7 +61,6 @@ stages:
       - inference_limit_gate
     knowledge: [knowledge/design-work-paradigm/02-objective-decomposition.md]
     schema: kernel/contracts/artifacts/design-objectives.schema.json
-    status: framework  # P1.3 prompt 为框架版
 
   # ========================================================================
   # Phase 2: 用户与任务建模
@@ -75,7 +74,6 @@ stages:
     quality_gates:
       - schema_gate
     schema: kernel/contracts/artifacts/product-archetype.schema.json
-    status: framework
 
   - id: user-task-modeling
     type: llm
@@ -88,7 +86,6 @@ stages:
       - traceability_gate
     knowledge: [knowledge/design-work-paradigm/03-user-task-modeling.md]
     schema: kernel/contracts/artifacts/user-task-map.schema.json
-    status: framework
 
   - id: business-flow-modeling
     type: llm
@@ -100,7 +97,6 @@ stages:
       - inference_limit_gate
     knowledge: [knowledge/design-work-paradigm/05-business-flow-modeling.md]
     schema: kernel/contracts/artifacts/business-flow.schema.json
-    status: framework
 
   - id: user-journey-mapping
     type: llm
@@ -112,7 +108,6 @@ stages:
       - traceability_gate
     knowledge: [knowledge/design-work-paradigm/06-user-journey-mapping.md]
     schema: kernel/contracts/artifacts/journey-map.schema.json
-    status: framework
 
   # ========================================================================
   # Phase 3: 信息架构与页面设计
@@ -132,7 +127,6 @@ stages:
       id: C2-ia
       message: "信息架构已生成。pages={{information_architecture.pages.length}}，要改告诉我，否则继续。"
       allow: [continue, modify, supplement]
-    status: framework
 
   - id: page-flow
     type: llm
@@ -142,7 +136,6 @@ stages:
     quality_gates:
       - schema_gate
     schema: kernel/contracts/artifacts/page-flow.schema.json
-    status: framework
 
   - id: page-structure
     type: llm
@@ -152,7 +145,6 @@ stages:
     quality_gates:
       - schema_gate
     schema: kernel/contracts/artifacts/page-structure.schema.json
-    status: framework
 
   # ========================================================================
   # Phase 4: 组件与交互设计
@@ -167,7 +159,6 @@ stages:
       - schema_gate
     knowledge: [knowledge/design-work-paradigm/10-component-strategy.md]
     schema: kernel/contracts/artifacts/component-strategy.schema.json
-    status: framework
 
   - id: state-matrix
     type: llm
@@ -179,7 +170,6 @@ stages:
       - inference_limit_gate
     knowledge: [knowledge/design-work-paradigm/11-state-matrix.md]
     schema: kernel/contracts/artifacts/state-matrix.schema.json
-    status: framework
 
   - id: interaction-rules
     type: llm
@@ -190,7 +180,6 @@ stages:
       - schema_gate
     knowledge: [knowledge/design-work-paradigm/12-interaction-rules.md]
     schema: kernel/contracts/artifacts/interaction-rules.schema.json
-    status: framework
 
   # ========================================================================
   # Phase 5: 受约束的代码生成
@@ -202,14 +191,12 @@ stages:
     only_when: mode != "designer-dsl"
     inputs: [information_architecture, component_strategy, interaction_rules, design_objectives]
     outputs: [design_spec_md]
-    status: framework
 
   - id: token-extraction
     type: llm
     prompt: prompts-v2/14-token-extraction.md
     inputs: [design_spec_md]
     outputs: [design_tokens, tokens_css]
-    status: framework
 
   - id: constrained-code-generation
     type: llm
@@ -230,7 +217,6 @@ stages:
       id: C3-code
       message: "代码已生成。要改告诉我，否则继续。"
       allow: [continue, modify]
-    status: framework
 
   # ========================================================================
   # Phase 6: 追溯性与质量评估
@@ -254,7 +240,6 @@ stages:
       - traceability_gate
     knowledge: [knowledge/design-work-paradigm/19-traceability.md]
     schema: kernel/contracts/artifacts/traceability-map.schema.json
-    status: framework
 
   - id: professional-gap-assessment
     type: llm
@@ -270,7 +255,6 @@ stages:
       - schema_gate
     knowledge: [knowledge/design-work-paradigm/17-quality-rubrics.md]
     schema: kernel/contracts/artifacts/professional-gap-report.schema.json
-    status: framework
 
   # ========================================================================
   # Phase 7: 启动与交付
