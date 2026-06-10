@@ -92,9 +92,10 @@ async def call_llm(full_input: str, model: str, max_tokens: int) -> dict[str, An
     ) as stream:
         async for text in stream.text_stream:
             full_text += text
+        # Get final message BEFORE exiting context
+        final_msg = await stream.get_final_message()
 
     elapsed_ms = int((time.time() - t0) * 1000)
-    final_msg = await stream.get_final_message()
     return {
         "text": full_text,
         "input_tokens": final_msg.usage.input_tokens,
