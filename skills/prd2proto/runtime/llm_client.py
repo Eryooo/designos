@@ -356,12 +356,13 @@ class LLMClient:
 
     @staticmethod
     def extract_json(text: str) -> dict[str, Any]:
-        """从LLM输出中提取JSON对象（容忍markdown包裹）。
+        """从LLM输出中提取JSON对象（容忍markdown包裹+自动修复截断）。
 
         处理策略：
         1. 优先匹配 ```json ... ``` 包裹
         2. fallback到匹配第一个 { 到最后一个 }
-        3. 失败抛 JSONExtractionError
+        3. 直接解析失败时，尝试修复截断的JSON（补全未闭合括号）
+        4. 全部失败抛 JSONExtractionError
 
         Args:
             text: LLM返回的原始文本
@@ -370,28 +371,167 @@ class LLMClient:
             解析后的dict
 
         Raises:
-            JSONExtractionError: 未找到或解析失败
+            JSONExtractionError: 未找到或修复后仍解析失败
         """
-        # 策略1: ```json ... ``` 包裹
-        fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", text, re.DOTALL)
+        # 去除markdown包裹
+        cleaned = text.strip()
+        fenced = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", cleaned, re.DOTALL)
         if fenced:
             raw = fenced.group(1)
         else:
-            # 策略2: 找第一个 { 到最后一个 }
-            start = text.find("{")
-            end = text.rfind("}")
-            if start == -1 or end == -1 or end <= start:
+            # 去除可能的 ```json 开头但无闭合的情况
+            if cleaned.startswith("```"):
+                nl = cleaned.find("\n")
+                if nl != -1:
+                    cleaned = cleaned[nl + 1:]
+            # 找第一个 { 到最后一个 }
+            start = cleaned.find("{")
+            end = cleaned.rfind("}")
+            if start == -1:
                 raise JSONExtractionError(
-                    f"LLM 输出中未找到 JSON 对象（前100字: {text[:100]!r}）"
+                    f"LLM 输出中未找到 JSON 起始 {{（前100字: {text[:100]!r}）"
                 )
-            raw = text[start : end + 1]
+            if end <= start:
+                # 没有闭合 } —— 说明被截断，取从 { 到结尾
+                raw = cleaned[start:]
+            else:
+                raw = cleaned[start : end + 1]
 
+        # 尝试1: 直接解析
         try:
             return json.loads(raw)
+        except json.JSONDecodeError:
+            pass
+
+        # 尝试2: 修复截断的JSON（补全未闭合括号）
+        repaired = LLMClient._repair_truncated_json(raw)
+        if repaired is not None:
+            try:
+                result = json.loads(repaired)
+                return result
+            except json.JSONDecodeError:
+                pass
+
+        # 全部失败
+        try:
+            json.loads(raw)
         except json.JSONDecodeError as exc:
             raise JSONExtractionError(
-                f"JSON 解析失败: {exc}。前200字: {raw[:200]!r}"
+                f"JSON 解析失败（修复后仍失败）: {exc}。"
+                f"长度{len(raw)}字符，末尾100字: {raw[-100:]!r}"
             ) from exc
+
+    @staticmethod
+    def _repair_truncated_json(raw: str) -> str | None:
+        """修复被截断的JSON（补全未闭合的括号/引号）。
+
+        策略：
+        1. 用栈追踪 { [ 的嵌套（正确跳过字符串内的括号）
+        2. 移除末尾不完整的部分（trailing comma / 半个token）
+        3. 按栈顺序补全 ] }
+
+        注意：这是兜底修复，可能丢失末尾未输出完的字段，
+        但保证产出可解析的合法JSON（核心字段通常在前面已完整）。
+
+        Returns:
+            修复后的JSON字符串；无法修复返回None
+        """
+        stack: list[str] = []
+        in_string = False
+        escape = False
+        last_safe_pos = -1  # 最后一个"安全截断点"（完整value结束处）
+
+        for i, ch in enumerate(raw):
+            if escape:
+                escape = False
+                continue
+            if ch == "\\":
+                escape = True
+                continue
+            if ch == '"':
+                in_string = not in_string
+                if not in_string:
+                    # 字符串刚结束，是潜在安全点
+                    last_safe_pos = i
+                continue
+            if in_string:
+                continue
+            # 非字符串内
+            if ch in "{[":
+                stack.append(ch)
+            elif ch in "}]":
+                if stack:
+                    stack.pop()
+                last_safe_pos = i
+            elif ch in "0123456789truefalsenull":
+                # 数字/布尔/null结尾也是潜在安全点
+                last_safe_pos = i
+
+        # 如果还在字符串中，说明字符串被截断 → 回退到上个安全点
+        if in_string and last_safe_pos > 0:
+            truncated = raw[: last_safe_pos + 1]
+            # 重新计算栈
+            return LLMClient._close_brackets(truncated)
+
+        # 不在字符串中：去除末尾的trailing comma和空白
+        trimmed = raw.rstrip()
+        # 去除末尾残缺的 "key": 或 "key": "incomplet 之类
+        # 回退到最后一个完整结构点（} ] " 或数字）
+        while trimmed and trimmed[-1] not in '}]"0123456789truenul':
+            if trimmed[-1] == ",":
+                trimmed = trimmed[:-1].rstrip()
+                break
+            trimmed = trimmed[:-1].rstrip()
+
+        # 去除可能的trailing comma
+        if trimmed.endswith(","):
+            trimmed = trimmed[:-1].rstrip()
+
+        return LLMClient._close_brackets(trimmed)
+
+    @staticmethod
+    def _close_brackets(s: str) -> str | None:
+        """根据未闭合的括号栈，补全闭合符号。"""
+        stack: list[str] = []
+        in_string = False
+        escape = False
+
+        for ch in s:
+            if escape:
+                escape = False
+                continue
+            if ch == "\\":
+                escape = True
+                continue
+            if ch == '"':
+                in_string = not in_string
+                continue
+            if in_string:
+                continue
+            if ch in "{[":
+                stack.append(ch)
+            elif ch == "}":
+                if stack and stack[-1] == "{":
+                    stack.pop()
+            elif ch == "]":
+                if stack and stack[-1] == "[":
+                    stack.pop()
+
+        # 如果仍在字符串中，无法安全修复
+        if in_string:
+            return None
+
+        # 去除trailing comma
+        s = s.rstrip()
+        if s.endswith(","):
+            s = s[:-1].rstrip()
+
+        # 按栈逆序补全
+        closing = ""
+        for opener in reversed(stack):
+            closing += "}" if opener == "{" else "]"
+
+        return s + closing
 
 
 def main():
