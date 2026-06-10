@@ -585,3 +585,14 @@ assets:
     do_not_claim: 不保证覆盖所有未来失败模式
     owner: designos-core
     status: pilot
+  - id: ux.experience-measurement
+    version: 1.0.0-pilot
+    domain: ux
+    type: methodology
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/ux/experience-measurement.md
+    decision_use: 体验度量方法论选择（UES/HEART/YOUKU/GSM）与维度定义
+    quality_bar: 含 purpose/applies_to/decision_framework/senior_heuristics/quality_rubric/common_failure_modes/source_assets/do_not_claim
+    do_not_claim: 不规定具体产品的体验目标值；不定义某个产品该选哪个方法论
+    owner: designos-core
+    status: pilot
