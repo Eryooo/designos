@@ -480,7 +480,247 @@ class PipelineExecutor:
             source_names=list(upstream_artifacts.keys()) + list(runtime_inputs.keys()),
         )
 
+        # 7. 契约规范化（gaps / states 等格式对齐 schema，保留 raw 不掩盖问题）
+        artifact = self._normalize_artifact(artifact, stage_id)
+
+        # 8. Schema 自检 + 内容完整性校验 + 重试（Batch 2 retry policy）
+        #    schema critical 或 内容关键项缺失 → 带反馈重新生成 1 次
+        #    仍失败则记 failure case（不手工伪修复）
+        schema_ref = stage.get('schema')
+        if schema_ref:
+            passed, errors = self.schema_validator.validate(artifact, schema_ref)
+            crit = [e for e in errors if e.get('critical')]
+            content_issues = self._content_quality_issues(stage_id, artifact)
+            if crit or content_issues:
+                reasons = []
+                if crit:
+                    reasons.append(f"{len(crit)} 个 schema critical")
+                if content_issues:
+                    reasons.append(f"{len(content_issues)} 个内容质量问题")
+                print(f"      🔁 触发重试（{', '.join(reasons)}）...")
+                missing = sorted({
+                    e['message'].split("'")[1]
+                    for e in crit
+                    if "is a required property" in e.get('message', '') and "'" in e['message']
+                })
+                retry_prompt = (
+                    full_prompt
+                    + "\n\n---\n# 上次输出的问题（必须修复）\n"
+                    + (f"\n## Schema 缺失字段（{len(crit)} critical）\n{', '.join(missing)}\n" if missing else "")
+                    + (f"\n## 内容质量问题（资深设计师必须做到）\n" + "\n".join(f"- {x}" for x in content_issues) + "\n" if content_issues else "")
+                    + "\n请重新输出**完整 JSON**：所有 required 字段齐全、枚举合法、"
+                    + "且上述内容质量问题全部修复（这是资深 vs 初级的关键差异）。只输出 JSON。"
+                )
+                try:
+                    retry_resp = await self.llm_client.call_with_continuation(retry_prompt)
+                    retry_artifact = LLMClient.extract_json(retry_resp.text)
+                    retry_artifact = self._inject_runtime_metadata(
+                        retry_artifact, stage_id,
+                        source_names=list(upstream_artifacts.keys()) + list(runtime_inputs.keys()),
+                    )
+                    retry_artifact = self._normalize_artifact(retry_artifact, stage_id)
+                    rp, re_errs = self.schema_validator.validate(retry_artifact, schema_ref)
+                    re_crit = [e for e in re_errs if e.get('critical')]
+                    re_content = self._content_quality_issues(stage_id, retry_artifact)
+                    # 累计 retry 的 token
+                    response.input_tokens += retry_resp.input_tokens
+                    response.output_tokens += retry_resp.output_tokens
+                    # 采纳判断：schema+内容问题总数减少则采用重试结果
+                    before_total = len(crit) + len(content_issues)
+                    after_total = len(re_crit) + len(re_content)
+                    if after_total < before_total:
+                        print(f"      ✅ 重试改善 {before_total}→{after_total}（schema {len(crit)}→{len(re_crit)}, 内容 {len(content_issues)}→{len(re_content)}），采用重试")
+                        artifact = retry_artifact
+                        artifact['_retry_applied'] = True
+                        crit = re_crit
+                        content_issues = re_content
+                    else:
+                        print(f"      ⚠️ 重试未改善（{before_total}→{after_total}），保留原结果")
+                except (LLMClientError, JSONExtractionError) as exc:
+                    print(f"      ⚠️ 重试失败: {exc}")
+                # 仍有 critical 或内容问题 → 记 failure case
+                if crit or content_issues:
+                    self._record_failure_case(stage_id, artifact, crit, content_issues)
+
         return artifact, response.to_dict()
+
+    def _content_quality_issues(self, stage_id: str, artifact: Dict) -> list:
+        """检查 stage 关键内容质量项（资深 vs 初级的关键差异）。
+
+        返回缺失的关键项描述列表（空=通过）。用于触发重试 + 反馈给 LLM。
+        这是 runtime 校验（要求 LLM 重生成），不是手工填充。
+        """
+        if not isinstance(artifact, dict):
+            return []
+        issues = []
+
+        if stage_id == 'design-objectives':
+            # 推导链不能断
+            gdm = artifact.get('goal_derivation_map') or {}
+            if not (isinstance(gdm, dict) and gdm.get('business_to_product')):
+                issues.append("goal_derivation_map.business_to_product 为空：4层目标推导链断裂，必须连接 BG→PG")
+            if not (isinstance(gdm, dict) and gdm.get('product_to_user')):
+                issues.append("goal_derivation_map.product_to_user 为空：必须连接 PG→UG")
+            # 方法论必选
+            em = artifact.get('experience_methodology')
+            if not (isinstance(em, dict) and em.get('primary_methodology')):
+                issues.append("experience_methodology 缺失：必须选择体验度量方法论（UES/HEART/YOUKU）并说明理由")
+
+        elif stage_id == 'user-task-modeling':
+            # 隐藏任务必须识别
+            ht = artifact.get('hidden_tasks')
+            if not (isinstance(ht, list) and len(ht) >= 1):
+                issues.append("hidden_tasks 为空：必须识别≥1个隐藏任务（错误恢复/批量/协作/追溯类），这是资深关键能力")
+
+        elif stage_id == 'user-journey-mapping':
+            # 旅程不能模板化：需有情绪曲线 + 关键时刻
+            if not artifact.get('emotion_curve'):
+                issues.append("emotion_curve 缺失：旅程需有情绪曲线，非页面流程")
+            if not artifact.get('moments_of_truth'):
+                issues.append("moments_of_truth 缺失：需识别关键决策时刻")
+
+        elif stage_id == 'state-matrix':
+            # 状态矩阵覆盖：AI执行态 + 边界态
+            if not artifact.get('ai_execution_states'):
+                issues.append("ai_execution_states 缺失：AI产品必须覆盖AI执行态（thinking/streaming/中断/失败）")
+            if not artifact.get('boundary_states'):
+                issues.append("boundary_states 缺失：需覆盖边界态（首次/无权限/离线）")
+
+        return issues
+
+    def _record_failure_case(
+        self, stage_id: str, artifact: Dict,
+        critical_errors: list, content_issues: list | None = None,
+    ) -> None:
+        """记录 schema/内容 仍失败的 case 到 failure-cases（不掩盖真实失败）。"""
+        fc_dir = PROJECT_ROOT / "eval" / "failure-cases"
+        fc_dir.mkdir(parents=True, exist_ok=True)
+        fc_path = fc_dir / f"{stage_id}-fail.json"
+        fc_path.write_text(
+            json.dumps({
+                'stage_id': stage_id,
+                'remaining_schema_critical': critical_errors,
+                'remaining_content_issues': content_issues or [],
+                'retry_applied': artifact.get('_retry_applied', False),
+                'note': 'remaining after normalization + 1 retry; recorded honestly, not hand-fixed',
+            }, ensure_ascii=False, indent=2),
+            encoding='utf-8',
+        )
+        print(f"      📋 failure case 记录: {fc_path.name}")
+
+    # ---- 契约规范化（Batch 2）----
+
+    @staticmethod
+    def _infer_gap_category(text: str) -> str:
+        """从 gap 描述推断 category（base schema 枚举）。"""
+        t = str(text)
+        if any(k in t for k in ['冲突', '矛盾', '不一致', 'conflict']):
+            return 'conflicting_information'
+        if any(k in t for k in ['模糊', '两种', '并存', '不清', '歧义', 'ambig']):
+            return 'ambiguous_requirement'
+        if any(k in t for k in ['未提供', '未明确', '缺少', '没有', '未定义', 'missing', '无']):
+            return 'missing_input'
+        return 'insufficient_detail'
+
+    def _normalize_gaps(self, gaps) -> list:
+        """规范化 gaps，对齐 base schema + 用户要求字段，保留 raw_gap。
+
+        用户要求字段：gap_id / category / description / severity / source / impact
+        base schema required：gap_id / category / description / impact
+        规则：自动补齐缺失字段，但保留 raw_gap 记录 LLM 原始输出（不掩盖真实问题）。
+        """
+        if not isinstance(gaps, list):
+            return []
+        normalized = []
+        for i, g in enumerate(gaps, 1):
+            if isinstance(g, str):
+                raw = g
+                desc = g
+                g = {}
+            elif isinstance(g, dict):
+                raw = dict(g)
+                desc = (
+                    g.get('description') or g.get('gap')
+                    or g.get('issue') or g.get('message') or str(g)
+                )
+            else:
+                continue
+
+            impact = g.get('impact', 'medium')
+            if impact not in ('critical', 'high', 'medium', 'low'):
+                impact = 'medium'
+
+            category = g.get('category')
+            if category not in (
+                'missing_input', 'ambiguous_requirement',
+                'conflicting_information', 'insufficient_detail',
+            ):
+                category = self._infer_gap_category(desc)
+
+            norm = {
+                'gap_id': g.get('gap_id') if str(g.get('gap_id', '')).startswith('GAP-') else f'GAP-{i:03d}',
+                'category': category,
+                'description': desc,
+                'impact': impact,
+                # 用户要求的额外字段（base schema 不 required，但用户要求必须有）
+                'severity': g.get('severity', impact),
+                'source': g.get('source', 'llm_identified'),
+                # 保留原始，不掩盖真实问题
+                'raw_gap': raw,
+            }
+            if 'mitigation' in g:
+                norm['mitigation'] = g['mitigation']
+            if 'affected_fields' in g:
+                norm['affected_fields'] = g['affected_fields']
+            normalized.append(norm)
+        return normalized
+
+    def _normalize_states(self, artifact: Dict) -> None:
+        """规范化 business_flow 的 states，补 state_type（缺失时推断）。"""
+        states = artifact.get('states')
+        if not isinstance(states, list):
+            return
+        for s in states:
+            if not isinstance(s, dict):
+                continue
+            st = s.get('state_type')
+            if st in ('normal', 'exception', 'terminal'):
+                continue
+            # 推断：is_terminal→terminal，名称含异常/错误/失败→exception，否则normal
+            name = str(s.get('state_name', '')) + str(s.get('description', ''))
+            if s.get('is_terminal') or any(k in name for k in ['完成', '关闭', '结束', '终止']):
+                s['state_type'] = 'terminal'
+            elif any(k in name for k in ['异常', '错误', '失败', '驳回', '拒绝', '超时']):
+                s['state_type'] = 'exception'
+            else:
+                s['state_type'] = 'normal'
+            s.setdefault('_runtime_normalized', []).append('state_type')
+
+    def _normalize_artifact(self, artifact: Dict, stage_id: str) -> Dict:
+        """契约规范化总入口。透明记录 normalization。"""
+        if not isinstance(artifact, dict):
+            return artifact
+        normalized_fields = []
+
+        # gaps 规范化（所有 stage 通用）
+        if artifact.get('gaps'):
+            before = artifact['gaps']
+            artifact['gaps'] = self._normalize_gaps(before)
+            # 仅当确实改了结构才记录
+            if artifact['gaps'] and (
+                not isinstance(before[0], dict)
+                or 'gap_id' not in (before[0] if isinstance(before[0], dict) else {})
+            ):
+                normalized_fields.append('gaps')
+
+        # states 规范化（business-flow）
+        if 'states' in artifact:
+            self._normalize_states(artifact)
+            normalized_fields.append('states.state_type')
+
+        if normalized_fields:
+            artifact.setdefault('_runtime_normalized', normalized_fields)
+        return artifact
 
     def _inject_runtime_metadata(
         self, artifact: Dict, stage_id: str, source_names: list | None = None,

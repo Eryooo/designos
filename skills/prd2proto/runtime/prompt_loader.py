@@ -62,6 +62,61 @@ class PromptLoader:
 
         return path.read_text(encoding="utf-8")
 
+    # 上游注入时剥离的元数据信封字段（下游不需要，省 token）
+    _COMPACT_STRIP_KEYS = {
+        'artifact_id', 'skill_id', 'run_id', 'created_at', 'maturity',
+        'source_inputs', 'inferred_fields', 'warnings', 'validation_status',
+        'traceability', '_runtime_injected', '_runtime_normalized',
+        '_retry_applied', 'assumptions',
+    }
+
+    # 业务对象内的"解释性"字段（下游消费需结论，不需理由 → 省 token）
+    _COMPACT_STRIP_NESTED = {
+        'rationale', 'gsm_signal', 'gsm_why', 'why_this_number',
+        'context_from_prd', 'evidence', 'priority_rationale', 'reason',
+        'measurement_method', 'ia_rationale', 'navigation_rationale',
+        'interaction_density_rationale', 'data_density_rationale',
+        'custom_rationale', 'pattern_rationale',
+    }
+
+    @classmethod
+    def _strip_nested(cls, obj: Any) -> Any:
+        """递归剥离业务对象内的解释性字段（保留结论性字段）。"""
+        if isinstance(obj, dict):
+            return {
+                k: cls._strip_nested(v)
+                for k, v in obj.items()
+                if k not in cls._COMPACT_STRIP_NESTED
+            }
+        if isinstance(obj, list):
+            return [cls._strip_nested(x) for x in obj]
+        return obj
+
+    @classmethod
+    def _compact_upstream(cls, asset: Any) -> Any:
+        """注入上游 artifact 前剥离元数据信封 + 解释性字段，只留业务结论（省 token）。
+
+        - 移除 runtime 元数据（artifact_id/run_id/...）
+        - 移除解释性字段（rationale/gsm_*/evidence/... → 下游需结论非理由）
+        - gaps 简化为 description 列表
+        - 保留结论性业务字段（goal_id/description/target/serves_*/priority/...）
+        """
+        if not isinstance(asset, dict):
+            return asset
+        compact = {}
+        for k, v in asset.items():
+            if k in cls._COMPACT_STRIP_KEYS:
+                continue
+            if k == 'gaps' and isinstance(v, list):
+                compact[k] = [
+                    (g.get('description') or g.get('gap') or str(g))
+                    if isinstance(g, dict) else str(g)
+                    for g in v
+                ][:5]
+                continue
+            compact[k] = cls._strip_nested(v)
+        return compact
+
     def render_stage_prompt(
         self,
         prompt_file: str,
@@ -120,7 +175,10 @@ class PromptLoader:
                 sections.append(f"\n## {asset_name}\n")
                 sections.append("```json\n")
                 sections.append(
-                    json.dumps(asset_data, ensure_ascii=False, indent=2)
+                    json.dumps(
+                        self._compact_upstream(asset_data),
+                        ensure_ascii=False, indent=2,
+                    )
                 )
                 sections.append("\n```\n")
             sections.append("\n---\n")

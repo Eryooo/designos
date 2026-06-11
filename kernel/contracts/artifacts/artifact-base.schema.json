@@ -17,6 +17,8 @@
       "enum": [
         "design_strategy",
         "user_persona",
+        "requirement_inventory",
+        "product_archetype",
         "design_objectives",
         "user_task_map",
         "scenario_map",
