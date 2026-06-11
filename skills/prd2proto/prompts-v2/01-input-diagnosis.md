@@ -214,7 +214,7 @@
 
 **检查点**：
 - [ ] PRD 有"商业目标"/"业务目标"章节？
-- [ ] 目标有量化指标（GMV、用户数、转化率）？
+- [ ] 目标有量化指标（数值 + 单位 + 对比基准）？
 - [ ] 目标有优先级标记？
 
 ### 2. user_definition_clarity (0.0-1.0)
@@ -410,14 +410,14 @@ overall_score = (
       "gap_id": "GAP-001",
       "description": "PRD 缺少用户画像定义",
       "impact": "high",
-      "mitigation": "基于产品定位推断为'中小企业销售主管'，但需人工确认"
+      "mitigation": "基于产品定位推断为 '<primary_user_role>'，但需人工确认"
     }
   ],
   "assumptions": [
     {
       "assumption_id": "ASM-001",
-      "description": "假设用户为中小企业销售主管（25-40 岁）",
-      "rationale": "基于产品定位（CRM）推断",
+      "description": "假设用户为 <primary_user_role>（<demographic_placeholder>）",
+      "rationale": "基于产品定位（<product_archetype>）推断",
       "risk_if_wrong": "high"
     }
   ]
@@ -454,132 +454,125 @@ overall_score = (
 
 ---
 
-## 完整示例
+## 输入诊断 — Format Skeleton
 
-### 输入：高质量 PRD
+> 运行时不注入任何具体业务案例。下方仅为字段骨架，所有 value 用 `<placeholder>` 表示。
+> 如需真实/合成教学案例，放 `eval/golden-cases/`，runtime prompt 默认不注入。
+
+### 输入形态（任意 PRD 的抽象结构）
 
 ```markdown
-# CRM 系统 PRD
+# <product_name>
 
 ## 1. 商业目标
-- Q2 获取 50 家付费企业客户
-- GMV 达到 100 万元
-- 单客户管理时间减少 30%
+- <business_goal: target_quantity + time_window>
+- <business_metric_target: metric + value + unit>
+- <efficiency_or_growth_target: percentage>
 
 ## 2. 用户画像
-- 主要用户：中小企业销售主管
-- 年龄：25-40 岁
-- 技能水平：熟练使用企业微信、钉钉
-- 痛点：Excel 管理客户信息容易丢失、团队无法实时查看
+- 主要用户：<primary_user_role>
+- <user_attribute: age / skill_level / context>
+- 痛点：<current_pain_point>
 
 ## 3. 核心功能（按优先级）
 P0:
-- 客户信息 CRUD
-- 销售线索跟进提醒
-
+- <core_functional_requirement>
 P1:
-- 销售数据报表
-- 团队协作
+- <secondary_functional_requirement>
 
 ## 4. 非功能需求
-- 并发：支持 500 用户
-- 性能：页面加载 < 2s
-- 安全：数据加密存储
+- 并发：<concurrency_requirement>
+- 性能：<performance_threshold>
+- 安全：<security_requirement>
 
 ## 5. 技术约束
-- 前端：React + Ant Design
-- 时间：3 个月
+- 技术栈：<tech_stack>
+- 时间：<timeline_constraint>
 ```
 
-### 输出：requirement_inventory
+### 输出：requirement_inventory（format skeleton）
 
 ```json
 {
-  "artifact_id": "req-inv-20260609-001",
+  "artifact_id": "<artifact_id>",
   "artifact_type": "requirement_inventory",
-  "created_at": "2026-06-09T10:00:00Z",
-  
+  "created_at": "<iso8601_timestamp>",
+
   "input_materials": {
     "primary": {
       "type": "prd",
-      "file_path": "crm-prd-v1.2.md",
-      "file_size": 2048,
-      "format": "md",
-      "quality_score": 0.92,
-      "readability": "high"
+      "file_path": "<input_file_path>",
+      "file_size": "<int>",
+      "format": "md | docx | ...",
+      "quality_score": "<0-1>",
+      "readability": "high | medium | low"
     },
     "secondary": []
   },
-  
+
   "completeness_assessment": {
-    "overall_score": 0.92,
+    "overall_score": "<0-1>",
     "dimensions": {
-      "business_goals_clarity": 1.0,
-      "user_definition_clarity": 0.9,
-      "functional_requirements_completeness": 0.8,
-      "non_functional_requirements_completeness": 1.0,
-      "constraints_clarity": 1.0
+      "business_goals_clarity": "<0-1>",
+      "user_definition_clarity": "<0-1>",
+      "functional_requirements_completeness": "<0-1>",
+      "non_functional_requirements_completeness": "<0-1>",
+      "constraints_clarity": "<0-1>"
     }
   },
-  
+
   "functional_requirements": [
     {
       "req_id": "FR-001",
-      "description": "客户信息 CRUD",
-      "priority": "P0",
-      "source": "PRD 3.0"
-    },
-    {
-      "req_id": "FR-002",
-      "description": "销售线索跟进提醒",
-      "priority": "P0",
-      "source": "PRD 3.0"
+      "description": "<functional_requirement_description>",
+      "priority": "P0 | P1 | P2",
+      "source": "<prd_section_ref>"
     }
   ],
-  
+
   "ambiguities": [
     {
       "ambiguity_id": "AMB-001",
-      "description": "PRD 未明确'销售线索'的字段定义",
-      "affected_areas": ["data_model", "form_design"],
-      "clarification_needed": "线索包含哪些字段？必填/选填？",
-      "default_interpretation": "假设包含：客户名称、联系方式、意向产品、跟进状态、下次跟进时间",
-      "risk_if_wrong": "medium"
+      "description": "<what_is_ambiguous>",
+      "affected_areas": ["<downstream_area>"],
+      "clarification_needed": "<question_to_resolve>",
+      "default_interpretation": "<assumed_interpretation_placeholder>",
+      "risk_if_wrong": "low | medium | high"
     }
   ],
-  
+
   "conflicts": [],
-  
+
   "gaps": [
     {
       "gap_id": "GAP-001",
-      "category": "missing_detail",
-      "description": "PRD 未定义'销售数据报表'的具体维度",
-      "impact": "medium",
-      "affected_fields": ["dashboard_design"],
-      "mitigation": "假设包含：销售额、客户数、转化率、团队排名"
+      "category": "missing_detail | missing_critical | ...",
+      "description": "<what_is_missing>",
+      "impact": "low | medium | high | critical",
+      "affected_fields": ["<downstream_field>"],
+      "mitigation": "<mitigation_placeholder>"
     }
   ],
-  
+
   "assumptions": [
     {
       "assumption_id": "ASM-001",
-      "description": "假设用户主要在移动端使用（80% 流量）",
-      "rationale": "销售主管经常外出拜访客户",
-      "validation_method": "需要真实使用数据验证",
-      "risk_if_wrong": "high",
-      "affected_downstream": ["information_architecture", "interaction_rules"]
+      "description": "<assumption_made>",
+      "rationale": "<basis_for_assumption>",
+      "validation_method": "<how_to_validate>",
+      "risk_if_wrong": "low | medium | high",
+      "affected_downstream": ["<downstream_stage>"]
     }
   ],
-  
+
   "readiness_decision": {
-    "decision": "proceed",
-    "rationale": "输入质量高（0.92），仅有少量细节缺失，可用行业惯例补充。",
+    "decision": "proceed | block | fallback_safe",
+    "rationale": "<decision_rationale>",
     "blockers": [],
-    "mitigation_strategy": "将所有推断内容标注 [inferred]，在 professional_gap_report 中说明需人工确认的部分"
+    "mitigation_strategy": "<how_inferences_are_marked_and_reported>"
   },
-  
-  "confidence": 0.95,
+
+  "confidence": "<0-1>",
   "warnings": [],
   "inferred_fields": [],
   "traceability": {

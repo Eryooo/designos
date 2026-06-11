@@ -30,12 +30,12 @@
 
 #### Step 2: 80/20划分
 - 80%：标准CRUD/表单/导航 → 组件库
-- 20%：核心差异化 → 定制（如AI对话气泡）
+- 20%：核心差异化 → 定制（`<domain_specific_custom_component>`）
 
 #### Step 3: 组件树分层
 - **Atom**: Button, Input, Tag (复用组件库)
-- **Molecule**: SearchBar (Atom组合)
-- **Organism**: ChatPanel, SkillCard (业务组件)
+- **Molecule**: `<composed_component>`（Atom组合，如 SearchBar）
+- **Organism**: `<business_organism_component>`（业务组件）
 
 #### Step 4: 定制理由
 为什么标准组件不够用（可量化）
@@ -59,37 +59,30 @@
   "artifact_type": "component_strategy",
 
   "library_choice": {
-    "primary": "antd@5",
-    "rationale": "B端最成熟，与React生态契合，TypeScript支持完善",
-    "alternatives_considered": ["element-plus（Vue）", "arco-design"],
-    "version_lock": "5.x"
+    "primary": "<component_library_name>",
+    "rationale": "<why_this_library>",
+    "alternatives_considered": ["<alternative_library>", "..."],
+    "version_lock": "<version>"
   },
 
   "atomic_components": [
-    {"component": "Button", "source": "antd/Button", "customization": "none"},
-    {"component": "Input", "source": "antd/Input", "customization": "none"},
-    {"component": "Tabs", "source": "antd/Tabs", "customization": "样式微调"}
+    {"component": "Button", "source": "<library>/Button", "customization": "none"},
+    {"component": "Input", "source": "<library>/Input", "customization": "none"},
+    {"component": "Tabs", "source": "<library>/Tabs", "customization": "<customization>"}
   ],
 
   "molecule_components": [
-    {"name": "SearchBar", "composed_of": ["Input", "Button"], "atoms_used": ["antd/Input", "antd/Button"]}
+    {"name": "<molecule_name>", "composed_of": ["<atom>", "..."], "atoms_used": ["<library>/<Atom>", "..."]}
   ],
 
   "organism_components": [
     {
-      "name": "ChatPanel",
-      "purpose": "AI对话核心组件",
+      "name": "<organism_component_name>",
+      "purpose": "<component_purpose>",
       "is_custom": true,
-      "custom_rationale": "组件库无标准AI对话组件；流式输出+消息状态需深度定制",
-      "composed_of": ["MessageList", "MessageItem", "InputBar"],
-      "atoms_used": ["antd/Input", "antd/Button"]
-    },
-    {
-      "name": "SkillCard",
-      "purpose": "技能展示+安装",
-      "is_custom": true,
-      "custom_rationale": "antd/Card不满足技能特定布局（图标+名称+安装按钮+状态）",
-      "composed_of": ["Card", "Button", "Tag"]
+      "custom_rationale": "<why_library_component_insufficient>",
+      "composed_of": ["<sub_component>", "..."],
+      "atoms_used": ["<library>/<Atom>", "..."]
     }
   ],
 
@@ -100,9 +93,9 @@
   },
 
   "naming_conventions": {
-    "atomic": "AntD原生（Button, Input）",
-    "molecule": "PascalCase（SearchBar）",
-    "organism": "业务前缀（ChatPanel, SkillCard）"
+    "atomic": "组件库原生命名（Button, Input）",
+    "molecule": "PascalCase（<molecule_name>）",
+    "organism": "业务前缀（<organism_component_name>）"
   },
 
   "anti_patterns": [

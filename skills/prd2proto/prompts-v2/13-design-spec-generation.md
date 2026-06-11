@@ -78,9 +78,9 @@
 ## 1.1 色彩系统
 
 ### Primary
-- `--color-primary-500`: #1890FF (主色)
-- `--color-primary-600`: #096DD9 (hover)
-- `--color-primary-700`: #0050B3 (active)
+- `--color-primary-500`: `<primary_color_hex>` (主色，格式 #RRGGBB)
+- `--color-primary-600`: `<primary_hover_hex>` (hover)
+- `--color-primary-700`: `<primary_active_hex>` (active)
 
 ### 用法
 ```css
@@ -89,7 +89,7 @@ button:hover { background: var(--color-primary-600); }
 ```
 
 ### 反例
-❌ `background: #1890FF` (硬编码，违反宪法规则1)
+❌ `background: <hardcoded_hex>` (硬编码，违反宪法规则1)
 ✅ `background: var(--color-primary-500)`
 ```
 

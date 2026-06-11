@@ -25,7 +25,7 @@
 | 维度 | Junior做法 | Senior做法 |
 |------|-----------|-----------|
 | 数据来源 | 凭直觉写 | 强制消费上游资产 |
-| 视觉值 | 硬编码（#3B82F6） | Token变量（var(--color-primary)） |
+| 视觉值 | 硬编码（`<hex>`） | Token变量（var(--color-primary)） |
 | 基础组件 | 自己实现Button | 从组件库导入 |
 | 状态覆盖 | 只写default | 7态全覆盖 |
 | Design.md | 忽略 | 严格遵守 |
@@ -38,7 +38,7 @@
 
 ❌ 违规：
 ```tsx
-<div style={{ color: '#3B82F6', fontSize: 14, padding: 16 }}>
+<div style={{ color: '<hardcoded_hex>', fontSize: 14, padding: 16 }}>
 ```
 
 ✅ 合规：
@@ -71,10 +71,10 @@ function Button({ children }) {
 
 ✅ 合规：
 ```tsx
-import { Button } from 'antd';
+import { Button } from '<component_library>';
 ```
 
-**例外**：组件库不提供的业务组件（FlowEditor/GanttChart）允许自建，但内部基础组件仍用组件库
+**例外**：组件库不提供的业务组件（`<domain_specific_component>`）允许自建，但内部基础组件仍用组件库
 
 ---
 
@@ -108,7 +108,7 @@ import { Button } from 'antd';
 - design-spec指定的间距 > 组件库默认间距
 - design-spec指定的组件库选型 > LLM自行判断
 
-❌ 违规：design-spec写"主色#3B82F6"，代码用AntD默认蓝`#1677ff`
+❌ 违规：design-spec 指定 `<spec_primary_hex>`，代码却用组件库默认色 `<library_default_hex>`
 
 ---
 
@@ -158,7 +158,7 @@ import { Button } from 'antd';
 
   "project_meta": {
     "framework": "react18-vite-ts",
-    "ui_library": "antd@5",
+    "ui_library": "<component_library_name>",
     "package_manager": "pnpm",
     "node_version": "≥18"
   },
@@ -233,14 +233,14 @@ import { Button } from 'antd';
 
   "review_gate_input": {
     "framework_used": "react18-vite-ts",
-    "ui_lib_used": "antd@5",
+    "ui_lib_used": "<component_library_name>",
     "files_count": 24,
     "ready_for_review": true
   },
 
   "inferred_fields": [],
   "gaps": [
-    {"gap": "design-spec未提供，使用AntD默认主题", "impact": "中", "recommendation": "用户提供design-spec后重新生成"}
+    {"gap": "design-spec未提供，使用组件库默认主题", "impact": "中", "recommendation": "用户提供design-spec后重新生成"}
   ]
 }
 ```
@@ -263,8 +263,8 @@ import { Button } from 'antd';
 | Junior | Senior |
 |--------|--------|
 | 凭直觉写代码 | 强制消费上游资产 |
-| 硬编码颜色#3B82F6 | var(--color-primary) |
-| 自己实现Button | import { Button } from 'antd' |
+| 硬编码颜色 `<hex>` | var(--color-primary) |
+| 自己实现Button | import { Button } from '<component_library>' |
 | 只写default状态 | 7态全覆盖 |
 | 忽略design-spec | 严格遵守优先级最高 |
 | 不标consumed_from | 每文件追溯上游 |

@@ -104,8 +104,8 @@
 - ❌ "用户体验需要提升"
 
 **Senior诊断**：
-- ✅ "Dim 4扣20分：state-matrix缺AI执行态的'中断'状态，导致用户停止AI生成时无UI反馈，建议补充AI-005状态+停止按钮"
-- ✅ "Dim 5扣15分：src/pages/Chat/index.tsx:42硬编码`fontSize:14`，违反宪法规则1，应改为var(--font-size-body)"
+- ✅ "Dim 4扣20分：state-matrix缺AI执行态的'中断'状态，导致用户停止AI生成时无UI反馈，建议补充对应状态+停止按钮"
+- ✅ "Dim 5扣15分：`<source_file_path>:<line>` 硬编码 `<hardcoded_value>`，违反宪法规则1，应改为 `var(--<design_token>)`"
 
 ---
 
@@ -125,140 +125,102 @@
 {
   "artifact_type": "professional_gap_report",
   "maturity": "draft",
-  "confidence": 0.85,
+  "confidence": "<0-1>",
 
   "overall_assessment": {
-    "professional_level": "senior",
-    "overall_score": 87,
+    "professional_level": "junior | intermediate | senior | senior_plus",
+    "overall_score": "<0-100>",
     "level_distribution": {
       "junior": "<60",
       "intermediate": "60-74",
       "senior": "75-89",
       "senior_plus": "90-100"
     },
-    "summary": "整体达到资深水准（87分），设计推理和可追溯性优秀（90+），代码质量良好（85），用户洞察可提升至senior+水平。"
+    "summary": "<overall_assessment_summary>"
   },
 
   "dimension_scores": [
     {
       "dimension": "reasoning_depth",
       "name": "设计推理深度",
-      "score": 92,
-      "level": "senior_plus",
-      "strengths": [
-        "4层目标推导链完整（BG-PG-UG-EG）",
-        "GSM贯穿全链",
-        "experience_methodology选择UES有充分理由"
-      ],
-      "gaps": [
-        "部分PG的success_metric推断率高（无baseline）"
-      ]
+      "score": "<0-100>",
+      "level": "junior | intermediate | senior | senior_plus",
+      "strengths": ["<strength>"],
+      "gaps": ["<gap>"]
     },
     {
       "dimension": "user_insight",
       "name": "用户洞察深度",
-      "score": 80,
-      "level": "senior",
-      "strengths": [
-        "user_task_map有JTBD句式",
-        "journey_map有情绪曲线"
-      ],
-      "gaps": [
-        "hidden_tasks偏少（仅2个，建议≥3个）",
-        "未识别协作场景的隐藏任务"
-      ]
+      "score": "<0-100>",
+      "level": "<level>",
+      "strengths": ["<strength>"],
+      "gaps": ["<gap>"]
     },
     {
       "dimension": "business_modeling",
       "name": "业务建模完整性",
-      "score": 85,
-      "level": "senior",
-      "strengths": ["状态机含异常+终止状态", "权限矩阵三维"],
-      "gaps": ["concurrency_rules仅1条，可补充批量操作竞态"]
+      "score": "<0-100>",
+      "level": "<level>",
+      "strengths": ["<strength>"],
+      "gaps": ["<gap>"]
     },
     {
       "dimension": "experience_detail",
       "name": "体验细节专业度",
-      "score": 88,
-      "level": "senior",
-      "strengths": ["6维状态覆盖", "AI执行态完整"],
-      "gaps": ["data_states陈旧数据场景缺失"]
+      "score": "<0-100>",
+      "level": "<level>",
+      "strengths": ["<strength>"],
+      "gaps": ["<gap>"]
     },
     {
       "dimension": "code_quality",
       "name": "代码质量规范度",
-      "score": 85,
-      "level": "senior",
-      "strengths": ["4条宪法全compliant", "fidelity_score=92"],
-      "gaps": ["src/components/MessageItem.tsx:23 硬编码color"]
+      "score": "<0-100>",
+      "level": "<level>",
+      "strengths": ["<strength>"],
+      "gaps": ["<source_file_path>:<line> <issue_description>"]
     },
     {
       "dimension": "traceability",
       "name": "可追溯性",
-      "score": 92,
-      "level": "senior_plus",
-      "strengths": ["5层追溯完整", "decision_trace 25条均有evidence"],
-      "gaps": ["少数low_confidence字段未给validation_method"]
+      "score": "<0-100>",
+      "level": "<level>",
+      "strengths": ["<strength>"],
+      "gaps": ["<gap>"]
     }
   ],
 
   "critical_gaps": [
     {
       "gap_id": "CG-001",
-      "dimension": "user_insight",
-      "severity": "high",
-      "issue": "hidden_tasks仅识别2个（错误恢复/批量），未识别协作场景任务",
-      "impact": "上线后可能暴露「转交客户」「请求审批」等协作需求未覆盖",
-      "specific_fix": "补充hidden_tasks：HT-003「转交客户给同事」+ HT-004「请求主管审批」",
-      "estimated_effort": "30分钟",
-      "priority": "P1"
-    },
-    {
-      "gap_id": "CG-002",
-      "dimension": "code_quality",
-      "severity": "medium",
-      "issue": "MessageItem.tsx:23 硬编码color: '#666'",
-      "impact": "违反宪法规则1，主题切换时该处不变",
-      "specific_fix": "改为color: 'var(--color-text-secondary)'",
-      "estimated_effort": "5分钟",
-      "priority": "P0"
+      "dimension": "<dimension>",
+      "severity": "high | medium | low",
+      "issue": "<specific_issue>",
+      "impact": "<impact_if_unfixed>",
+      "specific_fix": "<concrete_actionable_fix>",
+      "estimated_effort": "<effort>",
+      "priority": "P0 | P1 | P2"
     }
   ],
 
   "improvement_recommendations": [
     {
       "rec_id": "REC-001",
-      "category": "user_insight",
-      "title": "补充协作场景隐藏任务",
-      "rationale": "B端工具用户多协作，遗漏会导致上线后翻车",
-      "action_items": [
-        "从user_task_map识别多角色协作点",
-        "补充转交/审批/通知类隐藏任务",
-        "重新生成journey_map包含协作流程"
-      ],
-      "priority": "P1",
-      "estimated_effort": "1小时",
-      "expected_score_lift": "+5"
-    },
-    {
-      "rec_id": "REC-002",
-      "category": "code_quality",
-      "title": "扫描所有硬编码视觉值",
-      "rationale": "宪法规则1合规性需100%",
-      "action_items": [
-        "运行ESLint规则扫描hex字面量",
-        "替换为Token变量"
-      ],
-      "priority": "P0",
-      "expected_score_lift": "+3"
+      "category": "<dimension>",
+      "title": "<recommendation_title>",
+      "rationale": "<why_it_matters>",
+      "action_items": ["<action_item>"],
+      "priority": "P0 | P1 | P2",
+      "estimated_effort": "<effort>",
+      "expected_score_lift": "<+N>"
     }
   ],
 
   "comparison_to_senior_standard": {
-    "areas_at_senior_plus": ["reasoning_depth", "traceability"],
-    "areas_at_senior": ["user_insight", "business_modeling", "experience_detail", "code_quality"],
-    "areas_below_senior": [],
-    "gap_to_senior_plus_overall": "需要补充：协作隐藏任务+代码硬编码扫描+边界状态完善"
+    "areas_at_senior_plus": ["<dimension>"],
+    "areas_at_senior": ["<dimension>"],
+    "areas_below_senior": ["<dimension>"],
+    "gap_to_senior_plus_overall": "<what_is_needed_to_reach_senior_plus>"
   },
 
   "honest_disclosures": [
@@ -268,9 +230,9 @@
   ],
 
   "next_iteration_priorities": [
-    {"priority": "P0", "task": "修复硬编码（5分钟）"},
-    {"priority": "P1", "task": "补充协作隐藏任务（1小时）"},
-    {"priority": "P2", "task": "完善边界状态（30分钟）"}
+    {"priority": "P0", "task": "<highest_priority_fix>"},
+    {"priority": "P1", "task": "<next_priority_fix>"},
+    {"priority": "P2", "task": "<lower_priority_fix>"}
   ]
 }
 ```

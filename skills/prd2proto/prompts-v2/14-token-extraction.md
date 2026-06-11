@@ -20,7 +20,7 @@
 
 | 类别 | 子项 | 示例值 |
 |------|------|-------|
-| **color** | brand/text/bg/border/state | brand.primary: #1890FF |
+| **color** | brand/text/bg/border/state | brand.primary: `<primary_color_hex>` |
 | **typography** | family/size/weight/line-height | size.body: 14px |
 | **spacing** | 4/8/12/16/24/32/48 | md: 16px |
 | **borderRadius** | sm/md/lg/full | md: 8px |
@@ -55,32 +55,32 @@
   
   "color": {
     "brand": {
-      "primary": {"$value": "#1890FF", "$type": "color"},
-      "primary-hover": {"$value": "#096DD9", "$type": "color"},
-      "primary-active": {"$value": "#0050B3", "$type": "color"}
+      "primary": {"$value": "<primary_color_hex>", "$type": "color"},
+      "primary-hover": {"$value": "<primary_hover_hex>", "$type": "color"},
+      "primary-active": {"$value": "<primary_active_hex>", "$type": "color"}
     },
     "text": {
-      "primary": {"$value": "#000000d9", "$type": "color"},
-      "secondary": {"$value": "#00000073", "$type": "color"},
-      "disabled": {"$value": "#00000040", "$type": "color"}
+      "primary": {"$value": "<text_primary_hex>", "$type": "color"},
+      "secondary": {"$value": "<text_secondary_hex>", "$type": "color"},
+      "disabled": {"$value": "<text_disabled_hex>", "$type": "color"}
     },
     "bg": {
-      "default": {"$value": "#ffffff", "$type": "color"},
-      "secondary": {"$value": "#fafafa", "$type": "color"}
+      "default": {"$value": "<bg_default_hex>", "$type": "color"},
+      "secondary": {"$value": "<bg_secondary_hex>", "$type": "color"}
     },
     "border": {
-      "default": {"$value": "#d9d9d9", "$type": "color"}
+      "default": {"$value": "<border_default_hex>", "$type": "color"}
     },
     "state": {
-      "success": {"$value": "#52c41a", "$type": "color"},
-      "warning": {"$value": "#faad14", "$type": "color"},
-      "error": {"$value": "#f5222d", "$type": "color"}
+      "success": {"$value": "<semantic_success_hex>", "$type": "color"},
+      "warning": {"$value": "<semantic_warning_hex>", "$type": "color"},
+      "error": {"$value": "<semantic_error_hex>", "$type": "color"}
     }
   },
 
   "typography": {
     "family": {
-      "default": {"$value": "PingFang SC, sans-serif", "$type": "fontFamily"}
+      "default": {"$value": "<font_family>", "$type": "fontFamily"}
     },
     "size": {
       "h1": {"$value": "24px", "$type": "fontSize"},
@@ -114,7 +114,7 @@
   },
 
   "_metadata": {
-    "source": "antd@5 default theme + small customization",
+    "source": "<component_library_default_theme> + small customization",
     "design_spec_provided": false,
     "mode": "pm",
     "p0_status": "framework_level"

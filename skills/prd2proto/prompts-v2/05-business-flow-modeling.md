@@ -29,14 +29,15 @@
 | 异常 | "弹个窗提示" | 分类处理（系统/业务/用户） |
 | 并发 | "应该不会出问题" | 显式设计（锁/事务/优先级） |
 
-**示例（退款流程）**：
+**抽象示例（状态机骨架，不绑定具体业务）**：
 ```
-❌ Junior: 用户申请 → 商家审核 → 退款成功
-✅ Senior: 
-  状态机: 待审核 ↔ 审核中 → 处理中 → 已完成/已拒绝/已取消
-  权限: 用户[提交/取消], 商家[同意/拒绝], 平台[介入]
-  异常: 72h未处理→自动同意, 退款失败→平台垫付
-  并发: 用户取消时商家刚审核→商家操作优先
+❌ Junior: `<actor>` 发起 → `<reviewer>` 处理 → 终态（仅 Happy Path）
+✅ Senior:
+  状态机: <state_pending> ↔ <state_in_progress> → <state_processing>
+          → <terminal_success> / <terminal_rejected> / <terminal_cancelled>
+  权限: <actor_a>[<action_set_a>], <actor_b>[<action_set_b>], <actor_c>[<escalation>]
+  异常: <timeout_rule>（如 <duration> 未处理→<auto_action>）, <failure_rule>
+  并发: <concurrent_conflict> 时 <conflict_resolution_rule>
 ```
 
 ### 2.2 推理过程（5步）
@@ -44,15 +45,15 @@
 #### Step 1: 识别业务对象和生命周期
 
 **资深思考**：
-- **找业务主语**：PRD说"退款管理"，真正的业务对象是"退款单"（Order Refund）
+- **找业务主语**：PRD 说"`<feature_name>`"，真正的业务对象是 `<business_object>`
 - **识别生老病死**：创建→待处理→处理中→完成/取消/失败（终止状态）
 - **区分业务状态 vs UI状态**：
-  - 业务状态："待审核"（数据库字段，影响业务逻辑）
-  - UI状态："展开/折叠"（前端临时，不影响业务）
+  - 业务状态：`<business_state>`（数据库字段，影响业务逻辑）
+  - UI状态：`<ui_state>`（前端临时，不影响业务，如展开/折叠）
 
 **Junior错误**：
 - ❌ 把页面流程当业务流程（"进入列表页→点详情→点提交"）
-- ❌ 不识别业务对象（只说"退款功能"，不说"退款单"）
+- ❌ 不识别业务对象（只说"`<feature_name>`"，不抽象出 `<business_object>`）
 - ❌ 混淆业务状态和UI状态
 
 ---
@@ -62,18 +63,18 @@
 **资深思考**：
 
 1. **列举所有状态（含异常）**
-   - 正常状态：待审核、审核中、处理中、已完成
-   - 异常状态：已拒绝、已取消、退款失败、超时关闭
+   - 正常状态：`<state_pending>`、`<state_in_progress>`、`<state_processing>`、`<terminal_success>`
+   - 异常状态：`<terminal_rejected>`、`<terminal_cancelled>`、`<state_failed>`、`<timeout_closed>`
 
 2. **标注转换条件**
-   - "待审核 → 审核中"：商家点击"开始审核"按钮 + 有审核权限
-   - "审核中 → 已拒绝"：商家点击"拒绝" + 填写理由（必填）
+   - "`<state_pending>` → `<state_in_progress>`"：`<actor>` 触发 `<action>` + 有 `<permission>`
+   - "`<state_in_progress>` → `<terminal_rejected>`"：`<actor>` 触发 `<reject_action>` + `<required_input>`
 
 3. **识别终止状态**
-   - 已完成、已拒绝、已取消、超时关闭（这些状态不能再转换）
+   - `<terminal_success>`、`<terminal_rejected>`、`<terminal_cancelled>`、`<timeout_closed>`（不能再转换）
 
 4. **回退路径**
-   - "审核中 → 待审核"：商家点击"退回"（重新审核）
+   - "`<state_in_progress>` → `<state_pending>`"：`<actor>` 触发 `<rollback_action>`（重新处理）
 
 **质量检查**：
 - ✅ 每个状态有明确定义
@@ -94,25 +95,25 @@
 **资深思考**：
 - **三个维度**：状态 × 角色 × 操作
 - **区分"可见"和"可操作"**：
-  - 可见：用户在"已完成"状态能看到退款单详情
-  - 可操作：商家在"待审核"状态能点击"开始审核"按钮
+  - 可见：`<actor>` 在 `<state>` 状态能看到 `<business_object>` 详情
+  - 可操作：`<actor>` 在 `<state>` 状态能触发 `<action>`
 
 ---
 
 #### Step 4: 设计异常处理（分类+检测+恢复）
 
 **异常分类**：
-- **系统异常**：支付接口超时、数据库连接失败
-- **业务异常**：退款金额超限、订单已关闭
-- **用户异常**：填写信息不全、重复提交
+- **系统异常**：`<system_exception>`（如接口超时、数据库连接失败）
+- **业务异常**：`<business_exception>`（如金额超限、对象已关闭）
+- **用户异常**：`<user_exception>`（如信息不全、重复提交）
 
 ---
 
 #### Step 5: 处理并发（识别竞态+定义锁+设计优先级）
 
 **识别竞态条件**：
-- 用户取消时商家刚审核通过 → 谁的操作生效？
-- 两个商家同时审核同一退款单 → 会重复处理吗？
+- `<actor_a>` 触发 `<action_a>` 时 `<actor_b>` 刚完成 `<action_b>` → 谁生效？
+- 两个 `<actor>` 同时操作同一 `<business_object>` → 会重复处理吗？
 
 ---
 
@@ -133,44 +134,44 @@
 {
   "artifact_type": "business_flow",
   "business_object": {
-    "name": "退款单",
-    "english_name": "OrderRefund"
+    "name": "<business_object_name>",
+    "english_name": "<BusinessObjectName>"
   },
   "states": [
     {
       "state_id": "S-001",
-      "state_name": "待审核",
-      "is_initial": true,
-      "is_terminal": false
+      "state_name": "<state_name>",
+      "is_initial": "true | false",
+      "is_terminal": "true | false"
     }
   ],
   "transitions": [
     {
-      "from_state": "S-001",
-      "to_state": "S-002",
-      "trigger": "商家点击「开始审核」",
-      "conditions": ["商家有审核权限"]
+      "from_state": "<state_id>",
+      "to_state": "<state_id>",
+      "trigger": "<actor> 触发 <action>",
+      "conditions": ["<permission_or_guard_condition>"]
     }
   ],
   "permission_matrix": {
-    "S-001_待审核": {
-      "ROLE-001_用户": {
-        "allowed_actions": ["view", "cancel"]
+    "<state_id>": {
+      "<role_id>": {
+        "allowed_actions": ["view", "<action>", "..."]
       }
     }
   },
   "exception_handlers": [
     {
-      "exception_type": "业务异常",
+      "exception_type": "系统异常 | 业务异常 | 用户异常",
       "exception_code": "E-001",
-      "detection_point": "用户点击「申请退款」时",
-      "user_message": "此订单已关闭，无法申请退款"
+      "detection_point": "<when_detected>",
+      "user_message": "<user_facing_message>"
     }
   ],
   "concurrency_rules": [
     {
-      "scenario": "用户取消 vs 商家审核",
-      "rule": "商家操作优先"
+      "scenario": "<concurrent_conflict_scenario>",
+      "rule": "<conflict_resolution_rule>"
     }
   ]
 }
@@ -180,7 +181,7 @@
 
 ## 5. Decision Rules
 
-1. **业务对象识别**：找PRD中的"主语"（订单/工单/申请）
+1. **业务对象识别**：找PRD中的"主语"（即承载状态流转的 `<business_object>`）
 2. **状态完整性**：Happy Path + 异常状态 + 终止状态
 3. **权限三维**：状态 × 角色 × 操作
 4. **异常分类**：系统/业务/用户

@@ -25,17 +25,17 @@
 | 维度 | 功能（Feature） | 任务（Task） |
 |------|----------------|-------------|
 | 视角 | 系统能做什么 | 用户要达成什么 |
-| 描述 | "导出报表" | "向老板证明业绩" |
+| 描述 | `<system_capability>` | `<user_outcome>` |
 | 粒度 | 操作级 | 目标级 |
 | 价值 | 工具性 | 结果性 |
 
-**示例**：
+**抽象对比（不绑定具体行业/产品）**：
 ```
-❌ Junior: PRD说"客户管理" → 任务是"增删改查客户"
-✅ Senior: 销售为什么要管理客户？
-  → 真实任务1: "维护客户关系以促成成交"（不丢单）
-  → 真实任务2: "向主管汇报跟进进度"（证明价值）
-  → 真实任务3: "快速找到上次沟通记录"（续接话题）
+❌ Junior: PRD 说 "<entity_management>" → 任务写成 "<crud_on_entity>"
+✅ Senior: 追问用户为什么要做 "<entity_management>"？
+  → 真实任务1: "<user_outcome_a>"（深层动机A）
+  → 真实任务2: "<user_outcome_b>"（深层动机B）
+  → 真实任务3: "<user_outcome_c>"（深层动机C）
 ```
 
 ### 2.2 推理过程（4步）
@@ -44,12 +44,12 @@
 
 **专业方法**：
 1. **从design_objectives反推角色**
-   - 业务目标"提升团队业绩" → 需要"管理者"角色
-   - 用户目标"快速录入客户" → 需要"执行者"角色
+   - 业务目标"<business_goal>" → 需要"管理者"角色
+   - 用户目标"<user_goal>" → 需要"执行者"角色
 
 2. **区分"主角色"和"配角色"**
-   - 主角色：高频使用，核心价值（销售员）
-   - 配角色：低频但关键（管理员、审批者）
+   - 主角色：高频使用，核心价值（`<primary_role>`）
+   - 配角色：低频但关键（`<secondary_role>`，如管理员/审批者）
 
 3. **标注角色特征**
    - expertise_level: novice / intermediate / expert
@@ -71,23 +71,23 @@
 2. **达成这个目的是为了什么？**（深层动机）
 3. **最终想要什么结果？**（真实目标）
 
-**示例**：
+**抽象示例（追问三层，不绑定具体业务）**：
 ```
-PRD功能: "客户信息管理"
-  ↓ 第一层: 录入和查看客户信息
-  ↓ 第二层: 下次跟进时记得上次聊了什么
-  ↓ 第三层: 不丢单，提升成交率
+PRD功能: "<entity_management_feature>"
+  ↓ 第一层: <direct_purpose>（用户用它做什么）
+  ↓ 第二层: <deeper_motivation>（为了什么）
+  ↓ 第三层: <real_outcome>（最终想要的结果）
 
-真实任务: "维护客户关系以促成成交"
-  - task_name: "维护客户关系以促成成交"
-  - job_to_be_done: "当我跟进客户时，我想快速回忆上次沟通内容和客户偏好，以便续接话题不生疏，避免丢单"
-  - user_goal: "提升成交率，不因信息遗忘导致客户流失"
+真实任务: "<user_outcome>"
+  - task_name: "<user_outcome>"
+  - job_to_be_done: "当我 <situation> 时，我想 <action>，以便 <outcome>"
+  - user_goal: "<user_value_goal>"
 ```
 
 **Junior错误**：
 - ❌ 把"增删改查"当作任务
 - ❌ 停留在功能层面，不挖掘真实目标
-- ❌ 任务描述用系统语言（"管理客户"）而非用户语言（"不丢单"）
+- ❌ 任务描述用系统语言（`<crud_on_entity>`）而非用户语言（`<user_outcome>`）
 
 ---
 
@@ -104,8 +104,8 @@ PRD功能: "客户信息管理"
 
 | 频率 | 价值 | 成本 | 优先级 | 说明 |
 |------|------|------|--------|------|
-| 高 | 高 | 低 | P0 | 必须极致优化（如"快速查找客户"） |
-| 高 | 高 | 高 | P0 | 重点投入（如"录入完整客户信息"） |
+| 高 | 高 | 低 | P0 | 必须极致优化（高频高价值低成本任务） |
+| 高 | 高 | 高 | P0 | 重点投入（高频高价值核心任务） |
 | 高 | 低 | 低 | P1 | 高频但价值低，简化即可 |
 | 低 | 高 | 高 | 权衡 | 低频高价值，需判断投入产出比 |
 | 低 | 低 | - | P2 | 能用就行 |
@@ -113,14 +113,14 @@ PRD功能: "客户信息管理"
 **专业细节**：
 
 1. **频率不是拍脑袋**
-   - multiple_per_day: 销售每天录入多个客户
-   - daily: 主管每天查看团队进度
-   - weekly: 主管每周生成业绩报表
-   - monthly: 财务每月对账
+   - multiple_per_day: `<high_frequency_executor_task>`
+   - daily: `<daily_management_task>`
+   - weekly: `<weekly_reporting_task>`
+   - monthly: `<monthly_periodic_task>`
 
 2. **价值要分维度**
    - 对用户的价值（省时间、减焦虑、提效率）
-   - 对业务的价值（促成交、降流失、提留存）
+   - 对业务的价值（如提升转化、降低流失、提高留存等）
 
 3. **成本包括认知成本**
    - 不只是操作步骤（点击几次）
@@ -132,7 +132,7 @@ PRD功能: "客户信息管理"
 ```json
 {
   "priority": "P0",
-  "priority_rationale": "高频(daily) × 高价值(直接影响成交) / 中成本(5步操作) = P0。销售每天需要快速找到客户上次沟通记录，这是避免丢单的关键。"
+  "priority_rationale": "高频(<frequency>) × 高价值(<value_dimension>) / <cost>成本(<cost_detail>) = P0。<why_this_task_is_critical>"
 }
 ```
 
@@ -150,27 +150,27 @@ PRD功能: "客户信息管理"
 **常见的隐藏任务类型**：
 
 1. **错误恢复任务**
-   - "误删了重要客户，怎么找回？"
+   - "`<entity>` 被误删，怎么找回？"
    - "填错了信息，怎么撤销？"
    - PRD只写"删除"，不写"恢复"
 
 2. **批量操作任务**
-   - "100个客户要批量改状态"
+   - "`<bulk_operation_on_entities>`"
    - "导入历史数据"
    - PRD写"单个操作"，用户需要"批量"
 
 3. **协作任务**
-   - "我要把这个客户转给同事"
-   - "请主管帮我审批"
+   - "`<handoff_task: transfer_to_colleague>`"
+   - "`<approval_request_task>`"
    - PRD关注个人，忽略协作
 
 4. **追溯任务**
-   - "这个客户上次谁跟进的？"
-   - "为什么这个单子黄了？"
+   - "`<entity>` 上次由谁处理？"
+   - "`<failed_case>` 为什么失败？"
    - PRD关注当下，忽略历史
 
 5. **异常处理任务**
-   - "客户投诉了怎么处理？"
+   - "`<complaint_or_dispute>` 怎么处理？"
    - "数据冲突了怎么办？"
    - PRD关注正常流，忽略异常
 
@@ -187,10 +187,10 @@ PRD功能: "客户信息管理"
   "hidden_tasks": [
     {
       "task_id": "HT-001",
-      "task_name": "恢复误删的客户",
-      "category": "error_recovery",
-      "rationale": "销售偶尔会误删客户，需要恢复能力避免数据丢失",
-      "priority": "P1",
+      "task_name": "<hidden_task_name>",
+      "category": "error_recovery | batch | collaboration | trace | exception",
+      "rationale": "<why_this_task_is_real_but_unstated>",
+      "priority": "P1 | P2",
       "inferred": true
     }
   ]
@@ -203,10 +203,10 @@ PRD功能: "客户信息管理"
 
 | 分类 | 定义 | 优先级 | 示例 |
 |------|------|--------|------|
-| **primary_tasks** | 高频、核心价值、主流程 | P0-P1 | "维护客户关系以促成成交" |
-| **secondary_tasks** | 中频、辅助价值、支持流程 | P1-P2 | "向主管汇报跟进进度" |
-| **edge_tasks** | 低频、异常处理、错误恢复 | P2 | "恢复误删的客户" |
-| **hidden_tasks** | PRD未提，但真实存在 | 推断 | "批量导入历史客户数据" |
+| **primary_tasks** | 高频、核心价值、主流程 | P0-P1 | `<primary_task_outcome>` |
+| **secondary_tasks** | 中频、辅助价值、支持流程 | P1-P2 | `<secondary_task_outcome>` |
+| **edge_tasks** | 低频、异常处理、错误恢复 | P2 | `<edge_recovery_task>` |
+| **hidden_tasks** | PRD未提，但真实存在 | 推断 | `<inferred_hidden_task>` |
 
 ---
 
@@ -228,118 +228,105 @@ PRD功能: "客户信息管理"
 {
   "artifact_type": "user_task_map",
   "maturity": "draft",
-  "confidence": 0.75,
+  "confidence": "<0-1>",
 
   "user_roles": [
     {
       "role_id": "ROLE-001",
-      "role_name": "销售员",
-      "description": "一线销售，负责客户跟进和成交",
+      "role_name": "<role_name>",
+      "description": "<role_description>",
       "characteristics": {
-        "expertise_level": "intermediate",
-        "tech_savviness": "medium",
-        "primary_device": "desktop",
-        "usage_frequency": "daily"
+        "expertise_level": "novice | intermediate | expert",
+        "tech_savviness": "low | medium | high",
+        "primary_device": "mobile | desktop | tablet | mixed",
+        "usage_frequency": "daily | weekly | monthly | occasional"
       },
-      "goals": ["UG-002", "UG-003"]
+      "goals": ["<user_goal_id>"]
     }
   ],
 
   "primary_tasks": [
     {
       "task_id": "PT-001",
-      "task_name": "维护客户关系以促成成交",
-      "user_role": "销售员",
-      "job_to_be_done": "当我跟进客户时，我想快速回忆上次沟通内容和客户偏好，以便续接话题不生疏，避免丢单",
-      "user_goal": "提升成交率，不因信息遗忘导致客户流失",
-      "trigger": "接到客户电话、准备拜访客户、客户咨询时",
-      "frequency": "daily",
-      "duration_estimate": "每次5-10分钟",
+      "task_name": "<task_name>",
+      "user_role": "<role_name>",
+      "job_to_be_done": "当我 <situation> 时，我想 <action>，以便 <outcome>",
+      "user_goal": "<user_value_goal>",
+      "trigger": "<task_trigger>",
+      "frequency": "daily | weekly | monthly | occasional",
+      "duration_estimate": "<duration>",
       "steps": [
         {
           "step_number": 1,
-          "action": "查找客户",
-          "user_thinking": "这个客户叫什么来着？手机号多少？",
-          "pain_point": "如果客户多了，记不住名字"
-        },
-        {
-          "step_number": 2,
-          "action": "回顾历史沟通",
-          "user_thinking": "上次聊了什么？他关心什么？",
-          "pain_point": "记录太多，找不到重点"
-        },
-        {
-          "step_number": 3,
-          "action": "记录本次沟通",
-          "user_thinking": "这次聊了什么要记下来",
-          "pain_point": "切换窗口麻烦，边打电话边记录"
+          "action": "<step_action>",
+          "user_thinking": "<user_inner_thought>",
+          "pain_point": "<step_pain_point>"
         }
       ],
       "value": {
-        "to_user": "避免丢单，提升专业形象",
-        "to_business": "提升成交率，降低客户流失"
+        "to_user": "<value_to_user>",
+        "to_business": "<value_to_business>"
       },
-      "completion_cost": "medium",
-      "priority": "P0",
-      "priority_rationale": "高频(daily) × 高价值(直接影响成交) / 中成本(3步操作) = P0",
-      "related_design_objectives": ["UG-002"],
-      "inferred": false,
-      "traceable_to_prd": "PRD §3.1 客户信息管理"
+      "completion_cost": "low | medium | high",
+      "priority": "P0 | P1 | P2",
+      "priority_rationale": "高频(<frequency>) × 高价值(<value>) / <cost>成本 = <priority>",
+      "related_design_objectives": ["<user_goal_id>"],
+      "inferred": "true | false",
+      "traceable_to_prd": "<prd_section_ref>"
     }
   ],
 
   "secondary_tasks": [
     {
       "task_id": "ST-001",
-      "task_name": "向主管汇报跟进进度",
-      "user_role": "销售员",
-      "job_to_be_done": "当周会/月会时，我想快速生成我的客户跟进报表，以便向主管证明我在努力工作",
-      "frequency": "weekly",
-      "priority": "P1",
-      "inferred": false
+      "task_name": "<task_name>",
+      "user_role": "<role_name>",
+      "job_to_be_done": "当我 <situation> 时，我想 <action>，以便 <outcome>",
+      "frequency": "weekly | monthly",
+      "priority": "P1 | P2",
+      "inferred": "true | false"
     }
   ],
 
   "edge_tasks": [
     {
       "task_id": "ET-001",
-      "task_name": "恢复误删的客户",
-      "user_role": "销售员",
-      "job_to_be_done": "当我不小心删错客户时，我想快速恢复，以免数据丢失",
+      "task_name": "<edge_task_name>",
+      "user_role": "<role_name>",
+      "job_to_be_done": "当我 <error_situation> 时，我想 <recovery_action>，以便 <outcome>",
       "frequency": "occasional",
       "priority": "P2",
-      "category": "error_recovery",
-      "inferred": true,
-      "rationale": "销售偶尔会误删，需要恢复能力"
+      "category": "error_recovery | exception",
+      "inferred": "true | false",
+      "rationale": "<why_this_edge_task_matters>"
     }
   ],
 
   "hidden_tasks": [
     {
       "task_id": "HT-001",
-      "task_name": "批量导入历史客户数据",
-      "user_role": "销售员",
-      "job_to_be_done": "当我从旧系统迁移过来时，我想批量导入上百个历史客户，而不是手动一个个录入",
-      "category": "batch_operation",
-      "priority": "P1",
+      "task_name": "<hidden_task_name>",
+      "user_role": "<role_name>",
+      "job_to_be_done": "当我 <situation> 时，我想 <action>，以便 <outcome>",
+      "category": "batch_operation | collaboration | trace",
+      "priority": "P1 | P2",
       "inferred": true,
-      "rationale": "PRD只提单个录入，但实际迁移场景需要批量能力"
+      "rationale": "<why_this_task_is_real_but_unstated>"
     }
   ],
 
   "task_priority_matrix": {
-    "P0_tasks": ["PT-001", "PT-002"],
-    "P1_tasks": ["ST-001", "HT-001"],
-    "P2_tasks": ["ET-001"]
+    "P0_tasks": ["<task_id>"],
+    "P1_tasks": ["<task_id>"],
+    "P2_tasks": ["<task_id>"]
   },
 
-  "inferred_fields": ["hidden_tasks", "ET-001"],
+  "inferred_fields": ["<inferred_field>"],
   "gaps": [
-    {"gap": "PRD未明确销售主管角色的管理任务", "impact": "中", "recommendation": "补充主管角色的任务（查看团队业绩、分配客户）"}
+    {"gap": "<missing_info>", "impact": "高|中|低", "recommendation": "<how_to_resolve>"}
   ],
   "assumptions": [
-    "假设销售员每天需要跟进5-10个客户",
-    "假设主管每周需要查看团队业绩报表"
+    "<assumption_made>"
   ]
 }
 ```
@@ -369,8 +356,8 @@ PRD功能: "客户信息管理"
 
 | Junior错误 | Senior正确 |
 |-----------|-----------|
-| 只识别"用户"一个角色 | 至少2个角色（销售员+主管），标注特征 |
-| 任务是"增删改查客户" | 任务是"维护客户关系以促成成交" |
+| 只识别"用户"一个角色 | 至少2个角色（`<primary_role>`+`<secondary_role>`），标注特征 |
+| 任务是"`<crud_on_entity>`" | 任务是"`<user_outcome>`" |
 | 按PRD优先级照搬 | 用频率×价值/成本公式+rationale |
 | 遗漏错误恢复任务 | 主动识别hidden_tasks（恢复/批量/协作） |
 | 任务描述用系统语言 | 用用户语言+JTBD句式 |
@@ -402,7 +389,7 @@ PRD功能: "客户信息管理"
 
 ## 8. Forbidden Behaviors
 
-❌ 把功能当任务（"客户管理"） ❌ 只识别1个角色 ❌ 不标注角色特征 ❌ 优先级无rationale ❌ 任务无steps ❌ 无hidden_tasks ❌ 用系统语言而非用户语言 ❌ frequency用模糊词（"经常"而非"daily"） ❌ 不追问"为什么" ❌ 编造数据
+❌ 把功能当任务（`<entity_management>`） ❌ 只识别1个角色 ❌ 不标注角色特征 ❌ 优先级无rationale ❌ 任务无steps ❌ 无hidden_tasks ❌ 用系统语言而非用户语言 ❌ frequency用模糊词（"经常"而非"daily"） ❌ 不追问"为什么" ❌ 编造数据
 
 ---
 
