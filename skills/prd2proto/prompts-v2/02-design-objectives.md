@@ -96,31 +96,72 @@ experience_methodology:
 
 ---
 
-## 5. JTBD Format (for User Goals)
+## 5. Format Skeletons (All Four Layers)
+
+> These are **format骨架**, not business examples. They show the *shape* of a
+> correct field, using `<placeholder>` tokens only. Never fill them with a
+> specific product/company/IP/school/brand name.
+
+### 5.1 Business Goal skeleton
+
+```yaml
+- id: <business_goal_id>            # e.g. BG-001
+  statement: <measurable_business_outcome> by <time_window>
+  metric: <number + unit + comparison>     # the north-star or input to it
+  metric_type: north_star | input_metric | guardrail
+  source: <source_requirement_id> | inferred
+  rationale: <why this is a business outcome, not a feature>
+```
+
+- `statement` must be a business **outcome**, never a feature name.
+- If derived without explicit PRD basis, set `source: inferred` and explain.
+
+### 5.2 Product Goal skeleton
+
+```yaml
+- id: <product_goal_id>             # e.g. PG-001
+  statement: <product_capability_that_drives_a_business_goal>
+  serves_business_goal: <business_goal_id>   # exactly one, must exist
+  input_metric: <number + unit + comparison> # leading indicator for the BG
+  source: <source_requirement_id> | inferred
+```
+
+- `input_metric` is a **leading** indicator (product can move it directly),
+  distinct from the BG's lagging outcome metric.
+
+### 5.3 User Goal skeleton (JTBD)
 
 ```
-when <situation>, I want to <action>, so I can <outcome>
+when <user_situation_with_specific_trigger>,
+I want to <user_intent_with_action_verb>,
+so I can <user_value_outcome>
 ```
 
-- `<situation>` — the trigger context (not a product feature)
-- `<action>` — the user-side intent (verb-led)
-- `<outcome>` — the value the user receives (not the product capability)
+```yaml
+- id: <user_goal_id>                # e.g. UG-001
+  jtbd: "when <situation>, I want to <action>, so I can <outcome>"
+  supports_product_goal: <product_goal_id>   # exactly one, must exist
+  pain_points: [<current_friction>, ...]
+  source: <source_requirement_id> | inferred
+```
+
+- `<situation>` — the trigger context (NOT a product feature)
+- `<action>` — the user-side intent (verb-led, NOT a feature name)
+- `<outcome>` — the value the user receives (NOT the product capability)
 
 **Anti-pattern**: writing `<action>` as a feature name
 (e.g. "I want to use feature X").
 
----
-
-## 6. GSM (Goal–Signal–Metric) for Experience Goals
-
-Each `<experience_goal_id>` MUST express:
+### 5.4 Experience Goal skeleton (GSM)
 
 ```yaml
-- id: <experience_goal_id>
-  goal: <single sentence: what is the desired experience>
-  signal: <observable behavior or perception that confirms goal>
-  metric: <measurable threshold with unit + comparison>
-  why_this_metric: <1 sentence: connection to user_goal & archetype>
+- id: <experience_goal_id>          # e.g. EG-001
+  goal: <single_sentence_desired_experience>
+  signal: <observable_behavior_or_perception>
+  metric: <number + unit + comparison>
+  why_this_metric: <reason_connected_to_user_goal_and_archetype>
+  supports_user_goal: <user_goal_id>          # exactly one, must exist
+  dimension: <dimension_from_chosen_methodology>   # e.g. a UES/HEART dimension
 ```
 
 `metric` must be:
@@ -273,6 +314,34 @@ Stages 04~17 will consume:
 - `goal_derivation_map` for stage 16 traceability
 
 Schema critical fields here drive **most** downstream schema dependencies.
+
+---
+
+## 16. Regeneration Triggers
+
+The orchestrator MUST regenerate this stage's output (or request a rerun)
+when any of these conditions hold. These are **quality gates that fail the
+artifact**, not soft warnings:
+
+| Trigger | Condition | Action |
+|---------|-----------|--------|
+| `missing_layer` | Any of BG/PG/UG/EG is empty | regenerate |
+| `broken_derivation` | Any PG/UG/EG lacks a valid parent link, or parent id not found | regenerate |
+| `empty_derivation_map` | `goal_derivation_map` empty in any sub-map | regenerate |
+| `incomplete_gsm` | Any EG missing one of goal/signal/metric/why_this_metric | regenerate |
+| `qualitative_metric` | Any metric lacks number+unit+comparison | regenerate |
+| `methodology_mismatch` | Methodology contradicts `primary_archetype` (§4) | regenerate |
+| `missing_priorities` | `archetype_priorities` absent | regenerate |
+| `b2b2c_single_side` | Archetype is b2b2c but role-sets < 3 | regenerate |
+| `pollution_detected` | `scan-sensitive` finds a hit, or any business-narrative example present | regenerate + flag |
+| `confidence_low` | Self-assessed objective confidence < 0.6 | regenerate once; if still low → `human_review` |
+
+Regeneration policy:
+- Max 2 automatic regenerations per stage.
+- On the 2nd failure, escalate to `human_review` with a structured
+  `regeneration_report` listing which triggers fired and what was attempted.
+- Never silently emit an artifact that fails a hard trigger
+  (`missing_layer`, `broken_derivation`, `pollution_detected`).
 
 ---
 

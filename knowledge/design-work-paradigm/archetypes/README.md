@@ -234,6 +234,30 @@ stage 03 必须产出以下字段（供下游 stage 04~17 消费）：
 
 ---
 
+## 9. Do-Not-Apply Matrix（跨 archetype 互斥逻辑）
+
+stage 03 输出 `do_not_apply_patterns` 时引用本矩阵。每个 archetype 明确
+**不应套用**哪些其他 archetype 的判断逻辑：
+
+| 当前 archetype | 不应套用的逻辑 | 原因 |
+|---------------|--------------|------|
+| `b2b-enterprise-workflow` | b2c 的"激活/留存/动机/增长漏斗" | 用户非自愿使用，增长指标误导 |
+| `internal-tool` | b2c 促活留存；b2b 商业化/定价 | 被指派使用，无采纳漏斗与付费转化 |
+| `b2c-consumer-product` | b2b 的"权限/审批/审计/流程合规" | 单用户自我目标，无组织流程 |
+| `b2b2c-platform` | 任何单边视角（只 b2b 或只 b2c） | 必须三角色（供给/消费/平台）同时建模 |
+| `brand-identity-brief` | prd2proto 页面流生成；data-dashboard 指标逻辑 | 品牌策略 ≠ 产品功能，应 handoff |
+| `ai-agent-product` | 把 AI 当普通表单/CRUD；隐藏不确定性 | 必须建模 thinking/streaming/中断/失败态 |
+| `data-dashboard` | b2c 增长逻辑；ai-agent 对话逻辑 | 决策支持工具，核心是 KPI 与下钻 |
+| `content-community-product` | b2b 流程审批；纯电商交易闭环 | 核心是内容消费/UGC/社区关系 |
+| `hybrid-ambiguous` | 默认套 b2b 或 b2c 之一 | 必须列 ambiguity_gaps，不得静默默认 |
+
+**使用规则**：
+- stage 03 必须为 `primary_archetype` 至少列出本矩阵对应行的 1~2 条
+  `do_not_apply_patterns`。
+- 下游 stage 04~17 读取该字段，主动抑制错误 archetype 的推理路径。
+
+---
+
 **Version**: S0-v1.0（2026-06-12 - Batch S0 重构后初版）
-**Status**: 轻量规则层（9 类 archetype + 决策树 + routing + 字段契约）
+**Status**: 轻量规则层（9 类 archetype + 决策树 + routing + 字段契约 + do-not-apply 矩阵）
 **Next**: 9 个 archetype-specific 文件由后续批次补全

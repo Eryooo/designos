@@ -226,6 +226,31 @@ Confidence must reflect that responsibility.
 
 ---
 
+## 12. Regeneration Triggers
+
+The orchestrator MUST regenerate (or escalate) when any condition holds:
+
+| Trigger | Condition | Action |
+|---------|-----------|--------|
+| `invalid_archetype` | `primary_archetype` not in the 9-enum | regenerate |
+| `missing_stable_field` | Any of the 10 required fields absent | regenerate |
+| `ambiguity_unflagged` | confidence < 0.7 but `ambiguity_gaps` empty | regenerate |
+| `overconfident` | confidence ≥ 0.9 but evidence thin / multiple archetypes plausible | regenerate |
+| `routing_mismatch` | `routing_decision` contradicts §5 table | regenerate |
+| `brand_not_routed` | Pure brand brief but `routing_decision` ≠ handoff | regenerate |
+| `b2b2c_priorities_single_side` | Archetype b2b2c but priorities not split into 3 role-sets | regenerate |
+| `priorities_invented` | `archetype_specific_priorities` not traceable to `archetypes/README.md §3` | regenerate |
+| `pollution_detected` | scan-sensitive hit, or business-narrative in any field | regenerate + flag |
+
+Regeneration policy:
+- Max 2 automatic regenerations.
+- On 2nd failure → `routing_decision=human_review` with a
+  `regeneration_report` listing fired triggers.
+- A wrong archetype here mis-routes **all** downstream stages; prefer
+  `human_review` over a low-confidence guess.
+
+---
+
 **Version**: S0-v1.0 (2026-06-12 — Batch S0 refactor: removed all
 business examples, output stable 10 fields, derives rules from
 `archetypes/README.md`)
