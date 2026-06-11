@@ -51,11 +51,15 @@ prompt_loader_mod = load_module_from_file(
 llm_client_mod = load_module_from_file(
     'prd2proto_llm_client', RUNTIME_DIR / 'llm_client.py'
 )
+schema_validator_mod = load_module_from_file(
+    'prd2proto_schema_validator', RUNTIME_DIR / 'schema_validator.py'
+)
 
 PromptLoader = prompt_loader_mod.PromptLoader
 LLMClient = llm_client_mod.LLMClient
 LLMClientError = llm_client_mod.LLMClientError
 JSONExtractionError = llm_client_mod.JSONExtractionError
+SchemaValidator = schema_validator_mod.SchemaValidator
 
 
 @dataclass
@@ -100,6 +104,8 @@ class PipelineExecutor:
             max_tokens=max_tokens,
             mock=mock,
         )
+        # Phase 4 新增：schema validator（含 $ref 解析）
+        self.schema_validator = SchemaValidator()
 
         self.context = {
             'mode': 'pm',
@@ -270,8 +276,14 @@ class PipelineExecutor:
                 try:
                     print(f"   🔍 Quality Gate: {gate_id}")
 
-                    gate_kwargs = self._prepare_gate_kwargs(gate_id, output)
-                    result = self.gate_executor.execute(gate_id, **gate_kwargs)
+                    # Phase 4: schema_gate 用 SchemaValidator 单独处理
+                    # （kernel/gates.py 的 schema_gate 无法解析 $ref，
+                    #  而真实 schema 都通过 allOf+$ref 引用 artifact-base）
+                    if gate_id == 'schema_gate':
+                        result = self._run_schema_gate(stage, output)
+                    else:
+                        gate_kwargs = self._prepare_gate_kwargs(gate_id, output)
+                        result = self.gate_executor.execute(gate_id, **gate_kwargs)
 
                     gate_results.append(result.to_dict())
 
@@ -428,6 +440,79 @@ class PipelineExecutor:
             artifact['validation_status'].setdefault('human_review_required', True)
 
         return artifact
+
+    def _run_schema_gate(self, stage: Dict, output: Dict):
+        """用 SchemaValidator 执行 schema_gate（支持 $ref 解析）。
+
+        与 kernel/gates.py 的 schema_gate 行为对齐：
+        - 0 errors → PASS
+        - critical errors > 0 → 抛 QualityGateBlocked
+        - 仅 non-critical → WARNING
+
+        Args:
+            stage: pipeline stage 配置（含 schema 字段）
+            output: stage 产出 artifact
+
+        Returns:
+            GateResult 对象
+        """
+        # 从 stage 配置获取 schema 路径
+        schema_ref = stage.get('schema')
+        if not schema_ref:
+            # stage 未声明 schema，跳过验证（warning）
+            return self._make_gate_result(
+                gate_id='schema_gate',
+                status=GateStatus.WARNING,
+                message=f"stage '{stage['id']}' 未声明 schema 字段，跳过 schema 验证",
+            )
+
+        passed, errors = self.schema_validator.validate(output, schema_ref)
+
+        if passed:
+            return self._make_gate_result(
+                gate_id='schema_gate',
+                status=GateStatus.PASS,
+                message=f"Artifact 符合 schema {schema_ref}",
+            )
+
+        critical_errors = [e for e in errors if e.get('critical')]
+        non_critical = [e for e in errors if not e.get('critical')]
+
+        if critical_errors:
+            # 抛 QualityGateBlocked，复用现有处理逻辑
+            blocked_result = self._make_gate_result(
+                gate_id='schema_gate',
+                status=GateStatus.BLOCKED,
+                message=f"发现 {len(critical_errors)} 个 critical schema 错误",
+                errors=errors,
+                recommendation="修复以下必需字段后重试",
+            )
+            raise QualityGateBlocked(blocked_result)
+
+        return self._make_gate_result(
+            gate_id='schema_gate',
+            status=GateStatus.WARNING,
+            message=f"发现 {len(non_critical)} 个 non-critical schema 警告",
+            errors=errors,
+            recommendation="建议补充以下可选字段以提升质量",
+        )
+
+    @staticmethod
+    def _make_gate_result(
+        gate_id: str,
+        status,
+        message: str,
+        errors: list | None = None,
+        recommendation: str = "",
+    ):
+        """构造 GateResult 对象（复用 kernel/gates.py 的 GateResult 类）。"""
+        return gates.GateResult(
+            gate_id=gate_id,
+            status=status,
+            message=message,
+            errors=errors,
+            recommendation=recommendation,
+        )
 
     def _prepare_gate_kwargs(self, gate_id: str, output: Dict) -> Dict:
         """准备质量门参数"""
