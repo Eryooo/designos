@@ -286,7 +286,7 @@
 - ✅ 6类规则覆盖（nav/form/feedback/operation/error/keyboard）
 - ✅ 每条规则具体可执行（颜色/位置/时长）
 - ✅ 危险操作有二次确认+具体保护
-- ✅ AI交互规则（小飞侠场景）
+- ✅ AI交互规则（AI 产品场景）
 - ✅ accessibility规则≥3条
 
 **Should**:

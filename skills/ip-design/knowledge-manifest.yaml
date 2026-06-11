@@ -63,12 +63,6 @@ shared_knowledge:
   - id: design.templates.brand-material-spec
     used_by: M06-brand-material
     use: 产出物模板
-  - id: design.cases.xfx-ipdesign
-    used_by: examples
-    use: 武侠原型 + 既有品牌基因继承的落地案例
-  - id: design.cases.xfg-ip-kimi
-    used_by: examples
-    use: 企业效率场景型 IP 的提示词与状态延展精细化案例
 
 private_reference_boundary: |
   本批(I0)未建 skill 私有 reference 的 stage 绑定说明,留给 I1 runtime 时补;

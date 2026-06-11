@@ -29,35 +29,35 @@
 | 层级 | 平铺或过度嵌套 | 核心任务≤3级可达 |
 | 扩展性 | 新功能硬塞 | 预留扩展位 |
 
-**示例（CRM）**：
+**抽象对比（按模块 vs 按任务，不绑定任何具体产品）**：
 ```
-❌ Junior（按模块）:
-- 客户管理 → 客户列表/客户详情
-- 订单管理
-- 数据报表
+❌ Junior（按系统模块组织）:
+- <entity_a>管理 → <entity_a>列表 / <entity_a>详情
+- <entity_b>管理
+- <reporting_module>
 
-✅ Senior（按任务）:
-- 工作台（任务优先）: 今日待跟进/待处理订单/本周目标
-- 客户（按状态）: 我的客户/公海客户/已成交
-- 数据（按角色）: 我的业绩/团队业绩(主管可见)
+✅ Senior（按任务优先级组织）:
+- <primary_workspace>（任务优先）: <high_freq_task_a> / <high_freq_task_b>
+- <entity_group>（按状态）: <status_a> / <status_b> / <status_c>
+- <data_area>（按角色）: <self_scope> / <team_scope>（<role_gated>）
 ```
 
 ### 2.2 推理过程（5步）
 
 #### Step 1: 提取信息对象
 
-**资深思考**：从需求中提取核心名词（客户/订单/产品/技能/会话）
+**资深思考**：从需求中提取核心名词（领域实体，如 `<entity_a>` / `<entity_b>` / `<entity_c>`）
 
-**对于小飞侠**：会话、技能、人设、公告
+**输出形态**：一组信息对象 `<information_object>`，每个含属性与关系。
 
 ---
 
 #### Step 2: 建立关系模型
 
 **资深思考**：对象间的层级、关联、聚合关系
-- 会话 包含 多条消息
-- 技能 属于 分类
-- 人设 关联 会话
+- `<entity_a>` 包含 多个 `<entity_b>`（1:N）
+- `<entity_c>` 属于 `<category>`
+- `<entity_d>` 关联 `<entity_a>`
 
 ---
 
@@ -87,7 +87,7 @@
 - **底部Tab**：移动端、3-5个核心入口
 - **面包屑**：深层级辅助定位
 
-**对于小飞侠**（5大模块）：底部/侧边导航（智语堂/武艺库/人物设定/江湖通告）
+**导航模式与适用条件**（规则，不举具体产品）：选定的 `<navigation_pattern>` 必须匹配层级深度与切换频率。
 
 ---
 
@@ -121,60 +121,53 @@
 
 ## 4. Required Output Schema
 
-输出 `information_architecture` artifact。核心字段：
+输出 `information_architecture` artifact。以下为 **format skeleton**（字段骨架，用
+`<placeholder>` 表示，不得填入任何具体真实或合成的产品/模块/路径）：
 
 ```json
 {
   "artifact_type": "information_architecture",
   "maturity": "draft",
-  "confidence": 0.75,
+  "confidence": "<0-1>",
 
   "organization_principle": {
-    "primary_dimension": "task",
-    "rationale": "小飞侠是B端工具，用户核心诉求是快速完成任务，按任务组织优于按模块",
-    "navigation_pattern": "sidebar",
-    "pattern_rationale": "5大模块需常驻切换，侧边栏最适合"
+    "primary_dimension": "task | role | status | module",
+    "rationale": "<why_this_dimension>",
+    "navigation_pattern": "sidebar | top_tab | bottom_tab | mixed",
+    "pattern_rationale": "<why_this_pattern>"
   },
 
   "information_objects": [
     {
       "object_id": "OBJ-001",
-      "object_name": "会话",
-      "english_name": "Session",
-      "attributes": ["title", "lastMessageTime", "messages"],
+      "object_name": "<object_name>",
+      "english_name": "<EnglishName>",
+      "attributes": ["<attribute>", "..."],
       "relationships": [
-        {"to": "OBJ-002消息", "type": "contains", "cardinality": "1:N"}
+        {"to": "<object_id>", "type": "contains | belongs_to | relates_to", "cardinality": "1:N | N:1 | N:M"}
       ]
     }
   ],
 
   "site_map": {
-    "root": "小飞侠",
+    "root": "<product_root_placeholder>",
     "nodes": [
       {
         "node_id": "NAV-001",
-        "name": "智语堂",
+        "name": "<nav_node_name>",
         "level": 1,
         "type": "module",
-        "serves_tasks": ["PT-001"],
-        "priority": "P0",
-        "url": "/chat",
+        "serves_tasks": ["<task_id>"],
+        "priority": "P0 | P1 | P2",
+        "url": "<url_path>",
         "children": [
           {
             "node_id": "NAV-001-1",
-            "name": "会话列表",
+            "name": "<child_node_name>",
             "level": 2,
-            "url": "/chat/sessions"
+            "url": "<url_path>"
           }
         ]
-      },
-      {
-        "node_id": "NAV-002",
-        "name": "武艺库",
-        "level": 1,
-        "serves_tasks": ["PT-002"],
-        "priority": "P1",
-        "url": "/skills"
       }
     ]
   },
@@ -182,47 +175,47 @@
   "pages": [
     {
       "page_id": "PAGE-001",
-      "page_name": "智语堂主页",
-      "url": "/chat",
-      "nav_node": "NAV-001",
-      "serves_tasks": ["PT-001"],
-      "depth_level": 1,
-      "breadcrumb": ["首页", "智语堂"]
+      "page_name": "<page_name>",
+      "url": "<url_path>",
+      "nav_node": "<node_id>",
+      "serves_tasks": ["<task_id>"],
+      "depth_level": "<int>",
+      "breadcrumb": ["<crumb>", "..."]
     }
   ],
 
   "navigation_design": {
     "primary_nav": {
-      "type": "sidebar",
-      "items": ["智语堂", "武艺库", "人物设定", "江湖通告"]
+      "type": "sidebar | top_tab | bottom_tab",
+      "items": ["<nav_item>", "..."]
     },
     "secondary_nav": {
       "type": "tab",
-      "context": "武艺库内：技能市场/我的武艺"
+      "context": "<secondary_nav_context>"
     }
   },
 
   "task_reachability": [
     {
-      "task_id": "PT-001",
-      "task_name": "发起对话",
-      "clicks_to_reach": 1,
-      "path": ["智语堂"],
-      "meets_3click_rule": true
+      "task_id": "<task_id>",
+      "task_name": "<task_name>",
+      "clicks_to_reach": "<int>",
+      "path": ["<nav_item>", "..."],
+      "meets_3click_rule": "true | false"
     }
   ],
 
   "extensibility": {
-    "reserved_slots": ["设置（预留）", "数据统计（预留）"],
-    "extension_strategy": "新增模块加入一级导航，不破坏现有结构"
+    "reserved_slots": ["<reserved_slot>", "..."],
+    "extension_strategy": "<how_new_modules_are_added>"
   },
 
   "inferred_fields": [],
   "gaps": [
-    {"gap": "PRD未明确管理员后台IA", "impact": "中", "recommendation": "MVP暂不涉及管理员"}
+    {"gap": "<missing_info>", "impact": "高|中|低", "recommendation": "<how_to_resolve>"}
   ],
   "assumptions": [
-    "假设用户最常用智语堂（一级导航首位）"
+    "<assumption_made>"
   ]
 }
 ```

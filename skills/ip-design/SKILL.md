@@ -74,7 +74,7 @@ ip-design 是一个 **pilot 级品牌 IP 设计 skill**,目标:让 AI 按 Design
 - 8 个方法论(总纲 + M01–M06)
 - 4 个质量门槛(rubric / checklists / failure-modes / gap-report)
 - 6 个模板(brand-brief / worldview / persona-profile / visual-spec / content-plan / brand-material-spec)
-- 2 个案例(xfx-ipdesign 武侠原型 / xfg-ip-kimi 企业效率场景)
+- 合成案例（synthetic case；待在 `eval/golden-cases/` 下补充，不含真实项目证据）
 
 私有 `reference/adapter-*.md` 只描述"本 skill 在自己 pipeline 的某 stage 如何应用某共享 id",**不复制共享正文**。决策内容的 source of truth 在 `knowledge/design/`,本 skill 只消费。
 

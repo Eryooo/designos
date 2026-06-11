@@ -68,12 +68,28 @@ _REQUIRED_TEMPLATES = (
     "design.templates.brand-material-spec",
 )
 
-# 项目专属词:绝不允许在通用方法论中出现,只能在 cases/ 出现
-_PROJECT_SPECIFIC_TERMS = (
-    "讯飞", "小飞侠", "小飞棍", "侠客靛青", "数据化酒葫芦", "光剑", "数据披风",
-    "效率权杖", "深空灰", "活力橙", "飞域", "智语堂", "武艺库", "江湖通告",
-    "令狐冲", "悟空", "钉钉",
+# 项目专属词黑名单：绝不硬编码进公开仓库（否则测试代码本身成为泄露源）。
+# 真实词表只存在于本地私有证据目录（.gitignore 已排除），CI/公开环境缺失时
+# 相关测试自动跳过。
+_PRIVATE_WORDLIST: Path = (
+    _REPO_ROOT / ".designos-private-evidence" / "sensitive-words.txt"
 )
+
+
+def _load_project_specific_terms() -> tuple[str, ...]:
+    """从私有词表加载项目专属词；文件缺失返回空（调用方据此 skip）。"""
+    if not _PRIVATE_WORDLIST.exists():
+        return ()
+    terms: list[str] = []
+    for line in _PRIVATE_WORDLIST.read_text(encoding="utf-8").splitlines():
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        terms.append(s)
+    return tuple(terms)
+
+
+_PROJECT_SPECIFIC_TERMS = _load_project_specific_terms()
 
 # 过度承诺关键词(中英),通用方法论或 SKILL 资产不应出现
 _OVERPROMISE_PATTERNS = (
@@ -175,6 +191,8 @@ def test_skill_adapter_references_existing_shared_ids() -> None:
 
 def test_no_project_specific_terms_in_generic_layer() -> None:
     """通用方法论 / 模板 / 质量文件正文(剔除 source_assets 段)不得含项目专属词。"""
+    if not _PROJECT_SPECIFIC_TERMS:
+        pytest.skip("私有词表缺失（公开/CI 环境），跳过项目专属词检查")
     offenders: list[str] = []
     target_dirs = [
         _DESIGN / "ip",
@@ -193,20 +211,24 @@ def test_no_project_specific_terms_in_generic_layer() -> None:
     assert not offenders, "通用层出现项目专属词:\n" + "\n".join(offenders)
 
 
-def test_cases_directory_can_contain_project_specific_terms() -> None:
-    """cases/ 目录允许出现项目专属词;若都没出现说明 cases 太空。"""
-    found_any = False
-    for case_dir in (_DESIGN / "cases").iterdir():
-        if not case_dir.is_dir():
-            continue
-        for md in case_dir.glob("*.md"):
-            text = md.read_text(encoding="utf-8")
-            if any(term in text for term in _PROJECT_SPECIFIC_TERMS):
-                found_any = True
-                break
-        if found_any:
-            break
-    assert found_any, "cases/ 应有项目专属词演示落地形态,实际全无"
+def test_cases_directory_has_no_private_evidence() -> None:
+    """脱敏后 cases/ 不得含真实项目证据。
+
+    历史上 cases/ 存放真实项目案例（含项目专属词），已在脱敏阶段删除。
+    合成案例尚未重建。本测试锁定：要么 cases/ 不存在，要么其中任何文件
+    都不含项目专属词（只允许合成案例）。"""
+    cases_dir = _DESIGN / "cases"
+    if not cases_dir.exists():
+        return  # cases/ 已移除，待用合成案例重建
+    if not _PROJECT_SPECIFIC_TERMS:
+        pytest.skip("私有词表缺失（公开/CI 环境），跳过 cases 证据检查")
+    offenders: list[str] = []
+    for md in cases_dir.rglob("*.md"):
+        text = md.read_text(encoding="utf-8")
+        for term in _PROJECT_SPECIFIC_TERMS:
+            if term in text:
+                offenders.append(f"{md.relative_to(_REPO_ROOT)} 含项目专属词 '{term}'")
+    assert not offenders, "cases/ 不得含真实证据，只能放合成案例:\n" + "\n".join(offenders)
 
 
 def test_no_overpromise_in_generic_layer_or_skill_shell() -> None:

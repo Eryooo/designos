@@ -88,8 +88,8 @@
 
 ## examples_to_read
 
-- `knowledge/design/cases/xfg-ip-kimi/`(四层提示词、三视图/状态提示词、量化锁定与严格避免的强样例)
-- `knowledge/design/cases/xfx-ipdesign/`(符号定位与中英对照提示词示例)
+- 案例引用为可选项，且不得指向任何私有业务证据或项目专属 case 路径。
+- 如需案例支撑，使用已批准的合成设计案例（synthetic case；后续在 `eval/golden-cases/` 下补充）。
 
 ## do_not_claim
 

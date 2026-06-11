@@ -90,7 +90,7 @@ class LLMClient:
             max_tokens: 最大输出tokens（设计推理产出长，需≥16k）
             temperature: 温度（推理类任务0.3较好）
             api_key: API key（默认从env读）
-            base_url: API base URL（讯飞代理需指定）
+            base_url: API base URL（如需内部代理则指定）
             mock: 是否启用mock模式（必须显式True，默认False = 真实调用）
         """
         self.model = model

@@ -29,7 +29,8 @@ GENERIC_PATTERNS=(
   # 凭证/密钥结构（不论上下文）
   '(?i)(api[_-]?key|secret|token|password|access[_-]?token)\s*[:=]\s*["'\''][a-zA-Z0-9_\-]{16,}["'\'']'
   # 内部 URL / 内部代理（结构）
-  '(?i)\.iflytek\.com'
+  # 注意：具体的真实内部域名只放在私有词表 .designos-private-evidence/，
+  # 公开脚本仅保留通用结构正则，不硬编码任何真实域名。
   'http://[a-z]+\.internal'
   '(?i)internal[_-](corp|company|domain)\.com'
   # 本地绝对路径（暴露环境）

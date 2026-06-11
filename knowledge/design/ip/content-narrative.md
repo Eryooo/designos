@@ -59,8 +59,8 @@
 
 ## examples_to_read
 
-- `knowledge/design/cases/xfx-ipdesign/`(首秀与核心事件示例)
-- `knowledge/design/cases/xfg-ip-kimi/`(对话语料库与内容矩阵示例)
+- 案例引用为可选项，且不得指向任何私有业务证据或项目专属 case 路径。
+- 如需案例支撑，使用已批准的合成设计案例（synthetic case；后续在 `eval/golden-cases/` 下补充）。
 
 ## do_not_claim
 

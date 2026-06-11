@@ -7,7 +7,7 @@
 
 - `../knowledge-manifest.yaml`:声明引用哪些 shared knowledge id。
 - 共享方法论 source of truth 全部在 `knowledge/design/`,本目录不复制正文。
-- 案例与跑偏样例在 `knowledge/design/cases/{xfx-ipdesign,xfg-ip-kimi}/`。
+- 合成案例与跑偏样例待在 `eval/golden-cases/` 下补充（不得指向私有业务证据或项目专属 case 路径）。
 
 ## I1 计划(供后续批次参考,不在本批执行)
 

@@ -16,11 +16,11 @@ description: DesignOS 每批开始前的前置检查官。在开始任何 Design
 
 ### 2. branch / status 检查
 ```bash
-git branch --show-current        # 必须是 skills-pilot-wave2
+git branch --show-current        # 必须是 feature/senior-designer-paradigm-engine
 git status --short               # 看是否有无关脏文件
 git log --oneline -5             # 确认基线，确认不含已暂停的 acceptance archetype
 ```
-- 分支不是 `skills-pilot-wave2` → **停**，提示用户。
+- 分支不是 `feature/senior-designer-paradigm-engine` → **停**，提示用户。
 - HEAD 含 `design-acceptance` 相关提交 → **停**。
 
 ### 3. 禁止事项检查（对照 CLAUDE.md 第 3 节）

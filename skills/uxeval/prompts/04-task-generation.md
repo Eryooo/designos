@@ -78,7 +78,7 @@ exception_scenarios:
 
 ### Step 3：基于旅程地图生成可用性测试脚本
 
-**格式**（参考真实业务文档"任务脚本-星火英语"）：
+**格式**（合成示例，任务脚本不得引用任何私有业务文档）：
 
 ```yaml
 usability_test_script:

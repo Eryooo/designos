@@ -58,42 +58,36 @@
 
 ## 4. Required Output Schema
 
+以下为 **format skeleton**（字段骨架，用 `<placeholder>` 表示，不得填入具体真实或合成的页面/区域/组件）：
+
 ```json
 {
   "artifact_type": "page_structure",
   "pages": [
     {
       "page_id": "PAGE-001",
-      "page_name": "智语堂主页",
-      "layout_pattern": "two_column",
+      "page_name": "<page_name>",
+      "layout_pattern": "single_column | two_column | grid | ...",
       "regions": [
         {
           "region_id": "REG-001",
-          "region_name": "会话列表",
-          "position": "left_sidebar",
-          "width": "280px",
-          "purpose": "切换历史会话",
-          "components": ["search", "list", "new_chat_button"]
-        },
-        {
-          "region_id": "REG-002",
-          "region_name": "对话主区",
-          "position": "main",
-          "width": "calc(100% - 280px)",
-          "purpose": "消息流+输入",
-          "components": ["message_list", "input_bar"]
+          "region_name": "<region_name>",
+          "position": "left_sidebar | main | top | ...",
+          "width": "<width>",
+          "purpose": "<region_purpose>",
+          "components": ["<component>", "..."]
         }
       ],
       "info_hierarchy": [
-        {"level": "L1", "content": "AI回复消息", "visual_emphasis": "正常字号"},
-        {"level": "L2", "content": "会话标题", "visual_emphasis": "粗体"},
-        {"level": "L3", "content": "时间戳", "visual_emphasis": "次要色"}
+        {"level": "L1", "content": "<primary_content>", "visual_emphasis": "<emphasis>"},
+        {"level": "L2", "content": "<secondary_content>", "visual_emphasis": "<emphasis>"},
+        {"level": "L3", "content": "<tertiary_content>", "visual_emphasis": "<emphasis>"}
       ],
-      "visual_flow": "F型（用户从左侧选会话→主区阅读消息→底部输入）",
+      "visual_flow": "F | Z | center（<reading_path_rationale>）",
       "responsive": {
-        "mobile": "侧边栏抽屉式",
-        "tablet": "保留侧边栏（窄）",
-        "desktop": "完整双栏"
+        "mobile": "<mobile_layout>",
+        "tablet": "<tablet_layout>",
+        "desktop": "<desktop_layout>"
       }
     }
   ]

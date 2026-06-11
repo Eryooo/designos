@@ -50,7 +50,7 @@
 3. **业务状态**：待处理/处理中/已完成/已拒绝（来自business_flow）
 4. **权限状态**：无权限/部分权限/全部权限
 5. **数据状态**：无数据/部分数据/完整数据/陈旧数据
-6. **AI执行态**（小飞侠重要）：等待输入/思考中/流式输出/已完成/中断/失败
+6. **AI执行态**（AI 产品重要）：等待输入/思考中/流式输出/已完成/中断/失败
 
 **Junior错误**：
 - ❌ 只关注页面状态，忽略组件/业务/AI执行态
@@ -64,7 +64,7 @@
 - 页面success + 列表error 是矛盾吗？
 - AI流式输出中 + 用户想停止 怎么处理？
 
-**对小飞侠对话**：
+**对合成示例对话**：
 - 等待首次输入：欢迎语+引导卡片
 - 输入中+发送禁用：未输入或超长
 - 流式输出中：消息逐字渲染+显示停止按钮
@@ -97,9 +97,9 @@
 - 转换动效（淡入淡出/骨架屏过渡）
 - 转换时长（loading超过3秒怎么办）
 
-**对小飞侠**：
-- 发送消息：输入框聚焦→loading→成功显示/失败重试
-- AI回复：用户消息显示→AI思考中→流式输出→完整显示
+**状态转换设计要点（规则，非具体产品）**：
+- 每个异步操作：`<idle>` → `loading` → `success | error`，error 态须给 recovery
+- AI 类操作：`<waiting>` → `thinking` → `streaming` → `done | interrupted | failed`
 
 ---
 
@@ -131,50 +131,29 @@
 
 ## 4. Required Output Schema
 
-输出 `state_matrix` artifact。核心字段：
+输出 `state_matrix` artifact。以下为 **format skeleton**（字段骨架，用 `<placeholder>` 表示，
+不得填入任何具体真实或合成的产品/页面/组件/文案）：
 
 ```json
 {
   "artifact_type": "state_matrix",
   "maturity": "draft",
-  "confidence": 0.75,
+  "confidence": "<0-1>",
 
   "page_states": [
     {
       "page_id": "PAGE-001",
-      "page_name": "智语堂主页",
+      "page_name": "<page_name>",
       "states": [
         {
           "state_id": "PS-001",
-          "state_type": "loading",
-          "trigger": "首次进入页面/会话切换",
-          "visual": "骨架屏（消息区+输入区灰色占位）",
-          "message": null,
-          "max_duration": "3秒",
-          "fallback": "超过3秒显示「加载中...」+取消按钮"
-        },
-        {
-          "state_id": "PS-002",
-          "state_type": "empty",
-          "trigger": "无历史会话",
-          "visual": "插图+欢迎语",
-          "message": "欢迎使用小飞侠，开始你的第一次对话吧",
-          "actions": ["+新建对话"]
-        },
-        {
-          "state_id": "PS-003",
-          "state_type": "error",
-          "trigger": "加载失败",
-          "visual": "错误插图",
-          "message": "网络连接失败，请检查网络后重试",
-          "actions": ["重试", "返回首页"]
-        },
-        {
-          "state_id": "PS-004",
-          "state_type": "success",
-          "trigger": "正常加载完成",
-          "visual": "完整内容显示",
-          "message": null
+          "state_type": "loading | empty | error | success",
+          "trigger": "<what_triggers_this_state>",
+          "visual": "<visual_description>",
+          "message": "<message_or_null>",
+          "max_duration": "<duration_or_null>",
+          "fallback": "<fallback_behavior_or_null>",
+          "actions": ["<action>", "..."]
         }
       ]
     }
@@ -183,127 +162,77 @@
   "component_states": [
     {
       "component_id": "COMP-001",
-      "component_name": "发送按钮",
+      "component_name": "<component_name>",
       "states": [
-        {"state": "default", "visual": "蓝色背景白色文字"},
-        {"state": "hover", "visual": "深蓝色背景"},
-        {"state": "active", "visual": "更深蓝色+按下效果"},
-        {"state": "focused", "visual": "蓝色边框光晕"},
-        {"state": "disabled", "visual": "灰色背景", "reason": "未输入/超过2000字"},
-        {"state": "loading", "visual": "spinner动画", "reason": "发送中"}
+        {"state": "default | hover | active | focused | disabled | loading",
+         "visual": "<visual>", "reason": "<reason_if_applicable>"}
       ]
     }
   ],
 
   "business_states": [
     {
-      "object": "会话",
-      "states": ["创建中", "活跃", "已归档"],
-      "linked_business_flow": "BF-001"
+      "object": "<business_object>",
+      "states": ["<state>", "..."],
+      "linked_business_flow": "<flow_id>"
     }
   ],
 
   "ai_execution_states": [
     {
       "state_id": "AI-001",
-      "state_name": "等待输入",
-      "trigger": "用户进入对话",
-      "visual": "输入框默认聚焦+占位符",
-      "user_actions": ["输入", "上传附件"]
-    },
-    {
-      "state_id": "AI-002",
-      "state_name": "思考中",
-      "trigger": "用户发送后",
-      "visual": "三个跳动的点+「AI正在思考」",
-      "user_actions": ["停止"],
-      "max_duration": "10秒"
-    },
-    {
-      "state_id": "AI-003",
-      "state_name": "流式输出",
-      "trigger": "AI开始返回",
-      "visual": "逐字显示+光标闪烁",
-      "user_actions": ["停止"]
-    },
-    {
-      "state_id": "AI-004",
-      "state_name": "已完成",
-      "trigger": "完整回复结束",
-      "visual": "完整消息+操作按钮（复制/重新生成）"
-    },
-    {
-      "state_id": "AI-005",
-      "state_name": "中断",
-      "trigger": "用户点击停止",
-      "visual": "已输出部分+「已停止」标记",
-      "user_actions": ["继续生成", "重新提问"]
-    },
-    {
-      "state_id": "AI-006",
-      "state_name": "失败",
-      "trigger": "网络错误/服务异常",
-      "visual": "错误图标+「生成失败」",
-      "user_actions": ["重试", "联系客服"]
+      "state_name": "waiting | thinking | streaming | done | interrupted | failed",
+      "trigger": "<trigger>",
+      "visual": "<visual>",
+      "user_actions": ["<action>", "..."],
+      "max_duration": "<duration_or_null>"
     }
   ],
 
   "permission_states": [
     {
-      "scenario": "无技能安装权限",
-      "visual": "技能市场置灰+提示",
-      "message": "您暂无安装权限，请联系管理员",
-      "actions": ["联系管理员"]
+      "scenario": "<permission_scenario>",
+      "visual": "<visual>",
+      "message": "<message>",
+      "actions": ["<action>", "..."]
     }
   ],
 
   "data_states": [
     {
-      "scenario": "搜索无结果",
-      "visual": "插图+建议",
-      "message": "未找到相关技能，试试换个关键词",
-      "actions": ["清除搜索", "浏览全部"]
-    },
-    {
-      "scenario": "数据陈旧",
-      "visual": "时间戳+刷新图标",
-      "message": "数据更新于5分钟前",
-      "actions": ["立即刷新"]
+      "scenario": "<data_scenario: empty | stale | extreme>",
+      "visual": "<visual>",
+      "message": "<message>",
+      "actions": ["<action>", "..."]
     }
   ],
 
   "boundary_states": [
     {
-      "scenario": "首次访问",
-      "trigger": "用户首次打开",
-      "visual": "新手引导4步",
-      "actions": ["立即开始", "跳过"]
-    },
-    {
-      "scenario": "网络离线",
-      "trigger": "网络断开",
-      "visual": "顶部红色横幅",
-      "message": "网络已断开，部分功能不可用",
-      "actions": ["重新连接"]
+      "scenario": "<boundary_scenario: first_visit | offline | ...>",
+      "trigger": "<trigger>",
+      "visual": "<visual>",
+      "message": "<message_or_null>",
+      "actions": ["<action>", "..."]
     }
   ],
 
   "state_transitions": [
     {
-      "from": "PS-001 loading",
-      "to": "PS-004 success",
-      "trigger": "数据加载完成",
-      "animation": "淡出loading+淡入内容",
-      "duration": "300ms"
+      "from": "<state_id + state_type>",
+      "to": "<state_id + state_type>",
+      "trigger": "<trigger>",
+      "animation": "<animation>",
+      "duration": "<duration>"
     }
   ],
 
-  "inferred_fields": ["boundary_states"],
+  "inferred_fields": ["<field_inferred_without_prd_basis>"],
   "gaps": [
-    {"gap": "PRD未明确AI生成超时阈值", "impact": "中", "recommendation": "建议10秒超时+用户提示"}
+    {"gap": "<missing_info>", "impact": "高|中|低", "recommendation": "<how_to_resolve>"}
   ],
   "assumptions": [
-    "假设AI思考时间通常≤10秒"
+    "<assumption_made>"
   ]
 }
 ```
@@ -348,7 +277,7 @@
 **Must**:
 - ✅ page_states ≥4个/页（loading/empty/error/success）
 - ✅ component_states ≥5态/组件
-- ✅ ai_execution_states ≥6态（小飞侠场景）
+- ✅ ai_execution_states ≥6态（AI 产品场景）
 - ✅ 每个error有具体message+actions
 - ✅ boundary_states ≥3个
 

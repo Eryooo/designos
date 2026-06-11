@@ -11,9 +11,8 @@ contracts:
 - Visibility loop: stable output-path convention + liveness dev_url delivery.
 - Automation honesty: no stage is described as fully-automated when it is LLM/manual.
 
-Source reports:
-- /Users/young/Documents/trae_projects/xfg-ui/prd2proto_skill_report.md
-- /Users/young/Documents/claude-code/designos/prd2proto-run/REPORT-skill-iteration.md
+Source reports: two real run reports (external IDE + Claude Code), kept in
+private local evidence (not tracked in this public repo).
 """
 
 from __future__ import annotations

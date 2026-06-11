@@ -29,15 +29,15 @@
 | 情绪 | 不考虑 | 情绪曲线（焦虑/兴奋/挫败/满意） |
 | 痛点 | 泛泛而谈 | 具体+优先级+改进方案 |
 
-**示例（在线教育购课）**：
+**抽象对比（不绑定任何具体行业/产品）**：
 ```
-❌ Junior: 看广告 → 注册 → 购课 → 上课
+❌ Junior: 只画系统内线性步骤（注册 → 登录 → 使用 → 结束）
 ✅ Senior:
-  阶段: 认知(朋友推荐)→考虑(试听对比)→决策(优惠拼团)→学习(上课作业)→续费(学习报告)
-  触点: 抖音/官网/APP/客服/微信群
-  情绪: 好奇→犹豫→兴奋→焦虑→满意→纠结
-  痛点: 试听入口难找、支付复杂、作业无反馈
-  机会: 免费试听降门槛、拼团促转化、报告促续费
+  阶段: <awareness> → <consideration> → <decision> → <usage> → <loyalty>
+  触点: 跨渠道（<online_channel> / <offline_channel> / <support_channel>）
+  情绪: 每阶段标注 positive / neutral / negative / critical_pain
+  痛点: <specific_locatable_pain> + severity + affected_users
+  机会: 每个痛点 → <actionable_opportunity> + business_value
 ```
 
 ### 2.2 推理过程（5步）
@@ -49,8 +49,8 @@
 - **5A模型**：Aware(认知)→Appeal(吸引)→Ask(询问)→Act(行动)→Advocate(推荐)
 - **B端调整**：认知→评估→采购决策→部署→使用→续约
 
-**对于内部工具（如小飞侠）**：
-- 首次认知（同事推荐/工作台发现）
+**B端内部工具的典型阶段（抽象，非具体产品）**：
+- 首次认知（同事推荐 / 工作台发现）
 - 首次尝试（新手引导）
 - 日常使用（核心任务）
 - 深度使用（高级功能）
@@ -127,106 +127,79 @@
 
 ## 4. Required Output Schema
 
-输出 `journey_map` artifact。核心字段：
+输出 `journey_map` artifact。以下为 **format skeleton**（字段骨架，用 `<placeholder>` 表示，
+不得填入任何具体真实或合成的产品/模块/业务内容）：
 
 ```json
 {
   "artifact_type": "journey_map",
   "maturity": "draft",
-  "confidence": 0.75,
+  "confidence": "<0-1>",
 
   "journey_meta": {
-    "primary_role": "首次使用的普通员工",
-    "journey_name": "从首次认知到日常依赖",
-    "journey_type": "onboarding_to_habit",
-    "linked_tasks": ["PT-001", "PT-002"]
+    "primary_role": "<primary_user_role>",
+    "journey_name": "<journey_name>",
+    "journey_type": "<journey_type>",
+    "linked_tasks": ["<task_id>", "..."]
   },
 
   "journey_stages": [
     {
       "stage_id": "JS-001",
-      "stage_name": "首次认知",
+      "stage_name": "<stage_name>",
       "stage_order": 1,
-      "description": "员工在工作台发现小飞侠或被同事推荐",
-      "touchpoints": ["飞书工作台入口", "同事推荐", "公司公告"],
-      "user_actions": ["看到入口", "好奇点击"],
-      "user_thinking": "这是什么？能帮我干什么？",
-      "emotion": "neutral",
-      "emotion_score": 0,
+      "description": "<what_user_does_in_this_stage>",
+      "touchpoints": ["<touchpoint>", "..."],
+      "user_actions": ["<user_action>", "..."],
+      "user_thinking": "<user_inner_thought>",
+      "emotion": "positive | neutral | negative | critical_pain",
+      "emotion_score": "<-2..2>",
       "pain_points": [
         {
-          "pain": "入口不显眼，容易忽略",
-          "severity": "medium",
-          "affected_users": "首次用户"
+          "pain": "<specific_locatable_pain>",
+          "severity": "low | medium | high",
+          "affected_users": "<affected_user_segment>"
         }
       ],
       "opportunities": [
         {
-          "opportunity": "工作台首屏推荐位+引导动画",
-          "business_value": "提升首次激活率",
-          "priority": "P1"
-        }
-      ]
-    },
-    {
-      "stage_id": "JS-002",
-      "stage_name": "首次尝试",
-      "stage_order": 2,
-      "description": "用户进入新手引导，尝试首次对话",
-      "touchpoints": ["新手引导4步", "智语堂"],
-      "user_actions": ["看引导", "发首条消息"],
-      "user_thinking": "怎么用？能解决我的问题吗？",
-      "emotion": "negative",
-      "emotion_score": -1,
-      "pain_points": [
-        {
-          "pain": "引导太长，急于体验核心功能",
-          "severity": "high",
-          "affected_users": "急性子用户"
-        }
-      ],
-      "opportunities": [
-        {
-          "opportunity": "引导支持跳过，直达对话",
-          "business_value": "降低首次流失",
-          "priority": "P0"
+          "opportunity": "<actionable_opportunity>",
+          "business_value": "<linked_business_value>",
+          "priority": "P0 | P1 | P2"
         }
       ]
     }
   ],
 
   "emotion_curve": {
-    "summary": "首次认知(neutral)→尝试(negative,引导受挫)→首次成功(positive)→日常使用(positive)→习惯养成(positive)",
-    "lowest_point": "JS-002 首次尝试（引导过长）",
-    "highest_point": "JS-003 首次对话成功",
+    "summary": "<stage→stage emotion progression>",
+    "lowest_point": "<stage_id + why>",
+    "highest_point": "<stage_id + why>",
     "peak_end_analysis": {
-      "peak_pain": "新手引导过长",
-      "end_experience": "对话成功获得价值"
+      "peak_pain": "<biggest_pain>",
+      "end_experience": "<final_impression>"
     }
   },
 
   "moments_of_truth": [
     {
-      "moment": "首次对话获得有用答案",
-      "stage_id": "JS-003",
-      "why_critical": "决定用户是否建立产品价值认知，是激活的关键转化点",
-      "success_criteria": "首次对话解决率≥70%"
+      "moment": "<critical_moment>",
+      "stage_id": "<stage_id>",
+      "why_critical": "<why_this_decides_retention>",
+      "success_criteria": "<number + unit + comparison>"
     }
   ],
 
   "cross_channel_touchpoints": [
-    {"channel": "飞书工作台", "stages": ["JS-001"], "role": "入口"},
-    {"channel": "智语堂APP", "stages": ["JS-002", "JS-003", "JS-004"], "role": "核心"},
-    {"channel": "江湖通告", "stages": ["JS-005"], "role": "促活"}
+    {"channel": "<channel>", "stages": ["<stage_id>"], "role": "<role>"}
   ],
 
-  "inferred_fields": ["emotion_curve"],
+  "inferred_fields": ["<field_inferred_without_prd_basis>"],
   "gaps": [
-    {"gap": "PRD未提供用户流失数据", "impact": "中", "recommendation": "上线后埋点验证情绪曲线"}
+    {"gap": "<missing_info>", "impact": "高|中|低", "recommendation": "<how_to_resolve>"}
   ],
   "assumptions": [
-    "假设用户首次使用最关心「能否快速解决问题」",
-    "假设引导过长是主要流失点"
+    "<assumption_made>"
   ]
 }
 ```

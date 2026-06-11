@@ -1,12 +1,13 @@
-# Golden Case: 提示词四层结构
+# Golden Case: 提示词四层结构（合成案例）
 
 本 golden case 演示正确的 AI 绘图提示词包:四层结构 + 量化 + 负向 + 基准图。
+> 合成案例：虚构 IP 主符号"引导罗盘"，所有符号名与色值均为示意，非任何真实项目。
 
 ## 输入
 
 ```yaml
 visual_spec:
-  core_symbol: {name: "效率权杖", visual_weight_pct: 60}
+  core_symbol: {name: "引导罗盘", visual_weight_pct: 60}
   color_system:
     primary: {hex: "#1A1A2E", ratio_pct: 60}
   style_spectrum:
@@ -25,13 +26,13 @@ visual_spec:
 image_prompt_pack:
   canonical_image:
     prompt_four_layers:
-      core_symbol: "效率权杖(主符号 60%),几何柱体顶端点状光源"
+      core_symbol: "引导罗盘(主符号 60%),几何环体中心点状光源"
       design_philosophy: "扁平几何极简成熟商务 2D"
-      technical_params: "深空灰 #1A1A2E (60%) + 活力橙 #FF6B35 (30%) + 科技蓝 #3A86FF (10%);毛玻璃 70% 透明度;右上 45° 光源;输出 4K PNG 透明背景"
-      quality_and_avoidance: "32px 下权杖清晰可辨;严格避免:过度 3D/二次元萌系/动物化/遮挡核心符号/拉伸变形"
+      technical_params: "主色深蓝 #1A1A2E (60%) + 强调橙 #FF6B35 (30%) + 辅助蓝 #3A86FF (10%);毛玻璃 70% 透明度;右上 45° 光源;输出 4K PNG 透明背景"
+      quality_and_avoidance: "32px 下罗盘清晰可辨;严格避免:过度 3D/二次元萌系/动物化/遮挡核心符号/拉伸变形"
     locked_values:
       primary_hex: "#1A1A2E"
-      core_symbol_name: "效率权杖"
+      core_symbol_name: "引导罗盘"
       style_position: "扁平+几何+极简+成熟商务+2D"
   
   multi_platform:

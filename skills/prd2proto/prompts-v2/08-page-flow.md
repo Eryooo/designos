@@ -51,11 +51,10 @@
 - 关联入口（从其他功能跳转）
 - 外部入口（消息推送/分享链接/深链接）
 
-**对于小飞侠对话流程**：
-- 主入口：点击"智语堂"
-- 新建入口：点击"+新建对话"
-- 历史入口：点击会话列表项
-- 引导入口：新手引导Step4直达
+**入口类型（规则，非具体产品）**：
+- 主入口：`<primary_entry_point>`
+- 关联入口：`<related_entry_point>`
+- 历史/外部入口：`<external_or_history_entry>`
 
 **Junior错误**：
 - ❌ 只设计一个入口（"用户进入对话页"）
@@ -123,9 +122,9 @@
 - 数据保护：草稿自动保存
 - 状态恢复：回来时恢复到离开前
 
-**对于小飞侠**：
-- 输入到一半切走 → 草稿保留
-- 对话中网络断 → 重连后恢复
+**中断恢复设计要点（规则，非具体产品）**：
+- 输入中途离开 → 草稿/输入状态保留
+- 过程中连接中断 → 重连后恢复到离开前状态
 
 ---
 
@@ -141,122 +140,88 @@
 
 ## 4. Required Output Schema
 
-输出 `page_flow` artifact。核心字段：
+输出 `page_flow` artifact。以下为 **format skeleton**（字段骨架，用 `<placeholder>` 表示，
+不得填入任何具体真实或合成的产品/页面/业务链路）：
 
 ```json
 {
   "artifact_type": "page_flow",
   "maturity": "draft",
-  "confidence": 0.75,
+  "confidence": "<0-1>",
 
   "flows": [
     {
       "flow_id": "FLOW-001",
-      "flow_name": "发起对话",
-      "serves_task": "PT-001",
-      "linked_journey_stage": "JS-002",
+      "flow_name": "<flow_name>",
+      "serves_task": "<task_id>",
+      "linked_journey_stage": "<stage_id>",
 
       "entries": [
         {
           "entry_id": "ENT-001",
-          "entry_name": "主入口",
-          "source": "点击智语堂导航",
-          "is_primary": true
-        },
-        {
-          "entry_id": "ENT-002",
-          "entry_name": "新建入口",
-          "source": "点击+新建对话"
-        },
-        {
-          "entry_id": "ENT-003",
-          "entry_name": "引导入口",
-          "source": "新手引导Step4直达"
+          "entry_name": "<entry_name>",
+          "source": "<entry_source>",
+          "is_primary": "true | false"
         }
       ],
 
       "main_flow": [
         {
           "step": 1,
-          "page": "智语堂主页",
-          "action": "输入框默认聚焦",
-          "next": 2
-        },
-        {
-          "step": 2,
-          "page": "智语堂主页",
-          "action": "用户输入并发送",
-          "next": 3
-        },
-        {
-          "step": 3,
-          "page": "智语堂主页",
-          "action": "流式接收AI回复",
-          "is_completion": true
+          "page": "<page_name>",
+          "action": "<user_or_system_action>",
+          "next": "<next_step_or_null>",
+          "is_completion": "true | false"
         }
       ],
 
       "branches": [
         {
           "branch_id": "BR-001",
-          "branch_type": "conditional",
-          "condition": "首次用户",
-          "trigger_step": 1,
-          "branch_path": "先展示欢迎语+引导卡片",
-          "rejoin_step": 2
-        },
-        {
-          "branch_id": "BR-002",
-          "branch_type": "choice",
-          "condition": "用户选择上传附件",
-          "trigger_step": 2,
-          "branch_path": "打开附件选择器→校验大小(≤20MB)→上传"
+          "branch_type": "conditional | choice",
+          "condition": "<branch_condition>",
+          "trigger_step": "<step>",
+          "branch_path": "<branch_action_sequence>",
+          "rejoin_step": "<step_or_null>"
         }
       ],
 
       "exceptions": [
         {
           "exception_id": "EXC-001",
-          "exception_type": "validation",
-          "trigger": "输入超过2000字符",
-          "handling": "提示「消息过长，请精简」+ 阻止发送",
-          "recovery": "用户编辑后重新发送"
-        },
-        {
-          "exception_id": "EXC-002",
-          "exception_type": "network",
-          "trigger": "发送失败（网络超时）",
-          "handling": "消息标记「发送失败」+ 显示重试按钮",
-          "recovery": "点击重试重新发送"
+          "exception_type": "validation | network | business | permission",
+          "trigger": "<what_triggers_it>",
+          "handling": "<how_it_is_shown_and_blocked>",
+          "recovery": "<how_user_recovers>"
         }
       ],
 
       "interruption_recovery": {
-        "scenario": "用户输入一半切换走",
-        "strategy": "草稿自动保存到本地",
-        "recovery_behavior": "回来时恢复草稿内容"
+        "scenario": "<interruption_scenario>",
+        "strategy": "<save_strategy>",
+        "recovery_behavior": "<restore_behavior>"
       },
 
       "completion": {
-        "completion_signal": "收到完整AI回复",
-        "next_guidance": ["继续提问", "新建对话", "查看历史"],
-        "redirect": null
+        "completion_signal": "<completion_signal>",
+        "next_guidance": ["<next_action>", "..."],
+        "redirect": "<redirect_target_or_null>"
       }
     }
   ],
 
   "global_rules": {
-    "back_behavior": "保留已输入内容，不清空",
-    "close_behavior": "草稿自动保存",
-    "draft_retention": "本地保存，下次进入恢复"
+    "back_behavior": "<back_behavior>",
+    "close_behavior": "<close_behavior>",
+    "draft_retention": "<draft_retention_rule>"
   },
 
-  "inferred_fields": ["interruption_recovery"],
+  "inferred_fields": ["<field_inferred_without_prd_basis>"],
   "gaps": [
-    {"gap": "PRD未明确网络断开重连机制", "impact": "中", "recommendation": "补充离线提示+重连逻辑"}
+    {"gap": "<missing_info>", "impact": "高|中|低", "recommendation": "<how_to_resolve>"}
   ],
   "assumptions": [
-    "假设用户可能在对话中途切换标签"
+    "<assumption_made>"
   ]
 }
 ```

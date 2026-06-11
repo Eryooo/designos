@@ -176,25 +176,25 @@ import { Button } from 'antd';
   },
 
   "consumed_assets": {
-    "ia_routes": ["/chat", "/skills", "/persona", "/notice"],
-    "components_used": ["antd/Button", "antd/Input", "antd/List", "antd/Modal"],
-    "tokens_consumed": ["--color-primary", "--font-size-body", "--spacing-md"],
+    "ia_routes": ["<url_path>", "..."],
+    "components_used": ["<ui_lib>/<Component>", "..."],
+    "tokens_consumed": ["<--design-token>", "..."],
     "states_implemented": ["default", "hover", "active", "focus", "disabled", "loading", "error"],
-    "interaction_rules_applied": ["FORM-001", "FB-001", "OP-001"]
+    "interaction_rules_applied": ["<rule_id>", "..."]
   },
 
   "files_generated": [
     {
-      "path": "src/pages/Chat/index.tsx",
-      "description": "智语堂主页",
-      "consumed_from": ["PAGE-001", "FLOW-001"],
-      "lines_of_code": 120
+      "path": "<source_file_path>",
+      "description": "<file_description>",
+      "consumed_from": ["<page_id>", "<flow_id>"],
+      "lines_of_code": "<int>"
     },
     {
-      "path": "src/styles/tokens.css",
-      "description": "Design Token CSS变量",
+      "path": "<tokens_css_path>",
+      "description": "<design_token_css>",
       "consumed_from": ["design_tokens"],
-      "tokens_count": 45
+      "tokens_count": "<int>"
     }
   ],
 

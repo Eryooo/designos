@@ -60,16 +60,16 @@
 - alternatives_considered（考虑过的备选）
 - evidence（数据/经验/PRD引用）
 
-**示例**：
+**format skeleton**：
 ```json
 {
   "decision_id": "D-001",
-  "decision_point": "为什么BG-001优先级P0",
-  "rationale": "直接服务北极星指标周活≥40%",
-  "alternatives_considered": ["P1（次优先级）"],
+  "decision_point": "<why_this_decision>",
+  "rationale": "<reasoning>",
+  "alternatives_considered": ["<alternative>", "..."],
   "evidence": [
-    {"type": "prd_reference", "source": "PRD §1.2 北极星定义"},
-    {"type": "industry_benchmark", "source": "B端工具周活基准30-50%"}
+    {"type": "prd_reference", "source": "<prd_section_ref>"},
+    {"type": "industry_benchmark", "source": "<benchmark_source>"}
   ]
 }
 ```
@@ -83,12 +83,12 @@
 - 设计token ← design-spec
 - 组件import ← component-strategy
 
-**示例**：
+**format skeleton**：
 ```json
 {
-  "field_path": "src/pages/Chat/index.tsx:42",
-  "field_value": "var(--color-primary)",
-  "traced_to": ["design_tokens.color.primary", "design-spec §3.1"]
+  "field_path": "<file_or_field_path>",
+  "field_value": "<value>",
+  "traced_to": ["<asset_id>", "<spec_ref>"]
 }
 ```
 
@@ -117,21 +117,24 @@
 
 ## 4. Required Output Schema
 
+以下为 **format skeleton**（字段骨架，用 `<placeholder>` 表示，不得填入任何具体真实或合成的
+产品/文件名/PRD 段落/业务指标）：
+
 ```json
 {
   "artifact_type": "traceability_map",
   "maturity": "draft",
-  "confidence": 0.85,
+  "confidence": "<0-1>",
 
   "input_trace": {
     "primary_inputs": [
       {
-        "input_id": "prd-小飞侠.md",
+        "input_id": "<source_prd_filename>",
         "input_type": "prd",
-        "usage": "提取业务目标/功能需求/用户定义",
-        "coverage": 0.85,
-        "sections_used": ["§1.2", "§1.3", "§4.1-4.5", "§5"],
-        "sections_unused": ["§6 接口定义（属技术实现）"]
+        "usage": "<what_was_extracted>",
+        "coverage": "<0-1>",
+        "sections_used": ["<section_ref>", "..."],
+        "sections_unused": ["<section_ref + why>"]
       }
     ],
     "secondary_inputs": [],
@@ -140,102 +143,78 @@
 
   "asset_trace": [
     {
-      "asset_id": "design_objectives",
-      "stage": "02",
-      "upstream": ["requirement_inventory"],
-      "downstream": ["user_task_map", "user_journey_map", "information_architecture"]
-    },
-    {
-      "asset_id": "user_task_map",
-      "stage": "04",
-      "upstream": ["design_objectives", "requirement_inventory"],
-      "downstream": ["business_flow", "user_journey_map", "information_architecture"]
+      "asset_id": "<asset_id>",
+      "stage": "<stage_number>",
+      "upstream": ["<asset_id>", "..."],
+      "downstream": ["<asset_id>", "..."]
     }
   ],
 
   "decision_trace": [
     {
       "decision_id": "D-001",
-      "decision_point": "为什么experience_methodology选UES而非HEART",
-      "rationale": "小飞侠是B端内部工具，UES五度（易用/一致/满意/任务/性能）覆盖B端核心诉求，HEART的Adoption/Retention不适用（B端被迫使用）",
-      "alternatives_considered": ["HEART六维", "优酷模型"],
+      "decision_point": "<decision_question>",
+      "rationale": "<why_this_choice>",
+      "alternatives_considered": ["<alternative>", "..."],
       "evidence": [
-        {"type": "prd_reference", "source": "PRD §1.4 集团全员"},
-        {"type": "industry_best_practice", "source": "knowledge/ux/experience-measurement.md"}
+        {"type": "prd_reference | industry_best_practice | user_research", "source": "<source>"}
       ],
-      "made_at_stage": "02",
-      "asset_id": "design_objectives"
-    },
-    {
-      "decision_id": "D-002",
-      "decision_point": "为什么IA按task组织而非按module",
-      "rationale": "用户任务优先级矩阵显示P0任务在工作台触发，按task组织能让P0任务≤2级可达",
-      "evidence": [
-        {"type": "user_research", "source": "user_task_map.task_priority_matrix"}
-      ],
-      "made_at_stage": "07"
+      "made_at_stage": "<stage_number>",
+      "asset_id": "<asset_id>"
     }
   ],
 
   "field_trace": [
     {
-      "field_path": "src/pages/Chat/index.tsx",
+      "field_path": "<file_or_field_path>",
       "traced_to": [
-        {"asset": "PAGE-001", "stage": "07-IA"},
-        {"asset": "FLOW-001", "stage": "08-page-flow"}
-      ]
-    },
-    {
-      "field_path": "src/styles/tokens.css:--color-primary",
-      "traced_to": [
-        {"asset": "design_tokens.color.primary", "stage": "14"},
-        {"asset": "design-spec §3.1", "source": "user_input"}
+        {"asset": "<asset_id>", "stage": "<stage>"}
       ]
     }
   ],
 
   "inference_summary": {
-    "total_inferred_fields": 12,
-    "high_confidence_count": 8,
-    "low_confidence_count": 4,
+    "total_inferred_fields": "<int>",
+    "high_confidence_count": "<int>",
+    "low_confidence_count": "<int>",
     "key_inferences": [
       {
-        "field": "BG-001.success_metric",
-        "value": "周活≥40%",
+        "field": "<field_path>",
+        "value": "<inferred_value>",
         "inferred": true,
-        "rationale": "PRD未给量化指标，基于B端工具行业基准30-50%取中位",
-        "validation_method": "上线后埋点验证"
+        "rationale": "<basis_for_inference>",
+        "validation_method": "<how_to_validate>"
       }
     ]
   },
 
   "coverage_metrics": {
-    "input_coverage": 0.85,
-    "objective_to_code_coverage": 0.90,
-    "all_BG_traced_to_code": true,
-    "all_PG_traced_to_code": true,
+    "input_coverage": "<0-1>",
+    "objective_to_code_coverage": "<0-1>",
+    "all_BG_traced_to_code": "true | false",
+    "all_PG_traced_to_code": "true | false",
     "untraced_code_files": []
   },
 
   "quality_indicators": {
-    "decision_count": 25,
-    "decision_with_evidence_count": 23,
-    "decision_evidence_rate": 0.92,
-    "inference_marked_rate": 1.0,
-    "consistency_score": 0.95
+    "decision_count": "<int>",
+    "decision_with_evidence_count": "<int>",
+    "decision_evidence_rate": "<0-1>",
+    "inference_marked_rate": "<0-1>",
+    "consistency_score": "<0-1>"
   },
 
   "gaps_summary": [
     {
       "gap_id": "GAP-001",
-      "stage": "02",
-      "description": "PRD未提供数据基线",
-      "impact": "high",
-      "mitigation": "用行业基准+标注inferred"
+      "stage": "<stage_number>",
+      "description": "<missing_info>",
+      "impact": "high | medium | low",
+      "mitigation": "<how_to_mitigate>"
     }
   ],
 
-  "overall_traceability_score": 0.92
+  "overall_traceability_score": "<0-1>"
 }
 ```
 
