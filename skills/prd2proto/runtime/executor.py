@@ -82,6 +82,8 @@ class PipelineExecutor:
         mock: bool = False,
         model: str = "claude-opus-4-8",
         max_tokens: int = 32768,
+        save_stages_dir: str | None = None,
+        validation_mode: bool = False,
     ):
         """
         Args:
@@ -106,6 +108,14 @@ class PipelineExecutor:
         )
         # Phase 4 新增：schema validator（含 $ref 解析）
         self.schema_validator = SchemaValidator()
+        # Batch 1: 逐 stage 实时保存输出（即使后续 stage 失败，前面成功的已落盘）
+        self.save_stages_dir = Path(save_stages_dir) if save_stages_dir else None
+        if self.save_stages_dir:
+            self.save_stages_dir.mkdir(parents=True, exist_ok=True)
+        self._stage_seq = 0  # stage 序号（用于文件命名）
+        # Batch 1 验证模式：gate critical 记录但不中断 pipeline，
+        # 让 12 个 stage 都真实跑+都被检验+失败如实记录（不跳过 gate，只是不中断）
+        self.validation_mode = validation_mode
 
         self.context = {
             'mode': 'pm',
@@ -153,6 +163,10 @@ class PipelineExecutor:
                 # 执行 stage
                 result = await self._execute_stage(stage, inputs)
                 stage_results.append(result)
+
+                # Batch 1: 逐 stage 实时保存（success/blocked/error 都存）
+                if self.save_stages_dir:
+                    self._save_stage_output(stage, result)
 
                 # 检查是否 blocked
                 if result.status == 'blocked':
@@ -295,20 +309,41 @@ class PipelineExecutor:
                         })
 
                 except QualityGateBlocked as e:
-                    print(f"      ❌ Blocked: {e.result.message}")
-                    return StageResult(
-                        stage_id=stage_id,
-                        status='blocked',
-                        output={
+                    if self.validation_mode:
+                        # 验证模式：记录 critical 但不中断，保留真实 output 供下游+评审
+                        print(
+                            f"      ⚠️  [validation-mode] Gate critical（记录不中断）: "
+                            f"{e.result.message}"
+                        )
+                        gate_results.append({
                             'gate_id': gate_id,
+                            'status': 'blocked',
                             'message': e.result.message,
-                            'issues': e.result.issues or e.result.errors,
+                            'errors': e.result.errors,
+                            'issues': e.result.issues,
                             'recommendation': e.result.recommendation,
-                        },
-                        gate_results=gate_results,
-                        warnings=warnings,
-                        llm_metrics=llm_metrics,
-                    )
+                        })
+                        warnings.append({
+                            'gate_id': gate_id,
+                            'message': f"[critical-recorded] {e.result.message}",
+                        })
+                        # 继续后续 gate，不 return
+                        continue
+                    else:
+                        print(f"      ❌ Blocked: {e.result.message}")
+                        return StageResult(
+                            stage_id=stage_id,
+                            status='blocked',
+                            output={
+                                'gate_id': gate_id,
+                                'message': e.result.message,
+                                'issues': e.result.issues or e.result.errors,
+                                'recommendation': e.result.recommendation,
+                            },
+                            gate_results=gate_results,
+                            warnings=warnings,
+                            llm_metrics=llm_metrics,
+                        )
 
         # 保存到 reasoning_assets
         if 'outputs' in stage:
@@ -325,6 +360,43 @@ class PipelineExecutor:
             warnings=warnings,
             llm_metrics=llm_metrics,
         )
+
+    def _save_stage_output(self, stage: Dict, result: "StageResult") -> None:
+        """逐 stage 保存输出到文件（含 schema validation 结果）。
+
+        文件命名: stage-NN-{stage_id}.json
+        无论 success/blocked/error 都保存（失败如实记录，不静默）。
+        """
+        self._stage_seq += 1
+        seq = self._stage_seq
+        stage_id = stage.get('id', f'stage{seq}')
+        fname = f"stage-{seq:02d}-{stage_id}.json"
+        fpath = self.save_stages_dir / fname
+
+        # 提取 schema validation 结果（从 gate_results 里找 schema_gate）
+        schema_result = None
+        for gr in (result.gate_results or []):
+            if gr.get('gate_id') == 'schema_gate':
+                schema_result = {
+                    'status': gr.get('status'),
+                    'errors': gr.get('errors', []),
+                }
+                break
+
+        record = {
+            'stage_seq': seq,
+            'stage_id': stage_id,
+            'execution_status': result.status,  # success/blocked/error
+            'schema_validation': schema_result,
+            'llm_metrics': result.llm_metrics,
+            'warnings': result.warnings,
+            'output': result.output,
+        }
+        fpath.write_text(
+            json.dumps(record, ensure_ascii=False, indent=2, default=str),
+            encoding='utf-8',
+        )
+        print(f"   💾 saved: {fname} (status={result.status})")
 
     async def _execute_llm_stage(
         self,
@@ -403,23 +475,40 @@ class PipelineExecutor:
             raise
 
         # 6. 注入 runtime 元数据（artifact_id / skill_id / created_at 等）
-        artifact = self._inject_runtime_metadata(artifact, stage_id)
+        artifact = self._inject_runtime_metadata(
+            artifact, stage_id,
+            source_names=list(upstream_artifacts.keys()) + list(runtime_inputs.keys()),
+        )
 
         return artifact, response.to_dict()
 
-    def _inject_runtime_metadata(self, artifact: Dict, stage_id: str) -> Dict:
-        """注入 runtime 注入字段（不让 LLM 生成）。"""
+    def _inject_runtime_metadata(
+        self, artifact: Dict, stage_id: str, source_names: list | None = None,
+    ) -> Dict:
+        """注入 runtime 元数据信封（不篡改 LLM 业务输出）。
+
+        职责边界：
+        - 注入 runtime 才知道的字段（artifact_id/run_id/created_at/source_inputs）
+        - 补全 base schema required 的元数据信封默认值（仅当 LLM 未输出时）
+        - 不修改 business_goals/states 等业务内容
+        - 用 _runtime_injected 透明记录哪些是 runtime 补的（不假装是 LLM 给的）
+        """
         from datetime import datetime, timezone
         import uuid
 
         artifact_type = artifact.get('artifact_type', stage_id.replace('-', '_'))
-
-        # 生成 artifact_id（pattern: {artifact_type}-{YYYYMMDD}-{8位hex}）
         date_str = datetime.now(timezone.utc).strftime('%Y%m%d')
         short_uuid = uuid.uuid4().hex[:8]
         artifact_id = f"{artifact_type.replace('_', '-')}-{date_str}-{short_uuid}"
 
-        # 仅在缺失时填充（让 LLM 输出优先）
+        injected = []  # 记录 runtime 补了哪些字段
+
+        def _set_if_missing(key, value):
+            if key not in artifact or artifact[key] in (None, "", [], {}):
+                artifact[key] = value
+                injected.append(key)
+
+        # === runtime 才知道的字段 ===
         artifact.setdefault('artifact_id', artifact_id)
         artifact.setdefault('artifact_type', artifact_type)
         artifact.setdefault('skill_id', 'prd2proto')
@@ -429,15 +518,42 @@ class PipelineExecutor:
             datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
         )
 
+        # source_inputs: runtime 知道喂了哪些输入（LLM 不该编造文件路径）
+        if not artifact.get('source_inputs'):
+            artifact['source_inputs'] = [
+                {
+                    'input_type': 'existing_artifact' if '_' in n else 'prd',
+                    'input_id': n,
+                    'input_status': 'complete',
+                }
+                for n in (source_names or ['prd_content'])
+            ]
+            injected.append('source_inputs')
+
+        # === base schema required 元数据信封（LLM 未输出时补保守默认）===
+        _set_if_missing('maturity', 'draft')
+        if 'confidence' not in artifact:
+            artifact['confidence'] = 0.5  # 保守默认；LLM 应自己给
+            injected.append('confidence(default-0.5)')
+        _set_if_missing('inferred_fields', [])
+        _set_if_missing('gaps', [])
+        _set_if_missing('warnings', [])
+        _set_if_missing('traceability', {})
+
         # validation_status
         if 'validation_status' not in artifact:
             artifact['validation_status'] = {
                 'schema_valid': True,
                 'human_review_required': True,
             }
+            injected.append('validation_status')
         else:
             artifact['validation_status'].setdefault('schema_valid', True)
             artifact['validation_status'].setdefault('human_review_required', True)
+
+        # 透明记录 runtime 补了什么（不假装 LLM 给的）
+        if injected:
+            artifact['_runtime_injected'] = injected
 
         return artifact
 
@@ -599,6 +715,15 @@ def main():
         default='/tmp/pipeline-output.json',
         help='结果输出路径',
     )
+    parser.add_argument(
+        '--save-stages-dir',
+        help='逐 stage 保存输出的目录（Batch 1 真实验证用）',
+    )
+    parser.add_argument(
+        '--validation-mode',
+        action='store_true',
+        help='验证模式：gate critical 记录但不中断 pipeline（Batch 1 收集完整数据用）',
+    )
 
     args = parser.parse_args()
 
@@ -622,6 +747,8 @@ def main():
         mock=args.mock,
         model=args.model,
         max_tokens=args.max_tokens,
+        save_stages_dir=args.save_stages_dir,
+        validation_mode=args.validation_mode,
     )
 
     # 可选：只跑前 N 个 stage

@@ -1,3 +1,9 @@
+# ============================================================
+# ⚠️ LEGACY / 旧版（已归档，非默认主线）
+# 当前默认主线是 pipeline.yaml（v2，17-stage 设计推理链路）。
+# 本文件（v1，8-stage：prd-understanding → liveness-check）仅向后兼容保留。
+# runtime 默认加载 pipeline.yaml；如需跑 v1 须显式 --pipeline pipeline.v1.yaml。
+# ============================================================
 name: prd2proto-pipeline
 
 description: |

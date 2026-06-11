@@ -1,9 +1,14 @@
 # DesignOS Skills Status Matrix
 # 本文件记录所有 skills 的成熟度状态、运行时可靠性和企业就绪度
-# 更新日期：2026-06-09
+# 更新日期：2026-06-10（Batch 0 事实收口：新增五层 readiness 口径）
+#
+# 状态口径定义见 docs/STATUS-DEFINITION.md
+# 五层 readiness（不可跨层推导）：
+#   methodology_ready → prompt_ready → runtime_ready → validated → enterprise_ready
 
-version: "1.0.0"
-description: "Skill 成熟度和能力清单"
+version: "2.0.0"
+description: "Skill 成熟度和能力清单（五层 readiness 口径）"
+status_definition_ref: docs/STATUS-DEFINITION.md
 
 skills:
   - id: uxeval
@@ -11,6 +16,24 @@ skills:
     maturity: beta
     runtime_reliability: tool_assisted
     enterprise_ready: partial
+
+    # === 五层 readiness（2026-06-10 Batch 0 新增）===
+    readiness:
+      methodology_ready: true
+      prompt_ready: partial      # 仅 1 个 ENHANCED 示范，prompts-v2 未建立
+      runtime_ready: partial     # 旧 runtime 存在，未对齐 prd2proto 真实链路
+      validated: false
+      enterprise_ready: false
+    current_stage: prompt_ready
+    main_blockers:
+      - "prompts-v2 未建立（仅 1 个 ENHANCED 示范）"
+      - "evidence-map / issue-clustering 未形成"
+      - "无真实截图/PRD 评估 case"
+    not_allowed_claims:
+      - "uxeval 已达资深设计师评估水平"
+      - "可替代人工 UX 研究"
+    next_required_step:
+      - "建立 uxeval prompts-v2 + evidence-map + issue-clustering + real screenshot case（Batch 3）"
 
     stable_outputs:
       - journey_map.md
@@ -54,6 +77,25 @@ skills:
     maturity: pilot
     runtime_reliability: llm_assisted
     enterprise_ready: false
+
+    # === 五层 readiness（2026-06-10 Batch 0 新增）===
+    readiness:
+      methodology_ready: true
+      prompt_ready: true         # prompts-v2 17/17 COMPLETE
+      runtime_ready: partial     # 真实 LLM 链路打通，已验证前 5+ stage，非全 17-stage 稳定
+      validated: false           # 真实 PRD 端到端验证进行中（Batch 1）
+      enterprise_ready: false
+    current_stage: runtime_partial
+    main_blockers:
+      - "完整 17-stage 真实链路未全部验证（已跑通前 5+，Batch 1 跑前 12+）"
+      - "无真实 PRD 端到端 golden case 验证结果"
+      - "traceability/gap-report 未基于真实产物生成"
+    not_allowed_claims:
+      - "prd2proto 已达资深设计师产出水平"
+      - "可生产级生成 runnable 原型"
+      - "终极目标达成"
+    next_required_step:
+      - "用真实 PRD 跑前 12+ stage，每个 schema validate，生成 run-report + rubric（Batch 1）"
 
     stable_outputs: []
 
@@ -108,6 +150,23 @@ skills:
     runtime_reliability: llm_synthesis
     enterprise_ready: false
 
+    # === 五层 readiness（2026-06-10 Batch 0 新增）===
+    readiness:
+      methodology_ready: true
+      prompt_ready: partial      # 仅 1 个 ENHANCED 示范
+      runtime_ready: false       # 无真实 evidence/source confidence 闭环
+      validated: false
+      enterprise_ready: false
+    current_stage: prompt_ready
+    main_blockers:
+      - "缺真实证据链与 source confidence 闭环"
+      - "prompts-v2 未建立（仅 1 个 ENHANCED 示范）"
+    not_allowed_claims:
+      - "ai-analytics 已能产出可信研究结论"
+      - "可把常识当研究结论"
+    next_required_step:
+      - "建立 source-inventory / evidence-card / strategy-confidence contract（Batch 4）"
+
     stable_outputs: []
 
     unstable_outputs:
@@ -156,6 +215,23 @@ skills:
     maturity: pilot
     runtime_reliability: llm_assisted
     enterprise_ready: partial
+
+    # === 五层 readiness（2026-06-10 Batch 0 新增）===
+    readiness:
+      methodology_ready: true
+      prompt_ready: partial      # 仅 1 个 ENHANCED 示范
+      runtime_ready: false       # design lock 未强制执行，无图像验收闭环
+      validated: false
+      enterprise_ready: false
+    current_stage: prompt_ready
+    main_blockers:
+      - "design lock 未强制执行"
+      - "无图像验收闭环"
+    not_allowed_claims:
+      - "ip-design 能保证多轮一致性"
+      - "可防止 AI 任意重画"
+    next_required_step:
+      - "design-lock-definition prompt + visual acceptance case（Batch 6）"
 
     stable_outputs:
       - persona_profile.md
@@ -206,6 +282,23 @@ skills:
     maturity: alpha
     runtime_reliability: contract_baseline
     enterprise_ready: false
+
+    # === 五层 readiness（2026-06-10 Batch 0 新增）===
+    readiness:
+      methodology_ready: true    # 方法论已扩展（含修复的 12 个 brand 方法论）
+      prompt_ready: false        # prompts-v2 不存在
+      runtime_ready: false
+      validated: false
+      enterprise_ready: false
+    current_stage: methodology_ready
+    main_blockers:
+      - "prompts-v2 完全不存在"
+      - "runtime 几乎未形成完整 skill 能力"
+    not_allowed_claims:
+      - "brand-creative 已可用"
+      - "可产出品牌设计决策资产"
+    next_required_step:
+      - "先做 brand-strategy / logo-design / visual-identity / brand-guidelines MVP，不做全部 13 个（Batch 5）"
 
     stable_outputs: []
 

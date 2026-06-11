@@ -1,5 +1,20 @@
 # 自动化执行最终报告
 
+# 自动化执行最终报告
+
+> ---
+> ## ⚠️ STATUS CORRECTION / 状态修正（2026-06-10 Batch 0）
+>
+> **本报告下方"让 DesignOS 所有 skills 达到资深设计师级别""核心 skill 100% 完成"等表述已被修正。**
+>
+> 旧表述把"方法论完成"误推导为"达到资深设计师级别"。真实状态：仅 methodology_ready，
+> 未达 prompt_ready/runtime_ready/validated。详见 `docs/STATUS-DEFINITION.md`。
+>
+> 正确表述："方法论底座已建立；prd2proto prompts-v2 已完成；runtime 局部真实化未闭环；真实验证进行中。"
+>
+> 下方原文保留作历史记录，完成度结论以本修正章节为准。
+> ---
+
 **执行时间**: 2026-06-09 22:00-23:45  
 **执行模式**: 全权限自动化（你下班后）  
 **分支**: `feature/senior-designer-paradigm-engine`  

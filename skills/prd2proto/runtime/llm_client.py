@@ -147,25 +147,41 @@ class LLMClient:
         )
 
         effective_max_tokens = max_tokens or self.max_tokens
-        t0 = time.time()
-        full_text = ""
 
-        try:
-            async with client.messages.stream(
-                model=self.model,
-                max_tokens=effective_max_tokens,
-                temperature=self.temperature,
-                messages=[{"role": "user", "content": prompt}],
-            ) as stream:
-                async for text_chunk in stream.text_stream:
-                    full_text += text_chunk
-                # 必须在async with内获取final_message
-                final_msg = await stream.get_final_message()
-
-        except Exception as exc:
-            raise LLMClientError(
-                f"LLM API 调用失败: {exc}"
-            ) from exc
+        # 网络瞬时错误重试（指数退避）。
+        # 注意：重试的是网络/连接错误，不是篡改 LLM 输出，不违反"不静默修正"红线。
+        import asyncio as _asyncio
+        max_retries = 3
+        last_exc = None
+        for attempt in range(max_retries):
+            t0 = time.time()
+            full_text = ""
+            try:
+                async with client.messages.stream(
+                    model=self.model,
+                    max_tokens=effective_max_tokens,
+                    temperature=self.temperature,
+                    messages=[{"role": "user", "content": prompt}],
+                ) as stream:
+                    async for text_chunk in stream.text_stream:
+                        full_text += text_chunk
+                    final_msg = await stream.get_final_message()
+                break  # 成功，跳出重试
+            except Exception as exc:
+                last_exc = exc
+                err_repr = repr(str(exc)) or type(exc).__name__
+                if attempt < max_retries - 1:
+                    wait = 2 ** attempt * 5  # 5s, 10s
+                    print(
+                        f"      ⚠️  LLM 调用失败（attempt {attempt+1}/{max_retries}）: "
+                        f"{err_repr}，{wait}s 后重试..."
+                    )
+                    await _asyncio.sleep(wait)
+                else:
+                    raise LLMClientError(
+                        f"LLM API 调用失败（重试{max_retries}次后）: "
+                        f"{type(exc).__name__}: {exc}"
+                    ) from exc
 
         elapsed_ms = int((time.time() - t0) * 1000)
         stop_reason = getattr(final_msg, "stop_reason", "") or ""

@@ -63,3 +63,9 @@ trace.jsonl
 .claude/settings.local.json
 .claude/projects/
 .claude/sessions/
+
+# 真实验证 case 含内部未公开业务数据（PRD/业务分析/LLM代理日志），不进公开仓库
+eval/golden-cases/prd2proto/case-001-real-enterprise-workbench/input-prd.md
+eval/golden-cases/prd2proto/case-001-real-enterprise-workbench/outputs/
+eval/golden-cases/prd2proto/case-001-real-enterprise-workbench/pipeline-full-result.json
+eval/golden-cases/prd2proto/case-001-real-enterprise-workbench/run.log

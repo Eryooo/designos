@@ -1,5 +1,23 @@
 # 🎉 任务完成报告
 
+> ---
+> ## ⚠️ STATUS CORRECTION / 状态修正（2026-06-10 Batch 0）
+>
+> **本报告下方的完成度表述已被修正，请勿据此判断 skill 可用性。**
+>
+> 旧表述问题：本报告把"方法论 100% 完成"误推导为"终极目标达成""所有 skills 达到资深设计师级别"。
+> 这违反了状态口径（方法论完成 ≠ skill 可用 ≠ 真实验证通过）。
+>
+> **真实状态**（详见 `docs/STATUS-DEFINITION.md` 与 `skills/status.matrix.yaml`）：
+> - ✅ methodology_ready：方法论底座已建立
+> - ⚠️ 但这**不等于** prompt_ready / runtime_ready / validated / enterprise_ready
+> - ❌ 未达"终极目标"，未达"资深设计师级别"，未"真实验证"
+>
+> 正确表述应为："DesignOS 已建立跨 skills 的资深设计师**方法论底座**（methodology_ready）"。
+>
+> 下方原文保留作为历史记录，但其完成度结论以本修正章节为准。
+> ---
+
 **完成时间**: 2026-06-10 00:00  
 **执行模式**: 全权限自动化  
 **分支**: feature/senior-designer-paradigm-engine

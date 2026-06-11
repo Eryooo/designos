@@ -1,23 +1,31 @@
 # prd2proto
 
-从 PRD → 可交互前端原型。基于 Senior Designer Work Paradigm Engine 的能力级 pilot。
+从 PRD → 设计推理资产 → 受约束的原型 scaffold。基于 Senior Designer Work Paradigm Engine。
 
 ## Status
 
-**Capability-level Pilot** (2026-06-10)
+**状态口径见 `docs/STATUS-DEFINITION.md`（五层 readiness）**
 
-- ✅ Pipeline v2: 17-stage 设计推理链路
-- 🔄 Prompts: 框架完成，资深设计师逻辑补全中
-- 🔄 LLM Execution: 从 mock 向真实执行迁移中
-- 🔄 Schema Gates: 接入中
-- ❌ Code Generation: 框架级占位
-- ❌ Production Ready: 否
+当前真实状态（2026-06-10）：
 
-**本版本目标**: 把 prd2proto 从 framework/mock 推进到真实可执行的能力级 pilot。
+| readiness 层 | 状态 | 说明 |
+|-------------|------|------|
+| methodology_ready | ✅ | 方法论底座完整 |
+| prompt_ready | ✅ | prompts-v2 17/17 COMPLETE |
+| runtime_ready | 🔄 partial | 真实 LLM 链路打通，已验证前 5+ stage，非全 17-stage 稳定 |
+| validated | 🔄 进行中 | 真实 PRD 端到端验证（Batch 1） |
+| enterprise_ready | ❌ | 未达 |
+
+**not_allowed_claims**（禁止声称）：
+- ❌ "终极目标达成" / "达到资深设计师产出水平"
+- ❌ "production-ready" / "可生产级生成 runnable 原型"
+
+**本版本定位**：prompt_ready + runtime_partial，**真实验证进行中**。代码生成为框架级 scaffold，非生产级。
 
 ## Pipeline 版本
 
-- `pipeline.yaml`: **v2主线** (17 stages, 2026-06)
+- `pipeline.yaml`: **v2 主线** (17-stage 设计推理链路, 2026-06)
+- `pipeline.v1.yaml`: legacy 旧版（8-stage，向后兼容保留）
 - `pipeline.v1.yaml`: 旧版保留 (8 stages, 向后兼容)
 
 默认运行 v2:
