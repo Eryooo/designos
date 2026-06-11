@@ -104,17 +104,18 @@ case "$mode" in
   working)
     echo "🔍 扫描当前 working tree（git ls-files）..."
     [ -z "$USER_WORDLIST_LINES" ] && echo "⚠️  $PRIVATE_WORDLIST 不存在，仅用通用规则扫描"
-    while IFS= read -r f; do
+    # 用 -z（NUL 分隔）避免 git 对非 ASCII（中文）文件名加引号转义而被静默跳过
+    while IFS= read -r -d '' f; do
       [ -f "$f" ] || continue
       scan_text "$f" "cat \"$f\""
-    done < <(git ls-files)
+    done < <(git ls-files -z)
     ;;
   staged)
     echo "🔍 扫描暂存区（pre-commit）..."
-    while IFS= read -r f; do
+    while IFS= read -r -d '' f; do
       [ -f "$f" ] || continue
       scan_text "$f (staged)" "git show \":$f\""
-    done < <(git diff --cached --name-only --diff-filter=ACM)
+    done < <(git diff --cached --name-only --diff-filter=ACM -z)
     ;;
   file)
     [ -f "$target" ] || { echo "文件不存在: $target" >&2; exit 2; }
