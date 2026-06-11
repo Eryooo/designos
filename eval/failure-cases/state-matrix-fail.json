@@ -1,0 +1,9 @@
+{
+  "stage_id": "state-matrix",
+  "remaining_schema_critical": [],
+  "remaining_content_issues": [
+    "boundary_states 缺失：需覆盖边界态（首次/无权限/离线）"
+  ],
+  "retry_applied": false,
+  "note": "remaining after normalization + 1 retry; recorded honestly, not hand-fixed"
+}

@@ -1,0 +1,20 @@
+{
+  "stage_id": "component-strategy",
+  "remaining_schema_critical": [
+    {
+      "field": "(root)",
+      "message": "'component_library' is a required property",
+      "validator": "required",
+      "critical": true
+    },
+    {
+      "field": "(root)",
+      "message": "'component_inventory' is a required property",
+      "validator": "required",
+      "critical": true
+    }
+  ],
+  "remaining_content_issues": [],
+  "retry_applied": false,
+  "note": "remaining after normalization + 1 retry; recorded honestly, not hand-fixed"
+}
