@@ -57,3 +57,9 @@ runs/
 *.log
 trace.jsonl
 .private/
+
+# Claude Code (个人/工具配置，不应进版本库)
+.claude/settings.json
+.claude/settings.local.json
+.claude/projects/
+.claude/sessions/
