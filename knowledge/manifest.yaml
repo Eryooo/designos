@@ -453,28 +453,6 @@ assets:
     do_not_claim: 不替代真实生产打样
     owner: designos-core
     status: pilot
-  - id: design.cases.xfx-ipdesign
-    version: 0.1.0-pilot
-    domain: design
-    type: case
-    applicable_skills: [ip-design]
-    source_of_truth: knowledge/design/cases/xfx-ipdesign/README.md
-    decision_use: 武侠原型 + 既有品牌基因继承的真实落地案例 + 跑偏与改写
-    quality_bar: 含 before/after + gap 样例 + 项目专属词清单
-    do_not_claim: 项目专属符号仅作演示,不进通用方法论
-    owner: designos-core
-    status: pilot
-  - id: design.cases.xfg-ip-kimi
-    version: 0.1.0-pilot
-    domain: design
-    type: case
-    applicable_skills: [ip-design]
-    source_of_truth: knowledge/design/cases/xfg-ip-kimi/README.md
-    decision_use: 企业效率场景型 IP 的提示词与状态延展精细化案例
-    quality_bar: 含 before/after + gap 样例 + 项目专属词清单
-    do_not_claim: 项目专属符号仅作演示,不进通用方法论
-    owner: designos-core
-    status: pilot
   - id: design.strategy.brand-strategy-methodology
     version: 0.1.0-pilot
     domain: design
