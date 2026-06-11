@@ -1,5 +1,10 @@
 # prd2proto v2 真实端到端验证报告 (Run Report)
 
+> ⚠️ **脱敏说明**：本报告基于真实企业内部 PRD 运行，产品名/平台名/LLM代理已脱敏。原始 PRD 与 stage outputs 含未公开业务数据，不进公开仓库（见 .gitignore），本地保留供复现。
+>
+> 报告保留的是**方法论价值**：执行统计、schema 根因、质量评分、修复路径。
+
+
 > **本报告记录真实输入、真实执行、真实输出、真实失败。无任何手工修饰 LLM 输出。**
 
 ---
@@ -9,7 +14,7 @@
 | 项 | 值 |
 |----|----|
 | Case ID | case-001-real-enterprise-workbench |
-| 输入 PRD | 小飞侠 MVP（企业内部 AI 助手 + 技能市场，5 大模块，1286 字）|
+| 输入 PRD | 企业AI助手（脱敏）（企业内部 AI 助手 + 技能市场，5 大模块，1286 字）|
 | PRD 类型 | 真实企业内部 PRD（非 toy/placeholder）|
 | 复杂度 | 中等 |
 | 执行日期 | 2026-06-11 |
@@ -24,7 +29,7 @@
 | 模型 | claude-opus-4-8 |
 | max_tokens | 32768 |
 | LLM 调用 | 真实（非 mock）|
-| 凭证 | ANTHROPIC_AUTH_TOKEN（讯飞代理 one.iflytek.com）|
+| 凭证 | ANTHROPIC_AUTH_TOKEN（内部LLM代理）|
 | 网络重试 | 3 次指数退避（应对瞬时抖动）|
 | 截断防护 | 续写 + JSON auto-repair |
 | 总 token 消耗 | 192,614 in / 92,109 out |
