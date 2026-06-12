@@ -2,7 +2,8 @@
 set -euo pipefail
 
 # DesignOS Install Script
-# Usage: curl -fsSL https://raw.githubusercontent.com/<YOUR_ORG>/<YOUR_INTERNAL_REPO>/main/install.sh | bash
+# Usage: npx designos@latest
+#        (or run this script with LOCAL_SOURCE pointing at a package checkout)
 #
 # ⚠️  请在 macOS 终端 / Linux shell 中直接运行，不要让 IDE 里的 AI 代跑
 #     IDE AI 沙箱写不了 ~/.claude/skills 等全局目录，会降级成项目内安装，
@@ -16,9 +17,7 @@ set -euo pipefail
 #   - Cursor (IDE)      → ~/.cursor/skills-cursor/
 #   - WorkBuddy (IDE)   → ~/.workbuddy/skills/
 
-VERSION="0.5.0a1"
-REPO="<YOUR_ORG>/<YOUR_INTERNAL_REPO>"
-BRANCH="main"
+VERSION="0.7.0"
 
 # Colors
 RED='\033[0;31m'
@@ -103,28 +102,10 @@ if [ -n "${LOCAL_SOURCE:-}" ]; then
   EXTRACTED="$LOCAL_SOURCE"
   ok "本地源: $LOCAL_SOURCE"
 else
-  header "下载 DesignOS Skills"
-
-  ARCHIVE_URL="https://github.com/$REPO/archive/refs/heads/$BRANCH.tar.gz"
-
-  if command -v curl &>/dev/null; then
-    curl -fsSL "$ARCHIVE_URL" -o "$TMPDIR/designos.tar.gz"
-  else
-    wget -q "$ARCHIVE_URL" -O "$TMPDIR/designos.tar.gz"
-  fi
-
-  tar -xzf "$TMPDIR/designos.tar.gz" -C "$TMPDIR"
-
-  # Find extracted directory (could be designos-main or Agent-design-main)
-  EXTRACTED=$(find "$TMPDIR" -maxdepth 1 -type d ! -name "$(basename "$TMPDIR")" | head -1)
-
-  if [ -z "$EXTRACTED" ] || [ ! -d "$EXTRACTED/skills" ]; then
-    err "下载解压失败，找不到 skills/ 目录。"
-    err "请检查网络连接或手动下载: https://github.com/$REPO"
-    exit 1
-  fi
-
-  ok "下载完成"
+  err "Direct GitHub fallback install is not supported in this public-safe release."
+  err "Please install via:"
+  err "  npx designos@latest"
+  exit 1
 fi
 
 # -------------------------------------------------------------------
@@ -184,7 +165,7 @@ case "${1:-help}" in
     fi
     ;;
   update)
-    npx <YOUR_INTERNAL_PACKAGE>
+    npx designos@latest
     ;;
   list)
     echo "已安装的 Skills:"
@@ -206,7 +187,7 @@ case "${1:-help}" in
     echo "命令："
     echo "  designos list     列出已安装的 skills"
     echo "  designos path     输出 skills 安装路径"
-    echo "  designos update   升级到最新版（等同 npx <YOUR_INTERNAL_PACKAGE>）"
+    echo "  designos update   升级到最新版（等同 npx designos@latest）"
     echo "  designos inject   注入 AGENTS.md 到当前目录（IDE 不识别时兜底）"
     echo "  designos help     显示帮助"
     ;;
@@ -350,7 +331,7 @@ if [ "$INSTALL_MODE" = "local" ]; then
   printf "  仅在当前项目目录（$PWD）的 IDE 会话里能用 /uxeval\n"
   echo ""
   printf "  ${BOLD}建议${NC} → 退出 IDE，在 macOS ${BOLD}终端 App${NC} 里重新运行：\n"
-  printf "         ${BLUE}npx <YOUR_INTERNAL_PACKAGE>${NC}\n"
+  printf "         ${BLUE}npx designos@latest${NC}\n"
   echo ""
   printf "  这样 skill 会装到 ~/.designos 并软链到所有 IDE 的全局 skills 目录，\n"
   printf "  之后在任何项目目录都能 /uxeval。\n"

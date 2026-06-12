@@ -7,10 +7,11 @@
 Transform design expertise into reusable AI skills for Claude Code, Cursor, and more.
 
 ![Skills](https://img.shields.io/badge/skills-5-purple?style=for-the-badge)
-![Status](https://img.shields.io/badge/status-internal_pilot-yellow?style=for-the-badge)
+![Status](https://img.shields.io/badge/status-pilot_baseline-yellow?style=for-the-badge)
 [![License](https://img.shields.io/badge/license-Apache%202.0-orange?style=for-the-badge)](LICENSE)
 
-> **Internal pilot — not a public release.** Status of record:
+> **Public-safe pilot baseline.** Use with review — **not** enterprise-ready, and
+> not all skills are at senior-designer level yet. Status of record:
 > [`INTERNAL-PILOT-README.md`](INTERNAL-PILOT-README.md) · [`REVIEW-MANIFEST.md`](REVIEW-MANIFEST.md)
 
 [Quick Start](#-quick-start) • [Skills](#-skills) • [Documentation](docs/README.md) • [Examples](docs/examples/)
@@ -21,11 +22,16 @@ Transform design expertise into reusable AI skills for Claude Code, Cursor, and 
 
 ## 🚀 Quick Start
 
-> Internal pilot is distributed as a clean snapshot, **not** a public npm package.
-> Install from your internal private repo / registry rather than the public registry.
+> Pilot baseline. Use with review — not enterprise-ready, not all-skills senior-level yet.
 
 ```bash
-# from the internal private repo checkout
+# Install skills into your AI coding assistant (Claude Code, Cursor, Trae, ...)
+npx designos@latest
+```
+
+For local development from a source checkout:
+
+```bash
 pip install -e ".[dev]"
 ```
 
@@ -204,7 +210,7 @@ output/brand-creative/
 
 ## 💬 Community
 
-- **Internal pilot feedback** — file issues/discussions in your internal private repo
+- **Feedback** — file issues/discussions on the project repository
 - **[Changelog](CHANGELOG.md)** — Release notes
 
 ---
@@ -220,7 +226,7 @@ output/brand-creative/
 
 ## 📊 Quality & Status
 
-> **Internal pilot — not public release, not enterprise-ready, not all-skills senior-level.**
+> **Public-safe pilot baseline — not enterprise-ready, not all-skills senior-level.**
 > The authoritative status source is `INTERNAL-PILOT-README.md` / `REVIEW-MANIFEST.md`.
 
 - ✅ Per-skill unit tests pass when run individually (some cross-skill collection
@@ -239,8 +245,8 @@ output/brand-creative/
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ```bash
-# Clone and install (replace with your internal private repo URL)
-git clone <YOUR_INTERNAL_PRIVATE_REPO_URL>
+# Clone and install for local development
+git clone https://github.com/Eryooo/designos.git
 cd designos
 pip install -e ".[dev]"
 
