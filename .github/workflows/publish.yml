@@ -1,9 +1,8 @@
 name: Publish to PyPI
 
+# Manual-only. Tag pushes (v*) do NOT auto-publish to PyPI or create GitHub
+# Releases, to avoid accidental cross-channel publishing during npm releases.
 on:
-  push:
-    tags:
-      - "v*"
   workflow_dispatch:
     inputs:
       target:
@@ -78,7 +77,6 @@ jobs:
   publish-pypi:
     needs: build
     if: >-
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')) ||
       (github.event_name == 'workflow_dispatch' &&
        github.event.inputs.target == 'pypi')
     runs-on: ubuntu-latest
@@ -97,7 +95,9 @@ jobs:
 
   github-release:
     needs: publish-pypi
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: >-
+      (github.event_name == 'workflow_dispatch' &&
+       github.event.inputs.target == 'pypi')
     runs-on: ubuntu-latest
     permissions:
       contents: write
