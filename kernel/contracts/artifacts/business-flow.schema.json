@@ -1,0 +1,224 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/business-flow.schema.json",
+  "title": "Business Flow",
+  "description": "业务流程建模 artifact，包含状态机、权限矩阵、异常处理、并发规则",
+  "allOf": [
+    {
+      "$ref": "./artifact-base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "business_object": {
+          "type": "object",
+          "description": "核心业务对象（订单/工单/退款单等）",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "业务对象名称"
+            },
+            "english_name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string"
+            },
+            "lifecycle_stages": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": ["name"]
+        },
+        "states": {
+          "type": "array",
+          "description": "业务状态列表",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "properties": {
+              "state_id": {
+                "type": "string",
+                "pattern": "^S-\\d{3}$"
+              },
+              "state_name": {
+                "type": "string"
+              },
+              "state_type": {
+                "type": "string",
+                "enum": ["normal", "exception", "terminal"]
+              },
+              "description": {
+                "type": "string"
+              },
+              "is_initial": {
+                "type": "boolean"
+              },
+              "is_terminal": {
+                "type": "boolean"
+              },
+              "business_rules": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "data_requirements": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "allowed_transitions": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            },
+            "required": ["state_id", "state_name", "state_type"]
+          }
+        },
+        "transitions": {
+          "type": "array",
+          "description": "状态转换规则",
+          "items": {
+            "type": "object",
+            "properties": {
+              "transition_id": {
+                "type": "string",
+                "pattern": "^T-\\d{3}$"
+              },
+              "from_state": {"type": "string"},
+              "to_state": {"type": "string"},
+              "trigger": {"type": "string"},
+              "trigger_type": {
+                "type": "string",
+                "enum": ["user_action", "system_event", "time_based"]
+              },
+              "conditions": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "side_effects": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "rollback_conditions": {
+                "type": "array",
+                "items": {"type": "string"}
+              },
+              "timeout_rule": {
+                "type": "object",
+                "properties": {
+                  "duration": {"type": "string"},
+                  "action": {"type": "string"}
+                }
+              }
+            },
+            "required": ["from_state", "to_state", "trigger"]
+          }
+        },
+        "permission_matrix": {
+          "type": "object",
+          "description": "三维权限矩阵: 状态 × 角色 × 操作",
+          "additionalProperties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "allowed_actions": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "forbidden_actions": {
+                  "type": "array",
+                  "items": {"type": "string"}
+                },
+                "visibility_rules": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        },
+        "exception_handlers": {
+          "type": "array",
+          "description": "异常处理（系统/业务/用户）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "exception_type": {
+                "type": "string",
+                "enum": ["业务异常", "系统异常", "用户异常"]
+              },
+              "exception_code": {
+                "type": "string",
+                "pattern": "^E-\\d{3}$"
+              },
+              "exception_name": {"type": "string"},
+              "detection_point": {"type": "string"},
+              "detection_rule": {"type": "string"},
+              "user_message": {"type": "string"},
+              "recovery_path": {"type": "string"},
+              "fallback_state": {"type": ["string", "null"]}
+            },
+            "required": ["exception_type", "detection_point", "user_message"]
+          }
+        },
+        "concurrency_rules": {
+          "type": "array",
+          "description": "并发竞态处理规则",
+          "items": {
+            "type": "object",
+            "properties": {
+              "scenario": {"type": "string"},
+              "detection": {"type": "string"},
+              "rule": {"type": "string"},
+              "implementation": {"type": "string"}
+            },
+            "required": ["scenario", "rule"]
+          }
+        },
+        "business_rules": {
+          "type": "array",
+          "description": "全局业务规则（超时/权限/合规）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rule_id": {
+                "type": "string",
+                "pattern": "^BR-\\d{3}$"
+              },
+              "rule_name": {"type": "string"},
+              "rule_type": {
+                "type": "string",
+                "enum": ["timeout", "permission", "compliance", "data_integrity"]
+              },
+              "description": {"type": "string"},
+              "trigger": {"type": "string"},
+              "action": {"type": "string"},
+              "reason": {"type": "string"}
+            },
+            "required": ["rule_name", "description"]
+          }
+        },
+        "related_flows": {
+          "type": "array",
+          "description": "关联的其他业务流程",
+          "items": {
+            "type": "object",
+            "properties": {
+              "flow_name": {"type": "string"},
+              "interaction": {"type": "string"}
+            }
+          }
+        }
+      },
+      "required": [
+        "business_object",
+        "states",
+        "transitions",
+        "permission_matrix",
+        "exception_handlers"
+      ]
+    }
+  ]
+}

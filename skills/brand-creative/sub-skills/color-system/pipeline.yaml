@@ -1,0 +1,44 @@
+version: "1.0"
+type: pipeline
+
+inputs:
+  - brand_brief
+
+outputs:
+  - color_palette
+
+stages:
+  - id: analyze_color_emotion
+    type: llm
+    # 从 brand_brief 人格关键词推导色彩情绪与角色需求
+    prompt: prompts/01-analyze-color-emotion.md
+    inputs:
+      - brand_brief
+    outputs:
+      - color_emotion_analysis
+    knowledge:
+      - ../../../../knowledge/design/visual/color-system-methodology.md
+      - ../../../../knowledge/design/quality/brand-identity-quality-rubric.md
+      - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
+
+  - id: generate_color_palette
+    type: llm
+    # 产出结构化色彩系统(主/辅/中性/语义色 + 对比度 + 介质差异)
+    prompt: prompts/02-generate-color-palette.md
+    inputs:
+      - color_emotion_analysis
+      - brand_brief
+    outputs:
+      - color_palette
+    knowledge:
+      - ../../../../knowledge/design/visual/color-system-methodology.md
+      - ../../../../knowledge/design/quality/brand-identity-quality-rubric.md
+      - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
+
+quality_checks:
+  - checkpoint: C3-color-system
+    rules:
+      - 主色/辅色对比度 ≥ 4.5:1 (WCAG AA)
+      - accessibility 字段必须是 "pass" 或 "needs_manual_check"
+      - print_color_risk 必须存在(高饱和色需预警色差)
+      - dark_light_usage 必须定义明暗背景双模式

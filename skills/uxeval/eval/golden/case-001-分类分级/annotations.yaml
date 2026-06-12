@@ -1,0 +1,80 @@
+---
+case_id: case-001-分类分级
+title: 分类分级数据规则配置平台 UXEval
+mode: client
+created: 2026-05-15
+fictional: true
+disclaimer: |
+  本案例为脱敏的虚构数据。结构、数量、模式参考真实评估产物，
+  但所有具体内容（产品名、模块名、问题描述、截图）均为虚构。
+
+# 标注信息（用于 promptfoo 自动评估）
+
+dimensions:
+  prd_understanding:
+    expected_modules_count: 3
+    expected_roles_count: 2
+    expected_key_tasks_count: 1
+    must_include_modules: ["规则草稿", "版本管理", "审批流"]
+    must_include_roles: ["运营专员", "数据管理员"]
+
+  principle_mapping:
+    expected_principles_count_min: 6
+    expected_principles_count_max: 12
+    must_include: ["F2", "S1", "F1", "P3"]
+    must_exclude_reason: ["P1 极简", "F4 帮助文档"]   # B 端表单密度高
+
+  journey_modeling:
+    expected_stages_count_min: 4
+    expected_stages_count_max: 7
+    must_include_stages: ["进入与定位", "任务执行", "结果理解"]
+    must_have_critical_pain_stage: true
+
+  task_generation:
+    expected_total_tasks_min: 12
+    expected_total_tasks_max: 25
+    every_task_has_principles: true
+    every_module_has_min_tasks: 2
+    no_function_test_tasks: true   # 检查是否混入功能测试
+
+  issue_attribution:
+    expected_issues_count_min: 15
+    expected_issues_count_max: 35
+    every_issue_has_evidence: true
+    every_issue_has_impact: true
+    every_issue_has_suggestion: true
+    every_issue_has_source_basis: true
+    expected_severity_distribution:
+      critical_min: 2
+      critical_max: 8
+      major_min: 6
+      major_max: 18
+
+# 必须出现的关键问题（黄金问题）
+golden_issues:
+  - title_keywords: ["待办", "视觉区分"]
+    expected_severity: major
+    expected_principles: ["S2", "P3"]
+  - title_keywords: ["保存", "草稿", "丢失"]
+    expected_severity: critical
+    expected_principles: ["S1", "F1"]
+  - title_keywords: ["规则测试", "结果", "不一致"]
+    expected_severity: critical
+    expected_principles: ["F2", "F5"]
+
+# 必须不出现的反例（防跑偏）
+forbidden_issues:
+  - reason: 功能存在性问题，不属于 UXEval
+    title_keywords: ["接口未实现", "字段缺失", "PRD 要求未做"]
+  - reason: 主观偏好，不应作为 issue
+    title_keywords: ["按钮颜色丑", "我觉得不好看"]
+
+# 评分标准
+scoring:
+  weight:
+    prd_understanding: 0.10
+    principle_mapping: 0.15
+    journey_modeling: 0.20
+    task_generation: 0.20
+    issue_attribution: 0.35
+  pass_threshold: 0.75

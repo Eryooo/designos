@@ -1,0 +1,25 @@
+name: brand-refresh
+description: |
+  品牌焕新:审计现状 → 重定策略 → 更新 VI。适合已有品牌做升级。
+  并行边界:audit 先行串行(后续依赖审计结论),VI 更新阶段并行。
+
+steps:
+  # brand-audit 必须先行(后续策略/VI 都依赖审计发现的差距)
+  - type: sequential
+    sub_skills: [brand-audit]
+    on_failure: abort
+
+  # brand-strategy 依赖审计结论,串行
+  - type: sequential
+    sub_skills: [brand-strategy]
+    on_failure: abort
+
+  # VI 更新:logo/color/typography 并行
+  - type: parallel
+    sub_skills: [logo-design, color-system, typography-system]
+    on_failure: continue   # 焕新可能只更新部分视觉元素
+
+  # visual-identity 汇总,串行
+  - type: sequential
+    sub_skills: [visual-identity]
+    on_failure: abort

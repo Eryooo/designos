@@ -1,0 +1,26 @@
+{
+  "stage_id": "information-architecture",
+  "remaining_schema_critical": [
+    {
+      "field": "(root)",
+      "message": "'sitemap' is a required property",
+      "validator": "required",
+      "critical": true
+    },
+    {
+      "field": "(root)",
+      "message": "'navigation' is a required property",
+      "validator": "required",
+      "critical": true
+    },
+    {
+      "field": "(root)",
+      "message": "'route_table' is a required property",
+      "validator": "required",
+      "critical": true
+    }
+  ],
+  "remaining_content_issues": [],
+  "retry_applied": false,
+  "note": "remaining after normalization + 1 retry; recorded honestly, not hand-fixed"
+}

@@ -1,0 +1,168 @@
+# Analysis Archetype — pilot baseline
+#
+# STATUS: Pilot baseline, calibrated from real ai-analytics A1 implementation.
+# This archetype is no longer provisional — it reflects the actual structure,
+# stage slots, checkpoints, and gates of the first shipped analysis skill.
+#
+# Calibration source:
+#   - skills/ai-analytics (A1 pilot baseline, committed 2026-06-01)
+#   - Validated via `validate --archetype analysis` (9/9 dimensions passed)
+#
+# Known pilot boundaries (not production-grade yet):
+#   - data_collection / report_generation are LLM synthesis, not real tools
+#   - No real competitor scraping; consumes user-provided material
+#   - analysis_report / comparison_matrix are human-readable evidence only,
+#     not promised for machine consumption
+#
+# Schema: .factory/archetypes/archetype_schema.py :: ArchetypeSpec
+
+name: analysis
+version: 0.1.0-pilot
+description: |
+  Skills that produce structured analysis reports + upstream products consumed
+  by other skills (uxeval, prd2proto, ip-design, brand-creative). Output is
+  "what we found about a competitor / market / user segment" — not issues
+  (evaluation) and not code (generation).
+
+  Pilot baseline: calibrated from ai-analytics A1. Stage slots reflect real
+  LLM-synthesis implementation, not idealized tool automation.
+representative_skill: ai-analytics
+
+# ─────────────────────────────────────────────────────────────────────
+# Frontmatter expectations (same baseline as other archetypes)
+# ─────────────────────────────────────────────────────────────────────
+frontmatter:
+  required_keys:
+    - name
+    - version
+    - type
+    - description
+    - requires
+    - outputs
+  required_kernel_range: ">=1.0.0,<2.0.0"
+  skill_type: pipeline
+
+# ─────────────────────────────────────────────────────────────────────
+# Required outputs — ai-analytics 4 canonical products
+# ─────────────────────────────────────────────────────────────────────
+outputs:
+  required:
+    - analysis_report
+    - design_strategy
+    - comparison_matrix
+    - user_persona
+  optional:
+    - heuristic_checklist
+    - evidence_pack
+
+# ─────────────────────────────────────────────────────────────────────
+# Stage slots — 6 段方法论：需求 → 采集 → 方法论 → 分析 → 策略 → 报告
+# Calibrated from ai-analytics A1 pilot: data_collection / report_generation
+# are LLM synthesis (consume user-provided material / render markdown), not
+# real tools. This reflects pilot reality, not idealized automation.
+# ─────────────────────────────────────────────────────────────────────
+stage_slots:
+  - slot_id: requirement_understanding
+    purpose: "Understand the analysis brief and target market/competitor scope."
+    stage_type: llm
+    required: true
+    required_inputs: [scope_md]
+
+  - slot_id: data_collection
+    purpose: "Organize user-provided competitor material (pilot: no real scraping)."
+    stage_type: llm
+    required: true
+
+  - slot_id: methodology_selection
+    purpose: "Pick analysis methodologies (PEST/SWOT/KANO/AIPL/USO) per scenario."
+    stage_type: llm
+    required: true
+    required_outputs: [methodologies]
+
+  - slot_id: analysis
+    purpose: "Apply chosen methodologies to collected data."
+    stage_type: llm
+    required: true
+    required_outputs: [analysis_findings]
+
+  - slot_id: strategy_synthesis
+    purpose: "Synthesize design strategy + user persona from analysis."
+    stage_type: llm
+    required: true
+    required_outputs: [design_strategy, user_persona, data_completeness_assessment]
+
+  - slot_id: report_generation
+    purpose: "Render analysis report + comparison matrix (pilot: LLM markdown, not tool)."
+    stage_type: llm
+    required: true
+    required_outputs: [analysis_report, comparison_matrix]
+
+# ─────────────────────────────────────────────────────────────────────
+# Checkpoint slots — C1/C2 (calibrated from ai-analytics A1)
+# ─────────────────────────────────────────────────────────────────────
+checkpoint_slots:
+  - checkpoint_id: C1
+    after_slot: data_collection
+    purpose: "User confirms collected competitor scope is representative."
+    required: true
+
+  - checkpoint_id: C2
+    after_slot: methodology_selection
+    purpose: "User confirms chosen methodologies fit the brief."
+    required: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Gate slots — QG1 data-completeness gate (calibrated from ai-analytics A1)
+# ─────────────────────────────────────────────────────────────────────
+gate_slots:
+  - gate_id: QG1
+    on_slot: strategy_synthesis
+    purpose: "Block strategy when collected data coverage is insufficient."
+    required: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Mode semantics — analysis 的 mode 是数据来源（暂未启用）
+# ─────────────────────────────────────────────────────────────────────
+mode_semantics:
+  semantic_type: data_source
+  allowed_modes: []
+  must_be_single_mode: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Evidence contract — analysis 要求数据完整度但不要求 evidence trustworthy
+# 阈值通过 strategy_synthesis 的 gate 控制
+# ─────────────────────────────────────────────────────────────────────
+evidence_contract:
+  required_fields:
+    - data_completeness_assessment
+  trusted_evidence_threshold: 0.85
+  fallback_evidence_threshold: 0.70
+
+# ─────────────────────────────────────────────────────────────────────
+# Delivery contract — 复用四态语义
+# ─────────────────────────────────────────────────────────────────────
+delivery_contract:
+  required_states:
+    - final_delivery_ready
+    - fallback_safe
+    - supplement_required
+    - blocked
+
+# ─────────────────────────────────────────────────────────────────────
+# Directory expectations — 与 evaluation 一致
+# ─────────────────────────────────────────────────────────────────────
+directory:
+  required_directories:
+    - prompts
+    - reference
+    - templates
+    - eval
+    - tests
+  required_files:
+    - SKILL.md
+    - pipeline.yaml
+    - constitution.md
+    - README.md
+  eval_layout: true
+
+constitution_required: true

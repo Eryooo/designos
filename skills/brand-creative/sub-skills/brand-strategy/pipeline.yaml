@@ -1,0 +1,52 @@
+version: "1.0"
+type: pipeline
+
+inputs:
+  - product_brief
+  - target_user
+  - competitor_matrix  # optional
+  - brand_audit_report  # optional
+
+outputs:
+  - brand_brief
+
+stages:
+  - id: analyze_context
+    type: llm
+    # 分析产品定位/目标用户/竞品态势,识别品牌战略机会点
+    prompt: prompts/01-analyze-context.md
+    inputs:
+      - product_brief
+      - target_user
+      - competitor_matrix
+      - brand_audit_report
+    outputs:
+      - context_analysis
+    knowledge:
+      - ../../../../knowledge/design/strategy/brand-strategy-methodology.md
+      - ../../../../knowledge/design/quality/brand-identity-quality-rubric.md
+      - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
+
+  - id: generate_brand_brief
+    type: llm
+    # 产出品牌策略基线(北极星/定位/差异化/核心价值/人格关键词)
+    prompt: prompts/02-generate-brand-brief.md
+    inputs:
+      - context_analysis
+      - product_brief
+      - target_user
+      - competitor_matrix
+    outputs:
+      - brand_brief
+    knowledge:
+      - ../../../../knowledge/design/strategy/brand-strategy-methodology.md
+      - ../../../../knowledge/design/quality/brand-identity-quality-rubric.md
+      - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
+
+quality_checks:
+  - checkpoint: C1-brand-strategy
+    rules:
+      - north_star 必须是情感化价值,不是功能描述
+      - competitor_matrix 存在时,differentiation.basis 必须是 "competitor_matrix"
+      - competitor_matrix 缺失或 status=insufficient_data 时,differentiation.basis 必须是 "inferred"
+      - personality_keywords 必须 3-5 个,覆盖情感/价值/行为维度

@@ -1,0 +1,39 @@
+{
+  "raw_issues": [
+    {
+      "raw_id": "RAW-001",
+      "principle_id": "S2",
+      "module_id": "M-WORKBENCH",
+      "found_at": "screens/工作台.png",
+      "raw_observation": "待办无视觉分类"
+    },
+    {
+      "raw_id": "RAW-BAD-002",
+      "principle_id": null,
+      "module_id": "M-001",
+      "found_at": "screens/规则.png",
+      "raw_observation": "保存按钮接口未实现，点击没有任何反应（应被排除：功能存在性问题）"
+    },
+    {
+      "raw_id": "RAW-BAD-003",
+      "principle_id": null,
+      "module_id": "M-002",
+      "found_at": "screens/版本.png",
+      "raw_observation": "PRD 要求版本对比功能未做（应被排除：功能存在性问题，不属于体验范畴）"
+    },
+    {
+      "raw_id": "RAW-BAD-004",
+      "principle_id": null,
+      "module_id": "M-003",
+      "found_at": "screens/审批.png",
+      "raw_observation": "审批字段缺失（应被排除：PRD 缺失字段是产品问题）"
+    },
+    {
+      "raw_id": "RAW-005",
+      "principle_id": "F2",
+      "module_id": "M-001",
+      "found_at": "screens/规则保存.png",
+      "raw_observation": "保存无加载反馈"
+    }
+  ]
+}

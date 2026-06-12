@@ -1,0 +1,260 @@
+# Brand Creative Knowledge Readiness Matrix (B1.0)
+#
+# 逐个审计 13 个子技能的知识就绪状态,区分:
+#   direct_reuse   — 共享资产可直接使用
+#   partial_reuse  — 只可通过私有 adapter 部分使用(非完整覆盖)
+#   must_create    — 开发 runtime 前必须新增(P0 阻塞)
+#   planned        — 非当前批次阻断项
+#   not_applicable — 不适用
+#
+# 守则:不得因为某资产含相似词汇就宣称它足以支撑品牌设计。
+# 守则:ready_for_parallel 子技能的 P0 knowledge gap 必须 = 0(active 资产完整覆盖)。
+
+schema_version: "0.1.0"
+audit_date: "2026-06-04"
+
+# ─────────────────────────────────────────────────────────────────────
+# 关键审计修正(B1.0 必须纠正的过度宣称)
+# ─────────────────────────────────────────────────────────────────────
+critical_corrections:
+  - asset: design.strategy.brand-strategy-alignment
+    correction: |
+      偏 IP Design(策略对齐服务于 IP 角色)。不能直接冒充完整通用品牌战略。
+      brand-strategy 子技能的 P0 知识由 B1.0 新增的 design.strategy.brand-strategy-methodology
+      提供(direct_reuse);brand-strategy-alignment 仅作 partial_reuse 参考。
+  - asset: design.quality.ip-design-quality-rubric
+    correction: |
+      IP 角色设计专用(含世界观/人格/IP 一致性维度)。不能作为 Brand Creative 的完整质量标准。
+      brand-creative 一律改用 B1.0 新增的 design.quality.brand-identity-quality-rubric。
+      禁止用 IP rubric 冒充品牌创意质量标准。
+  - asset: design.ip.content-narrative
+    correction: |
+      IP 内容叙事偏向(围绕 IP 角色的叙事)。只能标 partial_reuse,不能标完整覆盖品牌内容策略。
+  - asset: design.ip.brand-material-realization
+    correction: |
+      IP 物料方法论偏向。只能标 partial_reuse,不能标完整覆盖品牌物料。
+
+# ─────────────────────────────────────────────────────────────────────
+# 13 子技能逐项就绪审计
+# ─────────────────────────────────────────────────────────────────────
+sub_skills:
+  - id: brand-strategy
+    contract_status: ready_for_parallel
+    p0_knowledge_gap: 0
+    knowledge:
+      direct_reuse:
+        - id: design.strategy.brand-strategy-methodology
+          note: B1.0 新增,完整覆盖通用品牌策略(P0 满足)
+        - id: design.quality.brand-identity-quality-rubric
+        - id: design.quality.brand-creative-failure-modes
+        - id: design.templates.brand-brief
+      partial_reuse:
+        - id: design.strategy.brand-strategy-alignment
+          blocking: false
+          note: IP 偏向,仅作可选参考;P0 已由 methodology 满足,不阻塞
+    schema_ready: true   # brand_brief.schema.json
+    runtime_deps_ready: true  # competitive-analysis 可选;直接调用无强制上游
+    ready_reason: P0 知识完整(direct_reuse methodology)+ schema 完整 + 无未开发强制上游
+
+  - id: competitive-analysis
+    contract_status: ready_for_parallel
+    p0_knowledge_gap: 0
+    knowledge:
+      direct_reuse:
+        - id: research.competitor-analysis
+          note: K1 已有,直接覆盖竞品分析方法
+    schema_ready: true   # competitor_matrix + market_gap_report
+    runtime_deps_ready: true  # 独立起点,无上游
+    ready_reason: P0 知识完整 + schema 完整 + 独立起点无上游
+
+  - id: logo-design
+    contract_status: ready_for_parallel
+    p0_knowledge_gap: 0
+    knowledge:
+      direct_reuse:
+        - id: design.visual.logo-design-methodology
+          note: B1.0 新增,完整覆盖 logo 专项(黑白/缩放/轮廓/组合/辅助/商标风险)
+        - id: design.visual.image-prompt-system
+        - id: design.quality.brand-identity-quality-rubric
+        - id: design.quality.brand-creative-failure-modes
+      partial_reuse:
+        - id: design.visual.visual-translation
+          blocking: false
+          note: IP 形态偏向,仅形态/识别度可选参考;P0 已由 methodology 满足
+    schema_ready: true   # logo_spec + logo_prompt_pack
+    runtime_deps_ready: true  # 依赖 brand-strategy(同批可开发,基于冻结契约)
+    ready_reason: P0 知识完整(direct_reuse logo methodology)+ schema 完整 + 上游契约已冻结
+
+  - id: color-system
+    contract_status: ready_for_parallel
+    p0_knowledge_gap: 0
+    knowledge:
+      direct_reuse:
+        - id: design.visual.color-system-methodology
+          note: B1.0 新增,完整覆盖色彩系统(角色/对比度/明暗/介质/可访问性)
+        - id: design.quality.brand-identity-quality-rubric
+      partial_reuse:
+        - id: design.visual.visual-translation
+          blocking: false
+          note: IP 色彩情绪偏向,可选参考;P0 已由 methodology 满足
+    schema_ready: true   # color_palette
+    runtime_deps_ready: true
+    ready_reason: P0 知识完整 + schema 完整 + 上游契约已冻结
+
+  - id: typography-system
+    contract_status: ready_for_parallel
+    p0_knowledge_gap: 0
+    knowledge:
+      direct_reuse:
+        - id: design.visual.typography-system-methodology
+          note: B1.0 新增,完整覆盖字体系统(配对/字重/比例/行高/授权/跨端)
+        - id: design.quality.brand-identity-quality-rubric
+    schema_ready: true   # typography_spec
+    runtime_deps_ready: true
+    ready_reason: P0 知识完整 + schema 完整 + 上游契约已冻结
+
+  - id: brand-voice
+    contract_status: ready_for_parallel
+    p0_knowledge_gap: 0
+    knowledge:
+      direct_reuse:
+        - id: design.persona.voice-and-behavior-boundary
+          note: K1 已有,品牌层声音直接适用
+        - id: design.quality.brand-identity-quality-rubric
+    schema_ready: true   # brand_voice_guide
+    runtime_deps_ready: true
+    ready_reason: P0 知识完整 + schema 完整 + 上游契约已冻结
+
+  - id: brand-audit
+    contract_status: ready_for_parallel
+    p0_knowledge_gap: 0
+    knowledge:
+      direct_reuse:
+        - id: design.strategy.brand-audit-methodology
+          note: B1.0 新增,完整覆盖品牌审计(健康度/差距/对标/优先级)
+        - id: design.quality.brand-identity-quality-rubric
+    schema_ready: true   # brand_audit_report
+    runtime_deps_ready: true  # 独立起点
+    ready_reason: P0 知识完整 + schema 完整 + 独立起点
+
+  - id: visual-identity
+    contract_status: ready_after_upstream
+    p0_knowledge_gap: 0
+    knowledge:
+      direct_reuse:
+        - id: design.quality.brand-identity-quality-rubric
+        - id: design.quality.professional-gap-report
+      partial_reuse:
+        - id: design.visual.visual-translation
+          blocking: false
+        - id: design.quality.ip-design-quality-rubric
+          blocking: false
+          note: 禁止冒充;仅品牌识别维度可参考,质量以 brand-identity-quality-rubric 为准
+    schema_ready: true   # vi_manual
+    runtime_deps_ready: false  # 必须等 logo-design + color-system + typography-system 全部开发完成
+    ready_reason: |
+      知识与 schema 就绪,但运行时汇总 logo/color/typography 三者产物,
+      三个上游子技能尚未开发 runtime。不能与上游同批并行;须在上游完成后启动。
+
+  - id: content-strategy
+    contract_status: blocked_by_knowledge
+    p0_knowledge_gap: 1
+    knowledge:
+      partial_reuse:
+        - id: design.ip.content-narrative
+          blocking: true
+          note: IP 叙事偏向,非完整品牌内容策略覆盖;需私有 adapter 或新增 brand-content methodology
+    schema_ready: true   # content_strategy
+    runtime_deps_ready: true
+    blocked_reason: |
+      无 direct_reuse 的品牌内容策略资产。design.ip.content-narrative 是 IP 叙事偏向,
+      仅 partial_reuse(内容支柱/矩阵/节奏方法),不足以支撑完整品牌内容策略。
+      P0 gap=1:需 B1.1+ 建私有 adapter 或新增 design.strategy.brand-content-methodology。
+
+  - id: campaign-creative
+    contract_status: blocked_by_knowledge
+    p0_knowledge_gap: 1
+    knowledge:
+      direct_reuse:
+        - id: design.visual.image-prompt-system
+      partial_reuse:
+        - id: design.ip.content-narrative
+          blocking: true
+        - id: design.quality.brand-creative-failure-modes
+          blocking: false
+    schema_ready: true   # campaign_brief + creative_concepts
+    runtime_deps_ready: false  # 依赖 visual-identity + brand-voice(visual-identity 本身 ready_after_upstream)
+    blocked_reason: |
+      P0 gap=1:campaign 创意方法无 direct_reuse(content-narrative 仅 partial)。
+      且运行时依赖 visual-identity(ready_after_upstream)+ brand-voice,链路更长。
+
+  - id: brand-collateral
+    contract_status: blocked_by_knowledge
+    p0_knowledge_gap: 1
+    knowledge:
+      partial_reuse:
+        - id: design.ip.brand-material-realization
+          blocking: true
+          note: IP 物料偏向,仅通用物料规范可部分复用,非完整品牌物料覆盖
+    schema_ready: true   # collateral_spec
+    runtime_deps_ready: false  # 依赖 visual-identity
+    blocked_reason: |
+      P0 gap=1:无 direct_reuse 品牌物料资产。design.ip.brand-material-realization 是 IP 偏向。
+      需 B1.1+ 建私有 adapter 或新增品牌物料 methodology。且运行时依赖 visual-identity。
+
+  - id: digital-assets
+    contract_status: blocked_by_knowledge
+    p0_knowledge_gap: 1
+    knowledge:
+      direct_reuse:
+        - id: design.visual.image-prompt-system
+      partial_reuse:
+        - id: design.ip.brand-material-realization
+          blocking: true
+    schema_ready: true   # digital_asset_kit
+    runtime_deps_ready: false  # 依赖 visual-identity
+    blocked_reason: |
+      P0 gap=1:无 direct_reuse 数字资产规范资产(image-prompt-system 仅覆盖 prompt 部分)。
+      运行时依赖 visual-identity。
+
+  - id: brand-guidelines
+    contract_status: blocked_by_knowledge
+    p0_knowledge_gap: 1
+    knowledge:
+      direct_reuse:
+        - id: design.quality.brand-identity-quality-rubric
+        - id: design.quality.professional-gap-report
+      partial_reuse:
+        - id: design.ip.brand-material-realization
+          blocking: true
+    schema_ready: true   # brand_guidelines
+    runtime_deps_ready: false  # 汇总几乎所有上游
+    blocked_reason: |
+      最终汇总交付物,运行时依赖几乎所有上游(多数尚未开发)。
+      且品牌手册编排方法无 direct_reuse(brand-material-realization 仅 IP 偏向 partial)。
+
+# ─────────────────────────────────────────────────────────────────────
+# 就绪汇总
+# ─────────────────────────────────────────────────────────────────────
+summary:
+  ready_for_parallel:  # P0 gap=0 + schema 完整 + 无未开发强制上游(第一波可并行)
+    - brand-strategy
+    - competitive-analysis
+    - logo-design
+    - color-system
+    - typography-system
+    - brand-voice
+    - brand-audit
+  ready_after_upstream:  # 知识/schema 就绪,运行时等上游(第二波)
+    - visual-identity
+  blocked_by_knowledge:  # P0 knowledge gap > 0,需先补资产/adapter
+    - content-strategy
+    - campaign-creative
+    - brand-collateral
+    - digital-assets
+    - brand-guidelines
+  total_ready_for_parallel: 7
+  total_blocked_by_knowledge: 5
+  notes: |
+    planned P0 gap = 0(原 3 个 planned 已全部实现并移入 active)。
+    但 5 个 blocked 子技能仍有 P0 knowledge gap > 0,需 B1.1+ 补资产或 adapter。

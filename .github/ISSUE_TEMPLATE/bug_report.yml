@@ -1,0 +1,75 @@
+name: Bug Report
+description: 报告一个 Bug
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢你报告 Bug！请填写以下信息帮助我们快速定位问题。
+
+  - type: textarea
+    id: description
+    attributes:
+      label: 问题描述
+      description: 简要描述遇到的问题
+      placeholder: 例如：运行 /uxeval 时报错 "pipeline.yaml not found"
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: 复现步骤
+      description: 如何复现这个问题？
+      placeholder: |
+        1. 执行 `npx <YOUR_INTERNAL_PACKAGE>`
+        2. 在 Claude Code 中输入 `/uxeval`
+        3. 看到错误提示...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期行为
+      description: 你期望发生什么？
+      placeholder: 应该启动 UX 评估流程
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际行为
+      description: 实际发生了什么？
+      placeholder: 报错并退出
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境信息
+      description: 请提供环境信息
+      placeholder: |
+        - OS: macOS 14.0 / Windows 11 / Ubuntu 22.04
+        - Python 版本: 3.11.5
+        - DesignOS 版本: 0.6.0
+        - AI 助手: Claude Code / Cursor
+      render: markdown
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 错误日志
+      description: 如果有错误日志，请粘贴在这里
+      render: shell
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 其他信息
+      description: 其他可能有帮助的信息

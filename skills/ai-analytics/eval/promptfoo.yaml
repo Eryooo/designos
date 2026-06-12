@@ -1,0 +1,16 @@
+# Auto-generated baseline; replace with real eval cases as ai-analytics matures.
+description: ai-analytics analysis skill prompt eval set
+prompts:
+  - file://prompts/01-requirement-understanding.md
+  - file://prompts/05-strategy-synthesis.md
+  - file://prompts/06-report-generation.md
+providers:
+  - id: anthropic:messages:claude-opus-4-7
+    config:
+      max_tokens: 8000
+      temperature: 0.2
+tests:
+  - description: placeholder golden case 001 (design_strategy + user_persona)
+    vars: {}
+    assert:
+      - type: is-json

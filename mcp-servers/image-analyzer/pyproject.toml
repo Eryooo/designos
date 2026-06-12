@@ -1,0 +1,23 @@
+[project]
+name = "designos-mcp-image-analyzer"
+version = "0.1.0"
+requires-python = ">=3.11"
+description = "MCP Server for honest screenshot inventory and local metadata extraction"
+dependencies = [
+    "pydantic>=2.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+]
+vision = [
+    "Pillow>=10.0",
+]
+
+[project.scripts]
+designos-image-analyzer = "server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

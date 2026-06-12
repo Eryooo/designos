@@ -1,0 +1,22 @@
+{
+  "modules": [
+    {
+      "id": "M-001",
+      "name": "规则草稿",
+      "description": "创建与编辑规则草稿",
+      "pages": ["/rules/new", "/rules/edit/:id", "/rules/draft"]
+    },
+    {
+      "id": "M-002",
+      "name": "版本管理",
+      "description": "规则版本切换与回滚",
+      "pages": ["/rules/versions", "/rules/version/:id"]
+    },
+    {
+      "id": "M-003",
+      "name": "审批流",
+      "description": "规则审批与通知",
+      "pages": ["/approval/list", "/approval/detail/:id"]
+    }
+  ]
+}

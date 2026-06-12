@@ -1,0 +1,50 @@
+version: "1.0"
+type: pipeline
+
+inputs:
+  - visual_spec
+  - color_palette
+  - typography_spec
+
+outputs:
+  - vi_manual
+
+stages:
+  - id: integrate_visual_system
+    type: llm
+    prompt: prompts/01-integrate-visual-system.md
+    inputs:
+      - visual_spec
+      - color_palette
+      - typography_spec
+    outputs:
+      - integration_analysis
+    knowledge:
+      - ../../../../knowledge/design/visual/visual-identity-integration-methodology.md
+      - ../../../../knowledge/design/quality/brand-identity-quality-rubric.md
+      - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
+
+  - id: generate_vi_manual
+    type: llm
+    prompt: prompts/02-generate-vi-manual.md
+    inputs:
+      - integration_analysis
+      - visual_spec
+      - color_palette
+      - typography_spec
+    outputs:
+      - vi_manual
+    knowledge:
+      - ../../../../knowledge/design/visual/visual-identity-integration-methodology.md
+      - ../../../../knowledge/design/quality/professional-gap-report.md
+
+quality_checks:
+  - checkpoint: C5-visual-identity
+    rules:
+      - vi_manual.logo 必须非空且引用 visual_spec 关键规则
+      - vi_manual.color 必须非空且引用 color_palette 关键规则
+      - vi_manual.typography 必须非空且引用 typography_spec 关键规则
+      - vi_manual.application_rules 至少 5 项
+      - vi_manual.consistency_check 必须非空
+      - vi_manual.inherited_warnings 必须为数组(继承上游警告)
+      - vi_manual 不得覆盖上游 state 中的 visual_spec / color_palette / typography_spec

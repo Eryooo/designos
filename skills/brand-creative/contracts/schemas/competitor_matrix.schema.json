@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/competitor_matrix",
+  "x-output-type": "comparison_matrix",
+  "title": "competitor_matrix",
+  "description": "竞品对比矩阵。competitive-analysis 产出,kernel OutputType=comparison_matrix。",
+  "type": "object",
+  "required": [
+    "competitors"
+  ],
+  "properties": {
+    "competitors": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "visual_style": {
+            "type": "string"
+          },
+          "communication": {
+            "type": "string"
+          },
+          "market_position": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "visual_style"
+        ]
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "insufficient_data"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

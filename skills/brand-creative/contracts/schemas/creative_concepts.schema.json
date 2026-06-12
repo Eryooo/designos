@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/creative_concepts",
+  "title": "creative_concepts",
+  "description": "创意概念集合(internal)。campaign-creative 产出。",
+  "type": "object",
+  "required": [
+    "concepts"
+  ],
+  "properties": {
+    "concepts": {
+      "type": "array",
+      "minItems": 3,
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "vi_consistency": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ]
+      }
+    }
+  },
+  "additionalProperties": true
+}

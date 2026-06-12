@@ -1,0 +1,198 @@
+# Evaluation Archetype — extracted from skills/uxeval/ (frozen v1.5)
+#
+# Per CONTRACT §7, this is the canonical machine-readable spec for the
+# evaluation skill family. validate.py uses it to check skills; scaffold.py
+# uses it to generate skeletons; extract.py round-trips against it.
+#
+# Schema: .factory/archetypes/archetype_schema.py :: ArchetypeSpec
+
+name: evaluation
+version: 1.0.0
+description: |
+  Skills that produce evidence-anchored issue lists. Output is "what's wrong"
+  with citations. Quality gate is whether evidence is trustworthy enough to
+  let a finding into the main report.
+representative_skill: uxeval
+
+# ─────────────────────────────────────────────────────────────────────
+# Frontmatter expectations
+# ─────────────────────────────────────────────────────────────────────
+frontmatter:
+  required_keys:
+    - name
+    - version
+    - type
+    - description
+    - requires
+    - outputs
+  required_kernel_range: ">=1.0.0,<2.0.0"
+  skill_type: pipeline
+
+# ─────────────────────────────────────────────────────────────────────
+# Required outputs (must appear in SKILL.md `outputs:`)
+# ─────────────────────────────────────────────────────────────────────
+outputs:
+  required:
+    - issue_report             # Excel
+    - html_report              # shareable HTML
+    - evidence_pack            # screenshots / DOM / traces
+    - delivery_audit_bundle    # bounded fallback package + audit decision
+  optional:
+    - heuristic_checklist
+    - user_journey
+    - task_checklist
+    - automated_eval_trace
+    - evaluation_script
+
+# ─────────────────────────────────────────────────────────────────────
+# Stage slots — canonical pipeline topology
+# Concrete skills map their stage IDs to these slots.
+# ─────────────────────────────────────────────────────────────────────
+stage_slots:
+  - slot_id: understanding
+    purpose: "Parse PRD into modules / roles / scenarios / key_tasks."
+    stage_type: llm
+    required: true
+    required_inputs: [prd_file, scope_md]
+    required_outputs: [modules, key_tasks]
+
+  - slot_id: principle_mapping
+    purpose: "Pick heuristic principles relevant to scope."
+    stage_type: llm
+    required: true
+    required_outputs: [principles]
+
+  - slot_id: modeling
+    purpose: "Build the user-journey / task-flow model the eval will trace."
+    stage_type: llm
+    required: true
+
+  - slot_id: task_generation
+    purpose: "Convert journey/model into a task checklist."
+    stage_type: llm
+    required: true
+
+  - slot_id: evidence_planning
+    purpose: "Plan what evidence each task needs (mode-specific)."
+    stage_type: tool
+    required: false
+    only_when_modes: [client]
+
+  - slot_id: evidence_collection
+    purpose: "Capture evidence (screenshots / DOM / trace)."
+    stage_type: tool
+    required: true
+    required_outputs: [evidence_assessment]
+
+  - slot_id: issue_attribution
+    purpose: "Detect issues + attribute to principles + bind evidence."
+    stage_type: llm
+    required: true
+    required_outputs: [issues, delivery_assessment]
+
+  - slot_id: delivery_audit
+    purpose: "Runtime audit deciding final/fallback/supplement/blocked."
+    stage_type: tool
+    required: true
+    required_outputs: [audited_delivery_assessment, delivery_audit_bundle]
+
+  - slot_id: report_generation
+    purpose: "Render issues + evidence into Excel + HTML report."
+    stage_type: tool
+    required: true
+    required_outputs: [issue_report, html_report, evidence_pack]
+
+# ─────────────────────────────────────────────────────────────────────
+# Checkpoint slots — human pause points
+# uxeval has C1/C2/C3 — we keep all three required for the archetype.
+# ─────────────────────────────────────────────────────────────────────
+checkpoint_slots:
+  - checkpoint_id: C1
+    after_slot: modeling
+    purpose: "User confirms the journey/model covers critical paths."
+    required: true
+
+  - checkpoint_id: C2
+    after_slot: task_generation
+    purpose: "User calibrates the task checklist (avoid drifting to functional QA)."
+    required: true
+
+  - checkpoint_id: C3
+    after_slot: issue_attribution
+    purpose: "User reviews severity / attribution / suggestions."
+    required: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Gate slots — runtime quality gates
+# uxeval uses QG0-QG3. QG0/QG1/QG2/QG3 are client-mode gates.
+# ─────────────────────────────────────────────────────────────────────
+gate_slots:
+  - gate_id: QG0
+    on_slot: evidence_collection
+    purpose: "Pre-run evidence plan completeness gate."
+    required: false
+    only_when_modes: [client]
+
+  - gate_id: QG1
+    on_slot: issue_attribution
+    purpose: "Block when evidence is judged 'blocked' before attribution."
+    required: false
+    only_when_modes: [client]
+
+  - gate_id: QG2
+    on_slot: issue_attribution
+    purpose: "Pause when evidence is below attribution threshold."
+    required: true
+
+  - gate_id: QG3
+    on_slot: report_generation
+    purpose: "Block final report when delivery audit not 'final_delivery_ready'."
+    required: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Mode semantics — uxeval's mode = evidence collection method
+# ─────────────────────────────────────────────────────────────────────
+mode_semantics:
+  semantic_type: evidence_collection
+  allowed_modes: [web, client]
+  must_be_single_mode: false
+
+# ─────────────────────────────────────────────────────────────────────
+# Evidence contract — what evaluation skills must produce + thresholds
+# ─────────────────────────────────────────────────────────────────────
+evidence_contract:
+  required_fields:
+    - evidence_assessment       # produced by evidence_collection or attribution
+    - delivery_assessment       # produced by issue_attribution
+  trusted_evidence_threshold: 0.99
+  fallback_evidence_threshold: 0.85
+
+# ─────────────────────────────────────────────────────────────────────
+# Delivery contract — final/fallback/supplement/blocked must be produced
+# ─────────────────────────────────────────────────────────────────────
+delivery_contract:
+  required_states:
+    - final_delivery_ready
+    - fallback_safe
+    - supplement_required
+    - blocked
+
+# ─────────────────────────────────────────────────────────────────────
+# Directory expectations
+# Mirrors skills/uxeval/ layout.
+# ─────────────────────────────────────────────────────────────────────
+directory:
+  required_directories:
+    - prompts
+    - reference
+    - templates
+    - eval
+    - tests
+  required_files:
+    - SKILL.md
+    - pipeline.yaml
+    - constitution.md
+    - README.md
+  eval_layout: true
+
+constitution_required: true

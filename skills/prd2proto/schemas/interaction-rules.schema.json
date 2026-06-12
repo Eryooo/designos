@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Interaction Rules",
+  "description": "交互规则（导航、表单、表格、反馈、错误处理）",
+  "allOf": [
+    {"$ref": "../../kernel/contracts/artifacts/interaction-rules.schema.json"}
+  ]
+}

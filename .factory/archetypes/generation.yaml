@@ -1,0 +1,190 @@
+# Generation Archetype — provisional spec
+#
+# ⚠️ STATUS: PROVISIONAL. Not extracted from a real implementation.
+# ⚠️ This is a planning placeholder so scaffold can produce prd2proto /
+#    ip-design skeletons before the real business logic is implemented.
+# ⚠️ Once prd2proto ships, run `extract.py skills/prd2proto` and diff
+#    against this file. Reconcile differences and remove "provisional".
+#
+# Sources for this provisional spec:
+#   - docs/handoff/next-skills/01-six-skills-deep-analysis.md §3 (PRD2Proto)
+#   - ADR-003 (three-mode design + 4 production constitution rules)
+#   - kernel.contracts.enums.OutputType (generation output types)
+#
+# Schema: .factory/archetypes/archetype_schema.py :: ArchetypeSpec
+
+name: generation
+version: 0.1.0-provisional
+description: |
+  Skills that produce executable artifacts (code / prompts / brand assets)
+  rather than issue lists or analysis reports. Output is consumable by
+  developers or downstream tools.
+
+  PROVISIONAL: extracted from product spec, not from a real implementation.
+  Treat as the seed spec for scaffold; reconcile after prd2proto ships.
+
+  Note on mode_semantics: generation skills use mode for FIDELITY tier
+  (pm / designer-spec / designer-dsl), NOT evidence collection. validate
+  must enforce this difference vs evaluation.
+representative_skill: prd2proto
+
+# ─────────────────────────────────────────────────────────────────────
+# Frontmatter expectations
+# ─────────────────────────────────────────────────────────────────────
+frontmatter:
+  required_keys:
+    - name
+    - version
+    - type
+    - description
+    - requires
+    - outputs
+  required_kernel_range: ">=1.0.0,<2.0.0"
+  skill_type: pipeline
+
+# ─────────────────────────────────────────────────────────────────────
+# Required outputs — prd2proto / generation core products
+# ─────────────────────────────────────────────────────────────────────
+outputs:
+  required:
+    - prototype_code
+    - frontend_code
+  optional:
+    - design_tokens
+    - design_token_spec
+    - information_architecture
+    - component_spec
+    - style_guide
+
+# ─────────────────────────────────────────────────────────────────────
+# Stage slots — provisional (含 C1-C4 4 个 checkpoints)
+# ─────────────────────────────────────────────────────────────────────
+stage_slots:
+  - slot_id: prd_understanding
+    purpose: "Parse PRD into modules / pages / interactions."
+    stage_type: llm
+    required: true
+    required_inputs: [prd_file, scope_md]
+
+  - slot_id: design_analysis
+    purpose: "Produce design-analysis.md (covers IA + key components)."
+    stage_type: llm
+    required: true
+    required_outputs: [design_analysis_md]
+
+  - slot_id: spec_generation
+    purpose: "Generate design-spec.md (designer-spec mode only)."
+    stage_type: llm
+    required: false
+    only_when_modes: [designer-spec]
+
+  - slot_id: dsl_fetch
+    purpose: "Fetch DSL from MasterGo/Figma (designer-dsl mode only)."
+    stage_type: tool
+    required: false
+    only_when_modes: [designer-dsl]
+
+  - slot_id: token_extraction
+    purpose: "Extract Design Tokens (designer-dsl mode)."
+    stage_type: tool
+    required: false
+    only_when_modes: [designer-dsl]
+
+  - slot_id: code_generation
+    purpose: "Generate prototype/frontend code via frontend-codegen MCP."
+    stage_type: tool
+    required: true
+    required_outputs: [prototype_code]
+
+  - slot_id: review_gate
+    purpose: "Code-quality / fidelity self-review against constitution."
+    stage_type: llm
+    required: true
+    required_outputs: [review_report]
+
+  - slot_id: preview_launch
+    purpose: "Optional: spin up local preview server for the generated code."
+    stage_type: tool
+    required: false
+
+# ─────────────────────────────────────────────────────────────────────
+# Checkpoint slots — C1/C2/C3/C4 (provisional)
+# ─────────────────────────────────────────────────────────────────────
+checkpoint_slots:
+  - checkpoint_id: C1
+    after_slot: design_analysis
+    purpose: "User confirms design analysis covers required scope."
+    required: true
+
+  - checkpoint_id: C2
+    after_slot: spec_generation
+    purpose: "User confirms design-spec.md before code generation."
+    required: false
+    # Only meaningful in designer-spec mode
+
+  - checkpoint_id: C3
+    after_slot: token_extraction
+    purpose: "User confirms extracted Design Tokens."
+    required: false
+    # Only meaningful in designer-dsl mode
+
+  - checkpoint_id: C4
+    after_slot: review_gate
+    purpose: "User reviews generated code + fidelity report."
+    required: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Gate slots — generation 用 review_gate 替代 evaluation 的 audit_gate
+# ─────────────────────────────────────────────────────────────────────
+gate_slots:
+  - gate_id: QG_REVIEW
+    on_slot: review_gate
+    purpose: "Block code generation when constitution violated (e.g. hardcoded colors)."
+    required: true
+
+# ─────────────────────────────────────────────────────────────────────
+# Mode semantics — fidelity tier (NOT evidence collection!)
+# ─────────────────────────────────────────────────────────────────────
+mode_semantics:
+  semantic_type: fidelity
+  allowed_modes: [pm, designer-spec, designer-dsl]
+  must_be_single_mode: false
+
+# ─────────────────────────────────────────────────────────────────────
+# Evidence contract — generation 不要求 evidence_assessment（不是评估）
+# 用 review_report 代替
+# ─────────────────────────────────────────────────────────────────────
+evidence_contract:
+  required_fields:
+    - review_report
+  trusted_evidence_threshold: 0.95   # designer-dsl mode 要求高保真
+  fallback_evidence_threshold: 0.70  # pm mode 可接受低保真
+
+# ─────────────────────────────────────────────────────────────────────
+# Delivery contract — 复用四态
+# ─────────────────────────────────────────────────────────────────────
+delivery_contract:
+  required_states:
+    - final_delivery_ready
+    - fallback_safe
+    - supplement_required
+    - blocked
+
+# ─────────────────────────────────────────────────────────────────────
+# Directory expectations
+# ─────────────────────────────────────────────────────────────────────
+directory:
+  required_directories:
+    - prompts
+    - reference
+    - templates
+    - eval
+    - tests
+  required_files:
+    - SKILL.md
+    - pipeline.yaml
+    - constitution.md
+    - README.md
+  eval_layout: true
+
+constitution_required: true

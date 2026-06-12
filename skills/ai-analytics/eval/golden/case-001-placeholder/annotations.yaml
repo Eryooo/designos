@@ -1,0 +1,7 @@
+# Golden case 001 — placeholder
+
+把一次真实跑通的产物整理成 golden case：
+- input/: scope_md + competitor-data/
+- expected/: design-strategy.json + user-persona.json 的字段断言
+
+当前为占位，待首次真实 pilot 跑通后回填。

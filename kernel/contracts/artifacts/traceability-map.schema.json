@@ -1,0 +1,356 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/traceability-map.schema.json",
+  "title": "Traceability Map",
+  "description": "可追溯性地图，记录最终输出与上游资产、输入、决策的关联关系",
+  "allOf": [
+    {
+      "$ref": "./artifact-base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "output_artifact": {
+          "type": "object",
+          "description": "最终输出资产",
+          "properties": {
+            "artifact_id": {"type": "string"},
+            "artifact_type": {"type": "string"},
+            "output_files": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "file_path": {"type": "string"},
+                  "file_type": {"type": "string"},
+                  "description": {"type": "string"}
+                }
+              }
+            }
+          },
+          "required": ["artifact_id", "artifact_type"]
+        },
+        "input_trace": {
+          "type": "object",
+          "description": "输入追溯",
+          "properties": {
+            "primary_inputs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "input_id": {"type": "string"},
+                  "input_type": {"type": "string"},
+                  "file_path": {"type": "string"},
+                  "usage": {"type": "string", "description": "如何使用此输入"},
+                  "coverage": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0,
+                    "description": "输入被使用的比例"
+                  }
+                },
+                "required": ["input_id", "input_type", "usage"]
+              }
+            },
+            "secondary_inputs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "input_id": {"type": "string"},
+                  "input_type": {"type": "string"},
+                  "purpose": {"type": "string"}
+                }
+              }
+            },
+            "unused_inputs": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "input_id": {"type": "string"},
+                  "reason_not_used": {"type": "string"}
+                }
+              },
+              "description": "提供但未使用的输入"
+            }
+          },
+          "required": ["primary_inputs"]
+        },
+        "reasoning_asset_trace": {
+          "type": "object",
+          "description": "设计推理资产追溯",
+          "properties": {
+            "assets_used": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "asset_id": {"type": "string"},
+                  "asset_type": {"type": "string"},
+                  "usage_description": {"type": "string"},
+                  "output_elements_derived": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "output_element": {"type": "string"},
+                        "asset_field": {"type": "string"},
+                        "transformation": {"type": "string"}
+                      }
+                    }
+                  }
+                },
+                "required": ["asset_id", "asset_type", "usage_description"]
+              }
+            },
+            "asset_dependency_graph": {
+              "type": "object",
+              "description": "资产依赖图",
+              "additionalProperties": {
+                "type": "array",
+                "items": {"type": "string"}
+              }
+            }
+          },
+          "required": ["assets_used"]
+        },
+        "decision_trace": {
+          "type": "array",
+          "description": "关键决策追溯",
+          "items": {
+            "type": "object",
+            "properties": {
+              "decision_id": {
+                "type": "string",
+                "pattern": "^DEC-\\d{3}$"
+              },
+              "decision_type": {
+                "type": "string",
+                "enum": [
+                  "architecture",
+                  "interaction_pattern",
+                  "visual_style",
+                  "technical_stack",
+                  "component_choice",
+                  "state_management",
+                  "navigation",
+                  "data_model",
+                  "scope_definition"
+                ]
+              },
+              "decision_point": {
+                "type": "string",
+                "description": "决策内容"
+              },
+              "rationale": {
+                "type": "string",
+                "description": "决策理由"
+              },
+              "based_on": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "source_type": {
+                      "type": "string",
+                      "enum": ["input", "reasoning_asset", "constraint", "best_practice", "heuristic", "inferred"]
+                    },
+                    "source_id": {"type": "string"},
+                    "source_field": {"type": "string"}
+                  }
+                }
+              },
+              "alternatives_considered": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "alternative": {"type": "string"},
+                    "pros": {"type": "array", "items": {"type": "string"}},
+                    "cons": {"type": "array", "items": {"type": "string"}},
+                    "why_rejected": {"type": "string"}
+                  }
+                }
+              },
+              "confidence": {
+                "type": "number",
+                "minimum": 0.0,
+                "maximum": 1.0
+              },
+              "impact": {
+                "type": "string",
+                "enum": ["critical", "high", "medium", "low"]
+              }
+            },
+            "required": ["decision_id", "decision_type", "decision_point", "rationale", "based_on"]
+          }
+        },
+        "field_level_trace": {
+          "type": "object",
+          "description": "字段级追溯（输出 → 来源）",
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "field_path": {"type": "string"},
+              "sources": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "source_type": {
+                      "type": "string",
+                      "enum": ["prd", "design_objective", "user_task_map", "journey_map", "ia", "page_flow", "component_strategy", "state_matrix", "interaction_rules", "inferred", "default", "best_practice"]
+                    },
+                    "source_reference": {"type": "string"},
+                    "confidence": {"type": "number"}
+                  }
+                }
+              },
+              "transformation": {
+                "type": "string",
+                "description": "从源到输出的转换过程"
+              }
+            }
+          }
+        },
+        "inference_trace": {
+          "type": "object",
+          "description": "推断内容追溯",
+          "properties": {
+            "inferred_fields": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "field_path": {"type": "string"},
+                  "inferred_value": {"type": "string"},
+                  "inference_basis": {
+                    "type": "string",
+                    "description": "基于什么推断"
+                  },
+                  "confidence": {"type": "number"},
+                  "risk_if_wrong": {"type": "string", "enum": ["critical", "high", "medium", "low"]},
+                  "validation_method": {"type": "string"}
+                }
+              }
+            },
+            "total_inferred_percentage": {
+              "type": "number",
+              "description": "推断内容占比"
+            }
+          }
+        },
+        "constraint_compliance": {
+          "type": "object",
+          "description": "约束遵循情况",
+          "properties": {
+            "constraints_checked": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "constraint_id": {"type": "string"},
+                  "constraint_description": {"type": "string"},
+                  "compliance_status": {
+                    "type": "string",
+                    "enum": ["compliant", "non_compliant", "partially_compliant", "not_applicable"]
+                  },
+                  "evidence": {"type": "string"},
+                  "violations": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "violation": {"type": "string"},
+                        "severity": {"type": "string", "enum": ["critical", "high", "medium", "low"]},
+                        "mitigation": {"type": "string"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "coverage_analysis": {
+          "type": "object",
+          "description": "覆盖率分析",
+          "properties": {
+            "input_coverage": {
+              "type": "number",
+              "description": "输入被使用的比例"
+            },
+            "requirement_coverage": {
+              "type": "number",
+              "description": "需求被实现的比例"
+            },
+            "uncovered_requirements": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "requirement": {"type": "string"},
+                  "reason_not_covered": {"type": "string"},
+                  "planned_for": {"type": "string"}
+                }
+              }
+            },
+            "scope_creep_items": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "item": {"type": "string"},
+                  "justification": {"type": "string"},
+                  "approval_status": {"type": "string", "enum": ["approved", "pending", "rejected"]}
+                }
+              },
+              "description": "PRD 外新增内容"
+            }
+          }
+        },
+        "quality_gate_trace": {
+          "type": "object",
+          "description": "质量门追溯",
+          "properties": {
+            "gates_passed": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "gate_id": {"type": "string"},
+                  "gate_name": {"type": "string"},
+                  "pass_criteria": {"type": "string"},
+                  "actual_result": {"type": "string"}
+                }
+              }
+            },
+            "gates_failed": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "gate_id": {"type": "string"},
+                  "gate_name": {"type": "string"},
+                  "failure_reason": {"type": "string"},
+                  "bypass_justification": {"type": "string"}
+                }
+              }
+            }
+          }
+        }
+      },
+      "required": [
+        "output_artifact",
+        "input_trace",
+        "reasoning_asset_trace",
+        "decision_trace",
+        "field_level_trace",
+        "inference_trace",
+        "coverage_analysis"
+      ]
+    }
+  ]
+}

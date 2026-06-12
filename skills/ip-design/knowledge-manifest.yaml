@@ -1,0 +1,69 @@
+skill: ip-design
+schema_version: "0.1.0"
+status: asset-baseline   # I0: 资产壳基线;I1 才进入 runtime
+purpose: |
+  声明 ip-design skill 复用哪些 DesignOS 共享设计决策资产;仅引用 shared knowledge id,
+  不复制正文。本批(I0)只建资产壳,不开发 runtime;runtime 留给 I1。
+
+shared_knowledge:
+  - id: design.ip.methodology
+    used_by: orchestration
+    use: 六阶段总纲与跨阶段判断逻辑
+  - id: design.strategy.brand-strategy-alignment
+    used_by: M01-strategy-alignment
+    use: 品牌策略对齐:北极星/画像/价值/人格词/差异化
+  - id: design.ip.worldview-building
+    used_by: M02-worldview-building
+    use: 世界观构建:时空/规则/关系/原型/关键词
+  - id: design.persona.persona-modeling
+    used_by: M03-persona-modeling
+    use: 人格建模(行为模式为主 + MBTI 辅助)
+  - id: design.persona.voice-and-behavior-boundary
+    used_by: M03-persona-modeling, M05, M06
+    use: 声音库与行为红线
+  - id: design.visual.visual-translation
+    used_by: M04-visual-translation
+    use: 视觉转化(基因继承/识别度/小尺寸/状态/风格坐标/禁忌)
+  - id: design.visual.image-prompt-system
+    used_by: M04-visual-translation
+    use: AI 绘图提示词系统(四层/多平台/稳定/一致/负向)
+  - id: design.ip.content-narrative
+    used_by: M05-content-narrative
+    use: 内容叙事:首秀/事件/语料/矩阵/节奏
+  - id: design.ip.brand-material-realization
+    used_by: M06-brand-material
+    use: 物料落地与传播指南
+  - id: design.quality.ip-design-quality-rubric
+    used_by: review-gate
+    use: 九维 rubric + 一票否决
+  - id: design.quality.stage-review-checklists
+    used_by: each-stage-gate
+    use: 阶段必过项放行规则
+  - id: design.quality.common-failure-modes
+    used_by: each-stage-gate
+    use: 跑偏自检
+  - id: design.quality.professional-gap-report
+    used_by: review-gate
+    use: 不达中阶时显式 gap 与放行边界
+  - id: design.templates.brand-brief
+    used_by: M01-strategy-alignment
+    use: 产出物模板
+  - id: design.templates.worldview
+    used_by: M02-worldview-building
+    use: 产出物模板
+  - id: design.templates.persona-profile
+    used_by: M03-persona-modeling
+    use: 产出物模板
+  - id: design.templates.visual-spec
+    used_by: M04-visual-translation
+    use: 产出物模板
+  - id: design.templates.content-plan
+    used_by: M05-content-narrative
+    use: 产出物模板
+  - id: design.templates.brand-material-spec
+    used_by: M06-brand-material
+    use: 产出物模板
+
+private_reference_boundary: |
+  本批(I0)未建 skill 私有 reference 的 stage 绑定说明,留给 I1 runtime 时补;
+  knowledge/design/ 是唯一 source of truth,不在 skill 内复制正文。

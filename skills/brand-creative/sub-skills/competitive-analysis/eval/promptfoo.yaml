@@ -1,0 +1,107 @@
+# Promptfoo Evaluation Config for competitive-analysis
+
+description: 竞品分析子技能评测配置
+
+prompts:
+  - file://prompts/01-competitor-data-collection.md
+  - file://prompts/02-matrix-generation-and-gap-analysis.md
+
+providers:
+  - id: openai:gpt-4
+    config:
+      temperature: 0.7
+      max_tokens: 2000
+
+tests:
+  # ────────────────────────────────────────────────────────────
+  # Test Case 1: Complete Analysis (Golden)
+  # ────────────────────────────────────────────────────────────
+  - description: "完整竞品分析,status: complete"
+    vars:
+      product_brief: |
+        云笔记应用,面向知识工作者,支持 Markdown/多端同步/协作编辑。
+        核心卖点:极简编辑体验、本地优先、开放格式。
+      target_market: "全球市场,知识工作者/程序员/写作者,25-45 岁"
+      competitor_hints:
+        - "Notion,黑白极简风格,all-in-one 工作空间,主色调浅灰#F7F6F3"
+        - "Obsidian,深色主题,知识图谱,面向高级用户,紫色强调色#7C3AED"
+        - "Evernote,绿色品牌色#00A82D,传统笔记应用,TO-C 大众市场"
+    assert:
+      - type: javascript
+        value: |
+          const output = JSON.parse(output);
+          output.competitors.length >= 3
+      - type: javascript
+        value: |
+          const output = JSON.parse(output);
+          output.competitors.every(c => c.name && c.visual_style)
+      - type: javascript
+        value: |
+          const output = JSON.parse(output);
+          output.status === 'complete'
+      - type: contains
+        value: "visual_style"
+      - type: contains
+        value: "market_position"
+
+  # ────────────────────────────────────────────────────────────
+  # Test Case 2: Insufficient Data (Failure)
+  # ────────────────────────────────────────────────────────────
+  - description: "输入不足,status: insufficient_data"
+    vars:
+      product_brief: |
+        AI 法律咨询助手,面向律师事务所,支持案例检索/合同审查。
+      target_market: "中国市场,律师事务所,中小型律所为主"
+      competitor_hints: []
+    assert:
+      - type: javascript
+        value: |
+          const output = JSON.parse(output);
+          output.status === 'insufficient_data'
+      - type: contains
+        value: "[inferred]"
+      - type: not-contains
+        value: "status\": \"complete"
+      - type: contains-any
+        value:
+          - "insufficient data"
+          - "所需信息"
+          - "缺少资料"
+
+  # ────────────────────────────────────────────────────────────
+  # Test Case 3: Evidence Tagging
+  # ────────────────────────────────────────────────────────────
+  - description: "[inferred] 标注测试"
+    vars:
+      product_brief: "智能手表,面向运动爱好者"
+      target_market: "全球市场,运动爱好者,18-45 岁"
+      competitor_hints:
+        - "Apple Watch"
+        - "Garmin"
+    assert:
+      - type: javascript
+        value: |
+          const output = JSON.parse(output);
+          // 品牌名外的推断应标注 [inferred]
+          const hasInferredTag = output.competitors.some(c =>
+            c.visual_style.includes('[inferred]') ||
+            c.communication?.includes('[inferred]') ||
+            c.market_position?.includes('[inferred]')
+          );
+          hasInferredTag
+      - type: javascript
+        value: |
+          const output = JSON.parse(output);
+          output.status === 'insufficient_data'
+
+outputPath: eval/promptfoo-results.json
+
+defaultTest:
+  options:
+    provider: openai:gpt-4
+    transformOutput: |
+      // 确保输出是有效 JSON
+      if (typeof output === 'string') {
+        return JSON.parse(output);
+      }
+      return output;

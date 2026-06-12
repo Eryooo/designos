@@ -1,0 +1,100 @@
+name: ai-analytics-pipeline
+
+description: |
+  ai-analytics Pipeline — 竞品 / 市场 / 用户分析 → 结构化上游产物。
+  按"需求理解 → 数据采集 → 方法论选择 → 分析 → 策略合成 → 报告"组织 6 个 stage。
+  pilot 阶段全部 stage 为 LLM synthesis（无真实采集工具），稳定产出
+  design_strategy 与 user_persona，供 prd2proto 等下游 skill 通过 upstream_refs 引用。
+
+stages:
+  # ────────────────────────────────────────────────────────────
+  # Stage 1: 需求理解（分析 brief + 目标范围）
+  # ────────────────────────────────────────────────────────────
+  - id: requirement-understanding
+    type: llm
+    prompt: prompts/01-requirement-understanding.md
+    inputs: [scope_md]
+    outputs: [analysis_brief, target_scope]
+    knowledge: [reference/m01-requirement-understanding.md]
+    retry:
+      max_attempts: 2
+      backoff_seconds: 2.0
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 2: 数据采集（消费用户提供的竞品资料）+ Checkpoint C1
+  # ────────────────────────────────────────────────────────────
+  - id: data-collection
+    type: llm
+    prompt: prompts/02-data-collection.md
+    inputs: [analysis_brief, target_scope, competitor_data]
+    outputs: [collected_data, data_sources]
+    knowledge: [reference/m02-data-collection.md]
+    checkpoint:
+      id: C1
+      message: "已整理竞品范围与数据来源。要补充资料告诉我，否则继续。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 3: 方法论选择 + Checkpoint C2
+  # ────────────────────────────────────────────────────────────
+  - id: methodology-selection
+    type: llm
+    prompt: prompts/03-methodology-selection.md
+    inputs: [analysis_brief, collected_data]
+    outputs: [methodologies]
+    knowledge: [reference/m03-methodology-selection.md]
+    checkpoint:
+      id: C2
+      message: "已选用分析方法论。要换方法告诉我，否则继续。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 4: 竞品分析（在已采集数据上应用方法论）
+  # ────────────────────────────────────────────────────────────
+  - id: competitor-analysis
+    type: llm
+    prompt: prompts/04-competitor-analysis.md
+    inputs: [collected_data, methodologies]
+    outputs: [analysis_findings]
+    knowledge: [reference/m04-competitor-analysis.md]
+    retry:
+      max_attempts: 2
+      backoff_seconds: 3.0
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 5: 策略合成（核心产物）+ Gate QG1（数据完整度门）
+  # ────────────────────────────────────────────────────────────
+  - id: strategy-synthesis
+    type: llm
+    prompt: prompts/05-strategy-synthesis.md
+    inputs: [analysis_brief, analysis_findings, target_scope]
+    outputs: [design_strategy, user_persona, data_completeness_assessment]
+    knowledge: [reference/m05-strategy-synthesis.md]
+    gate:
+      when: data_completeness_assessment.coverage < 0.70
+      action: pause
+      checkpoint_id: QG1
+      message: "采集数据完整度不足（coverage < 0.70），硬合成策略风险高。请补充竞品资料或确认在低置信度下继续。"
+      status_reason_from: data_completeness_assessment.summary
+      required_actions_from: data_completeness_assessment.gaps
+      resume_from_stage: data-collection
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 6: 报告渲染（人读佐证：analysis_report + comparison_matrix）
+  # ────────────────────────────────────────────────────────────
+  - id: report-generation
+    type: llm
+    prompt: prompts/06-report-generation.md
+    inputs: [analysis_findings, design_strategy, user_persona, methodologies]
+    outputs: [analysis_report, comparison_matrix]
+    knowledge: [reference/m06-report-generation.md]
+
+memory:
+  read:
+    - "organization.ai-analytics.methodology_library"
+    - "organization.ai-analytics.competitor_library"
+  write:
+    - "project.ai-analytics.{run_id}"
+    - "project.ai-analytics.{run_id}.checkpoint_decisions"
+
+constitution: constitution.md

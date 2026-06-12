@@ -1,0 +1,88 @@
+{
+  "raw_issues": [
+    {
+      "raw_id": "RAW-001",
+      "principle_id": "S2",
+      "module_id": "M-WORKBENCH",
+      "found_at": "screens/工作台-首页-默认.png",
+      "raw_observation": "12 条混合待办无视觉分类，规则待办与其他类型字号、颜色、图标完全相同，扫描效率低"
+    },
+    {
+      "raw_id": "RAW-002",
+      "principle_id": "P3",
+      "module_id": "M-WORKBENCH",
+      "found_at": "screens/工作台-首页-默认.png",
+      "raw_observation": "工作台所有信息卡视觉权重相同，无主次层级"
+    },
+    {
+      "raw_id": "RAW-003",
+      "principle_id": "S1",
+      "module_id": "M-001",
+      "found_at": "screens/规则编辑-关闭后重开.png",
+      "raw_observation": "刷新页面后所有未提交内容全部丢失，无草稿恢复"
+    },
+    {
+      "raw_id": "RAW-004",
+      "principle_id": "F1",
+      "module_id": "M-001",
+      "found_at": "screens/规则编辑-关闭后重开.png",
+      "raw_observation": "页面关闭无任何二次确认或保存提示"
+    },
+    {
+      "raw_id": "RAW-005",
+      "principle_id": "F2",
+      "module_id": "M-001",
+      "found_at": "screens/规则编辑-保存后.png",
+      "raw_observation": "点击保存后按钮无 loading、无 toast，3-5 秒后才跳转"
+    },
+    {
+      "raw_id": "RAW-006",
+      "principle_id": "F2",
+      "module_id": "M-001",
+      "found_at": "screens/规则测试-结果.png",
+      "raw_observation": "测试结果显示 87 条，实际生效 92 条，差异未说明"
+    },
+    {
+      "raw_id": "RAW-007",
+      "principle_id": "F5",
+      "module_id": "M-001",
+      "found_at": "screens/规则测试-结果.png",
+      "raw_observation": "测试样本数据来源、与全量数据的关系不透明"
+    },
+    {
+      "raw_id": "RAW-008",
+      "principle_id": "F1",
+      "module_id": "M-002",
+      "found_at": "screens/版本回滚-确认弹窗.png",
+      "raw_observation": "回滚确认弹窗仅含取消/确定，无影响范围、无版本对比"
+    },
+    {
+      "raw_id": "RAW-009",
+      "principle_id": "S1",
+      "module_id": "M-002",
+      "found_at": "screens/版本回滚-确认弹窗.png",
+      "raw_observation": "回滚后无明确的「再次回滚」入口，操作不可轻易撤销"
+    },
+    {
+      "raw_id": "RAW-010",
+      "principle_id": "P2",
+      "module_id": "M-003",
+      "found_at": "screens/审批详情-规则查看.png",
+      "raw_observation": "规则字段以 JSON 格式展示，业务背景的审批人难以理解"
+    },
+    {
+      "raw_id": "RAW-011",
+      "principle_id": "F2",
+      "module_id": "M-003",
+      "found_at": "screens/审批通过-反馈.png",
+      "raw_observation": "审批通过后跳转回列表，无成功提示"
+    },
+    {
+      "raw_id": "RAW-012",
+      "principle_id": "S3",
+      "module_id": "M-003",
+      "found_at": "screens/审批列表-数据管理员视角.png",
+      "raw_observation": "审批列表无规则类型筛选，10+ 条混排"
+    }
+  ]
+}

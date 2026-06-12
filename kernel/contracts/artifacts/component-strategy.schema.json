@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/component-strategy.schema.json",
+  "title": "Component Strategy",
+  "description": "组件策略，定义组件库选择、组件映射和使用规则",
+  "allOf": [
+    {"$ref": "./artifact-base.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "component_library": {
+          "type": "object",
+          "properties": {
+            "library_name": {"type": "string"},
+            "version": {"type": "string"},
+            "framework": {"type": "string", "enum": ["react", "vue", "angular"]},
+            "rationale": {"type": "string"}
+          },
+          "required": ["library_name", "framework"]
+        },
+        "component_inventory": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "component_id": {"type": "string"},
+              "component_name": {"type": "string"},
+              "library_component": {"type": "string"},
+              "usage_count": {"type": "integer"},
+              "pages_used": {"type": "array", "items": {"type": "string"}},
+              "variants": {"type": "array", "items": {"type": "string"}},
+              "inferred": {"type": "boolean"}
+            },
+            "required": ["component_id", "component_name", "inferred"]
+          }
+        },
+        "component_mapping": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ui_element": {"type": "string"},
+              "mapped_component": {"type": "string"},
+              "props": {"type": "object"},
+              "rationale": {"type": "string"}
+            }
+          }
+        },
+        "usage_rules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "rule": {"type": "string"},
+              "applies_to": {"type": "array", "items": {"type": "string"}}
+            }
+          }
+        },
+        "anti_patterns": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      },
+      "required": ["component_library", "component_inventory"]
+    }
+  ]
+}

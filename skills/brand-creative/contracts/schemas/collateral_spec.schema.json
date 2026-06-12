@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "brand-creative/collateral_spec",
+  "x-output-type": "brand_material_spec",
+  "title": "collateral_spec",
+  "description": "品牌物料规格(internal,也作 brand_material_spec 公开)。brand-collateral 产出。",
+  "type": "object",
+  "required": [
+    "materials"
+  ],
+  "properties": {
+    "materials": {
+      "type": "array",
+      "minItems": 4,
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "dimensions": {
+            "type": "string"
+          },
+          "print_spec": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ]
+      }
+    },
+    "print_spec_status": {
+      "type": "string",
+      "enum": [
+        "complete",
+        "needs_vendor_confirmation"
+      ]
+    }
+  },
+  "additionalProperties": true
+}

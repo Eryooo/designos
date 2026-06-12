@@ -1,0 +1,61 @@
+version: "1.0"
+type: pipeline
+
+inputs:
+  - brand_brief
+
+outputs:
+  - visual_spec
+  - image_prompt_pack
+
+stages:
+  - id: analyze_brand_form
+    type: llm
+    # 分析品牌人格关键词,推导 logo 形态方向(标志类型/形态语言/风格坐标)
+    prompt: prompts/01-analyze-brand-form.md
+    inputs:
+      - brand_brief
+    outputs:
+      - form_direction
+    knowledge:
+      - ../../../../knowledge/design/visual/logo-design-methodology.md
+      - ../../../../knowledge/design/visual/logo-cognitive-translation.md
+      - ../../../../knowledge/design/quality/brand-identity-quality-rubric.md
+      - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
+
+  - id: generate_logo_spec
+    type: llm
+    # 产出 logo 设计规范(形态/色彩/黑白可用/最小尺寸/辅助图形/商标风险)
+    prompt: prompts/02-generate-logo-spec.md
+    inputs:
+      - form_direction
+      - brand_brief
+    outputs:
+      - visual_spec
+    knowledge:
+      - ../../../../knowledge/design/visual/logo-design-methodology.md
+      - ../../../../knowledge/design/visual/logo-cognitive-translation.md
+      - ../../../../knowledge/design/quality/brand-identity-quality-rubric.md
+      - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
+
+  - id: generate_prompt_pack
+    type: llm
+    # 产出 AI 绘图 prompt pack(含正向/负向控制,多平台适配)
+    prompt: prompts/03-generate-prompt-pack.md
+    inputs:
+      - visual_spec
+      - brand_brief
+    outputs:
+      - image_prompt_pack
+    knowledge:
+      - ../../../../knowledge/design/visual/image-prompt-system.md
+      - ../../../../knowledge/design/quality/brand-creative-failure-modes.md
+
+quality_checks:
+  - checkpoint: C2-logo-design
+    rules:
+      - visual_spec.black_white_usable 必须为 true
+      - visual_spec.min_size_px 必须 <= 32 (实际要求16px,留安全余量)
+      - visual_spec.form.rationale 必须回溯到 brand_brief 人格关键词
+      - visual_spec.trademark_risk_signals 必须非空或显式标注 "low_risk"
+      - image_prompt_pack.prompts 每项必须含 platform / positive / negative

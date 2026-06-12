@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Product Archetype",
+  "description": "产品原型定义（to-b/to-c, 交互复杂度, 保真度策略）",
+  "allOf": [
+    {"$ref": "../../kernel/contracts/artifacts/artifact-base.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "product_type": {"type": "string", "enum": ["to_b", "to_c", "to_g", "internal_tool"]},
+        "interaction_complexity": {"type": "string", "enum": ["simple", "moderate", "complex", "very_complex"]},
+        "fidelity_strategy": {"type": "string", "enum": ["wireframe", "high_fidelity", "production"]},
+        "rationale": {"type": "string"}
+      },
+      "required": ["product_type", "interaction_complexity", "fidelity_strategy"]
+    }
+  ]
+}

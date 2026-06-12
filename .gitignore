@@ -1,0 +1,76 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+.Python
+build/
+dist/
+*.egg-info/
+*.egg
+MANIFEST
+
+# Test / coverage / lint caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.pyright/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# uv
+.uv/
+
+# Secrets (allow .env.example)
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# OS
+Thumbs.db
+
+# DesignOS runtime artefacts
+runs/
+.designos/
+*.log
+trace.jsonl
+.private/
+
+# Claude Code (个人/工具配置，不应进版本库)
+.claude/settings.json
+.claude/settings.local.json
+.claude/projects/
+.claude/sessions/
+
+# 真实验证 case 含内部未公开业务数据（PRD/业务分析/LLM代理日志），不进公开仓库
+eval/golden-cases/prd2proto/case-001-real-enterprise-workbench/input-prd.md
+eval/golden-cases/prd2proto/case-001-real-enterprise-workbench/outputs/
+eval/golden-cases/prd2proto/case-001-real-enterprise-workbench/pipeline-full-result.json
+eval/golden-cases/prd2proto/case-001-real-enterprise-workbench/run.log
+
+# === Evidence Governance（S0）===
+# 真实业务证据/敏感词清单/PRD等只能本地保留，不进 git
+.designos-private-evidence/
+*.private-evidence

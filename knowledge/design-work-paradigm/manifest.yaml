@@ -1,0 +1,193 @@
+name: "Senior Designer Work Paradigm Engine"
+version: "1.0.0"
+description: "资深设计师工作范式引擎，定义设计推理的标准流程、质量标准和失败模式"
+
+category: knowledge_base
+type: design_methodology
+
+methods:
+  - id: "00"
+    name: "Core Principles"
+    file: "00-core-principles.md"
+    category: foundation
+    description: "核心原则与约束，定义设计推理的基本规则"
+
+  - id: "01"
+    name: "Input Diagnosis"
+    file: "01-input-diagnosis.md"
+    category: foundation
+    description: "输入诊断与完整性评估"
+    output_schema: "requirement_inventory.schema.json"
+
+  - id: "02"
+    name: "Objective Decomposition"
+    file: "02-objective-decomposition.md"
+    category: foundation
+    description: "设计目标分解（业务目标、用户目标、体验目标）"
+    output_schema: "design-objectives.schema.json"
+
+  - id: "03"
+    name: "User Task Modeling"
+    file: "03-user-task-modeling.md"
+    category: user_modeling
+    description: "用户任务地图（主要任务、次要任务、边缘任务）"
+    output_schema: "user-task-map.schema.json"
+
+  - id: "04"
+    name: "Scenario Modeling"
+    file: "04-scenario-modeling.md"
+    category: user_modeling
+    description: "场景建模（使用场景、上下文、约束）"
+    output_schema: "scenario-map.schema.json"
+
+  - id: "05"
+    name: "Business Flow Modeling"
+    file: "05-business-flow-modeling.md"
+    category: business_modeling
+    description: "业务流程建模（状态转换、权限流、异常流）"
+    output_schema: "business-flow.schema.json"
+
+  - id: "06"
+    name: "User Journey Mapping"
+    file: "06-user-journey-mapping.md"
+    category: user_modeling
+    description: "用户旅程地图（阶段、触点、情绪、痛点）"
+    output_schema: "journey-map.schema.json"
+
+  - id: "07"
+    name: "Information Architecture"
+    file: "07-information-architecture.md"
+    category: structure_design
+    description: "信息架构设计（站点地图、导航、路由）"
+    output_schema: "information-architecture.schema.json"
+
+  - id: "08"
+    name: "Page Flow Modeling"
+    file: "08-page-flow-modeling.md"
+    category: interaction_design
+    description: "页面流程建模（入口、分支、完成点）"
+    output_schema: "page-flow.schema.json"
+
+  - id: "09"
+    name: "Content Structure"
+    file: "09-content-structure.md"
+    category: structure_design
+    description: "内容结构设计（布局、模块、操作区）"
+    output_schema: "page-structure.schema.json"
+
+  - id: "10"
+    name: "Component Strategy"
+    file: "10-component-strategy.md"
+    category: interaction_design
+    description: "组件策略（组件库、映射、使用规则）"
+    output_schema: "component-strategy.schema.json"
+
+  - id: "11"
+    name: "State Matrix"
+    file: "11-state-matrix.md"
+    category: interaction_design
+    description: "状态矩阵（页面状态、组件状态、业务状态）"
+    output_schema: "state-matrix.schema.json"
+
+  - id: "12"
+    name: "Interaction Rules"
+    file: "12-interaction-rules.md"
+    category: interaction_design
+    description: "交互规则（导航、表单、表格、反馈、错误处理）"
+    output_schema: "interaction-rules.schema.json"
+
+  - id: "13"
+    name: "Visual Translation"
+    file: "13-visual-translation.md"
+    category: visual_design
+    description: "视觉翻译（设计语言 → 视觉规范）"
+    output_schema: "visual-spec.schema.json"
+
+  - id: "14"
+    name: "Brand Strategy Modeling"
+    file: "14-brand-strategy-modeling.md"
+    category: visual_design
+    description: "品牌策略建模（定位、调性、差异化）"
+    output_schema: "brand-strategy-map.schema.json"
+
+  - id: "15"
+    name: "IP Character Modeling"
+    file: "15-ip-character-modeling.md"
+    category: visual_design
+    description: "IP 角色建模（人设、世界观、视觉）"
+    output_schema: "ip-persona-map.schema.json"
+
+  - id: "16"
+    name: "Evaluation Evidence Modeling"
+    file: "16-evaluation-evidence-modeling.md"
+    category: evaluation
+    description: "评估证据建模（问题识别、证据绑定）"
+    output_schema: "evaluation-evidence-map.schema.json"
+
+  - id: "17"
+    name: "Quality Rubrics"
+    file: "17-quality-rubrics.md"
+    category: quality_assurance
+    description: "质量标准（9 维度评估模型）"
+    output_schema: "professional-gap-report.schema.json"
+
+  - id: "18"
+    name: "Failure Modes"
+    file: "18-failure-modes.md"
+    category: quality_assurance
+    description: "失败模式库（输入问题、输出问题、追溯问题）"
+
+  - id: "19"
+    name: "Traceability"
+    file: "19-traceability.md"
+    category: quality_assurance
+    description: "可追溯性机制（输入 → 推理 → 决策 → 输出）"
+    output_schema: "traceability-map.schema.json"
+
+skill_integration:
+  prd2proto:
+    methods: ["01", "02", "03", "05", "06", "07", "08", "09", "10", "11", "12", "17", "18", "19"]
+    priority: P0
+
+  uxeval:
+    methods: ["01", "06", "16", "17", "18", "19"]
+    priority: P1
+
+  ai-analytics:
+    methods: ["01", "02", "03", "04", "14", "17", "18", "19"]
+    priority: P1
+
+  ip-design:
+    methods: ["01", "15", "13", "17", "18", "19"]
+    priority: P1
+
+  brand-creative:
+    methods: ["01", "14", "13", "17", "18", "19"]
+    priority: P1
+
+quality_gates:
+  - id: schema_gate
+    description: "输出必须符合对应 artifact schema"
+    enforcement: mandatory
+
+  - id: traceability_gate
+    description: "关键决策必须可追溯到上游资产"
+    enforcement: mandatory
+
+  - id: gap_transparency_gate
+    description: "输入缺失必须进入 gaps，不得静默补全"
+    enforcement: mandatory
+
+  - id: inference_marking_gate
+    description: "推断内容必须标注 [inferred]"
+    enforcement: mandatory
+
+  - id: professional_gap_gate
+    description: "最终产物必须生成 professional_gap_report"
+    enforcement: mandatory
+
+maintainers:
+  - role: "DesignOS Core Team"
+    contact: "<YOUR_INTERNAL_PRIVATE_REPO>"
+
+last_updated: "2026-06-09"

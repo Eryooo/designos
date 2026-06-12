@@ -1,0 +1,175 @@
+# ============================================================
+# ⚠️ LEGACY / 旧版（已归档，非默认主线）
+# 当前默认主线是 pipeline.yaml（v2，17-stage 设计推理链路）。
+# 本文件（v1，8-stage：prd-understanding → liveness-check）仅向后兼容保留。
+# runtime 默认加载 pipeline.yaml；如需跑 v1 须显式 --pipeline pipeline.v1.yaml。
+# ============================================================
+name: prd2proto-pipeline
+
+description: |
+  prd2proto Pipeline — PRD → 可交互前端代码。
+  按"理解 → 分析 → 规范/DSL → Token → 代码 → 审查 → 启动"组织 8 个 stages。
+  支持 pm / designer-spec / designer-dsl 三种保真度档位；每种模式实际跑 7 个 stage
+  （pm/designer-spec 跳过 dsl-fetch，designer-dsl 跳过 spec-generation）。
+
+mode_prompt:
+  question: "选择保真度："
+  options:
+    - id: pm
+      label: "PM 模式（PRD → 低保真演示原型）"
+    - id: designer-spec
+      label: "设计师模式（PRD + design-spec.md → 高保真原型）"
+    - id: designer-dsl
+      label: "设计师生产模式（DSL + 组件库 → 生产代码）"
+
+upstream_refs:
+  - skill: ai-analytics
+    output_type: design_strategy
+    inject_as: design_strategy
+    required: false
+  - skill: ai-analytics
+    output_type: user_persona
+    inject_as: existing_personas
+    required: false
+
+stages:
+  # ────────────────────────────────────────────────────────────
+  # Stage 1: PRD 结构化理解
+  # ────────────────────────────────────────────────────────────
+  - id: prd-understanding
+    type: llm
+    prompt: prompts/01-prd-understanding.md
+    inputs: [prd_file, scope_md, existing_personas, design_strategy]
+    outputs: [modules, key_features, pages, user_flows, business_goal, auto_decisions]
+    knowledge: [reference/m01-prd-understanding.md]
+    retry:
+      max_attempts: 2
+      backoff_seconds: 2.0
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 2: 设计分析（信息架构 + 组件需求）+ Checkpoint C1
+  # ────────────────────────────────────────────────────────────
+  - id: design-analysis
+    type: llm
+    prompt: prompts/02-design-analysis.md
+    inputs: [modules, key_features, pages, user_flows]
+    outputs: [information_architecture, component_spec, design_analysis_md]
+    knowledge: [reference/m02-design-analysis.md]
+    checkpoint:
+      id: C1
+      message: "信息架构 + 组件清单已建。要改告诉我，否则继续。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 3a: design-spec.md 生成（pm + designer-spec 都跑）
+  #   - designer-dsl 模式跳过：用户自带 design-spec.md
+  #   - 若用户提供了 inputs/design-spec.md，prompt 会跳过模板匹配直接读
+  # ────────────────────────────────────────────────────────────
+  - id: spec-generation
+    type: llm
+    only_when: mode != "designer-dsl"
+    prompt: prompts/03a-spec-generation.md
+    inputs: [information_architecture, component_spec, design_analysis_md, business_goal]
+    outputs: [design_spec_md, design_spec_template_used]
+    knowledge: [reference/m03a-spec-generation.md]
+    checkpoint:
+      id: C2
+      message: "design-spec.md 已生成（含选用的模板风格）。要改告诉我，否则继续。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 3b: DSL 抓取（仅 designer-dsl 模式）
+  # ────────────────────────────────────────────────────────────
+  - id: dsl-fetch
+    type: tool
+    only_when: mode == "designer-dsl"
+    mcp_server: frontend-codegen
+    mcp_tool: fetch_dsl
+    inputs: [dsl_file]
+    outputs: [dsl_tree]
+    retry:
+      max_attempts: 3
+      backoff_seconds: 3.0
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 4: Token 提取（所有模式都跑，输出 W3C DTCG JSON + tokens.css）
+  # + Checkpoint C3
+  # ────────────────────────────────────────────────────────────
+  - id: token-extraction
+    type: llm
+    prompt: prompts/04-token-extraction.md
+    inputs: [design_spec_md, dsl_tree]
+    outputs: [design_tokens, tokens_css]
+    knowledge: [reference/m04-token-extraction.md]
+    checkpoint:
+      id: C3
+      message: "Design Tokens 已提取（DTCG JSON + tokens.css）。要改告诉我，否则继续。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 5: 代码生成（LLM 主导，prompt 钉死项目结构 / 状态管理 / mock 规模）
+  # ────────────────────────────────────────────────────────────
+  - id: code-generation
+    type: llm
+    prompt: prompts/05-code-generation.md
+    inputs:
+      - information_architecture
+      - component_spec
+      - design_tokens
+      - tokens_css
+      - design_spec_md
+      - dsl_tree
+      - auto_decisions
+    outputs: [prototype_code, frontend_code, code_generation_summary]
+    knowledge: [reference/m05-code-generation.md]
+    retry:
+      max_attempts: 2
+      backoff_seconds: 5.0
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 6: 代码审查 + Checkpoint C4 + Gate QG_REVIEW
+  # ────────────────────────────────────────────────────────────
+  - id: review-gate
+    type: llm
+    prompt: prompts/06-review-gate.md
+    inputs: [prototype_code, frontend_code, design_tokens, code_generation_summary, design_spec_md]
+    outputs: [review_report, constitution_violations, fidelity_score]
+    knowledge: [reference/m06-review-gate.md]
+    gate:
+      when: constitution_violations.count > 0
+      action: pause
+      checkpoint_id: QG_REVIEW
+      message: "代码审查发现违反代码宪法的项，请查看 review_report 并决定继续 / 修改 / 重新生成。"
+      status_reason_from: constitution_violations.summary
+      required_actions_from: constitution_violations.required_actions
+      resume_from_stage: code-generation
+    checkpoint:
+      id: C4
+      message: "审查通过，已展示 review_report + violations 数量。要改告诉我，否则进入 liveness-check。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 7: liveness-check（启动验证 / 闭环用户期待）
+  #   实装：LLM 引导用户跑 npm install + dev / build，回报 URL 或错误。
+  #   未来：frontend-codegen 真 MCP 实装 launch_preview 后，可改 type: tool。
+  # ────────────────────────────────────────────────────────────
+  - id: liveness-check
+    type: llm
+    prompt: prompts/07-liveness-check.md
+    inputs: [prototype_code, code_generation_summary]
+    outputs: [dev_url, liveness_report]
+    retry:
+      max_attempts: 2
+      backoff_seconds: 3.0
+
+memory:
+  read:
+    - "organization.prd2proto.golden_samples"
+    - "organization.prd2proto.failure_cases"
+    - "organization.prd2proto.design_token_library"
+    - "organization.prd2proto.component_library"
+  write:
+    - "project.prd2proto.{run_id}"
+    - "project.prd2proto.{run_id}.checkpoint_decisions"
+
+constitution: constitution.md

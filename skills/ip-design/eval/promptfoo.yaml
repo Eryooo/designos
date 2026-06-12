@@ -1,0 +1,124 @@
+# promptfoo eval config for ip-design skill
+
+description: IP Design Skill — 品牌 IP 设计六阶段生成流水线评估
+
+prompts:
+  - file://prompts/01-strategy-alignment.md
+  - file://prompts/02-worldview-building.md
+  - file://prompts/03-persona-modeling.md
+  - file://prompts/04-visual-translation.md
+  - file://prompts/05-narrative-planning.md
+  - file://prompts/06-landing-spec.md
+
+providers:
+  - id: openai:gpt-4
+    config:
+      temperature: 0.3
+  - id: anthropic:claude-opus-4
+    config:
+      temperature: 0.3
+
+tests:
+  # Golden cases
+  - description: "Stage 1: 北极星情感价值(golden)"
+    vars:
+      product_brief: "企业 AI 助理,帮员工快速调用集团 AI 能力完成办公任务。"
+      target_user: "企业员工,职业:知识工作者/管理者,场景:日常办公,痛点:AI 工具太多难选、调用复杂"
+      competitors: [{name: "钉钉", ip_form: "无独立 IP"}, {name: "飞书", ip_form: "无独立 IP"}, {name: "企业微信", ip_form: "无独立 IP"}]
+      brand_assets: {}
+    assert:
+      - type: is-json
+      - type: javascript
+        value: output.north_star?.is_emotional_value === true
+      - type: javascript
+        value: output.north_star?.five_elements && Object.keys(output.north_star.five_elements).length === 5
+      - type: javascript
+        value: !/(调用|执行|写周报)/.test(output.north_star?.five_elements?.value || "")
+
+  - description: "Stage 3: 行为模式为主 MBTI 辅助(golden)"
+    vars:
+      brand_brief:
+        personality_keywords: [{keyword: "主动", rationale: "..."}, {keyword: "结果导向", rationale: "..."}]
+      worldview: {rules: {}, relationship_network: {}}
+    assert:
+      - type: is-json
+      - type: javascript
+        value: Array.isArray(output.behavior_model?.sequence) && output.behavior_model.sequence.length >= 3
+      - type: javascript
+        value: output.mbti_aux?.note?.includes("MBTI 仅作辅助")
+      - type: javascript
+        value: Array.isArray(output.behavior_model?.observable_signals) && output.behavior_model.observable_signals.length > 0
+
+  - description: "Stage 4: 视觉识别度 32px 可辨 + 四级简化(golden)"
+    vars:
+      brand_brief: {}
+      worldview:
+      persona_profile: {}
+      brand_assets: {}
+    assert:
+      - type: is-json
+      - type: javascript
+        value: output.visual_spec?.recognizability?.canonical_test?.legible_at_32px === true
+      - type: javascript
+        value: |
+          const tiers = output.visual_spec?.recognizability?.size_tiers || {};
+          return tiers.large_ge_128px?.spec && tiers.mid_48_to_128?.spec && tiers.small_24_to_48?.spec && tiers.tiny_lt_24?.spec;
+      - type: javascript
+        value: Array.isArray(output.visual_spec?.strict_avoidance) && output.visual_spec.strict_avoidance.length >= 5
+
+  - description: "Stage 4: 提示词四层结构 + 负向(golden)"
+    vars:
+      brand_brief: {}
+      worldview: {}
+      persona_profile: {}
+      brand_assets: {}
+    assert:
+      - type: is-json
+      - type: javascript
+        value: |
+          const layers = output.image_prompt_pack?.canonical_image?.prompt_four_layers || {};
+          return layers.core_symbol && layers.design_philosophy && layers.technical_params && layers.quality_and_avoidance;
+      - type: javascript
+        value: Array.isArray(output.image_prompt_pack?.multi_platform) && output.image_prompt_pack.multi_platform.length >= 2
+      - type: javascript
+        value: output.image_prompt_pack?.multi_platform?.some(p => p.negative_prompt)
+
+  # Failure cases
+  - description: "Stage 1: 北极星功能化(failure F-S1)"
+    vars:
+      product_brief: "企业 AI 助理"
+      target_user: "企业员工"
+      competitors: []
+      brand_assets: {}
+    assert:
+      - type: is-json
+      - type: javascript
+        value: output.north_star?.is_emotional_value !== false  # 应拒绝 false
+      - type: not-contains
+        value: "调用 AI"  # 应拒绝功能化描述
+
+  - description: "Stage 3: 仅 MBTI 标签(failure F-P1)"
+    vars:
+      brand_brief: {personality_keywords: [{keyword: "主动"}]}
+      worldview: {}
+    assert:
+      - type: is-json
+      - type: javascript
+        value: Array.isArray(output.behavior_model?.sequence) && output.behavior_model.sequence.length > 0  # 不应为空
+
+  - description: "Stage 4: 32px 糊掉(failure F-V2)"
+    vars:
+      brand_brief: {}
+      worldview: {}
+      persona_profile: {}
+      brand_assets: {}
+    assert:
+      - type: is-json
+      - type: javascript
+        value: output.visual_spec?.recognizability?.canonical_test?.legible_at_32px !== false  # 应拒绝 false
+      - type: javascript
+        value: |
+          const tiers = output.visual_spec?.recognizability?.size_tiers || {};
+          return Object.keys(tiers).length >= 4;  # 四级不应为空
+
+outputPath: ./eval/results.json

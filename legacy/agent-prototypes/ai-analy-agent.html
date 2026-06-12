@@ -1,0 +1,1362 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI-Native 体验设计范式变革</title>
+  <style>
+    :root {
+      --paper: #ffffff;
+      --paper-2: #ffffff;
+      --ink: #16211f;
+      --muted: #5d6763;
+      --line: rgba(22, 33, 31, 0.16);
+      --teal: #106b6f;
+      --blue: #255ea8;
+      --red: #cf4636;
+      --amber: #b77b16;
+      --green: #2e7b4f;
+      --violet: #6b4aa5;
+      --shadow: 0 28px 70px rgba(29, 38, 35, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: #ffffff;
+      font-family: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+      letter-spacing: 0;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .site-nav {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      background: rgba(255, 255, 255, 0.94);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(14px);
+    }
+
+    .site-nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      width: min(1600px, calc(100vw - 48px));
+      height: 72px;
+      margin: 0 auto;
+    }
+
+    .site-brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .site-brand-mark {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      color: #fff;
+      background: var(--ink);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
+    .site-links {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .site-links a {
+      padding: 10px 12px;
+      border: 1px solid transparent;
+    }
+
+    .site-links a:hover,
+    .site-links a.active {
+      color: var(--ink);
+      border-color: var(--line);
+      background: rgba(22, 33, 31, 0.045);
+    }
+
+    .poster {
+      width: 1600px;
+      min-height: 2360px;
+      margin: 0 auto;
+      padding: 74px 78px 70px;
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+    }
+
+    .poster > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .poster::before {
+      content: "";
+      position: absolute;
+      inset: 28px;
+      border: 1px solid rgba(22, 33, 31, 0.18);
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .poster::after {
+      content: "";
+      position: absolute;
+      right: -120px;
+      bottom: -180px;
+      width: 520px;
+      height: 520px;
+      border: 88px solid rgba(37, 94, 168, 0.08);
+      transform: rotate(18deg);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .topbar {
+      position: relative;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 44px;
+      padding-bottom: 36px;
+      border-bottom: 5px solid var(--ink);
+    }
+
+    .kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      height: 36px;
+      padding: 0 14px;
+      border: 1px solid var(--ink);
+      border-radius: 999px;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.88);
+    }
+
+    .kicker .dot {
+      width: 46px;
+      height: 10px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle 5px at 5px 5px, var(--red) 98%, transparent),
+        radial-gradient(circle 5px at 23px 5px, var(--teal) 98%, transparent),
+        radial-gradient(circle 5px at 41px 5px, var(--amber) 98%, transparent);
+    }
+
+    h1 {
+      width: 920px;
+      margin: 24px 0 0;
+      font-size: 78px;
+      line-height: 1.03;
+      font-weight: 900;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      width: 850px;
+      margin: 28px 0 0;
+      color: #2c3734;
+      font-size: 28px;
+      line-height: 1.52;
+      font-weight: 500;
+    }
+
+    .executive-note {
+      width: 425px;
+      padding: 30px;
+      background: var(--ink);
+      color: #fff9ec;
+      box-shadow: var(--shadow);
+    }
+
+    .executive-note .label {
+      color: #e3c87c;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .executive-note .sentence {
+      margin-top: 18px;
+      font-size: 31px;
+      line-height: 1.28;
+      font-weight: 900;
+    }
+
+    .executive-note .small {
+      margin-top: 22px;
+      color: rgba(255, 249, 236, 0.76);
+      font-size: 20px;
+      line-height: 1.5;
+    }
+
+    .value-strip {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 34px;
+    }
+
+    .value {
+      min-height: 140px;
+      padding: 22px 22px 20px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: 0 16px 36px rgba(29, 38, 35, 0.08);
+    }
+
+    .value strong {
+      display: block;
+      font-size: 30px;
+      line-height: 1.12;
+      font-weight: 900;
+    }
+
+    .value span {
+      display: block;
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.45;
+      font-weight: 600;
+    }
+
+    .value:nth-child(1) { border-top: 8px solid var(--red); }
+    .value:nth-child(2) { border-top: 8px solid var(--teal); }
+    .value:nth-child(3) { border-top: 8px solid var(--blue); }
+    .value:nth-child(4) { border-top: 8px solid var(--green); }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin: 54px 0 22px;
+    }
+
+    .section-title .index {
+      display: grid;
+      place-items: center;
+      width: 46px;
+      height: 46px;
+      color: #fff;
+      background: var(--ink);
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 37px;
+      line-height: 1;
+      font-weight: 900;
+    }
+
+    .section-title p {
+      margin: 0 0 0 auto;
+      max-width: 620px;
+      color: var(--muted);
+      text-align: right;
+      font-size: 19px;
+      line-height: 1.42;
+      font-weight: 600;
+    }
+
+    .flow {
+      position: relative;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      padding: 30px 24px 42px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .flow::before {
+      content: "";
+      position: absolute;
+      left: 86px;
+      right: 86px;
+      top: 85px;
+      height: 6px;
+      background: linear-gradient(90deg, var(--red), var(--amber), var(--teal), var(--blue), var(--green));
+      opacity: 0.7;
+    }
+
+    .step {
+      position: relative;
+      min-height: 292px;
+      padding: 68px 15px 18px;
+      text-align: center;
+    }
+
+    .step .num {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      display: grid;
+      place-items: center;
+      width: 68px;
+      height: 68px;
+      transform: translateX(-50%);
+      border-radius: 50%;
+      color: #fff;
+      background: var(--ink);
+      border: 7px solid var(--paper-2);
+      font-size: 23px;
+      font-weight: 900;
+      z-index: 2;
+    }
+
+    .step h3 {
+      margin: 36px 0 12px;
+      font-size: 25px;
+      line-height: 1.18;
+      font-weight: 900;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .step b {
+      color: var(--ink);
+      font-weight: 900;
+    }
+
+    .agent-loop {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      align-items: stretch;
+      gap: 20px;
+      margin-top: 22px;
+    }
+
+    .loop-panel {
+      min-height: 214px;
+      padding: 26px 28px;
+      background: #15211f;
+      color: #fff9ec;
+      box-shadow: var(--shadow);
+    }
+
+    .loop-panel h3 {
+      margin: 0;
+      font-size: 29px;
+      line-height: 1.14;
+      font-weight: 900;
+    }
+
+    .loop-panel p {
+      margin: 18px 0 0;
+      color: rgba(255, 249, 236, 0.76);
+      font-size: 19px;
+      line-height: 1.52;
+      font-weight: 600;
+    }
+
+    .loop-panel:nth-child(2) {
+      background: var(--teal);
+    }
+
+    .loop-panel:nth-child(3) {
+      background: var(--red);
+    }
+
+    .feedback-loop {
+      display: grid;
+      grid-template-columns: 0.72fr repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 16px;
+      padding: 20px;
+      background: rgba(21, 33, 31, 0.055);
+      border: 1px solid rgba(22, 33, 31, 0.12);
+      box-shadow: 0 18px 45px rgba(29, 38, 35, 0.08);
+    }
+
+    .feedback-title {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 150px;
+      padding: 20px;
+      color: #fff9ec;
+      background: var(--ink);
+    }
+
+    .feedback-title strong {
+      display: block;
+      font-size: 29px;
+      line-height: 1.14;
+      font-weight: 900;
+    }
+
+    .feedback-title span {
+      display: block;
+      margin-top: 12px;
+      color: rgba(255, 249, 236, 0.76);
+      font-size: 17px;
+      line-height: 1.36;
+      font-weight: 650;
+    }
+
+    .feedback-card {
+      min-height: 150px;
+      padding: 20px 20px 18px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(22, 33, 31, 0.12);
+    }
+
+    .feedback-card h3 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.16;
+      font-weight: 900;
+    }
+
+    .feedback-card p {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.48;
+      font-weight: 650;
+    }
+
+    .roles {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+    }
+
+    .role {
+      position: relative;
+      min-height: 330px;
+      padding: 26px 24px 24px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 45px rgba(29, 38, 35, 0.1);
+    }
+
+    .role::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto 0 0;
+      width: 9px;
+      background: var(--teal);
+    }
+
+    .role:nth-child(1)::before { background: var(--red); }
+    .role:nth-child(2)::before { background: var(--blue); }
+    .role:nth-child(3)::before { background: var(--green); }
+    .role:nth-child(4)::before { background: var(--amber); }
+
+    .role .tag {
+      display: inline-block;
+      padding: 7px 11px;
+      color: #fff;
+      background: var(--ink);
+      font-size: 17px;
+      font-weight: 900;
+    }
+
+    .role h3 {
+      margin: 19px 0 14px;
+      font-size: 30px;
+      line-height: 1.18;
+      font-weight: 900;
+    }
+
+    .role ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .role li {
+      position: relative;
+      padding-left: 18px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.52;
+      font-weight: 650;
+    }
+
+    .role li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 13px;
+      width: 7px;
+      height: 7px;
+      background: currentColor;
+      border-radius: 50%;
+    }
+
+    .system-grid {
+      display: grid;
+      gap: 22px;
+      align-items: stretch;
+    }
+
+    .branch-map {
+      padding: 30px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .merge-title {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 20px;
+      padding-bottom: 14px;
+      border-bottom: 4px solid var(--ink);
+    }
+
+    .merge-title h3 {
+      margin: 0;
+      font-size: 31px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .merge-title span {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .main-trunk {
+      display: grid;
+      grid-template-columns: 170px 1fr;
+      gap: 16px;
+      align-items: center;
+      margin-top: 20px;
+      padding: 16px;
+      color: #fff;
+      background: var(--ink);
+      box-shadow: 0 16px 34px rgba(22, 33, 31, 0.12);
+    }
+
+    .main-trunk strong {
+      font-family: "SFMono-Regular", "Consolas", monospace;
+      font-size: 26px;
+      line-height: 1;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .main-trunk span {
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 18px;
+      line-height: 1.42;
+      font-weight: 700;
+    }
+
+    .merge-flow {
+      display: grid;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    .merge-lane {
+      display: grid;
+      grid-template-columns: 150px repeat(3, 1fr) 150px;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .merge-tag {
+      display: flex;
+      align-items: center;
+      padding: 12px 14px;
+      color: #fff;
+      background: var(--ink);
+      font-family: "SFMono-Regular", "Consolas", monospace;
+      font-size: 21px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .merge-tag.ux { background: var(--red); }
+    .merge-tag.feature { background: var(--teal); }
+    .merge-tag.qa { background: var(--green); }
+    .merge-tag.fix { background: var(--blue); }
+    .merge-tag.main { background: var(--ink); }
+
+    .merge-node {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-height: 72px;
+      padding: 13px 15px;
+      color: var(--ink);
+      background: rgba(22, 33, 31, 0.045);
+      border: 1px solid rgba(22, 33, 31, 0.12);
+      font-size: 17px;
+      line-height: 1.28;
+      font-weight: 800;
+    }
+
+    .merge-node::after {
+      content: "→";
+      position: absolute;
+      right: -20px;
+      top: 50%;
+      color: var(--muted);
+      font-size: 24px;
+      font-weight: 900;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+
+    .merge-node:last-child::after,
+    .merge-lane .merge-tag:last-child::after {
+      display: none;
+    }
+
+    .merge-node.dark {
+      color: #fff;
+      background: var(--ink);
+      border-color: var(--ink);
+    }
+
+    .branch-rules {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .branch-rule {
+      min-height: 96px;
+      padding: 16px;
+      background: rgba(22, 33, 31, 0.045);
+      border: 1px solid rgba(22, 33, 31, 0.09);
+    }
+
+    .branch-rule strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--ink);
+      font-size: 18px;
+      font-weight: 900;
+    }
+
+    .branch-rule span {
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.4;
+      font-weight: 650;
+    }
+
+    .definition {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .done {
+      min-height: 235px;
+      padding: 27px 25px;
+      color: #fff9ec;
+      background: var(--ink);
+      box-shadow: 0 18px 44px rgba(29, 38, 35, 0.12);
+    }
+
+    .done:nth-child(2) {
+      background: var(--blue);
+    }
+
+    .done:nth-child(3) {
+      background: var(--green);
+    }
+
+    .done h3 {
+      margin: 0 0 18px;
+      font-size: 29px;
+      line-height: 1.16;
+      font-weight: 900;
+    }
+
+    .done p {
+      margin: 0;
+      color: rgba(255, 249, 236, 0.82);
+      font-size: 18px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .gates {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 12px;
+    }
+
+    .gate {
+      min-height: 126px;
+      padding: 18px 14px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(22, 33, 31, 0.14);
+      text-align: center;
+    }
+
+    .gate .mark {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      margin: 0 auto 13px;
+      color: #fff;
+      background: var(--ink);
+      border-radius: 50%;
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    .gate:nth-child(2) .mark { background: var(--red); }
+    .gate:nth-child(3) .mark { background: var(--teal); }
+    .gate:nth-child(4) .mark { background: var(--blue); }
+    .gate:nth-child(5) .mark { background: var(--amber); }
+    .gate:nth-child(6) .mark { background: var(--green); }
+
+    .gate strong {
+      display: block;
+      font-size: 20px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .gate span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 650;
+    }
+
+    .bottom {
+      display: grid;
+      grid-template-columns: 1.05fr 0.95fr;
+      gap: 22px;
+      margin-top: 26px;
+      align-items: stretch;
+    }
+
+    .metrics {
+      padding: 28px 30px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .metrics h3,
+    .rulebook h3 {
+      margin: 0 0 18px;
+      font-size: 31px;
+      line-height: 1.15;
+      font-weight: 900;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .metric {
+      min-height: 118px;
+      padding: 18px 16px;
+      background: rgba(22, 33, 31, 0.055);
+      border: 1px solid rgba(22, 33, 31, 0.08);
+    }
+
+    .metric strong {
+      display: block;
+      color: var(--ink);
+      font-size: 22px;
+      line-height: 1.16;
+      font-weight: 900;
+    }
+
+    .metric span {
+      display: block;
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+      font-weight: 650;
+    }
+
+    .rulebook {
+      padding: 28px 30px;
+      color: #fff9ec;
+      background: var(--ink);
+      box-shadow: var(--shadow);
+    }
+
+    .rules {
+      display: grid;
+      gap: 14px;
+    }
+
+    .rule {
+      display: grid;
+      grid-template-columns: 34px 1fr;
+      gap: 13px;
+      align-items: start;
+      padding-bottom: 14px;
+      border-bottom: 1px solid rgba(255, 249, 236, 0.18);
+    }
+
+    .rule:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .rule .check {
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      color: var(--ink);
+      background: #e3c87c;
+      border-radius: 50%;
+      font-weight: 900;
+    }
+
+    .rule strong {
+      display: block;
+      font-size: 21px;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .rule span {
+      display: block;
+      margin-top: 4px;
+      color: rgba(255, 249, 236, 0.72);
+      font-size: 16px;
+      line-height: 1.38;
+      font-weight: 600;
+    }
+
+    .closing {
+      position: relative;
+      margin-top: 34px;
+      padding: 28px 34px;
+      color: #fff9ec;
+      background: linear-gradient(90deg, var(--red), #9b4f15 42%, var(--teal));
+      box-shadow: var(--shadow);
+    }
+
+    .closing strong {
+      display: block;
+      font-size: 34px;
+      line-height: 1.25;
+      font-weight: 900;
+    }
+
+    .closing span {
+      display: block;
+      margin-top: 12px;
+      color: rgba(255, 249, 236, 0.82);
+      font-size: 20px;
+      line-height: 1.42;
+      font-weight: 650;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 28px;
+      color: rgba(22, 33, 31, 0.62);
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    .comparison-table {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 22px;
+    }
+
+    .comparison-col {
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .comparison-col h4 {
+      margin: 0 0 16px;
+      font-size: 24px;
+      font-weight: 900;
+    }
+
+    .comparison-col.before h4 { color: var(--muted); }
+    .comparison-col.after h4 { color: var(--teal); }
+
+    .comparison-col ul {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .comparison-col li {
+      position: relative;
+      padding-left: 18px;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 17px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .comparison-col li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 6px;
+      height: 6px;
+      background: currentColor;
+      border-radius: 50%;
+    }
+
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      margin-top: 22px;
+    }
+
+    .data-card {
+      min-height: 160px;
+      padding: 24px;
+      text-align: center;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+
+    .data-card .number {
+      font-size: 56px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .data-card .label {
+      margin-top: 12px;
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .data-card .desc {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .data-card:nth-child(1) .number { color: var(--red); }
+    .data-card:nth-child(2) .number { color: var(--teal); }
+    .data-card:nth-child(3) .number { color: var(--blue); }
+    .data-card:nth-child(4) .number { color: var(--green); }
+
+    .data-card:nth-child(1) { border-top: 6px solid var(--red); }
+    .data-card:nth-child(2) { border-top: 6px solid var(--teal); }
+    .data-card:nth-child(3) { border-top: 6px solid var(--blue); }
+    .data-card:nth-child(4) { border-top: 6px solid var(--green); }
+
+    .methodology-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .method-card {
+      min-height: 180px;
+      padding: 22px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid var(--line);
+      box-shadow: 0 12px 30px rgba(29, 38, 35, 0.08);
+    }
+
+    .method-card h4 {
+      margin: 0 0 10px;
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .method-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    .method-card:nth-child(1) { border-left: 6px solid var(--red); }
+    .method-card:nth-child(2) { border-left: 6px solid var(--amber); }
+    .method-card:nth-child(3) { border-left: 6px solid var(--teal); }
+    .method-card:nth-child(4) { border-left: 6px solid var(--blue); }
+    .method-card:nth-child(5) { border-left: 6px solid var(--violet); }
+    .method-card:nth-child(6) { border-left: 6px solid var(--green); }
+
+    @media (max-width: 900px) {
+      .site-nav-inner {
+        height: auto;
+        min-height: 72px;
+        padding: 14px 0;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .site-links {
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="site-nav" aria-label="站点导航">
+    <div class="site-nav-inner">
+      <a class="site-brand" href="#" aria-label="AI设计范式变革">
+        <span class="site-brand-mark">AI</span>
+        <span>设计范式演进</span>
+      </a>
+      <div class="site-links">
+        <a class="active" href="#overview">范式变革</a>
+        <a href="#agent">Agent系统</a>
+        <a href="#value">业务价值</a>
+        <a href="#methodology">方法论</a>
+      </div>
+    </div>
+  </nav>
+  <main class="poster">
+    <header class="topbar">
+      <div>
+        <div class="kicker"><span class="dot"></span><span>AI-Native Design Transformation</span></div>
+        <h1>AI-Native<br>体验设计范式变革</h1>
+        <p class="lead">将资深体验设计师的分析方法论与批判性思维封装为可复用的AI Agent系统，实现从"人肉分析"到"人机协同"的范式跃迁。</p>
+      </div>
+      <aside class="executive-note">
+        <div class="label">核心价值</div>
+        <div class="sentence">让专业级竞品分析从专家特权变为团队人人可用的基础设施。</div>
+        <div class="small">AI不是要替代设计师，而是成为设计师的得力助手。设计师从"画图执行者"进化为"AI流程设计师"——设计AI工作流、编排人机协作、沉淀可复用的知识资产。</div>
+      </aside>
+    </header>
+
+    <section class="value-strip" aria-label="战略价值">
+      <div class="value">
+        <strong>角色升级</strong>
+        <span>从画图执行到AI系统架构，设计师进化为"AI流程设计师"。</span>
+      </div>
+      <div class="value">
+        <strong>流程创新</strong>
+        <span>从人工分析到AI协同，从繁琐执行到专注策略。</span>
+      </div>
+      <div class="value">
+        <strong>效率跃升</strong>
+        <span>竞品分析周期从1-2周压缩至1-2天，效率提升80%以上。</span>
+      </div>
+      <div class="value">
+        <strong>能力共享</strong>
+        <span>专家经验转化为团队资产，新人也能产出专业分析。</span>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">01</span>
+        <h2>项目背景与问题</h2>
+        <p>传统竞品分析依赖资深专家，周期长、主观性强、知识难传承。AI变革为设计工作带来全新可能性。</p>
+      </div>
+      <div class="comparison-table">
+        <div class="comparison-col before">
+          <h4>传统方式痛点</h4>
+          <ul>
+            <li>依赖专家：只有资深设计师能做专业分析</li>
+            <li>周期漫长：收集资料+分析需1-2周</li>
+            <li>主观性强：分析质量依赖个人经验</li>
+            <li>知识流失：专家离职=经验流失</li>
+            <li>重复劳动：大量时间花在资料收集和整理</li>
+            <li>难以复用：每次分析从零开始</li>
+          </ul>
+        </div>
+        <div class="comparison-col after">
+          <h4>AI-Native解决方案</h4>
+          <ul>
+            <li>能力普及：新人也能产出专业分析</li>
+            <li>效率跃升：1-2天完成全流程分析</li>
+            <li>质量稳定：方法论驱动，结果可复现</li>
+            <li>知识沉淀：专家经验转化为可复用资产</li>
+            <li>设计主导：设计师驱动全流程分析，产出专业策略</li>
+            <li>持续复用：知识库可应用于多个项目</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">02</span>
+        <h2>AI智能体协同工作流</h2>
+        <p>什么是Agent？Agent是具备特定能力的AI助手。5个专业Agent像流水线一样协同工作，从需求输入到报告输出，全程自动化执行专业分析。</p>
+      </div>
+      <div class="flow">
+        <div class="step">
+          <span class="num">1</span>
+          <h3>需求理解</h3>
+          <p><b>Agent 1：需求分析师</b><br>读取产品需求文档，自动拆解业务目标、用户场景、功能清单，制定分析计划。</p>
+        </div>
+        <div class="step">
+          <span class="num">2</span>
+          <h3>信息收集</h3>
+          <p><b>Agent 2：数据采集员</b><br>自动抓取竞品官网信息，智能分析截图中的布局、色彩、交互，整理成结构化数据。</p>
+        </div>
+        <div class="step">
+          <span class="num">3</span>
+          <h3>深度分析</h3>
+          <p><b>Agent 3：分析专家</b><br>从战略、功能、结构、交互、视觉、运营6个维度，用专业方法论进行系统分析。</p>
+        </div>
+        <div class="step">
+          <span class="num">4</span>
+          <h3>策略制定</h3>
+          <p><b>Agent 4：策略顾问</b><br>基于分析结果，识别差距与机会，输出设计策略建议和落地路线图。</p>
+        </div>
+        <div class="step">
+          <span class="num">5</span>
+          <h3>报告输出</h3>
+          <p><b>Agent 5：报告撰写员</b><br>整合所有分析，自动生成包含图表、数据、建议的专业竞品分析报告。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">03</span>
+        <h2>人机协同工作模式</h2>
+        <p>AI负责执行，人类负责决策。每个环节都设置人工确认点，确保分析质量可控，人类始终掌握最终决策权。</p>
+      </div>
+      <div class="agent-loop">
+        <div class="loop-panel">
+          <h3>人类设计师负责</h3>
+          <p>判断业务价值、运用批判性思维、制定创意策略、做出最终决策。人类是主导者，AI是助手。</p>
+        </div>
+        <div class="loop-panel">
+          <h3>AI Agent负责</h3>
+          <p>收集整理数据、识别分析模式、生成文档报告、执行重复性工作。AI处理繁琐任务，释放人类创造力。</p>
+        </div>
+        <div class="loop-panel">
+          <h3>协同工作方式</h3>
+          <p>每完成一个环节，AI暂停等待人类确认。人类可随时补充信息、调整方向，全程掌控分析进程。</p>
+        </div>
+      </div>
+      <div class="feedback-loop">
+        <div class="feedback-title">
+          <strong>协同工作三大原则</strong>
+          <span>让AI效率与人类专业判断完美结合。</span>
+        </div>
+        <div class="feedback-card">
+          <h3>经验结构化</h3>
+          <p>把专家的经验整理成标准文档，让AI按规范执行，比单纯写指令更可靠。</p>
+        </div>
+        <div class="feedback-card">
+          <h3>分步确认</h3>
+          <p>每个环节完成后暂停，等待人类检查确认。发现问题及时纠正，避免错误累积。</p>
+        </div>
+        <div class="feedback-card">
+          <h3>标准方法论</h3>
+          <p>使用业界公认的分析方法（如SWOT、PEST等），确保分析结果专业、全面、可对比。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">04</span>
+        <h2>业务价值与量化成果</h2>
+        <p>效率、质量、能力三重价值提升，让专业级竞品分析从专家特权变为团队基础设施。</p>
+      </div>
+      <div class="data-grid">
+        <div class="data-card">
+          <div class="number">8</div>
+          <div class="label">行业深度拆解</div>
+          <div class="desc">覆盖一线员工/管理者/知识/消费/汽车/银行/资讯/消费电子</div>
+        </div>
+        <div class="data-card">
+          <div class="number">6</div>
+          <div class="label">维度分析框架</div>
+          <div class="desc">战略/范围/结构/框架/表现/运营六维度全覆盖</div>
+        </div>
+        <div class="data-card">
+          <div class="number">11</div>
+          <div class="label">专业知识库</div>
+          <div class="desc">战略分析/需求分析/体验评估等可复用资产</div>
+        </div>
+        <div class="data-card">
+          <div class="number">80%</div>
+          <div class="label">效率提升</div>
+          <div class="desc">分析周期从1-2周压缩至1-2天</div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">05</span>
+        <h2>专业知识库体系</h2>
+        <p>把资深设计师的分析经验整理成11份标准文档，每份包含定义、步骤、模板和案例。AI按这些规范执行，确保分析质量稳定可靠。</p>
+      </div>
+      <div class="methodology-grid">
+        <div class="method-card">
+          <h4>战略洞察</h4>
+          <p>用PEST分析市场环境，用SWOT评估竞品优劣势，看清行业格局和竞争态势。</p>
+        </div>
+        <div class="method-card">
+          <h4>需求分析</h4>
+          <p>用KANO模型区分基本需求和亮点功能，用五层模型拆解用户体验全流程。</p>
+        </div>
+        <div class="method-card">
+          <h4>体验评估</h4>
+          <p>用尼尔森十大原则检查交互易用性，绘制用户旅程地图发现体验断点。</p>
+        </div>
+        <div class="method-card">
+          <h4>功能对比</h4>
+          <p>制作功能对比矩阵，用Gap分析识别我们与竞品的差距和超越机会。</p>
+        </div>
+        <div class="method-card">
+          <h4>策略制定</h4>
+          <p>用价值主张画布明确产品定位，制定分阶段落地的战略路线图。</p>
+        </div>
+        <div class="method-card">
+          <h4>设计规范</h4>
+          <p>沉淀交互设计最佳实践，确保AI输出的设计建议符合专业标准。</p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <span class="index">06</span>
+        <h2>六大核心能力</h2>
+        <p>本次实践全面体现了AI变革时代设计师应具备的六大核心能力，从工具应用到业务价值，形成完整的能力闭环。</p>
+      </div>
+      <div class="gates">
+        <div class="gate">
+          <div class="mark">1</div>
+          <strong>角色升级</strong>
+          <span>从画图执行到AI系统架构</span>
+        </div>
+        <div class="gate">
+          <div class="mark">2</div>
+          <strong>AI应用</strong>
+          <span>熟练运用AI工具提升效率</span>
+        </div>
+        <div class="gate">
+          <div class="mark">3</div>
+          <strong>流程创新</strong>
+          <span>重构设计工作流，实现人机协同</span>
+        </div>
+        <div class="gate">
+          <div class="mark">4</div>
+          <strong>经验沉淀</strong>
+          <span>将设计经验转化为可复用资产</span>
+        </div>
+        <div class="gate">
+          <div class="mark">5</div>
+          <strong>影响力</strong>
+          <span>赋能团队共同成长</span>
+        </div>
+        <div class="gate">
+          <div class="mark">6</div>
+          <strong>业务价值</strong>
+          <span>效率提升80%以上</span>
+        </div>
+      </div>
+      <div class="bottom">
+        <div class="metrics">
+          <h3>关键指标与成果</h3>
+          <div class="metric-grid">
+            <div class="metric"><strong>竞品覆盖</strong><span>8个行业工作台深度分析</span></div>
+            <div class="metric"><strong>分析维度</strong><span>6维度系统化框架</span></div>
+            <div class="metric"><strong>知识资产</strong><span>11个方法论文档</span></div>
+            <div class="metric"><strong>效率提升</strong><span>从1-2周压缩至1-2天</span></div>
+            <div class="metric"><strong>质量一致性</strong><span>方法论驱动，可复现</span></div>
+            <div class="metric"><strong>能力共享</strong><span>新人可独立产出专业分析</span></div>
+          </div>
+        </div>
+        <div class="rulebook">
+          <h3>核心经验总结</h3>
+          <div class="rules">
+            <div class="rule">
+              <span class="check">1</span>
+              <div><strong>把经验变成文档是AI可靠执行的基础</strong><span>将专家经验整理成结构化文档，比单纯写AI指令更有效，AI能按规范稳定执行。</span></div>
+            </div>
+            <div class="rule">
+              <span class="check">2</span>
+              <div><strong>分步确认确保质量可控</strong><span>每个环节完成后暂停等待检查，人类可随时介入调整，避免错误累积。</span></div>
+            </div>
+            <div class="rule">
+              <span class="check">3</span>
+              <div><strong>用标准方法保证质量一致</strong><span>使用业界公认的分析框架（SWOT、PEST等），确保每次分析都专业、全面。</span></div>
+            </div>
+            <div class="rule">
+              <span class="check">4</span>
+              <div><strong>AI是助手而非替代</strong><span>AI处理繁琐工作提升效率，但业务判断、创意策略、质量把控由人类主导。</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="closing">
+      <strong>最终目标：把资深设计师的分析经验封装成AI智能助手，让专业级竞品分析从专家特权变成团队人人可用的基础设施。</strong>
+      <span>核心关键词：角色升级 · 流程创新 · 人机协同 · 知识沉淀 · 效率跃升。</span>
+    </div>
+
+    <footer class="footer">
+      <span>AI-Native 体验设计范式变革</span>
+      <span>让AI成为设计师的得力助手，而非替代者</span>
+    </footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,102 @@
+{
+  "freeze_candidate_version": "client-mode-v1.5-freeze-rc1",
+  "product_context_version": "v0.4.0",
+  "benchmark_contract_version": "2026-05-27",
+  "freeze_date": "2026-05-28",
+  "run_mode": "client",
+  "freeze_conclusion": "frozen_for_pilot",
+  "freeze_reason": "All final-capable golden cases are above the V1.5 line, and remaining bounded cases are explained by objective input insufficiency rather than system quality gaps.",
+  "release_blocker_count": 0,
+  "release_blockers": [],
+  "golden_benchmark_baseline": {
+    "case_count": 5,
+    "v1_5_target_met_count": 5,
+    "v1_5_target_met_rate": 1.0,
+    "final_delivery_ready_case_count": 3,
+    "fallback_safe_case_count": 0,
+    "supplement_required_case_count": 1,
+    "blocked_case_count": 1,
+    "final_capable_pass_rate": 1.0,
+    "bounded_safety_pass_rate": 1.0,
+    "strongest_case": {
+      "case_id": "case-final-mainline",
+      "case_label": "高质量输入、主链路覆盖充分",
+      "delivery_status": "final_delivery_ready"
+    },
+    "weakest_case": {
+      "case_id": "case-hq-no-description",
+      "case_label": "高质量截图、但说明不足",
+      "delivery_status": "blocked"
+    },
+    "remaining_bottleneck": {
+      "metric": "objective_input_insufficiency",
+      "reason": "Current final-capable cases are all above the line; remaining bounded cases fail because key evidence is objectively absent."
+    },
+    "freeze_recommendation": "Recommend Freeze: final-capable golden cases are all above the V1.5 line, and the remaining bounded cases are explained by objectively insufficient input rather than system quality gaps."
+  },
+  "case_status_snapshot": [
+    {
+      "case_id": "case-final-mainline",
+      "delivery_status": "final_delivery_ready",
+      "input_quality_class": "high_quality",
+      "trusted_mapping_rate": 1.0,
+      "critical_path_page_hit_rate": 1.0,
+      "critical_path_state_hit_rate": 1.0,
+      "root_cause": "already_good_enough",
+      "v1_5_target_met": true
+    },
+    {
+      "case_id": "case-hq-no-description",
+      "delivery_status": "blocked",
+      "input_quality_class": "blocked",
+      "trusted_mapping_rate": 0.0,
+      "critical_path_page_hit_rate": 0.0,
+      "critical_path_state_hit_rate": 0.0,
+      "root_cause": "input_truly_insufficient",
+      "v1_5_target_met": true
+    },
+    {
+      "case_id": "case-salvageable",
+      "delivery_status": "final_delivery_ready",
+      "input_quality_class": "salvageable",
+      "trusted_mapping_rate": 1.0,
+      "critical_path_page_hit_rate": 1.0,
+      "critical_path_state_hit_rate": 1.0,
+      "root_cause": "system_ingestion_gap",
+      "v1_5_target_met": true
+    },
+    {
+      "case_id": "case-missing-evidence",
+      "delivery_status": "supplement_required",
+      "input_quality_class": "missing_evidence",
+      "trusted_mapping_rate": 1.0,
+      "critical_path_page_hit_rate": 1.0,
+      "critical_path_state_hit_rate": 0.291,
+      "root_cause": "input_truly_insufficient",
+      "v1_5_target_met": true
+    },
+    {
+      "case_id": "case-complex-multi-module",
+      "delivery_status": "final_delivery_ready",
+      "input_quality_class": "high_quality",
+      "trusted_mapping_rate": 1.0,
+      "critical_path_page_hit_rate": 1.0,
+      "critical_path_state_hit_rate": 1.0,
+      "root_cause": "already_good_enough",
+      "v1_5_target_met": true
+    }
+  ],
+  "known_good_artifacts": {
+    "golden_benchmark_sweep_json": "/private/tmp/route-b-batch11-sweep/golden_benchmark_sweep.json",
+    "golden_benchmark_sweep_markdown": "/private/tmp/route-b-batch11-sweep/golden_benchmark_sweep.md",
+    "salvageable_compare_json": "/private/tmp/route-b-batch11-salvageable-compare/salvageable_benchmark_compare.json",
+    "salvageable_compare_markdown": "/private/tmp/route-b-batch11-salvageable-compare/salvageable_benchmark_compare.md"
+  },
+  "known_good_validation_commands_doc": "docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md",
+  "known_boundaries_doc": "docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md",
+  "next_phase": {
+    "client_mode_status": "frozen",
+    "next_focus": "web_mode_packaging",
+    "after_web_mode": "skills_factory_template"
+  }
+}

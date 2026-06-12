@@ -1,0 +1,160 @@
+---
+description: 用户请求体验评估时应用（uxeval、体验评估、启发式评估、可用性测试、UX 走查）
+globs: ["**/*"]
+alwaysApply: false
+---
+
+# UXEval Skill — 完整执行指引
+
+> 完整规范见 @AGENTS.md 的「UXEval Skill」章节。
+> 评估宪法见 @skills/uxeval/constitution.md。
+> Skill 元数据见 @skills/uxeval/SKILL.md。
+
+## 触发条件
+
+识别到以下任一意图，立即进入 UXEval 流程：
+
+- 中文触发词：体验评估、启发式评估、可用性测试、UX 走查、体验走查、体验问题清单
+- 英文触发词：uxeval、heuristic evaluation、usability test、ux audit
+- 命令触发：`/uxeval`
+
+---
+
+## Step 0：欢迎 + 模式选择
+
+**必须先问用户**，不可跳过：
+
+```
+我将用 UXEval Skill 评估你的产品。请确认：
+
+1. 这是 Web 应用还是客户端应用？
+   - Web 应用：我可以用 Playwright 自动登录 + 截图（需要 URL + 账号密码）
+   - 客户端应用：你需要自己准备产品截图
+
+2. 必需的输入：
+   - PRD 文档（支持 .md / .pdf / .docx）
+   - 评估范围说明（评估目标、用户角色、产品范围）
+
+3. 推荐的输入：
+   - 5+ 张关键页面截图（客户端模式）
+   - 用户角色描述（如果 PRD 里没写清楚）
+
+你已经准备好了吗？
+```
+
+**绝对不要**：跳过模式选择就开始分析。
+
+---
+
+## Step 1：准备工作区
+
+如果当前目录没有 `designos.project.yaml`，先建立工作区：
+
+1. 创建 `inputs/`、`outputs/`、`runs/` 三个目录
+2. 创建 `designos.project.yaml`（name 从用户输入推断，mode 为 client 或 web）
+3. 创建 `inputs/scope.md` 模板让用户填写（评估目标、产品范围、关键用户角色）
+4. 把用户提供的 PRD 复制到 `inputs/prd.md`
+5. 客户端模式：把截图放到 `inputs/screens/`
+
+---
+
+## Step 2：12 阶段流水线（严格按顺序执行）
+
+完整流程定义见 @AGENTS.md 的「Step 2：12 阶段流水线」章节。
+
+| # | Stage | 关键输入 | 关键输出 | 备注 |
+|---|---|---|---|---|
+| 1 | prd-understanding | PRD + scope.md | 模块/功能/业务目标/评估边界 JSON | 用 prompts/v1.0.0/01-prd-understanding.md |
+| 2 | persona-derivation | 模块/功能/边界 | 用户角色列表 | 用 prompt 02 |
+| 3 | scenario-derivation | 角色/模块 | 用户场景列表 | 用 prompt 03 |
+| 4 | principle-mapping | scope/模块 | 启发式原则集 | 加载 reference/m02-启发式原则.md，用 prompt 04 |
+| 5 | journey-modeling | 角色/场景/模块 | 旅程图 + 旅程阶段 | 用 prompt 05；**Checkpoint C1** |
+| 6 | task-generation | 旅程/原则 | 完整任务清单 + 简洁版 | 用 prompt 06；**Checkpoint C2** |
+| 7 | task-script-generation | 任务清单 | Playwright 脚本 | 仅 web 模式；client 模式跳过 |
+| 8 | web-automation | Playwright 脚本 | 自动截图 + DOM | 仅 web 模式；client 模式跳过 |
+| 9 | screenshot-loading | inputs/screens/ | 截图列表 | 调用 image-analyzer MCP 或枚举文件 |
+| 10 | heuristic-detection | 截图 + 原则 + 任务 + 宪法 | 原始问题列表 | 调用 heuristic-engine MCP（含 LLM 视觉判断）|
+| 11 | issue-attribution | 原始问题 + 旅程 + 原则 | 结构化问题清单 | 用 prompt 11，按宪法约束；**Checkpoint C3** |
+| 12 | report-generation | 问题清单 | Excel + Markdown + 证据包 | 调用 excel-builder MCP |
+
+### 双模式路径
+
+```
+mode == "web"   → Stage 1-6 → Stage 7-8（Playwright 自动化）→ Stage 9-12
+mode == "client" → Stage 1-6 → 跳过 7-8 → Stage 9-12（人工截图）
+```
+
+---
+
+## Step 3：三个 Checkpoint 处理逻辑
+
+遇到 C1 / C2 / C3 时，**必须暂停**，展示以下格式：
+
+```
+📍 Checkpoint <ID> — 请确认产物
+
+[展示该阶段产出的 Markdown 内容]
+
+请回复：
+  1. 继续 — 进入下一阶段
+  2. 修改 — 我会基于你的反馈重做这一阶段
+  3. 补充 — 你补充信息后我增量更新
+```
+
+| Checkpoint | 触发时机 | 确认内容 |
+|---|---|---|
+| C1 | Stage 5 完成后 | 旅程地图是否覆盖关键用户路径 |
+| C2 | Stage 6 完成后 | 任务清单是否偏功能测试、是否漏掉关键体验任务 |
+| C3 | Stage 11 完成后 | 严重等级、归因、改进建议是否合理 |
+
+**绝对不要**：跳过 Checkpoint 直接继续，不可超时自动跳过。
+
+---
+
+## Step 4：评估宪法（7 条，不可违反）
+
+完整宪法见 @skills/uxeval/constitution.md。每条问题必须满足全部 7 条，违反任一条则**重新生成**（最多重试 3 次）：
+
+1. **证据绑定**：每条问题的 `evidence_refs` 不可为空，必须指向具体截图或 DOM 证据
+2. **信息安全**：不输出账号、密码、真实姓名、内部 URL 等敏感信息
+3. **等级合法**：严重等级只能是 `critical / major / minor / suggestion` 四选一
+4. **体验优先**：不把「功能是否存在」当作主要体验问题（功能缺失是 PRD 问题，不是体验问题）
+5. **建议可执行**：改进建议必须说清楚「改什么」「改成什么」，不可只说「优化 XX」
+6. **用户影响**：问题描述必须包含对用户的具体影响（如「导致用户无法完成 XX 任务」）
+7. **基准标注**：当 PRD 与实现冲突时，必须标明评估基准来源（以 PRD 为准还是以实现为准）
+
+---
+
+## Step 5：最终输出
+
+跑完 12 个 Stage 后，告知用户：
+
+```
+✓ UXEval 评估完成
+
+产出：
+- 旅程图：runs/<run-id>/outputs/01-旅程地图.md
+- 完整任务清单：runs/<run-id>/outputs/02-任务清单-完整版.md
+- 简洁任务清单：runs/<run-id>/outputs/03-任务清单-简洁版.md
+- 问题清单：runs/<run-id>/outputs/04-问题报告.xlsx
+- HTML 报告：runs/<run-id>/outputs/04-问题报告.html
+- 证据包：runs/<run-id>/outputs/evidence/
+
+下一步建议：
+- 召集设计评审会议过 Top 5 critical 问题
+- 把 Excel 分派给对应负责人
+- 修复后回归验证
+```
+
+---
+
+## 错误处理
+
+| 情况 | 处理方式 |
+|---|---|
+| PRD 缺失 | 拒绝执行，请求用户补充 |
+| scope.md 缺失 | 用模板让用户填，不要凭空猜 |
+| 截图缺失（client 模式）| 询问用户是用 screens-description.md 替代还是补截图 |
+| LLM 输出违反宪法 | 显式拒绝并重新生成，最多重试 3 次 |
+| Checkpoint 用户不回复 | 等待，不要超时跳过 |
+| designos CLI 不可用 | 自己按 pipeline.yaml 逐步骤执行（调 LLM + 调 MCP 工具）|

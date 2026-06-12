@@ -1,0 +1,61 @@
+{
+  "baseline_name": "web-mode-baseline-w1",
+  "baseline_date": "2026-06-01",
+  "branch": "factory-and-prd2proto-p1",
+  "run_mode": "web",
+  "release_blocker_count": 0,
+  "release_blockers": [],
+  "minimal_install": {
+    "python_package": "pip install -e \".[web]\"",
+    "browser_binaries": "python -m playwright install chromium",
+    "optional_dependency_extra": "web"
+  },
+  "test_partition": {
+    "unit": {
+      "marker": "unit",
+      "requires": "none",
+      "must_pass_when_dependency_absent": true,
+      "path": "mcp-servers/playwright-driver/tests/test_core.py",
+      "command": "python -m pytest -q -m unit mcp-servers/playwright-driver/tests/test_core.py"
+    },
+    "requires_playwright": {
+      "marker": "requires_playwright",
+      "requires": "playwright python package importable",
+      "skip_when_absent": true
+    },
+    "browser_smoke": {
+      "marker": "browser_smoke",
+      "requires": "chromium binaries launchable",
+      "skip_when_absent": true,
+      "path": "mcp-servers/playwright-driver/tests/test_integration.py",
+      "command": "python -m pytest -q mcp-servers/playwright-driver/tests/test_integration.py"
+    }
+  },
+  "known_good_results": {
+    "layer1_unit_with_playwright": "12 passed",
+    "layer1_unit_simulated_absent": "12 passed",
+    "driver_dir_simulated_absent": "12 passed, 7 skipped, 0 failed",
+    "layer23_browser_smoke": "deps present -> 7 passed (last observed 45.90s); deps absent -> 7 skipped (not a blocker)",
+    "uxeval_web_pipeline_integration": "36 passed",
+    "kernel_preflight": "6 passed"
+  },
+  "verified_capabilities": [
+    "import-cascade severed: pure-logic modules import without playwright",
+    "real-browser smoke: navigate/screenshot/extract_dom/execute_batch",
+    "multi-tab switch (mock server)",
+    "iframe switch + read (mock server)",
+    "form fill without submit",
+    "uxeval web/client only_when routing + execute_batch wiring",
+    "preflight mode-specific playwright install hint"
+  ],
+  "insufficiently_verified_capabilities": [
+    "real login flow (account/password, SSO) end-to-end",
+    "multi-tab on real complex sites",
+    "cross-origin / nested / dynamic iframe on real sites",
+    "heuristic-engine end-to-end loop (driver -> heuristic-engine -> issues)",
+    "RetryPlanner correction effectiveness on real failures"
+  ],
+  "validation_baseline_doc": "docs/releases/web-mode-baseline/web_mode_validation_baseline.md",
+  "known_boundaries_doc": "docs/releases/web-mode-baseline/web_mode_known_boundaries.md",
+  "next_phase_recommendation": "prd2proto"
+}

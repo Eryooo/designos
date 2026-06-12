@@ -1,0 +1,64 @@
+# logo-design promptfoo 评估配置
+
+description: logo-design 子技能质量评估
+
+prompts:
+  - file://../prompts/01-analyze-brand-form.md
+  - file://../prompts/02-generate-logo-spec.md
+  - file://../prompts/03-generate-prompt-pack.md
+
+providers:
+  - id: openai:gpt-4-turbo-preview
+    config:
+      temperature: 0.7
+
+tests:
+  - description: 几何图形标 golden case
+    vars:
+      brand_brief:
+        north_star: "让创业者感到被理解与支持"
+        positioning: "专业可信赖的创业服务品牌"
+        personality_keywords: ["专业", "温暖", "可靠", "创新", "亲和"]
+    assert:
+      - type: javascript
+        value: output.form && output.form.rationale.includes('专业')
+      - type: javascript
+        value: output.black_white_usable === true
+      - type: javascript
+        value: output.min_size_px <= 32
+      - type: javascript
+        value: output.trademark_risk_signals && output.trademark_risk_signals.length > 0
+      - type: not-contains
+        value: "可注册"
+      - type: not-contains
+        value: "版权清洁"  # 禁止过度承诺
+
+  - description: 字标 case
+    vars:
+      brand_brief:
+        north_star: "让年轻创作者感到自由与可能"
+        positioning: "年轻创意工具品牌"
+        personality_keywords: ["年轻", "活力", "创意", "前卫", "自由"]
+    assert:
+      - type: javascript
+        value: output.form && output.form.rationale.includes('年轻')
+      - type: javascript
+        value: output.black_white_usable === true
+      - type: not-contains
+        value: "最终商用"
+
+  - description: prompt pack 负向控制
+    vars:
+      visual_spec:
+        form:
+          primary_shape: "几何组合标"
+        color_refs: ["#0066CC"]
+    assert:
+      - type: javascript
+        value: output.prompts && output.prompts.length >= 2
+      - type: javascript
+        value: output.prompts.every(p => p.negative && p.negative.length > 0)
+      - type: javascript
+        value: output.status === "available"
+
+outputPath: ./eval-results.json

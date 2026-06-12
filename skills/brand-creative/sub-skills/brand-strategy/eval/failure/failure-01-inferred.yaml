@@ -1,0 +1,79 @@
+# Failure Case 01: 竞品矩阵缺失时必须标注 [inferred]
+
+description: |
+  用户直接调用 brand-strategy,未提供 competitor_matrix,或 competitor_matrix.status == "insufficient_data"。
+  验证:差异化判定必须标注 basis="inferred",声明中必须包含"未经验证"说明。
+
+inputs:
+  product_brief: |
+    EduFlow 是一款面向 K12 教师的备课助手,核心功能:AI 生成教案/知识点图谱/学情分析。
+    目标市场:公立学校一线教师。
+    价值主张:减轻教师备课负担,让教师有更多时间关注学生。
+
+  target_user: |
+    30-50岁公立学校教师,教学任务重,备课时间不足。
+    对 AI 工具有兴趣但不熟悉,希望工具真正理解教学场景。
+
+  competitor_matrix:
+    competitors: []
+    status: insufficient_data
+    reason: K12 教师备课细分市场竞品信息有限,无法提供充分对比数据
+
+expected_output:
+  brand_brief:
+    north_star: 让教师重获教学的从容与热情
+    positioning: 面向 K12 教师的场景理解型备课助手,在 AI 之上提供对教学复杂性的深度理解
+    differentiation:
+      statement: "[inferred] 基于产品的'理解教学场景'特性,推断可能与偏技术导向的教育科技产品形成差异(强调场景理解 vs 技术参数),但未经竞品对标验证,仅为初步推断"
+      basis: inferred
+    core_values:
+      - 尊重教学专业性
+      - 减负不添乱
+      - 持续学习
+    personality_keywords:
+      - 沉稳
+      - 专业
+      - 体贴
+      - 可靠
+    target_user: 30-50岁公立学校教师,教学任务重,需要真正理解教学场景的减负工具
+
+failure_mode: competitor_matrix_missing_or_insufficient
+failure_prevention:
+  - 检查 competitor_matrix 是否存在
+  - 检查 competitor_matrix.status 是否为 "complete"
+  - 检查 competitor_matrix.competitors 是否至少 3 个
+  - 任一条件不满足,必须设置 differentiation.basis = "inferred"
+  - differentiation.statement 必须包含 "[inferred]" 标记与"未经验证"说明
+
+quality_checks:
+  - name: differentiation_basis_is_inferred
+    description: 竞品矩阵缺失时,差异化判定基础必须是 inferred
+    assertion: |
+      differentiation.basis == "inferred"
+
+  - name: differentiation_statement_includes_disclaimer
+    description: 差异化声明包含"未经验证"说明
+    assertion: |
+      differentiation.statement 包含 "[inferred]" 或 "未经验证" 或 "推断" 或 "初步推断"
+
+  - name: differentiation_statement_no_absolute_claims
+    description: 差异化声明不包含绝对化表述
+    assertion: |
+      differentiation.statement 不包含"唯一"/"最"/"绝对"/"一定"等绝对化词汇
+
+  - name: north_star_is_emotional_value
+    description: 北极星仍然是情感化价值
+    assertion: |
+      north_star 包含情感关键词,不是功能描述
+
+  - name: personality_keywords_count
+    description: 人格关键词仍然 3-5 个
+    assertion: |
+      personality_keywords.length >= 3 && personality_keywords.length <= 5
+
+test_type: failure
+priority: P0
+contract_version: B1.0
+failure_reference: |
+  对应 constitution.md 第 1.2 节:无竞品矩阵或数据不足时的强制约束。
+  对应参考案例:reference/case-inferred-differentiation.md

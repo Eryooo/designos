@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/page-structure.schema.json",
+  "title": "Page Structure",
+  "description": "Schema for page-structure artifact (P0 baseline, to be extended)",
+  "allOf": [
+    {"$ref": "./artifact-base.schema.json"},
+    {
+      "type": "object",
+      "properties": {
+        "content": {
+          "type": "object",
+          "description": "Artifact-specific content (to be detailed in P1)"
+        }
+      },
+      "required": ["content"]
+    }
+  ]
+}

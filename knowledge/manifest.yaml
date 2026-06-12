@@ -1,0 +1,576 @@
+schema_version: "0.3.0"
+layer: shared-knowledge
+status: pilot
+owner: designos-core
+
+domains: [design, ux, product, frontend, research]
+known_skills: [uxeval, prd2proto, ai-analytics, ip-design, brand-creative]
+
+assets:
+  - id: ux.heuristic-principles
+    version: 0.2.0-pilot
+    domain: ux
+    type: principles
+    applicable_skills: [uxeval]
+    source_of_truth: knowledge/ux/heuristic-principles.md
+    decision_use: 统一体验评估原则选择、原则映射与严重等级基础口径
+    quality_bar: 含 purpose/applies_to/decision_framework/senior_heuristics/quality_rubric/common_failure_modes/source_assets/do_not_claim
+    do_not_claim: 不规定评分公式；不定义某次评估任务清单
+    owner: designos-core
+    status: pilot
+  - id: ux.journey-modeling
+    version: 0.2.0-pilot
+    domain: ux
+    type: methodology
+    applicable_skills: [uxeval]
+    source_of_truth: knowledge/ux/journey-modeling.md
+    decision_use: 从页面视角升级到用户旅程视角，支撑任务生成与问题归因
+    quality_bar: 含六阶段模板、旅程判定、质量 rubric 与 failure modes
+    do_not_claim: 不规定输出 schema；不替代用户访谈
+    owner: designos-core
+    status: pilot
+  - id: ux.evidence-quality
+    version: 0.2.0-pilot
+    domain: ux
+    type: standard
+    applicable_skills: [uxeval]
+    source_of_truth: knowledge/ux/evidence-quality.md
+    decision_use: 判定评估证据是否足以支撑问题清单与交付状态
+    quality_bar: 含证据类型、充分性三属性、交付四态与失败模式
+    do_not_claim: 不规定采集工具、文件格式或路径
+    owner: designos-core
+    status: pilot
+  - id: ux.severity-rubric
+    version: 0.2.0-pilot
+    domain: ux
+    type: rubric
+    applicable_skills: [uxeval]
+    source_of_truth: knowledge/ux/severity-rubric.md
+    decision_use: 统一 critical/major/minor/suggestion 严重等级判定
+    quality_bar: 等级由用户影响、频次、风险、可恢复性共同决定
+    do_not_claim: 不定义产品级优先级路线图或扣分公式
+    owner: designos-core
+    status: pilot
+  - id: ux.issue-attribution
+    version: 0.2.0-pilot
+    domain: ux
+    type: methodology
+    applicable_skills: [uxeval]
+    source_of_truth: knowledge/ux/issue-attribution.md
+    decision_use: 把 raw issue 转成可评审、可修复、可追溯的结构化问题
+    quality_bar: 含八步归因、建议模板、去重规则、功能测试偏移防线
+    do_not_claim: 不定义具体 Issue schema；不保证自动归因 100% 正确
+    owner: designos-core
+    status: pilot
+  - id: ux.ux-failure-modes
+    version: 0.2.0-pilot
+    domain: ux
+    type: failure_modes
+    applicable_skills: [uxeval]
+    source_of_truth: knowledge/ux/ux-failure-modes.md
+    decision_use: 用真实失败样例沉淀前置 calibration 与质量门控
+    quality_bar: 每个失败模式含现象、识别信号、根因、防线
+    do_not_claim: 不保证覆盖所有未来失败模式
+    owner: designos-core
+    status: pilot
+
+  - id: product.prd-understanding
+    version: 0.2.0-pilot
+    domain: product
+    type: methodology
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/product/prd-understanding.md
+    decision_use: 把非结构化 PRD 转成业务目标、模块、功能、页面、用户流
+    quality_bar: 推断显式标注，缺口写 warnings，不替 PM 发明需求
+    do_not_claim: 不替代需求评审；不保证推断真实成立
+    owner: designos-core
+    status: pilot
+  - id: product.information-architecture
+    version: 0.2.0-pilot
+    domain: product
+    type: methodology
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/product/information-architecture.md
+    decision_use: 组织 sitemap/navigation/route/critical path 四视图
+    quality_bar: 四视图一致、可直接供实现消费
+    do_not_claim: 不规定前端路由库；不生成具体页面设计稿
+    owner: designos-core
+    status: pilot
+  - id: product.user-story-mapping
+    version: 0.2.0-pilot
+    domain: product
+    type: methodology
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/product/user-story-mapping.md
+    decision_use: 用 story mapping 拆 modules/features/pages/flows 与关键路径
+    quality_bar: 结构可追踪，feature 满足 INVEST
+    do_not_claim: 不替代 roadmap 排期；不决定功能是否应该做
+    owner: designos-core
+    status: pilot
+  - id: product.interaction-state-coverage
+    version: 0.2.0-pilot
+    domain: product
+    type: standard
+    applicable_skills: [prd2proto, uxeval]
+    source_of_truth: knowledge/product/interaction-state-coverage.md
+    decision_use: 判断交互组件与流程是否覆盖关键状态和异常路径
+    quality_bar: 关键交互状态齐全，非适用状态有理由
+    do_not_claim: 不规定具体 CSS 实现；不替代无障碍专项审查
+    owner: designos-core
+    status: pilot
+
+  - id: frontend.atomic-design
+    version: 0.2.0-pilot
+    domain: frontend
+    type: methodology
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/frontend/atomic-design.md
+    decision_use: 组织 atoms/molecules/organisms/templates/pages 的组件分层
+    quality_bar: 层级清晰、命名稳定、引用方向单一、复用边界明确
+    do_not_claim: 不规定具体框架或组件库 API
+    owner: designos-core
+    status: pilot
+  - id: frontend.design-token-rules
+    version: 0.2.0-pilot
+    domain: frontend
+    type: standard
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/frontend/design-token-rules.md
+    decision_use: 规范 design token 三层架构、命名、引用与 CSS 变量输出
+    quality_bar: 三层清楚、引用可解析、命名语义化
+    do_not_claim: 不规定具体 token 值或构建工具
+    owner: designos-core
+    status: pilot
+  - id: frontend.component-state-rules
+    version: 0.2.0-pilot
+    domain: frontend
+    type: standard
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/frontend/component-state-rules.md
+    decision_use: 规范交互组件 default/hover/active/focus/disabled/loading/error 覆盖
+    quality_bar: 关键交互组件状态齐全，视觉/文案/行为一致
+    do_not_claim: 不覆盖业务状态机的全部领域状态
+    owner: designos-core
+    status: pilot
+  - id: frontend.code-quality-constitution
+    version: 0.2.0-pilot
+    domain: frontend
+    type: standard
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/frontend/code-quality-constitution.md
+    decision_use: 定义前端生成代码质量底线和 review gate 宪法
+    quality_bar: 四条规则可定位扫描，违规有修复建议与严重等级
+    do_not_claim: 不定义 ESLint/Prettier/CI；不保证生产可上线
+    owner: designos-core
+    status: pilot
+
+  - id: research.methodology-selection
+    version: 0.2.0-pilot
+    domain: research
+    type: methodology
+    applicable_skills: [ai-analytics]
+    source_of_truth: knowledge/research/methodology-selection.md
+    decision_use: 按目标与证据选择最小够用分析方法论
+    quality_bar: 方法论与问题/证据/产物一一对应，缺口明确
+    do_not_claim: 不规定某 skill 的选择算法；不替代数据质量审查
+    owner: designos-core
+    status: pilot
+  - id: research.competitor-analysis
+    version: 0.2.0-pilot
+    domain: research
+    type: methodology
+    applicable_skills: [ai-analytics]
+    source_of_truth: knowledge/research/competitor-analysis.md
+    decision_use: 把竞品资料转为可追溯 findings 与比较矩阵
+    quality_bar: findings 与矩阵均可追溯，维度服务最终策略
+    do_not_claim: 不自动爬取或验证外部资料；不预设行业
+    owner: designos-core
+    status: pilot
+  - id: research.user-persona-quality
+    version: 0.2.0-pilot
+    domain: research
+    type: methodology
+    applicable_skills: [ai-analytics]
+    source_of_truth: knowledge/research/user-persona-quality.md
+    decision_use: 评估 persona 是否可被设计/产品决策消费
+    quality_bar: 角色、目标、痛点、场景、证据完整且可行动
+    do_not_claim: 不替代真实用户研究；不预设具体用户群
+    owner: designos-core
+    status: pilot
+  - id: research.data-completeness-rubric
+    version: 0.2.0-pilot
+    domain: research
+    type: rubric
+    applicable_skills: [ai-analytics]
+    source_of_truth: knowledge/research/data-completeness-rubric.md
+    decision_use: 判断数据是否足以支撑策略、画像与竞品结论
+    quality_bar: coverage 与 gaps 有证据依据，能决定继续/补资料
+    do_not_claim: 不保证数据来源真实可靠；不自动补齐资料
+    owner: designos-core
+    status: pilot
+
+  - id: design.design-strategy
+    version: 0.2.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ai-analytics, prd2proto]
+    source_of_truth: knowledge/design/design-strategy.md
+    decision_use: 把分析结论转成目标人群、商业目标、设计原则、气质关键词
+    quality_bar: 策略可执行、可取舍、有证据，能指导模板/IA/组件选择
+    do_not_claim: 不替代品牌战略；不规定最终视觉稿
+    owner: designos-core
+    status: pilot
+  - id: design.design-template-selection
+    version: 0.2.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/design/design-template-selection.md
+    decision_use: 按产品定位特征选择视觉模板并做有限微调
+    quality_bar: 选择理由可解释，微调有限且不破坏模板核心
+    do_not_claim: 不复制模板 token 全文；不替代用户 design-spec
+    owner: designos-core
+    status: pilot
+  - id: design.tone-and-visual-direction
+    version: 0.2.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ai-analytics, prd2proto]
+    source_of_truth: knowledge/design/tone-and-visual-direction.md
+    decision_use: 把目标用户、业务目标、竞品定位转成 tone keywords 与视觉方向
+    quality_bar: tone 与用户/目标/竞品定位一致，并能落到视觉决策
+    do_not_claim: 不替代品牌手册；不产出最终视觉稿
+    owner: designos-core
+    status: pilot
+
+  # ===== I0 IP design senior-decision assets =====
+  - id: design.ip.methodology
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/ip/ip-design-methodology.md
+    decision_use: IP 设计六阶段总纲与跨阶段判断逻辑
+    quality_bar: 阶段依赖、关键词传导、可评审优先三件套齐全
+    do_not_claim: 不替代法务/商标审查;不替代真实用户研究
+    owner: designos-core
+    status: pilot
+  - id: design.ip.worldview-building
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/ip/worldview-building.md
+    decision_use: 构建 IP 世界观:时空、规则、关系、文化原型、关键词
+    quality_bar: 能力边界 + 反对者 + 自洽校验
+    do_not_claim: 不替代世界观 IP 法律授权
+    owner: designos-core
+    status: pilot
+  - id: design.ip.content-narrative
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/ip/content-narrative.md
+    decision_use: IP 内容叙事:首秀/核心事件/语料/矩阵/节奏
+    quality_bar: 关系递进 + 失败语料 + 可持续节奏
+    do_not_claim: 不保证传播效果;不替代真实运营
+    owner: designos-core
+    status: pilot
+  - id: design.ip.brand-material-realization
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/ip/brand-material-realization.md
+    decision_use: 物料落地:应用规范/衍生品/宣传物料/传播指南/生产清单
+    quality_bar: 三锁(符号/坐标/色彩模式)+ 可落地性 + 成本档位
+    do_not_claim: 不替代真实生产打样与法务合规
+    owner: designos-core
+    status: pilot
+  - id: design.strategy.brand-strategy-alignment
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/strategy/brand-strategy-alignment.md
+    decision_use: M01 品牌策略对齐:北极星/画像/价值/人格词/差异化
+    quality_bar: 北极星五要素 + 情感价值 + 差异化基于空白
+    do_not_claim: 不替代真实研究与法务
+    owner: designos-core
+    status: pilot
+  - id: design.persona.persona-modeling
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/persona/persona-modeling.md
+    decision_use: M03 人格建模:行为模式为主 MBTI 仅辅助 + 动机/恐惧/成长弧/关系网
+    quality_bar: 可观测行为模式 + 分层恐惧 + 合理触发
+    do_not_claim: 不声明 MBTI 是科学测量;不替代心理画像研究
+    owner: designos-core
+    status: pilot
+  - id: design.persona.voice-and-behavior-boundary
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/persona/voice-and-behavior-boundary.md
+    decision_use: 声音库与行为红线:口头禅/场景句式/情绪表达/红线
+    quality_bar: 含失败场景 + 情绪与视觉对齐 + 红线可判定
+    do_not_claim: 不替代品牌法务对外发声合规
+    owner: designos-core
+    status: pilot
+  - id: design.visual.visual-translation
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/visual/visual-translation.md
+    decision_use: M04 视觉转化:基因继承/形态/色彩/识别度/小尺寸/状态延展/风格谱系/禁忌
+    quality_bar: 32px 可辨 + 四级简化 + 风格坐标 + ≥5 禁忌
+    do_not_claim: 不声明商用资产;不替代商标版权检索
+    owner: designos-core
+    status: pilot
+  - id: design.visual.image-prompt-system
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/visual/image-prompt-system.md
+    decision_use: AI 绘图提示词系统:四层结构/多平台/稳定性/一致性/严格避免
+    quality_bar: 量化锁定 + 基准图 + 跨图一致性检查 + 负向 prompt
+    do_not_claim: 不保证平台输出稳定;不替代人工筛选
+    owner: designos-core
+    status: pilot
+  - id: design.quality.ip-design-quality-rubric
+    version: 0.1.0-pilot
+    domain: design
+    type: rubric
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/quality/ip-design-quality-rubric.md
+    decision_use: IP 设计九维 rubric:一致性/差异化/延展/识别度/成本/法务/可控/人格/证据
+    quality_bar: 九维四档 + 一票否决 + 与 gap 衔接
+    do_not_claim: 不替代品牌方/法务终审
+    owner: designos-core
+    status: pilot
+  - id: design.quality.stage-review-checklists
+    version: 0.1.0-pilot
+    domain: design
+    type: checklist
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/quality/stage-review-checklists.md
+    decision_use: 六阶段必过项清单,放行/不放行规则
+    quality_bar: 必过项全过且每项有证据指向
+    do_not_claim: 不替代评审会决议
+    owner: designos-core
+    status: pilot
+  - id: design.quality.common-failure-modes
+    version: 0.1.0-pilot
+    domain: design
+    type: failure_modes
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/quality/common-failure-modes.md
+    decision_use: 常见跑偏与失败模式集合:现象/信号/根因/防线
+    quality_bar: 每模式四段 + 防线挂在必过项或测试上
+    do_not_claim: 不保证覆盖所有未来失败模式
+    owner: designos-core
+    status: pilot
+  - id: design.quality.professional-gap-report
+    version: 0.1.0-pilot
+    domain: design
+    type: report
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/quality/professional-gap-report.md
+    decision_use: 当不达中阶时显式记录 gap 与放行边界,不允许假装完成
+    quality_bar: 每 gap 五段 + 临时放行边界保守 + 与 rubric/失败模式自检一致
+    do_not_claim: 不替代品牌方/法务的最终风险评估
+    owner: designos-core
+    status: pilot
+  - id: design.templates.brand-brief
+    version: 0.1.0-pilot
+    domain: design
+    type: template
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/templates/brand-brief.md
+    decision_use: M01 brand brief 填空骨架,字段对应必过项
+    quality_bar: 五要素 + 推断显式 + 竞品 ≥3
+    do_not_claim: 不替代真实研究
+    owner: designos-core
+    status: pilot
+  - id: design.templates.worldview
+    version: 0.1.0-pilot
+    domain: design
+    type: template
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/templates/worldview.md
+    decision_use: M02 worldview 填空骨架
+    quality_bar: 能力边界 + 冲突来源 + 自洽校验
+    do_not_claim: 不替代世界观授权审查
+    owner: designos-core
+    status: pilot
+  - id: design.templates.persona-profile
+    version: 0.1.0-pilot
+    domain: design
+    type: template
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/templates/persona-profile.md
+    decision_use: M03 persona profile 填空骨架(行为模式为主,MBTI 辅助)
+    quality_bar: 行为模式 + 分层恐惧 + 失败话术 + 行为红线
+    do_not_claim: 不声明 MBTI 科学性
+    owner: designos-core
+    status: pilot
+  - id: design.templates.visual-spec
+    version: 0.1.0-pilot
+    domain: design
+    type: template
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/templates/visual-spec.md
+    decision_use: M04 visual spec 填空骨架(基因继承/识别度/状态延展/风格坐标/禁忌)
+    quality_bar: 三栏继承 + 32px 可辨 + 四级 + 风格坐标 + ≥5 禁忌
+    do_not_claim: 不替代视觉终稿
+    owner: designos-core
+    status: pilot
+  - id: design.templates.content-plan
+    version: 0.1.0-pilot
+    domain: design
+    type: template
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/templates/content-plan.md
+    decision_use: M05 content plan 填空骨架
+    quality_bar: 首秀 + 核心事件递进 + 失败语料 + 节奏
+    do_not_claim: 不替代真实运营
+    owner: designos-core
+    status: pilot
+  - id: design.templates.brand-material-spec
+    version: 0.1.0-pilot
+    domain: design
+    type: template
+    applicable_skills: [ip-design]
+    source_of_truth: knowledge/design/templates/brand-material-spec.md
+    decision_use: M06 brand material spec 填空骨架
+    quality_bar: 应用规范 + 衍生品(可落地+成本)+ CMYK/Pantone + 传播语调
+    do_not_claim: 不替代真实生产打样
+    owner: designos-core
+    status: pilot
+  - id: design.strategy.brand-strategy-methodology
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [brand-creative]
+    source_of_truth: knowledge/design/strategy/brand-strategy-methodology.md
+    decision_use: 通用品牌策略(北极星/定位/价值分层/人格3-5个/差异化)
+    quality_bar: 含量化判断 + 冲突取舍 + 失败信号 + 一票否决 + 返工条件
+    do_not_claim: 不替代真实资深品牌经理评审;不覆盖完整品牌战略
+    owner: designos-core
+    status: pilot
+  - id: design.visual.logo-design-methodology
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [brand-creative]
+    source_of_truth: knowledge/design/visual/logo-design-methodology.md
+    decision_use: Logo 设计(类型/黑白/缩放/组合/辅助图形/商标风险)
+    quality_bar: 含量化判断 + 冲突取舍 + 失败信号 + 一票否决 + 返工条件
+    do_not_claim: 不替代真实视觉总监人工审核;不提供商标注册法律咨询
+    owner: designos-core
+    status: pilot
+  - id: design.visual.logo-cognitive-translation
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [brand-creative]
+    source_of_truth: knowledge/design/visual/logo-cognitive-translation.md
+    decision_use: Logo 概念从关键词到认知结构再到母形的翻译链路,避免 literal symbol jump
+    quality_bar: 含认知 schema + 图形关系 + 视觉变量 + 母形 + 误读预测 + 禁跳模式
+    do_not_claim: 不替代真实品牌语义测试;不提供商标注册或文化语义普适性保证
+    owner: designos-core
+    status: pilot
+  - id: design.visual.color-system-methodology
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [brand-creative]
+    source_of_truth: knowledge/design/visual/color-system-methodology.md
+    decision_use: 色彩系统(角色/对比度/明暗/介质差异/可访问性)
+    quality_bar: 含量化判断 + 冲突取舍 + 失败信号 + 一票否决 + 返工条件
+    do_not_claim: 不替代真实色彩顾问人工校准;不保证所有介质一致
+    owner: designos-core
+    status: pilot
+  - id: design.visual.typography-system-methodology
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [brand-creative]
+    source_of_truth: knowledge/design/visual/typography-system-methodology.md
+    decision_use: 字体系统(配对/字重/比例/行高/授权/跨端)
+    quality_bar: 含量化判断 + 冲突取舍 + 失败信号 + 一票否决 + 返工条件
+    do_not_claim: 不替代真实字体设计师人工调试;不提供字体授权法律咨询
+    owner: designos-core
+    status: pilot
+  - id: design.visual.visual-identity-integration-methodology
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [brand-creative]
+    source_of_truth: knowledge/design/visual/visual-identity-integration-methodology.md
+    decision_use: VI 聚合层一致性判断(logo/color/typography 冲突处理与缺口声明)
+    quality_bar: 含聚合判断规则 + 冲突处理 + 质量门 + 失败模式
+    do_not_claim: 不替代真实资深设计总监人工评审;不声称覆盖完整品牌手册
+    owner: designos-core
+    status: pilot
+  - id: design.strategy.brand-audit-methodology
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [brand-creative]
+    source_of_truth: knowledge/design/strategy/brand-audit-methodology.md
+    decision_use: 品牌审计(健康度/差距/对标/优先级)
+    quality_bar: 含量化判断 + 冲突取舍 + 失败信号 + 一票否决 + 返工条件
+    do_not_claim: 不替代真实品牌顾问战略咨询;不覆盖财务/法律风险
+    owner: designos-core
+    status: pilot
+  - id: design.strategy.brand-voice-methodology
+    version: 0.1.0-pilot
+    domain: design
+    type: methodology
+    applicable_skills: [brand-creative]
+    source_of_truth: knowledge/design/strategy/brand-voice-methodology.md
+    decision_use: 通用品牌声音决策(语调/口头禅/场景话术/内容原则/红线)
+    quality_bar: 含量化判断 + 红线清单 + 场景话术 + 一票否决 + 返工条件
+    do_not_claim: 不替代真实品牌方人工审定;不覆盖完整传播策略
+    owner: designos-core
+    status: pilot
+  - id: design.quality.brand-identity-quality-rubric
+    version: 0.1.0-pilot
+    domain: design
+    type: rubric
+    applicable_skills: [brand-creative]
+    source_of_truth: knowledge/design/quality/brand-identity-quality-rubric.md
+    decision_use: 品牌识别专用质量 rubric(高阶/中阶/低阶三档 + 6 项一票否决)
+    quality_bar: 含量化判断 + 失败信号 + 一票否决
+    do_not_claim: 不替代真实资深品牌经理人工评审
+    owner: designos-core
+    status: pilot
+  - id: design.quality.brand-creative-failure-modes
+    version: 0.1.0-pilot
+    domain: design
+    type: failure_modes
+    applicable_skills: [brand-creative]
+    source_of_truth: knowledge/design/quality/brand-creative-failure-modes.md
+    decision_use: 失败模式库(现象/可检测信号/根因/返工条件)
+    quality_bar: 每个失败模式含现象/识别信号/根因/防线
+    do_not_claim: 不保证覆盖所有未来失败模式
+    owner: designos-core
+    status: pilot
+  - id: ux.experience-measurement
+    version: 1.0.0-pilot
+    domain: ux
+    type: methodology
+    applicable_skills: [prd2proto]
+    source_of_truth: knowledge/ux/experience-measurement.md
+    decision_use: 体验度量方法论选择（UES/HEART/YOUKU/GSM）与维度定义
+    quality_bar: 含 purpose/applies_to/decision_framework/senior_heuristics/quality_rubric/common_failure_modes/source_assets/do_not_claim
+    do_not_claim: 不规定具体产品的体验目标值；不定义某个产品该选哪个方法论
+    owner: designos-core
+    status: pilot

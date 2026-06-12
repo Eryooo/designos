@@ -1,0 +1,14 @@
+{
+  "stage_id": "input-diagnosis",
+  "remaining_schema_critical": [
+    {
+      "field": "",
+      "message": "schema 文件加载失败: kernel/contracts/artifacts/requirement-inventory.schema.json",
+      "validator": "schema_load",
+      "critical": true
+    }
+  ],
+  "remaining_content_issues": [],
+  "retry_applied": false,
+  "note": "remaining after normalization + 1 retry; recorded honestly, not hand-fixed"
+}

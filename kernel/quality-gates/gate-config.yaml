@@ -1,0 +1,373 @@
+# Quality Gates Configuration
+# 定义每个 stage 需要执行的质量门及其阈值
+
+version: "1.0.0"
+
+# 全局阈值
+thresholds:
+  inference_limit:
+    warning: 0.3    # 30% 推断内容触发警告
+    blocked: 0.5    # 50% 推断内容阻塞执行
+
+  input_completeness:
+    warning: 0.5    # 50% 完整性触发警告
+    blocked: 0.3    # 30% 完整性阻塞执行
+
+  input_coverage:
+    warning: 0.7    # 70% 覆盖率触发警告
+    blocked: 0.5    # 50% 覆盖率阻塞执行
+
+# 每个 stage 的质量门配置
+stages:
+  # ============================================================================
+  # Stage 1: Input Diagnosis
+  # ============================================================================
+  input-diagnosis:
+    gates:
+      - id: gap_transparency_gate
+        required: true
+        on_blocked: stop_execution
+        on_warning: continue_with_flag
+
+    outputs:
+      - requirement_inventory
+
+    critical_fields:
+      - completeness_assessment.overall_score
+      - readiness_decision.decision
+      - gaps
+
+  # ============================================================================
+  # Stage 2: Design Objectives
+  # ============================================================================
+  design-objectives:
+    gates:
+      - id: schema_gate
+        required: true
+        on_blocked: stop_execution
+        on_warning: continue_with_flag
+
+      - id: inference_limit_gate
+        required: true
+        on_blocked: fallback_safe
+        on_warning: mark_for_review
+
+    outputs:
+      - design_objectives
+
+    critical_fields:
+      - business_goals
+      - user_goals
+      - experience_goals
+
+  # ============================================================================
+  # Stage 3: Product Archetype
+  # ============================================================================
+  product-archetype:
+    gates:
+      - id: schema_gate
+        required: true
+
+    outputs:
+      - product_archetype
+
+  # ============================================================================
+  # Stage 4: User Task Modeling
+  # ============================================================================
+  user-task-modeling:
+    gates:
+      - id: schema_gate
+        required: true
+        on_blocked: stop_execution
+
+      - id: inference_limit_gate
+        required: true
+        on_blocked: fallback_safe
+        on_warning: mark_for_review
+
+      - id: traceability_gate
+        required: true
+        on_blocked: stop_execution
+        on_warning: mark_for_review
+
+    outputs:
+      - user_task_map
+
+    critical_fields:
+      - primary_tasks
+      - task_priority_matrix
+
+  # ============================================================================
+  # Stage 5: Business Flow Modeling
+  # ============================================================================
+  business-flow-modeling:
+    gates:
+      - id: schema_gate
+        required: true
+
+      - id: inference_limit_gate
+        required: true
+        on_warning: mark_for_review
+
+    outputs:
+      - business_flow
+
+    critical_fields:
+      - entities
+      - state_machines
+
+  # ============================================================================
+  # Stage 6: User Journey Mapping
+  # ============================================================================
+  user-journey-mapping:
+    gates:
+      - id: schema_gate
+        required: true
+
+      - id: traceability_gate
+        required: true
+        on_warning: mark_for_review
+
+    outputs:
+      - user_journey_map
+
+    critical_fields:
+      - stages
+      - critical_moments
+
+  # ============================================================================
+  # Stage 7: Information Architecture
+  # ============================================================================
+  information-architecture:
+    gates:
+      - id: schema_gate
+        required: true
+        on_blocked: stop_execution
+
+      - id: traceability_gate
+        required: true
+        on_blocked: stop_execution
+        on_warning: mark_for_review
+
+    outputs:
+      - information_architecture
+
+    critical_fields:
+      - sitemap
+      - navigation
+      - route_table
+
+    traceability_requirements:
+      - all_pages_must_map_to_tasks: true
+      - min_input_coverage: 0.7
+
+  # ============================================================================
+  # Stage 8: Page Flow
+  # ============================================================================
+  page-flow:
+    gates:
+      - id: schema_gate
+        required: true
+
+    outputs:
+      - page_flow
+
+  # ============================================================================
+  # Stage 9: Page Structure
+  # ============================================================================
+  page-structure:
+    gates:
+      - id: schema_gate
+        required: true
+
+    outputs:
+      - page_structure
+
+  # ============================================================================
+  # Stage 10: Component Strategy
+  # ============================================================================
+  component-strategy:
+    gates:
+      - id: schema_gate
+        required: true
+        on_blocked: stop_execution
+
+    outputs:
+      - component_strategy
+
+    critical_fields:
+      - component_library
+      - component_inventory
+
+  # ============================================================================
+  # Stage 11: State Matrix
+  # ============================================================================
+  state-matrix:
+    gates:
+      - id: schema_gate
+        required: true
+
+      - id: inference_limit_gate
+        required: true
+        on_warning: mark_for_review
+
+    outputs:
+      - state_matrix
+
+    critical_fields:
+      - page_states
+
+  # ============================================================================
+  # Stage 12: Interaction Rules
+  # ============================================================================
+  interaction-rules:
+    gates:
+      - id: schema_gate
+        required: true
+
+    outputs:
+      - interaction_rules
+
+  # ============================================================================
+  # Stage 13: Code Generation
+  # ============================================================================
+  code-generation:
+    gates:
+      - id: code_constraint_gate
+        required: true
+        on_blocked: stop_execution
+        on_warning: mark_for_review
+
+    outputs:
+      - prototype_code
+
+    constraint_requirements:
+      - all_pages_from_ia: true
+      - all_components_from_strategy: true
+      - all_states_from_matrix: true
+
+  # ============================================================================
+  # Stage 14: Traceability Generation
+  # ============================================================================
+  traceability-generation:
+    gates:
+      - id: schema_gate
+        required: true
+        on_blocked: stop_execution
+
+      - id: traceability_gate
+        required: true
+        on_blocked: stop_execution
+
+    outputs:
+      - design_traceability_map
+
+    critical_fields:
+      - input_trace
+      - reasoning_asset_trace
+      - decision_trace
+      - coverage_analysis
+
+  # ============================================================================
+  # Stage 15: Professional Gap Assessment
+  # ============================================================================
+  professional-gap-assessment:
+    gates:
+      - id: schema_gate
+        required: true
+        on_blocked: stop_execution
+
+    outputs:
+      - professional_gap_report
+
+    critical_fields:
+      - rubric_dimensions
+      - overall_assessment
+      - human_review_requirements
+      - production_readiness
+      - claims_validation
+
+# 失败处理策略
+failure_handling:
+  blocked:
+    action: stop_execution
+    generate_report: true
+    notify_user: true
+    log_level: error
+
+  fallback_safe:
+    action: downgrade_mode
+    target_mode: pm
+    target_fidelity: low
+    adjust_thresholds:
+      inference_limit.blocked: 0.6
+      input_completeness.blocked: 0.4
+    notify_user: true
+    log_level: warning
+
+  warning:
+    action: continue_with_flag
+    mark_for_review: true
+    notify_user: false
+    log_level: warning
+
+# 质量门绕过规则（仅允许特定场景）
+bypass_rules:
+  # 用户显式 --force 参数
+  force_flag:
+    allowed_gates:
+      - inference_limit_gate
+      - code_constraint_gate
+    requires_acknowledgment: true
+    log_bypass: true
+
+  # fallback_safe 模式
+  fallback_safe_mode:
+    allowed_gates:
+      - inference_limit_gate
+    auto_adjust_thresholds: true
+
+  # 不允许绕过的质量门
+  never_bypass:
+    - gap_transparency_gate
+    - schema_gate
+    - traceability_gate
+
+# 质量报告
+reporting:
+  generate_summary: true
+  include_in_traceability_map: true
+  generate_separate_file: true
+  output_path: "quality-gate-results.json"
+
+  summary_includes:
+    - total_gates_executed
+    - passed_count
+    - warning_count
+    - blocked_count
+    - execution_time
+    - stage_breakdown
+    - critical_issues
+
+# 监控与日志
+monitoring:
+  log_all_gates: true
+  log_path: "logs/quality-gates.log"
+  metrics:
+    - gate_execution_time
+    - gate_failure_rate
+    - most_common_failures
+    - inference_ratio_distribution
+
+  alerts:
+    - condition: "blocked_count > 3"
+      action: "notify_admin"
+    - condition: "inference_ratio > 0.4"
+      action: "flag_for_review"
+
+# 测试模式
+test_mode:
+  enabled: false
+  skip_gates: []
+  mock_results: false
+  verbose_logging: true

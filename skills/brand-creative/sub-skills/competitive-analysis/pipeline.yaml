@@ -1,0 +1,45 @@
+name: competitive-analysis-pipeline
+
+description: |
+  竞品分析流水线 — 从产品简介/目标市场/竞品线索产出结构化竞品矩阵与市场空白报告。
+  按"竞品资料整合 → 竞品矩阵生成与市场空白识别"两阶段组织。
+
+upstream_refs: []
+  # competitive-analysis 是独立起点子技能,不依赖其它子技能产出
+
+stages:
+  # ────────────────────────────────────────────────────────────
+  # Stage 1: 竞品资料整合
+  # ────────────────────────────────────────────────────────────
+  - id: competitor-data-collection
+    type: llm
+    prompt: prompts/01-competitor-data-collection.md
+    inputs: [product_brief, target_market, competitor_hints]
+    outputs: [competitor_raw_data]
+    knowledge:
+      - ../../../../knowledge/research/competitor-analysis.md
+    # 整合用户提供的产品简介、目标市场、竞品线索,
+    # 识别至少 3 个直接竞品,采集可用资料。
+    # 每条 fact 标注 observed / inferred / unknown。
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 2: 竞品矩阵生成与市场空白识别
+  # ────────────────────────────────────────────────────────────
+  - id: matrix-generation-and-gap-analysis
+    type: llm
+    prompt: prompts/02-matrix-generation-and-gap-analysis.md
+    inputs: [competitor_raw_data, product_brief, target_market]
+    outputs: [competitor_matrix, comparison_matrix, market_gap_report]
+    knowledge:
+      - ../../../../knowledge/research/competitor-analysis.md
+    # 从整合后的竞品资料产出:
+    # 1. competitor_matrix(至少 3 个竞品,必含 visual_style)
+    # 2. comparison_matrix(competitor_matrix 别名)
+    # 3. market_gap_report(至少 1 个有证据基础的市场空白)
+    #
+    # 未验证结论标 [inferred],输入不足时 status: insufficient_data。
+
+outputs:
+  - competitor_matrix
+  - comparison_matrix
+  - market_gap_report

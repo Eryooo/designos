@@ -1,0 +1,44 @@
+line-length = 100
+target-version = "py311"
+force-exclude = true
+include = [
+    "designos/**/*.py",
+    "kernel/**/*.py",
+    "mcp-servers/*/**/*.py",
+]
+
+extend-exclude = [
+    ".venv",
+    "venv",
+    "build",
+    "dist",
+    "legacy",
+    "docs",
+    "skills",
+    "npm-package",
+    "tests",
+    "mcp-servers/*/tests",
+    "mcp-servers/*/tests/**",
+    "**/fixtures/**",
+]
+
+[lint]
+select = [
+    "E",      # pycodestyle errors
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "RUF100", # stale noqa directives
+]
+ignore = [
+    "E501",  # line length handled by formatter
+]
+
+[lint.per-file-ignores]
+"tests/**/*.py" = ["B011"]
+"__init__.py"   = ["F401"]
+
+[format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"

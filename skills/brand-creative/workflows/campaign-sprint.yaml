@@ -1,0 +1,32 @@
+name: campaign-sprint
+description: |
+  营销创意冲刺:快速策略 → campaign 概念 → 传播素材。适合单次营销战役。
+  并行边界(运行时):competitive-analysis 串行先行,brand-strategy 消费竞品矩阵串行产出策略,
+  campaign-creative 串行汇总。
+  外部输入契约见 contracts/workflow-input-contracts.yaml。
+
+  竞品分析策略:
+  - workflow 始终先运行 competitive-analysis,后运行 brand-strategy。
+  - 用户已有 competitor_matrix 时,competitive-analysis 负责验证、规范化和补充。
+  生产者(competitive-analysis)与消费者(brand-strategy)绝不放在同一 parallel step。
+
+steps:
+  # 竞品分析(串行先行)
+  - type: sequential
+    sub_skills: [competitive-analysis]
+    on_failure: continue   # 失败时 brand-strategy 用 [inferred] 兜底
+
+  # brand-strategy 消费 competitor_matrix(若有)产出策略,串行
+  - type: sequential
+    sub_skills: [brand-strategy]
+    on_failure: abort
+
+  # campaign-creative 依赖策略(及竞品分析的差异化输入),串行
+  - type: sequential
+    sub_skills: [campaign-creative]
+    on_failure: abort
+
+  # digital-assets 基于 campaign 概念产出传播素材,串行
+  - type: sequential
+    sub_skills: [digital-assets]
+    on_failure: continue

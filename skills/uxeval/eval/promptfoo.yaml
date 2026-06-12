@@ -1,0 +1,190 @@
+# UXEval Promptfoo 评估配置
+# 用法: promptfoo eval -c eval/promptfoo.yaml
+
+description: UXEval Skill 的 Prompt 评估集
+
+prompts:
+  - file://prompts/01-prd-understanding.md
+  - file://prompts/02-principle-mapping.md
+  - file://prompts/03-journey-modeling.md
+  - file://prompts/04-task-generation.md
+  - file://prompts/06-issue-attribution.md
+
+providers:
+  - id: anthropic:messages:claude-opus-4-7
+    config:
+      max_tokens: 8000
+      temperature: 0.2
+  - id: openai:chat:deepseek-v3
+    config:
+      max_tokens: 8000
+      temperature: 0.2
+      apiBaseUrl: ${DEEPSEEK_BASE_URL}
+
+defaultTest:
+  options:
+    transform: file://eval/judges/parse_json.js
+
+tests:
+  # ────────────────────────────────────────────────────────────
+  # Golden case 001: 分类分级数据规则平台
+  # ────────────────────────────────────────────────────────────
+  - description: golden case 001 - prd-understanding
+    vars:
+      prd_file: file://eval/golden/case-001-分类分级/input/prd.md
+      scope_md: file://eval/golden/case-001-分类分级/input/scope.md
+      existing_personas: ""
+    assert:
+      - type: javascript
+        value: |
+          // 必含 3 个模块
+          const m = output.modules || [];
+          return m.length === 3 &&
+            m.some(x => x.name.includes('草稿')) &&
+            m.some(x => x.name.includes('版本')) &&
+            m.some(x => x.name.includes('审批'));
+      - type: javascript
+        value: |
+          // 必含 2 个角色
+          const r = output.roles || [];
+          return r.length === 2 &&
+            r.some(x => x.name.includes('运营')) &&
+            r.some(x => x.name.includes('管理'));
+      - type: javascript
+        value: |
+          // out_of_scope 非空
+          return output.evaluation_boundary?.out_of_scope?.length > 0;
+
+  - description: golden case 001 - principle-mapping
+    vars:
+      scope_md: file://eval/golden/case-001-分类分级/input/scope.md
+      modules: file://eval/golden/case-001-分类分级/expected/modules.json
+      principles_md: ""
+    assert:
+      - type: javascript
+        value: |
+          const p = output.principles || [];
+          return p.length >= 6 && p.length <= 12;
+      - type: javascript
+        value: |
+          // 必须包含 F2, S1, F1, P3
+          const ids = (output.principles || []).map(x => x.id);
+          return ['F2', 'S1', 'F1', 'P3'].every(id => ids.includes(id));
+      - type: javascript
+        value: |
+          // skipped_principles 必须解释原因
+          return (output.skipped_principles || []).every(s => s.reason && s.reason.length > 5);
+
+  - description: golden case 001 - journey-modeling
+    vars:
+      modules: file://eval/golden/case-001-分类分级/expected/modules.json
+      roles: file://eval/golden/case-001-分类分级/expected/roles.json
+      scenarios: ""
+      key_tasks: ""
+      competitive_context: ""
+    assert:
+      - type: javascript
+        value: |
+          const stages = output.journey_stages || [];
+          return stages.length >= 4 && stages.length <= 8;
+      - type: javascript
+        value: |
+          // 至少有 1 个 critical_pain 阶段
+          const stages = output.journey_stages || [];
+          return stages.some(s => s.emotion === 'critical_pain');
+
+  - description: golden case 001 - task-generation - 防功能测试偏移
+    vars:
+      journey_map: file://eval/golden/case-001-分类分级/expected/03-旅程地图.md
+      principles: ""
+      roles: ""
+    assert:
+      - type: javascript
+        value: |
+          // 每个 task 都有 applicable_principles
+          const tasks = output.task_checklist_full || [];
+          const bad = tasks.filter(t => !t.applicable_principles?.length);
+          return bad.length === 0;
+      - type: javascript
+        value: |
+          // 没有功能测试关键词
+          const tasks = output.task_checklist_full || [];
+          const FN = ['跳转', '可点击', 'API', '返回 200'];
+          const bad = tasks.filter(t =>
+            (t.success_criteria || []).some(c => FN.some(kw => c.includes(kw)))
+          );
+          return bad.length === 0;
+      - type: javascript
+        value: |
+          // 总任务 12-30 之间
+          const tasks = output.task_checklist_full || [];
+          return tasks.length >= 12 && tasks.length <= 30;
+
+  - description: golden case 001 - issue-attribution - 宪法验证
+    vars:
+      raw_issues: file://eval/golden/case-001-分类分级/input/raw_issues.json
+      journey_map: ""
+      journey_stages: ""
+      principles: ""
+      task_checklist_full: ""
+      competitive_context: ""
+    assert:
+      - type: javascript
+        value: |
+          // 宪法 #1：每条 issue 必有 evidence_refs
+          const issues = output.issues || [];
+          return issues.every(i => Array.isArray(i.evidence_refs) && i.evidence_refs.length > 0);
+      - type: javascript
+        value: |
+          // 宪法 #3：severity 在合法枚举内
+          const issues = output.issues || [];
+          const allowed = ['critical', 'major', 'minor', 'suggestion'];
+          return issues.every(i => allowed.includes(i.severity));
+      - type: javascript
+        value: |
+          // 宪法 #5：suggestion 长度 >= 30
+          const issues = output.issues || [];
+          return issues.every(i => i.suggestion && i.suggestion.length >= 30);
+      - type: javascript
+        value: |
+          // 宪法 #6：user_impact 非空
+          const issues = output.issues || [];
+          return issues.every(i => i.user_impact && i.user_impact.length >= 30);
+      - type: javascript
+        value: |
+          // 宪法 #7：source_basis 非空
+          const issues = output.issues || [];
+          return issues.every(i => ['prd', 'screenshot', 'inferred'].includes(i.source_basis));
+      - type: javascript
+        value: |
+          // 关键问题必须被识别
+          const issues = output.issues || [];
+          const titles = issues.map(i => i.title);
+          const golden = [
+            t => t.includes('待办') && t.includes('视觉'),
+            t => t.includes('保存') && (t.includes('草稿') || t.includes('丢失')),
+            t => t.includes('测试') && t.includes('不一致'),
+          ];
+          return golden.every(check => titles.some(check));
+
+# ────────────────────────────────────────────────────────────
+# Failure case F001: 防止功能测试偏移
+# ────────────────────────────────────────────────────────────
+  - description: failure case F001 - 应该过滤功能测试
+    vars:
+      raw_issues: file://eval/failure/F001-功能测试偏移/raw_issues_with_function_bugs.json
+      journey_map: ""
+      journey_stages: ""
+      principles: ""
+      task_checklist_full: ""
+      competitive_context: ""
+    assert:
+      - type: javascript
+        value: |
+          // 输出的 issues 不应包含功能测试类问题
+          const issues = output.issues || [];
+          const FORBIDDEN = ['接口', '未实现', '功能不存在', '字段缺失'];
+          const bad = issues.filter(i =>
+            FORBIDDEN.some(kw => i.title.includes(kw) || i.description.includes(kw))
+          );
+          return bad.length === 0;

@@ -1,0 +1,213 @@
+name: uxeval-pipeline
+
+description: |
+  UXEval Pipeline：把高级体验设计师的评估流程标准化为
+  「理解 → 建模 → 执行 → 取证 → 归因 → 沉淀」六环节，支持 web/client 双模式。
+
+mode_prompt:
+  question: "选择评估模式："
+  options:
+    - id: web
+      label: "Web 应用（Playwright 自动化采集）"
+    - id: client
+      label: "客户端应用（人工提交截图）"
+
+upstream_refs:
+  - skill: ai-analytics
+    output_type: design_strategy
+    inject_as: competitive_context
+    required: false
+  - skill: ai-analytics
+    output_type: user_persona
+    inject_as: existing_personas
+    required: false
+
+stages:
+  # ────────────────────────────────────────────────────────────
+  # Stage 1: PRD 结构化理解（含角色 + 场景推导）
+  # ────────────────────────────────────────────────────────────
+  - id: prd-understanding
+    type: llm
+    prompt: prompts/01-prd-understanding.md
+    inputs: [prd_file, scope_md, existing_personas]
+    outputs: [modules, key_features, roles, scenarios, key_tasks, business_goal, evaluation_boundary]
+    knowledge: [reference/m01-需求理解.md]
+    retry:
+      max_attempts: 2
+      backoff_seconds: 2.0
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 2: 启发式原则映射
+  # ────────────────────────────────────────────────────────────
+  - id: principle-mapping
+    type: llm
+    prompt: prompts/02-principle-mapping.md
+    inputs: [scope_md, modules, principles_md]
+    outputs: [principles]
+    knowledge: [reference/m02-启发式原则.md]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 3: 旅程建模（Checkpoint C1）
+  # ────────────────────────────────────────────────────────────
+  - id: journey-modeling
+    type: llm
+    prompt: prompts/03-journey-modeling.md
+    inputs: [modules, roles, scenarios, key_tasks, competitive_context]
+    outputs: [journey_map, journey_stages]
+    knowledge: [reference/m03-旅程建模.md]
+    checkpoint:
+      id: C1
+      message: "请确认用户旅程是否覆盖关键路径，可以选择继续 / 修改 / 补充。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 4: 任务生成（Checkpoint C2）
+  # ────────────────────────────────────────────────────────────
+  - id: task-generation
+    type: llm
+    prompt: prompts/04-task-generation.md
+    inputs: [journey_map, journey_stages, principles, roles]
+    outputs: [task_checklist_full, task_checklist_lite]
+    knowledge: [reference/m04-任务生成.md]
+    checkpoint:
+      id: C2
+      message: "请校准任务清单（重点检查：是否偏功能测试，是否漏掉关键体验任务）。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 4.5: Client 关键证据规划（仅 client 模式）
+  # ────────────────────────────────────────────────────────────
+  - id: evidence-planning
+    type: tool
+    only_when: mode == "client"
+    mcp_server: image-analyzer
+    mcp_tool: plan_required_evidence
+    inputs: [modules, key_features, task_checklist_lite, journey_map, journey_stages, screenshots_dir]
+    outputs: [capture_mission, required_evidence_plan, critical_page_requirements, critical_state_requirements, evidence_input_guidance]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 5a: 评估脚本生成（仅 web 模式）
+  # ────────────────────────────────────────────────────────────
+  - id: task-script-generation
+    type: llm
+    only_when: mode == "web"
+    prompt: prompts/05a-script-generation.md
+    inputs: [task_checklist_lite, modules]
+    outputs: [evaluation_script]
+    knowledge: [reference/m05-证据采集.md]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 5b: Web 自动化采集（仅 web 模式）
+  # ────────────────────────────────────────────────────────────
+  - id: web-automation
+    type: tool
+    only_when: mode == "web"
+    mcp_server: playwright-driver
+    mcp_tool: execute_batch
+    inputs: [evaluation_script]
+    outputs: [screenshots, dom_data, detection_request, execution_summary]
+    retry:
+      max_attempts: 2
+      backoff_seconds: 5.0
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 5c: 截图加载与分析（仅 client 模式）
+  # ────────────────────────────────────────────────────────────
+  - id: screenshot-loading
+    type: tool
+    only_when: mode == "client"
+    gate:
+      when: evidence_input_guidance.pre_run_status in ["supplement_required", "blocked"]
+      action: pause
+      checkpoint_id: QG0
+      message: "开跑前发现 client 模式关键证据计划仍有明显缺口，请先按一次性补料清单处理。"
+      status_reason_from: evidence_input_guidance.status_reason
+      required_actions_from: evidence_input_guidance.required_actions
+      resume_from_stage: evidence-planning
+    mcp_server: image-analyzer
+    mcp_tool: load_and_analyze
+    inputs: [screenshots_dir, task_checklist_lite, required_evidence_plan]
+    outputs: [screenshots, image_analysis, evidence_assessment]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 5.5: PRD-截图冲突分析（仅 client 模式需要）
+  # ────────────────────────────────────────────────────────────
+  - id: prd-screenshot-conflict
+    type: llm
+    only_when: mode == "client"
+    gate:
+      when: evidence_assessment.delivery_status == "blocked"
+      action: pause
+      checkpoint_id: QG1
+      message: "当前截图证据被判定为 blocked，不能继续进入冲突分析与最终交付。"
+      status_reason_from: evidence_assessment.missing_coverage
+      required_actions_from: evidence_assessment.required_actions
+      resume_from_stage: screenshot-loading
+    prompt: prompts/05c-conflict-analysis.md
+    inputs: [modules, key_features, screenshots, image_analysis, evidence_assessment]
+    outputs: [prd_screenshot_conflicts]
+    knowledge: []
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 6: 问题检测 + 归因（Checkpoint C3）
+  # ────────────────────────────────────────────────────────────
+  - id: issue-attribution
+    type: llm
+    gate:
+      when: evidence_assessment.delivery_status in ["blocked", "supplement_required"]
+      only_when: mode == "client"
+      action: pause
+      checkpoint_id: QG2
+      message: "当前截图证据尚未达到最终问题归因质量门槛，请先补资料再继续。"
+      status_reason_from: evidence_assessment.missing_coverage
+      required_actions_from: evidence_assessment.required_actions
+      resume_from_stage: screenshot-loading
+    prompt: prompts/06-issue-attribution.md
+    inputs: [screenshots, image_analysis, evidence_assessment, prd_screenshot_conflicts, journey_map, journey_stages, principles, task_checklist_full, competitive_context, dom_data, detection_request]
+    outputs: [raw_issues, issues, unverified_issues, delivery_assessment]
+    knowledge: [reference/m06-问题归因.md]
+    checkpoint:
+      id: C3
+      message: "请审阅问题清单（严重等级、归因、改进建议是否合理）。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 6.5: 运行时最终交付审计
+  # ────────────────────────────────────────────────────────────
+  - id: delivery-audit
+    type: tool
+    only_when: mode == "client"
+    mcp_server: excel-builder
+    mcp_tool: audit_delivery_readiness
+    inputs: [issues, unverified_issues, evidence_assessment, delivery_assessment, capture_mission]
+    outputs: [audited_delivery_assessment, delivery_audit_bundle]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 7: 报告生成
+  # ────────────────────────────────────────────────────────────
+  - id: report-generation
+    type: tool
+    gate:
+      when: audited_delivery_assessment.delivery_status != "final_delivery_ready"
+      only_when: mode == "client"
+      action: pause
+      checkpoint_id: QG3
+      message: "当前运行时审计尚未通过最终报告交付门槛，请先查看 bounded fallback package 并按补料清单处理。"
+      status_reason_from: audited_delivery_assessment.status_reason
+      required_actions_from: audited_delivery_assessment.required_actions
+      resume_from_stage: screenshot-loading
+    mcp_server: excel-builder
+    mcp_tool: build_issue_report
+    inputs: [issues, journey_map, principles]
+    outputs: [issue_report, html_report, evidence_pack]
+
+memory:
+  read:
+    - "organization.uxeval.golden_samples"
+    - "organization.uxeval.failure_cases"
+    - "organization.uxeval.principle_library"
+  write:
+    - "project.uxeval.{run_id}"
+    - "project.uxeval.{run_id}.checkpoint_decisions"
+
+constitution: constitution.md

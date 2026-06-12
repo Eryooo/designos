@@ -1,0 +1,68 @@
+# Failure Case: Over-inference Without Evidence
+
+description: |
+  展示错误的过度推断场景(anti-pattern)。
+  用户仅提供竞品品牌名,但产出编造了大量未标注 [inferred] 的细节。
+
+input:
+  product_brief: |
+    在线教育平台,面向 K12 学生,提供直播课/录播课/作业批改。
+  target_market: "中国市场,K12 学生家长,二三线城市为主"
+  competitor_hints:
+    - "猿辅导"
+    - "学而思网校"
+    - "作业帮"
+
+bad_output_example:
+  competitor_matrix:
+    competitors:
+      - name: "猿辅导"
+        visual_style: "品牌色为蓝色#1890FF,卡通猴子吉祥物,圆角图标设计"
+        # ❌ 问题:未标注 [inferred],且编造了具体色号
+        communication: "年轻化语调,重视短视频与信息流广告"
+        # ❌ 问题:未标注 [inferred],编造了传播渠道
+        market_position: "面向一二线城市,客单价 ¥3000-8000/学期"
+        # ❌ 问题:未标注 [inferred],编造了价格区间
+    status: "complete"
+    # ❌ 问题:应标注 insufficient_data,因为 competitor_hints 仅有品牌名
+
+correct_output_should_be:
+  competitor_matrix:
+    competitors:
+      - name: "猿辅导"
+        visual_style: "在线教育平台常见蓝色系[inferred],具体品牌色与视觉元素 insufficient data"
+        communication: "面向 K12 学生家长[inferred],具体语调与渠道 insufficient data"
+        market_position: "K12 在线教育市场[inferred],具体定位与价格 insufficient data"
+      - name: "学而思网校"
+        visual_style: "教育行业常见专业配色[inferred],具体视觉风格 insufficient data"
+        communication: "学科教育导向[inferred],具体传播策略 insufficient data"
+        market_position: "K12 头部品牌[inferred],具体市场定位 insufficient data"
+      - name: "作业帮"
+        visual_style: "年轻化视觉风格[inferred],具体色彩与形态 insufficient data"
+        communication: "工具+内容传播[inferred],具体渠道与语料 insufficient data"
+        market_position: "K12 大众市场[inferred],具体细分与价格 insufficient data"
+    status: "insufficient_data"
+
+  market_gap_report:
+    gaps:
+      - dimension: "visual"
+        description: |
+          insufficient data on competitor visual style details.
+          gap identification requires: competitor_hints 包含品牌色/视觉元素/设计风格描述。
+      - dimension: "communication"
+        description: |
+          insufficient data on competitor communication strategy and channels.
+          gap identification requires: competitor_hints 包含传播渠道/语调/内容形式。
+
+anti_patterns_demonstrated:
+  - "编造具体色号而不标注 [inferred]"
+  - "编造价格区间而无证据"
+  - "仅有品牌名却输出 status: complete"
+  - "未明确标注 insufficient data"
+  - "假装完成详细竞品分析"
+
+correct_behavior:
+  - "品牌名外的所有推断必须标注 [inferred]"
+  - "证据不足时标注 insufficient data on [specific aspect]"
+  - "status 应为 insufficient_data"
+  - "market_gap_report 明确所需信息"

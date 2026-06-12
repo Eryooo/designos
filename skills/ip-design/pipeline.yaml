@@ -1,0 +1,134 @@
+name: ip-design-pipeline
+
+description: |
+  IP Design Pipeline — 品牌 IP 设计六阶段生成流水线。
+  按"策略对齐 → 世界观构建 → 人格建模 → 视觉转化 → 内容规划 → 物料落地"
+  组织 6 个 stages,每个 stage 消费共享设计决策库(knowledge/design/)。
+
+upstream_refs: []
+  # ip-design 是独立起点 skill,不依赖其它 skill 产出;
+  # 若后续需复用 ai-analytics 的 design_strategy/user_persona,在此声明。
+
+stages:
+  # ────────────────────────────────────────────────────────────
+  # Stage 1: 策略对齐 (M01)
+  # ────────────────────────────────────────────────────────────
+  - id: strategy-alignment
+    type: llm
+    prompt: prompts/01-strategy-alignment.md
+    inputs: [product_brief, target_user, competitors, brand_assets]
+    outputs: [brand_brief]
+    knowledge:
+      - reference/adapter-strategy-alignment.md
+      - id: design.strategy.brand-strategy-alignment
+      - id: design.templates.brand-brief
+    checkpoint:
+      id: C1
+      message: "品牌策略对齐完成:北极星/用户画像/核心价值/人格词/差异化已建。要改告诉我,否则继续。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 2: 世界观构建 (M02)
+  # ────────────────────────────────────────────────────────────
+  - id: worldview-building
+    type: llm
+    prompt: prompts/02-worldview-building.md
+    inputs: [brand_brief]
+    outputs: [worldview]
+    knowledge:
+      - reference/adapter-worldview-building.md
+      - id: design.ip.worldview-building
+      - id: design.templates.worldview
+    checkpoint:
+      id: C2
+      message: "世界观构建完成:时空/规则/关系网/文化原型/关键词已建。要改告诉我,否则继续。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 3: 人格建模 (M03)
+  # ────────────────────────────────────────────────────────────
+  - id: persona-modeling
+    type: llm
+    prompt: prompts/03-persona-modeling.md
+    inputs: [brand_brief, worldview]
+    outputs: [persona_profile]
+    knowledge:
+      - reference/adapter-persona-modeling.md
+      - id: design.persona.persona-modeling
+      - id: design.persona.voice-and-behavior-boundary
+      - id: design.templates.persona-profile
+    checkpoint:
+      id: C3
+      message: "人格建模完成:行为模式/动机恐惧/成长弧/声音边界已建。要改告诉我,否则继续。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 4: 视觉转化 (M04) + Quality Gate QG1
+  # ────────────────────────────────────────────────────────────
+  - id: visual-translation
+    type: llm
+    prompt: prompts/04-visual-translation.md
+    inputs: [brand_brief, worldview, persona_profile, brand_assets]
+    outputs: [visual_spec, image_prompt_pack]
+    knowledge:
+      - reference/adapter-visual-translation.md
+      - id: design.visual.visual-translation
+      - id: design.visual.image-prompt-system
+      - id: design.templates.visual-spec
+    gate:
+      when: visual_quality_check.failed
+      action: pause
+      checkpoint_id: QG1
+      message: "视觉转化阶段门:必过项检查(基因继承/32px 可辨/四级简化/风格坐标/禁忌≥5/提示词四层)。"
+      status_reason_from: visual_quality_check.summary
+      criteria:
+        - brand_gene_inheritance_if_existing_brand
+        - recognizable_at_32px
+        - four_tier_simplification
+        - style_spectrum_locked
+        - strict_avoidance_gte_5
+        - prompt_four_layers
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 5: 内容规划 (M05)
+  # ────────────────────────────────────────────────────────────
+  - id: narrative-planning
+    type: llm
+    prompt: prompts/05-narrative-planning.md
+    inputs: [brand_brief, persona_profile, visual_spec]
+    outputs: [content_plan]
+    knowledge:
+      - reference/adapter-narrative-planning.md
+      - id: design.ip.content-narrative
+      - id: design.templates.content-plan
+    checkpoint:
+      id: C4
+      message: "内容规划完成:首秀/核心事件/语料/矩阵/节奏已建。要改告诉我,否则继续。"
+      allow: [continue, modify, supplement]
+
+  # ────────────────────────────────────────────────────────────
+  # Stage 6: 物料落地 (M06) + Final Quality Gate QG2
+  # ────────────────────────────────────────────────────────────
+  - id: landing-spec
+    type: llm
+    prompt: prompts/06-landing-spec.md
+    inputs: [visual_spec, persona_profile, content_plan, brand_assets]
+    outputs: [brand_material_spec, professional_gap_report]
+    knowledge:
+      - reference/adapter-landing-spec.md
+      - id: design.ip.brand-material-realization
+      - id: design.templates.brand-material-spec
+      - id: design.quality.ip-design-quality-rubric
+      - id: design.quality.stage-review-checklists
+      - id: design.quality.common-failure-modes
+      - id: design.quality.professional-gap-report
+    gate:
+      when: creative_quality_check.failed
+      action: pause
+      checkpoint_id: QG2
+      message: "最终质量门:九维 rubric 自评 + 失败模式自检 + gap report。不达中阶必须写 gap。"
+      status_reason_from: creative_quality_check.summary
+      criteria:
+        - nine_dimension_rubric_self_eval
+        - failure_mode_checklist_passed
+        - gap_report_if_below_mid_tier

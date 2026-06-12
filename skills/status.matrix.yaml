@@ -1,0 +1,373 @@
+# DesignOS Skills Status Matrix
+# 本文件记录所有 skills 的成熟度状态、运行时可靠性和企业就绪度
+# 更新日期：2026-06-10（Batch 0 事实收口：新增五层 readiness 口径）
+#
+# 状态口径定义见 docs/STATUS-DEFINITION.md
+# 五层 readiness（不可跨层推导）：
+#   methodology_ready → prompt_ready → runtime_ready → validated → enterprise_ready
+
+version: "2.0.0"
+description: "Skill 成熟度和能力清单（五层 readiness 口径）"
+status_definition_ref: docs/STATUS-DEFINITION.md
+
+skills:
+  - id: uxeval
+    name: "UX Evaluation Engine"
+    maturity: beta
+    runtime_reliability: tool_assisted
+    enterprise_ready: partial
+
+    # === 五层 readiness（2026-06-10 Batch 0 新增）===
+    readiness:
+      methodology_ready: true
+      prompt_ready: partial      # 仅 1 个 ENHANCED 示范，prompts-v2 未建立
+      runtime_ready: partial     # 旧 runtime 存在，未对齐 prd2proto 真实链路
+      validated: false
+      enterprise_ready: false
+    current_stage: prompt_ready
+    main_blockers:
+      - "prompts-v2 未建立（仅 1 个 ENHANCED 示范）"
+      - "evidence-map / issue-clustering 未形成"
+      - "无真实截图/PRD 评估 case"
+    not_allowed_claims:
+      - "uxeval 已达资深设计师评估水平"
+      - "可替代人工 UX 研究"
+    next_required_step:
+      - "建立 uxeval prompts-v2 + evidence-map + issue-clustering + real screenshot case（Batch 3）"
+
+    stable_outputs:
+      - journey_map.md
+      - issues.xlsx
+      - delivery_assessment.json
+
+    unstable_outputs:
+      - html_report (格式可能变化)
+
+    known_limitations:
+      - "仅支持静态截图，不支持交互录屏"
+      - "issue 优先级算法为启发式，非 ML 模型"
+      - "client 模式依赖 OCR，web 模式依赖 playwright"
+      - "Nielsen heuristics 覆盖完整，WCAG 仅部分检查"
+      - "无真实用户测试数据，基于专家评估"
+
+    stable_capabilities:
+      - "识别明显可用性问题（违反 Nielsen 10 条）"
+      - "生成用户旅程地图"
+      - "问题优先级排序（严重度 × 频率 / 修复成本）"
+
+    unstable_capabilities:
+      - "复杂交互流程的完整覆盖"
+      - "动态内容的评估"
+
+    human_review_required:
+      - "所有 critical severity 问题"
+      - "涉及业务逻辑的问题"
+      - "accessibility 合规性声明"
+
+    not_suitable_for:
+      - "法律/合规认证依据"
+      - "完全替代人工 UX 研究"
+      - "实时交互系统评估"
+
+    last_verified_at: "2026-06-09"
+    last_major_change: "2026-05-27 (client mode v1.5 freeze)"
+
+  - id: prd2proto
+    name: "PRD to Prototype Pipeline"
+    maturity: pilot
+    runtime_reliability: llm_assisted
+    enterprise_ready: false
+
+    # === 五层 readiness（2026-06-10 Batch 0 新增）===
+    readiness:
+      methodology_ready: true
+      prompt_ready: true         # prompts-v2 17/17 COMPLETE
+      runtime_ready: partial     # 真实 LLM 链路打通，已验证前 5+ stage，非全 17-stage 稳定
+      validated: false           # 真实 PRD 端到端验证进行中（Batch 1）
+      enterprise_ready: false
+    current_stage: runtime_partial
+    main_blockers:
+      - "完整 17-stage 真实链路未全部验证（已跑通前 5+，Batch 1 跑前 12+）"
+      - "无真实 PRD 端到端 golden case 验证结果"
+      - "traceability/gap-report 未基于真实产物生成"
+    not_allowed_claims:
+      - "prd2proto 已达资深设计师产出水平"
+      - "可生产级生成 runnable 原型"
+      - "终极目标达成"
+    next_required_step:
+      - "用真实 PRD 跑前 12+ stage，每个 schema validate，生成 run-report + rubric（Batch 1）"
+
+    stable_outputs: []
+
+    unstable_outputs:
+      - design_spec.md
+      - prototype_code (代码质量依赖 PRD 质量)
+      - design_tokens.json
+
+    known_limitations:
+      - "设计推理资产生成为 MVP 阶段"
+      - "质量门尚未全部实现，当前为 scaffold 状态"
+      - "代码生成保真度严重依赖 PRD 完整性"
+      - "无真实 Figma/MasterGo MCP，designer-dsl 模式为 mock"
+      - "原型代码需要人工调整才能用于生产"
+      - "状态管理、错误处理为简化实现"
+      - "无国际化、无主题切换"
+
+    stable_capabilities:
+      - "PRD 结构化理解"
+      - "基础信息架构生成"
+
+    unstable_capabilities:
+      - "复杂业务流程建模"
+      - "状态矩阵完整性"
+      - "交互规则覆盖度"
+      - "原型代码可维护性"
+
+    human_review_required:
+      - "所有设计推理资产（design objectives, user task map, etc.）"
+      - "生成的原型代码"
+      - "业务流程正确性"
+      - "状态转换逻辑"
+
+    not_suitable_for:
+      - "直接用于生产环境"
+      - "复杂 B2B SaaS 系统"
+      - "需要高保真设计的场景"
+      - "政府/金融等强合规行业"
+
+    production_blockers:
+      - "设计推理资产验证逻辑未实现"
+      - "质量门为 warning 模式，不阻塞执行"
+      - "traceability 生成为 scaffold"
+      - "professional gap report 未自动生成"
+
+    last_verified_at: "2026-06-09"
+    last_major_change: "2026-06-09 (重构为设计推理驱动)"
+
+  - id: ai-analytics
+    name: "AI Analytics System Audit"
+    maturity: pilot
+    runtime_reliability: llm_synthesis
+    enterprise_ready: false
+
+    # === 五层 readiness（2026-06-10 Batch 0 新增）===
+    readiness:
+      methodology_ready: true
+      prompt_ready: partial      # 仅 1 个 ENHANCED 示范
+      runtime_ready: false       # 无真实 evidence/source confidence 闭环
+      validated: false
+      enterprise_ready: false
+    current_stage: prompt_ready
+    main_blockers:
+      - "缺真实证据链与 source confidence 闭环"
+      - "prompts-v2 未建立（仅 1 个 ENHANCED 示范）"
+    not_allowed_claims:
+      - "ai-analytics 已能产出可信研究结论"
+      - "可把常识当研究结论"
+    next_required_step:
+      - "建立 source-inventory / evidence-card / strategy-confidence contract（Batch 4）"
+
+    stable_outputs: []
+
+    unstable_outputs:
+      - design_strategy.md
+      - user_persona.md
+      - tracking_plan.json (字段可能不完整)
+
+    known_limitations:
+      - "无真实数据采集，仅基于 LLM 推理和文档分析"
+      - "竞品分析依赖人工提供材料，无自动爬取"
+      - "user persona 基于 PRD 推断，非真实用户研究"
+      - "设计策略为假设，需要验证"
+      - "无法接入真实 analytics 平台（GA, Mixpanel）"
+
+    stable_capabilities:
+      - "文档结构化分析"
+      - "竞品对比框架生成"
+
+    unstable_capabilities:
+      - "insight 质量（依赖输入文档质量）"
+      - "策略可执行性"
+      - "persona 准确性"
+
+    human_review_required:
+      - "所有 design_strategy"
+      - "所有 user_persona"
+      - "竞品分析结论"
+      - "指标定义"
+
+    not_suitable_for:
+      - "替代真实市场研究"
+      - "替代真实用户访谈"
+      - "作为产品决策唯一依据"
+      - "财务/投资分析"
+
+    production_blockers:
+      - "无真实数据源集成"
+      - "insight 无置信度评分"
+      - "无 evidence card 系统"
+
+    last_verified_at: "2026-06-09"
+    last_major_change: "2026-05-20 (baseline release)"
+
+  - id: ip-design
+    name: "IP Character Design System"
+    maturity: pilot
+    runtime_reliability: llm_assisted
+    enterprise_ready: partial
+
+    # === 五层 readiness（2026-06-10 Batch 0 新增）===
+    readiness:
+      methodology_ready: true
+      prompt_ready: partial      # 仅 1 个 ENHANCED 示范
+      runtime_ready: false       # design lock 未强制执行，无图像验收闭环
+      validated: false
+      enterprise_ready: false
+    current_stage: prompt_ready
+    main_blockers:
+      - "design lock 未强制执行"
+      - "无图像验收闭环"
+    not_allowed_claims:
+      - "ip-design 能保证多轮一致性"
+      - "可防止 AI 任意重画"
+    next_required_step:
+      - "design-lock-definition prompt + visual acceptance case（Batch 6）"
+
+    stable_outputs:
+      - persona_profile.md
+      - worldview.md
+
+    unstable_outputs:
+      - visual_spec.md
+      - image_prompt_pack.json (prompt 质量依赖 LLM)
+
+    known_limitations:
+      - "visual acceptance spec 为文档规范，无自动化验证"
+      - "image prompt 质量依赖 LLM，无法保证生成效果"
+      - "无真实 Midjourney/DALL-E 集成，生成需人工执行"
+      - "design locks 定义清晰，但无强制执行机制"
+      - "品牌基因继承为理论框架，实际应用需人工判断"
+
+    stable_capabilities:
+      - "人设建模（personality, behavior boundaries）"
+      - "世界观构建"
+      - "视觉方向定义"
+
+    unstable_capabilities:
+      - "视觉落地质量"
+      - "多场景一致性"
+      - "商业化应用指导"
+
+    human_review_required:
+      - "persona profile 完整性"
+      - "visual spec 可执行性"
+      - "image prompt 是否符合品牌调性"
+      - "design locks 是否合理"
+
+    not_suitable_for:
+      - "替代专业 IP 设计师"
+      - "直接用于商业授权"
+      - "游戏角色 3D 建模指导"
+      - "动画制作技术规范"
+
+    production_blockers:
+      - "visual acceptance criteria 无自动验证"
+      - "image generation 依赖外部工具"
+
+    last_verified_at: "2026-06-09"
+    last_major_change: "2026-05-25 (asset baseline)"
+
+  - id: brand-creative
+    name: "Brand Creative Toolkit"
+    maturity: alpha
+    runtime_reliability: contract_baseline
+    enterprise_ready: false
+
+    # === 五层 readiness（2026-06-10 Batch 0 新增）===
+    readiness:
+      methodology_ready: true    # 方法论已扩展（含修复的 12 个 brand 方法论）
+      prompt_ready: false        # prompts-v2 不存在
+      runtime_ready: false
+      validated: false
+      enterprise_ready: false
+    current_stage: methodology_ready
+    main_blockers:
+      - "prompts-v2 完全不存在"
+      - "runtime 几乎未形成完整 skill 能力"
+    not_allowed_claims:
+      - "brand-creative 已可用"
+      - "可产出品牌设计决策资产"
+    next_required_step:
+      - "先做 brand-strategy / logo-design / visual-identity / brand-guidelines MVP，不做全部 13 个（Batch 5）"
+
+    stable_outputs: []
+
+    unstable_outputs:
+      - brand_brief.md (仅 B1.1 sub-skill 有 runtime)
+
+    known_limitations:
+      - "仅 B1.1 (brand-strategy) 有实际 runtime 实现"
+      - "其他 12 个 sub-skills 为 contract baseline，无执行逻辑"
+      - "logo-design 无完整专业流程"
+      - "color-system 无对比度/可访问性验证"
+      - "typography-system 无授权风险检查"
+      - "visual-identity 无 traceability 实现"
+      - "brand-guidelines 无 professional gap report"
+
+    stable_capabilities: []
+
+    unstable_capabilities:
+      - "brand-strategy 生成（仅框架，无深度分析）"
+
+    human_review_required:
+      - "所有输出（当前为 alpha 状态）"
+
+    not_suitable_for:
+      - "替代专业品牌咨询"
+      - "直接用于品牌发布"
+      - "法律/商标注册依据"
+      - "印刷/生产规范"
+
+    production_blockers:
+      - "13 个 sub-skills 中仅 1 个有 runtime"
+      - "无质量评估体系"
+      - "无专业差距报告"
+      - "无可追溯性"
+
+    roadmap:
+      - "P1: B2 brand-audit (竞品分析)"
+      - "P1: B3 logo-design (完整流程)"
+      - "P2: B4 color-system, B5 typography-system"
+
+    last_verified_at: "2026-06-09"
+    last_major_change: "2026-06-08 (B1.1 foundation runtime)"
+
+# 全局约定
+global_conventions:
+  maturity_levels:
+    alpha: "契约已定义，runtime 为 skeleton 或部分实现，不适合生产使用"
+    pilot: "核心流程可执行，但质量不稳定，需要人工复核，仅适合内部试用"
+    beta: "核心功能稳定，部分场景可用于生产，但有明确局限性"
+    stable: "生产就绪，质量稳定，文档完整，企业可采用"
+    deprecated: "不再维护，建议迁移到替代方案"
+
+  runtime_reliability:
+    contract_baseline: "仅有契约和 schema，无实际执行逻辑"
+    llm_synthesis: "完全依赖 LLM 推理，无确定性算法，结果不可复现"
+    llm_assisted: "LLM + 结构化流程，有部分验证逻辑"
+    tool_assisted: "LLM + MCP tools + 确定性算法，结果可部分验证"
+    deterministic: "完全确定性算法，结果可复现"
+
+  enterprise_ready:
+    false: "不适合企业生产环境"
+    partial: "部分场景可用，但有明确限制"
+    true: "企业生产就绪"
+
+# 更新历史
+changelog:
+  - date: "2026-06-09"
+    changes:
+      - "新增 status.matrix.yaml"
+      - "prd2proto 标记为 pilot，enterprise_ready: false"
+      - "所有 skills 添加 production_blockers"
+      - "明确 human_review_required 和 not_suitable_for"

@@ -1,0 +1,362 @@
+name: prd2proto-pipeline-v2
+
+description: |
+  prd2proto Pipeline v2 — 基于 P0/P1 Senior Designer Work Paradigm Engine 重构。
+
+  核心变更：
+  - 不再从 PRD 直接生成代码
+  - 必须先生成 12 个设计推理资产
+  - 所有代码生成受推理资产约束
+  - 所有 stage 都有质量门验证
+  - 最终产物包含 traceability_map 和 professional_gap_report
+
+  状态：P1 Baseline（部分实现）
+
+version: "2.0.0-p1"
+
+mode_prompt:
+  question: "选择保真度："
+  options:
+    - id: pm
+      label: "PM 模式（PRD → 低保真演示原型）"
+    - id: designer-spec
+      label: "设计师模式（PRD + design-spec.md → 高保真原型）"
+
+upstream_refs:
+  - skill: ai-analytics
+    output_type: design_strategy
+    inject_as: design_strategy
+    required: false
+  - skill: ai-analytics
+    output_type: user_persona
+    inject_as: existing_personas
+    required: false
+
+stages:
+  # ========================================================================
+  # Phase 1: 输入诊断与目标分解
+  # ========================================================================
+
+  - id: input-diagnosis
+    type: llm
+    prompt: prompts-v2/01-input-diagnosis.md
+    inputs: [prd_file, prd_content, scope_md, existing_personas, design_strategy]
+    outputs: [requirement_inventory]
+    quality_gates:
+      - gap_transparency_gate
+    knowledge: [knowledge/design-work-paradigm/01-input-diagnosis.md]
+    schema: kernel/contracts/artifacts/requirement-inventory.schema.json
+    checkpoint:
+      id: C1-input
+      message: "输入诊断完成。completeness_score={{requirement_inventory.completeness_assessment.overall_score}}，decision={{requirement_inventory.readiness_decision.decision}}。要改告诉我，否则继续。"
+      allow: [continue, modify, supplement]
+
+  - id: design-objectives
+    type: llm
+    prompt: prompts-v2/02-design-objectives.md
+    inputs: [requirement_inventory]
+    outputs: [design_objectives]
+    quality_gates:
+      - schema_gate
+      - inference_limit_gate
+    knowledge: [knowledge/design-work-paradigm/02-objective-decomposition.md]
+    schema: kernel/contracts/artifacts/design-objectives.schema.json
+
+  # ========================================================================
+  # Phase 2: 用户与任务建模
+  # ========================================================================
+
+  - id: product-archetype
+    type: llm
+    prompt: prompts-v2/03-product-archetype.md
+    inputs: [requirement_inventory, design_objectives]
+    outputs: [product_archetype]
+    quality_gates:
+      - schema_gate
+    schema: kernel/contracts/artifacts/product-archetype.schema.json
+
+  - id: user-task-modeling
+    type: llm
+    prompt: prompts-v2/04-user-task-modeling.md
+    inputs: [design_objectives, requirement_inventory]
+    outputs: [user_task_map]
+    quality_gates:
+      - schema_gate
+      - inference_limit_gate
+      - traceability_gate
+    knowledge: [knowledge/design-work-paradigm/03-user-task-modeling.md]
+    schema: kernel/contracts/artifacts/user-task-map.schema.json
+
+  - id: business-flow-modeling
+    type: llm
+    prompt: prompts-v2/05-business-flow-modeling.md
+    inputs: [requirement_inventory, user_task_map]
+    outputs: [business_flow]
+    quality_gates:
+      - schema_gate
+      - inference_limit_gate
+    knowledge: [knowledge/design-work-paradigm/05-business-flow-modeling.md]
+    schema: kernel/contracts/artifacts/business-flow.schema.json
+
+  - id: user-journey-mapping
+    type: llm
+    prompt: prompts-v2/06-user-journey-mapping.md
+    inputs: [user_task_map, design_objectives]
+    outputs: [user_journey_map]
+    quality_gates:
+      - schema_gate
+      - traceability_gate
+    knowledge: [knowledge/design-work-paradigm/06-user-journey-mapping.md]
+    schema: kernel/contracts/artifacts/journey-map.schema.json
+
+  # ========================================================================
+  # Phase 3: 信息架构与页面设计
+  # ========================================================================
+
+  - id: information-architecture
+    type: llm
+    prompt: prompts-v2/07-information-architecture.md
+    inputs: [user_task_map, user_journey_map, design_objectives]
+    outputs: [information_architecture]
+    quality_gates:
+      - schema_gate
+      - traceability_gate  # 验证所有页面可追溯到 user_task
+    knowledge: [knowledge/design-work-paradigm/07-information-architecture.md]
+    schema: kernel/contracts/artifacts/information-architecture.schema.json
+    checkpoint:
+      id: C2-ia
+      message: "信息架构已生成。pages={{information_architecture.pages.length}}，要改告诉我，否则继续。"
+      allow: [continue, modify, supplement]
+
+  - id: page-flow
+    type: llm
+    prompt: prompts-v2/08-page-flow.md
+    inputs: [information_architecture, user_journey_map]
+    outputs: [page_flow]
+    quality_gates:
+      - schema_gate
+    schema: kernel/contracts/artifacts/page-flow.schema.json
+
+  - id: page-structure
+    type: llm
+    prompt: prompts-v2/09-page-structure.md
+    inputs: [information_architecture, page_flow]
+    outputs: [page_structure]
+    quality_gates:
+      - schema_gate
+    schema: kernel/contracts/artifacts/page-structure.schema.json
+
+  # ========================================================================
+  # Phase 4: 组件与交互设计
+  # ========================================================================
+
+  - id: component-strategy
+    type: llm
+    prompt: prompts-v2/10-component-strategy.md
+    inputs: [page_structure, design_objectives]
+    outputs: [component_strategy]
+    quality_gates:
+      - schema_gate
+    knowledge: [knowledge/design-work-paradigm/10-component-strategy.md]
+    schema: kernel/contracts/artifacts/component-strategy.schema.json
+
+  - id: state-matrix
+    type: llm
+    prompt: prompts-v2/11-state-matrix.md
+    inputs: [business_flow, page_structure]
+    outputs: [state_matrix]
+    quality_gates:
+      - schema_gate
+      - inference_limit_gate
+    knowledge: [knowledge/design-work-paradigm/11-state-matrix.md]
+    schema: kernel/contracts/artifacts/state-matrix.schema.json
+
+  - id: interaction-rules
+    type: llm
+    prompt: prompts-v2/12-interaction-rules.md
+    inputs: [page_structure, component_strategy]
+    outputs: [interaction_rules]
+    quality_gates:
+      - schema_gate
+    knowledge: [knowledge/design-work-paradigm/12-interaction-rules.md]
+    schema: kernel/contracts/artifacts/interaction-rules.schema.json
+
+  # ========================================================================
+  # Phase 5: 受约束的代码生成
+  # ========================================================================
+
+  - id: design-spec-generation
+    type: llm
+    prompt: prompts-v2/13-design-spec-generation.md
+    only_when: mode != "designer-dsl"
+    inputs: [information_architecture, component_strategy, interaction_rules, design_objectives]
+    outputs: [design_spec_md]
+
+  - id: token-extraction
+    type: llm
+    prompt: prompts-v2/14-token-extraction.md
+    inputs: [design_spec_md]
+    outputs: [design_tokens, tokens_css]
+
+  - id: constrained-code-generation
+    type: llm
+    prompt: prompts-v2/15-constrained-code-generation.md
+    inputs: [
+      information_architecture,
+      page_flow,
+      page_structure,
+      component_strategy,
+      state_matrix,
+      interaction_rules,
+      design_tokens
+    ]
+    outputs: [prototype_code]
+    quality_gates:
+      - code_constraint_gate  # 验证代码受推理资产约束
+    checkpoint:
+      id: C3-code
+      message: "代码已生成。要改告诉我，否则继续。"
+      allow: [continue, modify]
+
+  # ========================================================================
+  # Phase 6: 追溯性与质量评估
+  # ========================================================================
+
+  - id: traceability-generation
+    type: llm
+    prompt: prompts-v2/16-traceability-generation.md
+    inputs: [
+      prototype_code,
+      requirement_inventory,
+      design_objectives,
+      user_task_map,
+      information_architecture,
+      component_strategy,
+      state_matrix
+    ]
+    outputs: [design_traceability_map]
+    quality_gates:
+      - schema_gate
+      - traceability_gate
+    knowledge: [knowledge/design-work-paradigm/19-traceability.md]
+    schema: kernel/contracts/artifacts/traceability-map.schema.json
+
+  - id: professional-gap-assessment
+    type: llm
+    prompt: prompts-v2/17-professional-gap-assessment.md
+    inputs: [
+      prototype_code,
+      design_traceability_map,
+      requirement_inventory,
+      all_reasoning_assets
+    ]
+    outputs: [professional_gap_report]
+    quality_gates:
+      - schema_gate
+    knowledge: [knowledge/design-work-paradigm/17-quality-rubrics.md]
+    schema: kernel/contracts/artifacts/professional-gap-report.schema.json
+
+  # ========================================================================
+  # Phase 7: 启动与交付
+  # ========================================================================
+
+  - id: liveness-check
+    type: tool
+    inputs: [prototype_code]
+    outputs: [dev_url]
+    description: "启动开发服务器"
+
+# ============================================================================
+# Quality Gates Configuration
+# ============================================================================
+
+quality_gates_config: kernel/quality-gates/gate-config.yaml
+
+quality_gates_enforcement:
+  blocked:
+    action: stop_execution
+    generate_blocker_report: true
+    notify_user: true
+
+  fallback_safe:
+    action: downgrade_mode
+    target_mode: pm
+    target_fidelity: low
+    notify_user: true
+
+  warning:
+    action: continue_with_flag
+    mark_for_review: true
+    log: true
+
+# ============================================================================
+# Traceability Configuration
+# ============================================================================
+
+traceability_config:
+  enable_auto_trace: true
+  enable_field_level_trace: true
+  enable_inference_detection: true
+
+# ============================================================================
+# Output Configuration
+# ============================================================================
+
+outputs:
+  reasoning_assets_dir: "output/prd2proto/design-reasoning/"
+  prototype_dir: "output/prd2proto/prototype/"
+  quality_reports_dir: "output/prd2proto/quality/"
+
+  required_outputs:
+    - requirement_inventory.json
+    - design_objectives.json
+    - user_task_map.json
+    - information_architecture.json
+    - component_strategy.json
+    - state_matrix.json
+    - design_traceability_map.json
+    - professional_gap_report.json
+    - prototype_code/
+
+# ============================================================================
+# Known Limitations (P1 Baseline)
+# ============================================================================
+
+limitations:
+  prompts:
+    - "01-input-diagnosis.md: ✅ 完整"
+    - "02-17: ⚠️ 框架版本，P2 补充"
+
+  quality_gates:
+    - "5 个 gates 实现完整"
+    - "辅助方法为简化实现（如 _extract_pages_from_code）"
+    - "需要在 runtime 中完善代码解析逻辑"
+
+  traceability:
+    - "字段级追溯仅实现 IA 类型"
+    - "其他 artifact 类型（component_strategy, state_matrix）为简化实现"
+    - "inference detection 为关键字匹配，非语义匹配"
+
+  runtime:
+    - "pipeline executor 需要集成 quality gates"
+    - "pipeline executor 需要集成 traceability generator"
+    - "质量门失败处理需要完整实现"
+
+# ============================================================================
+# Version History
+# ============================================================================
+
+version_history:
+  - version: "2.0.0-p1"
+    date: "2026-06-09"
+    changes:
+      - "基于 P0 Senior Designer Work Paradigm Engine 重构"
+      - "新增 12 个设计推理 stages"
+      - "集成 quality gates"
+      - "集成 traceability"
+      - "1 个完整 prompt + 16 个框架 prompts"
+
+  - version: "1.0.0"
+    date: "2026-05-15"
+    changes:
+      - "初始版本（已弃用）"

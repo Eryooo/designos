@@ -1,0 +1,55 @@
+{
+  "version": "1.0.0",
+  "skill": "uxeval",
+  "description": "按需加载的方法论知识库索引。Kernel 根据 stage_id 选择性加载到 LLM context，避免一次性塞满。",
+  "documents": [
+    {
+      "id": "m01",
+      "title": "需求理解",
+      "path": "m01-需求理解.md",
+      "when_to_load": ["prd-understanding", "persona-derivation", "scenario-derivation"],
+      "purpose": "PRD 结构化提取 + 用户角色推导 + 关键场景推导",
+      "size_estimate_tokens": 1200
+    },
+    {
+      "id": "m02",
+      "title": "启发式原则",
+      "path": "m02-启发式原则.md",
+      "when_to_load": ["principle-mapping"],
+      "purpose": "Nielsen 10 原则 + 内置补充原则 + 自定义原则映射规则",
+      "size_estimate_tokens": 2200
+    },
+    {
+      "id": "m03",
+      "title": "旅程建模",
+      "path": "m03-旅程建模.md",
+      "when_to_load": ["journey-modeling"],
+      "purpose": "用户体验旅程地图、阶段表、核心任务链路的建模方法",
+      "size_estimate_tokens": 1500
+    },
+    {
+      "id": "m04",
+      "title": "任务生成",
+      "path": "m04-任务生成.md",
+      "when_to_load": ["task-generation"],
+      "purpose": "从旅程到任务清单的拆解规则；体验任务 vs 功能任务的判别口诀",
+      "size_estimate_tokens": 1600
+    },
+    {
+      "id": "m05",
+      "title": "证据采集",
+      "path": "m05-证据采集.md",
+      "when_to_load": ["task-script-generation", "screenshot-loading"],
+      "purpose": "证据规范、命名约定、Playwright 脚本生成规则",
+      "size_estimate_tokens": 1400
+    },
+    {
+      "id": "m06",
+      "title": "问题归因",
+      "path": "m06-问题归因.md",
+      "when_to_load": ["issue-attribution"],
+      "purpose": "raw issues → 结构化 Issue 的归因规则、严重等级判定、改进建议生成",
+      "size_estimate_tokens": 1800
+    }
+  ]
+}

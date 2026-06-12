@@ -1,0 +1,45 @@
+# ⚠️ 公网 npm 发布已禁用（internal pilot 阶段）
+# 原先 on: push tags v* 会自动发布到公网 registry.npmjs.org，
+# 这与"internal pilot / 不发公网包"冲突，且旧包 designos 待 deprecate。
+# 现改为仅手动触发 + 安全闸 if:false，重新启用前请确认目标为
+# 内部/scoped/private registry，而非公网 unscoped designos。
+name: Publish to npm (DISABLED for internal pilot)
+
+on:
+  workflow_dispatch:   # 仅手动；不再自动监听 tag
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    if: ${{ false }}   # 安全闸：默认不运行，确认 registry 后手动改为 true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Sync skills to npm-package
+        run: |
+          rm -rf npm-package/skills
+          cp -r skills npm-package/skills
+          echo "✅ skills synced to npm-package"
+
+      - name: Version consistency check
+        run: |
+          NPM_VER=$(node -p "require('./npm-package/package.json').version")
+          INSTALL_VER=$(grep '^VERSION=' npm-package/install.sh | head -1 | cut -d'"' -f2)
+          echo "npm-package version: ${NPM_VER}"
+          echo "install.sh VERSION: ${INSTALL_VER}"
+          if [[ "${NPM_VER}" != "${INSTALL_VER}" ]]; then
+            echo "❌ Version mismatch!"
+            exit 1
+          fi
+          echo "✅ Versions consistent"
+
+      - name: Publish
+        working-directory: npm-package
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

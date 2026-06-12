@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/product-archetype.schema.json",
+  "title": "Product Archetype",
+  "description": "产品原型定位 artifact：识别产品本质类型（工具/平台/内容/社交/AI对话等），为后续设计决策提供约束基因",
+  "allOf": [
+    {
+      "$ref": "./artifact-base.schema.json"
+    },
+    {
+      "type": "object",
+      "properties": {
+        "primary_archetype": {
+          "type": "object",
+          "description": "主 archetype（唯一）",
+          "properties": {
+            "name": {"type": "string", "description": "archetype 名称（中文）"},
+            "english_name": {"type": "string"},
+            "rationale": {"type": "string", "minLength": 10, "description": "为何判定此 archetype"},
+            "evidence": {
+              "type": "array",
+              "items": {"type": "string"},
+              "description": "PRD/上游证据"
+            }
+          },
+          "required": ["name", "rationale"]
+        },
+        "secondary_archetype": {
+          "type": "object",
+          "description": "次 archetype（可选，体现混合特性）",
+          "properties": {
+            "name": {"type": "string"},
+            "english_name": {"type": "string"},
+            "rationale": {"type": "string"},
+            "weight": {"type": "number", "minimum": 0, "maximum": 1},
+            "evidence": {"type": "array", "items": {"type": "string"}}
+          },
+          "required": ["name"]
+        },
+        "must_have_features": {
+          "type": "array",
+          "description": "此 archetype 的必备特征",
+          "minItems": 1,
+          "items": {"type": "string"}
+        },
+        "forbidden_patterns": {
+          "type": "array",
+          "description": "此 archetype 禁止的设计模式",
+          "items": {"type": "string"}
+        },
+        "typical_design_patterns": {
+          "type": "array",
+          "description": "典型设计模式（含参考）",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pattern": {"type": "string"},
+              "rationale": {"type": "string"},
+              "reference": {"type": "string"},
+              "constraints": {"type": "string"}
+            },
+            "required": ["pattern"]
+          }
+        },
+        "archetype_constraints": {
+          "type": "object",
+          "description": "archetype 对下游设计的约束",
+          "properties": {
+            "ia_pattern": {"type": "string"},
+            "navigation_pattern": {"type": "string"},
+            "interaction_density": {"type": "string"},
+            "data_density": {"type": "string"}
+          }
+        },
+        "competitive_archetype_examples": {
+          "type": "array",
+          "description": "同 archetype 的竞品参考",
+          "items": {
+            "type": "object",
+            "properties": {
+              "product": {"type": "string"},
+              "match_dimensions": {"type": "array", "items": {"type": "string"}},
+              "differentiation": {"type": "string"}
+            }
+          }
+        },
+        "design_implications": {
+          "type": "object",
+          "description": "对 IA/交互/组件/布局的设计启示"
+        }
+      },
+      "required": [
+        "primary_archetype",
+        "must_have_features",
+        "forbidden_patterns"
+      ]
+    }
+  ]
+}

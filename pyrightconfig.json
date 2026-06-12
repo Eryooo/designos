@@ -1,0 +1,40 @@
+{
+  "include": [
+    "kernel",
+    "designos"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "**/.venv",
+    "**/.ruff_cache",
+    "**/.pytest_cache",
+    "tests",
+    "**/tests",
+    "**/fixtures",
+    "legacy",
+    "docs",
+    "dist",
+    "build",
+    "skills",
+    "npm-package"
+  ],
+  "pythonVersion": "3.11",
+  "venvPath": ".",
+  "venv": ".venv",
+  "typeCheckingMode": "standard",
+  "reportMissingImports": "error",
+  "reportMissingModuleSource": "none",
+  "reportMissingTypeStubs": "none",
+  "reportUnknownMemberType": "none",
+  "reportUnknownVariableType": "none",
+  "reportUnknownArgumentType": "none",
+  "reportUnknownParameterType": "none",
+  "reportPrivateUsage": "none",
+  "reportImplicitStringConcatenation": "none",
+  "reportUnusedImport": "error",
+  "reportMissingTypeArgument": "error",
+  "reportReturnType": "error",
+  "reportUnnecessaryIsInstance": "error",
+  "reportUnnecessaryComparison": "error",
+  "useLibraryCodeForTypes": true
+}

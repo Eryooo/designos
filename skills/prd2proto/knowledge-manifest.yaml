@@ -1,0 +1,43 @@
+skill: prd2proto
+schema_version: "0.1.0"
+status: pilot
+purpose: 声明本 skill 复用哪些 DesignOS 共享知识资产；仅引用 shared knowledge id，不复制正文。
+
+shared_knowledge:
+  - id: product.prd-understanding
+    used_by: prd-understanding
+    use: PRD 结构化理解、推断标注、warnings 边界
+  - id: product.user-story-mapping
+    used_by: prd-understanding
+    use: modules/features/pages/flows 与 critical path 拆解
+  - id: product.information-architecture
+    used_by: design-analysis
+    use: sitemap/navigation/route/critical path 四视图
+  - id: product.interaction-state-coverage
+    used_by: design-analysis, review-gate
+    use: 交互状态覆盖与异常路径检查
+  - id: frontend.atomic-design
+    used_by: design-analysis, code-generation
+    use: 组件五层分层与复用边界
+  - id: frontend.design-token-rules
+    used_by: token-extraction, code-generation
+    use: token 三层架构、命名、引用与 CSS 变量输出
+  - id: frontend.component-state-rules
+    used_by: design-analysis, code-generation, review-gate
+    use: 组件七状态覆盖规则
+  - id: frontend.code-quality-constitution
+    used_by: code-generation, review-gate
+    use: 无硬编码、组件库、状态覆盖、design-spec 优先
+  - id: design.design-strategy
+    used_by: prd-understanding, spec-generation
+    use: 消费上游 design_strategy 校准目标人群、商业目标与设计原则
+  - id: design.design-template-selection
+    used_by: spec-generation
+    use: 模板选择与有限微调
+  - id: design.tone-and-visual-direction
+    used_by: spec-generation
+    use: tone keywords 与视觉方向推导
+
+private_reference_boundary: |
+  skills/prd2proto/reference/ 继续保留 stage 输出约束、schema 约束、prompt 消费方式；
+  knowledge/ 只保存跨 skill 复用的通用决策知识。
