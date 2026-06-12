@@ -233,7 +233,7 @@ ls -la .
 ### Before Asking for Help
 
 1. ✅ Check this troubleshooting guide
-2. ✅ Search [GitHub Issues](https://github.com/Eryooo/designos/issues)
+2. ✅ Search [GitHub Issues](<YOUR_INTERNAL_PRIVATE_REPO>/issues)
 3. ✅ Read [FAQ](#faq) below
 
 ### How to Report Issues
@@ -262,7 +262,7 @@ Actual: ...
 
 ### Community Support
 
-- [GitHub Discussions](https://github.com/Eryooo/designos/discussions) — Q&A
+- [GitHub Discussions](<YOUR_INTERNAL_PRIVATE_REPO>/discussions) — Q&A
 - [Discord](https://discord.gg/designos) — Real-time chat (coming soon)
 
 ---
@@ -291,4 +291,4 @@ A: Absolutely! See [Contributing Guide](../CONTRIBUTING.md).
 
 ---
 
-**Still stuck?** Open an issue: https://github.com/Eryooo/designos/issues/new
+**Still stuck?** Open an issue: <YOUR_INTERNAL_PRIVATE_REPO>/issues/new

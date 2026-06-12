@@ -1,3 +1,7 @@
+> ⚠️ **ARCHIVED / OUTDATED — DO NOT USE FOR CURRENT STATUS.**
+> 本文件是历史过程记录，不代表当前状态。当前权威状态见仓库根
+> `INTERNAL-PILOT-README.md` / `REVIEW-MANIFEST.md` / `skills/status.matrix.yaml`。
+
 # 方法论与 Prompts 质量审查报告
 
 **审查时间**: 2026-06-10  

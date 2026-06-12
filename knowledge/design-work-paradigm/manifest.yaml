@@ -188,6 +188,6 @@ quality_gates:
 
 maintainers:
   - role: "DesignOS Core Team"
-    contact: "https://github.com/Eryooo/designos"
+    contact: "<YOUR_INTERNAL_PRIVATE_REPO>"
 
 last_updated: "2026-06-09"

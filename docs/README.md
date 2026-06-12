@@ -36,12 +36,12 @@ Welcome to the DesignOS documentation! This guide will help you get started and 
 
 ## 🆘 Need Help?
 
-- **Questions?** → [GitHub Discussions](https://github.com/Eryooo/designos/discussions)
-- **Bug reports?** → [GitHub Issues](https://github.com/Eryooo/designos/issues)
+- **Questions?** → [GitHub Discussions](<YOUR_INTERNAL_PRIVATE_REPO>/discussions)
+- **Bug reports?** → [GitHub Issues](<YOUR_INTERNAL_PRIVATE_REPO>/issues)
 - **General chat?** → Coming soon (Discord)
 
 ## 🚀 Quick Links
 
 - [npm Package](https://www.npmjs.com/package/designos)
-- [GitHub Repository](https://github.com/Eryooo/designos)
-- [Release Notes](https://github.com/Eryooo/designos/releases)
+- [GitHub Repository](<YOUR_INTERNAL_PRIVATE_REPO>)
+- [Release Notes](<YOUR_INTERNAL_PRIVATE_REPO>/releases)

@@ -1,3 +1,7 @@
+> ⚠️ **ARCHIVED / OUTDATED — DO NOT USE FOR CURRENT STATUS.**
+> 本文件是历史过程记录，不代表当前状态。当前权威状态见仓库根
+> `INTERNAL-PILOT-README.md` / `REVIEW-MANIFEST.md` / `skills/status.matrix.yaml`。
+
 # DesignOS P0+P1 完成报告
 
 **执行日期**: 2026-06-09  

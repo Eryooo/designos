@@ -6,13 +6,13 @@
 
 将设计专业知识转化为可复用的 AI 技能，适用于 Claude Code、Cursor 等工具。
 
-[![npm version](https://img.shields.io/npm/v/designos.svg?style=for-the-badge)](https://www.npmjs.com/package/designos)
-[![npm downloads](https://img.shields.io/npm/dm/designos.svg?style=for-the-badge)](https://www.npmjs.com/package/designos)
 ![Skills](https://img.shields.io/badge/技能数-5-purple?style=for-the-badge)
-![Tests](https://img.shields.io/badge/测试通过-259-green?style=for-the-badge)
-![Sub-Skills](https://img.shields.io/badge/子技能-6-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/状态-内部试用-yellow?style=for-the-badge)
 [![License](https://img.shields.io/badge/许可证-Apache%202.0-orange?style=for-the-badge)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/Eryooo/designos?style=social)](https://github.com/Eryooo/designos)
+
+> **内部试用版本 — 非公开发布。** 状态以
+> [`INTERNAL-PILOT-README.md`](INTERNAL-PILOT-README.md) ·
+> [`REVIEW-MANIFEST.md`](REVIEW-MANIFEST.md) 为准。
 
 [快速开始](#-快速开始) • [技能列表](#-技能列表) • [文档](docs/README.md) • [示例](docs/examples/)
 
@@ -22,10 +22,12 @@
 
 ## 🚀 快速开始
 
-一行命令安装 DesignOS：
+> 内部试用以干净快照分发，**不是**公网 npm 包。
+> 请从内部私有仓库 / registry 安装，而非公网 registry。
 
 ```bash
-npx designos@latest
+# 在内部私有仓库 checkout 后
+pip install -e ".[dev]"
 ```
 
 然后在任何 AI 编程助手中使用：
@@ -222,8 +224,7 @@ output/brand-creative/
 
 ## 💬 社区
 
-- **[GitHub Discussions](https://github.com/Eryooo/designos/discussions)** — 提问 & 分享想法
-- **[Issues](https://github.com/Eryooo/designos/issues)** — Bug 报告 & 功能请求
+- **内部试用反馈** — 请在内部私有仓库提 issue / discussion
 - **[更新日志](CHANGELOG.md)** — 版本发布说明
 
 ---
@@ -237,12 +238,18 @@ output/brand-creative/
 
 ---
 
-## 📊 质量保证
+## 📊 质量与状态
 
-- ✅ **259 个测试**全部通过
-- ✅ **4/4 种原型**经过真实 PRD 验证
+> **内部试用 — 非公开发布、未达企业级、并非全 skills 资深水准。**
+> 状态以 `INTERNAL-PILOT-README.md` / `REVIEW-MANIFEST.md` 为准。
+
+- ✅ 各 skill 单独运行时单元测试通过（跨 skill 一起收集有已知冲突，
+  另有少量既有 pipeline 结构失败，详见 REVIEW-MANIFEST）
+- 🧪 **4 种产品原型**用合成 PRD 演练过（未经真实生产使用验证）
 - ✅ **CI/CD 流水线**（代码检查 + 类型检查 + 单元测试）
 - ✅ **独立版本管理**每个技能单独发版
+- ⚠️ **prd2proto** 是当前推进最深的资深化样板；其他 skills
+  （uxeval / ai-analytics / ip-design / brand-creative）仍需资深化
 - ✅ **基准测试框架**覆盖率、准确度、质量评分
 
 ---
@@ -265,8 +272,8 @@ output/brand-creative/
 欢迎贡献！查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解指南。
 
 ```bash
-# 克隆并安装
-git clone https://github.com/Eryooo/designos.git
+# 克隆并安装（替换为你的内部私有仓库地址）
+git clone <YOUR_INTERNAL_PRIVATE_REPO_URL>
 cd designos
 npm install
 
@@ -282,12 +289,6 @@ npm run create-skill my-skill
 ## 📜 许可证
 
 [Apache 2.0](LICENSE) © 2026 DesignOS Contributors
-
----
-
-## 🌟 Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=Eryooo/designos&type=Date)](https://star-history.com/#Eryooo/designos&Date)
 
 ---
 

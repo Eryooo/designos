@@ -412,9 +412,9 @@ npx designos install username/my-custom-skill
 
 ## Support
 
-- **Documentation**: https://github.com/Eryooo/designos#readme
-- **Issues**: https://github.com/Eryooo/designos/issues
-- **Discussions**: https://github.com/Eryooo/designos/discussions
+- **Documentation**: <YOUR_INTERNAL_PRIVATE_REPO>#readme
+- **Issues**: <YOUR_INTERNAL_PRIVATE_REPO>/issues
+- **Discussions**: <YOUR_INTERNAL_PRIVATE_REPO>/discussions
 
 ---
 

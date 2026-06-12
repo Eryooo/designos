@@ -98,7 +98,7 @@ After fixing the top 3 issues:
 
 Download this example:
 ```bash
-git clone https://github.com/Eryooo/designos-examples.git
+git clone <YOUR_INTERNAL_PRIVATE_REPO>-examples.git
 cd designos-examples/e-commerce-checkout
 npx designos@latest
 ```

@@ -1,3 +1,7 @@
+> ⚠️ **ARCHIVED / OUTDATED — DO NOT USE FOR CURRENT STATUS.**
+> 本文件是历史过程记录，不代表当前状态。当前权威状态见仓库根
+> `INTERNAL-PILOT-README.md` / `REVIEW-MANIFEST.md` / `skills/status.matrix.yaml`。
+
 # Claude Code Start Prompt
 
 把下面整段作为 Claude Code 新会话的第一条消息：

@@ -682,7 +682,7 @@ DesignOS 不只是工具
 ## 附录
 
 ### A. 项目地址
-- GitHub：https://github.com/Eryooo/designos
+- GitHub：<YOUR_INTERNAL_PRIVATE_REPO>
 - PyPI：https://pypi.org/project/designos/
 - 当前版本：v0.1.2（M1 — UXEval 内测版）
 

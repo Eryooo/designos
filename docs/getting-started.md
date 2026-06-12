@@ -129,7 +129,7 @@ You should see: `ai-analytics`, `brand-creative`, `ip-design`, `prd2proto`, `uxe
 ### More help?
 
 - [Troubleshooting Guide](troubleshooting.md)
-- [GitHub Discussions](https://github.com/Eryooo/designos/discussions)
+- [GitHub Discussions](<YOUR_INTERNAL_PRIVATE_REPO>/discussions)
 
 ## Configuration
 

@@ -1,3 +1,7 @@
+> ⚠️ **ARCHIVED / OUTDATED — DO NOT USE FOR CURRENT STATUS.**
+> 本文件是历史过程记录，不代表当前状态。当前权威状态见仓库根
+> `INTERNAL-PILOT-README.md` / `REVIEW-MANIFEST.md` / `skills/status.matrix.yaml`。
+
 # prd2proto v2 升级完整变更报告
 
 **分支**: `feature/senior-designer-paradigm-engine`

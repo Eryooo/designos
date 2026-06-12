@@ -78,4 +78,4 @@
 ## 联系
 
 - 维护：young
-- 仓库：https://github.com/Eryooo/designos
+- 仓库：<YOUR_INTERNAL_PRIVATE_REPO>

@@ -6,13 +6,12 @@
 
 Transform design expertise into reusable AI skills for Claude Code, Cursor, and more.
 
-[![npm version](https://img.shields.io/npm/v/designos.svg?style=for-the-badge)](https://www.npmjs.com/package/designos)
-[![npm downloads](https://img.shields.io/npm/dm/designos.svg?style=for-the-badge)](https://www.npmjs.com/package/designos)
 ![Skills](https://img.shields.io/badge/skills-5-purple?style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-259_passed-green?style=for-the-badge)
-![Sub-Skills](https://img.shields.io/badge/sub--skills-6-blue?style=for-the-badge)
+![Status](https://img.shields.io/badge/status-internal_pilot-yellow?style=for-the-badge)
 [![License](https://img.shields.io/badge/license-Apache%202.0-orange?style=for-the-badge)](LICENSE)
-[![GitHub stars](https://img.shields.io/github/stars/Eryooo/designos?style=social)](https://github.com/Eryooo/designos)
+
+> **Internal pilot — not a public release.** Status of record:
+> [`INTERNAL-PILOT-README.md`](INTERNAL-PILOT-README.md) · [`REVIEW-MANIFEST.md`](REVIEW-MANIFEST.md)
 
 [Quick Start](#-quick-start) • [Skills](#-skills) • [Documentation](docs/README.md) • [Examples](docs/examples/)
 
@@ -22,10 +21,12 @@ Transform design expertise into reusable AI skills for Claude Code, Cursor, and 
 
 ## 🚀 Quick Start
 
-Install DesignOS with a single command:
+> Internal pilot is distributed as a clean snapshot, **not** a public npm package.
+> Install from your internal private repo / registry rather than the public registry.
 
 ```bash
-npx designos@latest
+# from the internal private repo checkout
+pip install -e ".[dev]"
 ```
 
 Then use in any AI coding assistant:
@@ -203,8 +204,7 @@ output/brand-creative/
 
 ## 💬 Community
 
-- **[GitHub Discussions](https://github.com/Eryooo/designos/discussions)** — Ask questions & share ideas
-- **[Issues](https://github.com/Eryooo/designos/issues)** — Bug reports & feature requests
+- **Internal pilot feedback** — file issues/discussions in your internal private repo
 - **[Changelog](CHANGELOG.md)** — Release notes
 
 ---
@@ -218,12 +218,19 @@ output/brand-creative/
 
 ---
 
-## 📊 Quality
+## 📊 Quality & Status
 
-- ✅ **259 tests** passed across all skills
-- ✅ **4/4 archetypes** validated with real-world PRDs
+> **Internal pilot — not public release, not enterprise-ready, not all-skills senior-level.**
+> The authoritative status source is `INTERNAL-PILOT-README.md` / `REVIEW-MANIFEST.md`.
+
+- ✅ Per-skill unit tests pass when run individually (some cross-skill collection
+  quirks and a few known pipeline-structure failures remain — see REVIEW-MANIFEST)
+- 🧪 **4 product archetypes** exercised with synthetic PRDs (not validated against
+  real-world production usage)
 - ✅ **CI/CD pipeline** (lint + type-check + unit tests)
 - ✅ **Independent versioning** for each skill
+- ⚠️ **prd2proto** is the most advanced seniorization pilot; other skills
+  (uxeval / ai-analytics / ip-design / brand-creative) still require seniorization
 
 ---
 
@@ -232,8 +239,8 @@ output/brand-creative/
 We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ```bash
-# Clone and install
-git clone https://github.com/Eryooo/designos.git
+# Clone and install (replace with your internal private repo URL)
+git clone <YOUR_INTERNAL_PRIVATE_REPO_URL>
 cd designos
 pip install -e ".[dev]"
 
@@ -250,12 +257,6 @@ pyright
 ## 📝 License
 
 Apache 2.0 — See [LICENSE](LICENSE) for details.
-
----
-
-## 🌟 Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=Eryooo/designos&type=Date)](https://star-history.com/#Eryooo/designos&Date)
 
 ---
 

@@ -23,7 +23,7 @@
 
 ```bash
 # 克隆仓库
-git clone https://github.com/Eryooo/designos.git
+git clone <YOUR_INTERNAL_PRIVATE_REPO>.git
 cd designos
 
 # 安装开发依赖
@@ -161,4 +161,4 @@ pytest --cov=designos
 
 ## 问题？
 
-有任何疑问请在 [Discussions](https://github.com/Eryooo/designos/discussions) 提出，或通过 Issues 联系我们。
+有任何疑问请在 [Discussions](<YOUR_INTERNAL_PRIVATE_REPO>/discussions) 提出，或通过 Issues 联系我们。

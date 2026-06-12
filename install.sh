@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # DesignOS Install Script
-# Usage: curl -fsSL https://raw.githubusercontent.com/Eryooo/designos/main/install.sh | bash
+# Usage: curl -fsSL https://raw.githubusercontent.com/<YOUR_ORG>/<YOUR_INTERNAL_REPO>/main/install.sh | bash
 #
 # ⚠️  请在 macOS 终端 / Linux shell 中直接运行，不要让 IDE 里的 AI 代跑
 #     IDE AI 沙箱写不了 ~/.claude/skills 等全局目录，会降级成项目内安装，
@@ -17,7 +17,7 @@ set -euo pipefail
 #   - WorkBuddy (IDE)   → ~/.workbuddy/skills/
 
 VERSION="0.5.0a1"
-REPO="Eryooo/designos"
+REPO="<YOUR_ORG>/<YOUR_INTERNAL_REPO>"
 BRANCH="main"
 
 # Colors
