@@ -23,7 +23,7 @@ body:
       label: 复现步骤
       description: 如何复现这个问题？
       placeholder: |
-        1. 执行 `npx designos@latest`
+        1. 执行 `npx <YOUR_INTERNAL_PACKAGE>`
         2. 在 Claude Code 中输入 `/uxeval`
         3. 看到错误提示...
     validations:

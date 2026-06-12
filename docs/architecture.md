@@ -15,7 +15,7 @@ DesignOS is a modular design workflow engine that transforms design expertise in
                                  ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                      CLI Entry Point                            │
-│  npx designos@latest → Installer → Skill Registration          │
+│  npx <YOUR_INTERNAL_PACKAGE> → Installer → Skill Registration          │
 └────────────────────────────────┬────────────────────────────────┘
                                  │
                                  ▼
@@ -203,7 +203,7 @@ stages:
 2. Define knowledge files
 3. Create output templates
 4. Add tests
-5. Run `npx designos@latest` to register
+5. Run `npx <YOUR_INTERNAL_PACKAGE>` to register
 
 ### Custom Knowledge
 

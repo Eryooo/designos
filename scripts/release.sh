@@ -5,6 +5,13 @@
 
 set -euo pipefail
 
+# ⚠️ internal pilot 安全闸：本脚本会 push 到远端并触发公网 npm 发布。
+# 当前阶段（旧仓库历史未清理、旧 npm 包待 deprecate、不发公网包）禁止运行。
+# 重新启用前请：改为内部/private registry，确认目标仓库，再移除本闸。
+echo "⛔ release.sh 在 internal pilot 阶段已停用（防止误发公网 npm / 误推旧仓库）。"
+echo "   见 INTERNAL-PILOT-README.md / REVIEW-MANIFEST.md。如确需发布，手动移除本闸。"
+exit 1
+
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "${REPO_ROOT}"
 
@@ -92,12 +99,12 @@ echo ""
 echo "📋 Step 8: 发布到 npm"
 echo "   GitHub Actions 会自动 npm publish（监听 tag v*）"
 echo "   如果 CI 未配置 NPM_TOKEN，手动执行："
-echo "   cd npm-package && npm publish --registry=https://registry.npmjs.org/"
+echo "   cd npm-package && npm publish --registry=<YOUR_INTERNAL_REGISTRY>"
 echo ""
 
 # ─── Step 9: 验证 ────────────────────────────────────────────────────
 echo "📋 Step 9: 验证（等 CI 完成后执行）"
-echo "   npm view designos@latest version --registry=https://registry.npmjs.org/"
+echo "   npm view <YOUR_INTERNAL_PACKAGE>@latest version --registry=<YOUR_INTERNAL_REGISTRY>"
 echo "   预期输出：${NEW_VER}"
 echo ""
-echo "🎉 发布完成！用户执行 npx designos@latest 即可拿到 v${NEW_VER}"
+echo "🎉 发布完成！用户执行 npx <YOUR_INTERNAL_PACKAGE> 即可拿到 v${NEW_VER}"

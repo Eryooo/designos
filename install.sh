@@ -184,7 +184,7 @@ case "${1:-help}" in
     fi
     ;;
   update)
-    npx designos@latest
+    npx <YOUR_INTERNAL_PACKAGE>
     ;;
   list)
     echo "已安装的 Skills:"
@@ -206,7 +206,7 @@ case "${1:-help}" in
     echo "命令："
     echo "  designos list     列出已安装的 skills"
     echo "  designos path     输出 skills 安装路径"
-    echo "  designos update   升级到最新版（等同 npx designos@latest）"
+    echo "  designos update   升级到最新版（等同 npx <YOUR_INTERNAL_PACKAGE>）"
     echo "  designos inject   注入 AGENTS.md 到当前目录（IDE 不识别时兜底）"
     echo "  designos help     显示帮助"
     ;;
@@ -350,7 +350,7 @@ if [ "$INSTALL_MODE" = "local" ]; then
   printf "  仅在当前项目目录（$PWD）的 IDE 会话里能用 /uxeval\n"
   echo ""
   printf "  ${BOLD}建议${NC} → 退出 IDE，在 macOS ${BOLD}终端 App${NC} 里重新运行：\n"
-  printf "         ${BLUE}npx designos${NC}\n"
+  printf "         ${BLUE}npx <YOUR_INTERNAL_PACKAGE>${NC}\n"
   echo ""
   printf "  这样 skill 会装到 ~/.designos 并软链到所有 IDE 的全局 skills 目录，\n"
   printf "  之后在任何项目目录都能 /uxeval。\n"

@@ -100,7 +100,7 @@ Download this example:
 ```bash
 git clone <YOUR_INTERNAL_PRIVATE_REPO>-examples.git
 cd designos-examples/e-commerce-checkout
-npx designos@latest
+npx <YOUR_INTERNAL_PACKAGE>
 ```
 
 Then run:

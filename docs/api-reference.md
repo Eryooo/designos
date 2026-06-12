@@ -9,7 +9,7 @@ Complete reference for DesignOS CLI and programmatic API.
 ### Installation
 
 ```bash
-npx designos@latest
+npx <YOUR_INTERNAL_PACKAGE>
 ```
 
 **What it does**:
@@ -24,7 +24,7 @@ npx designos@latest
 
 **Example**:
 ```bash
-npx designos@latest --path ~/my-designos --force
+npx <YOUR_INTERNAL_PACKAGE> --path ~/my-designos --force
 ```
 
 ---
@@ -317,7 +317,7 @@ class Pipeline:
 
 | Code | Meaning | Solution |
 |------|---------|----------|
-| `E001` | Skill not found | Run `npx designos@latest` to install |
+| `E001` | Skill not found | Run `npx <YOUR_INTERNAL_PACKAGE>` to install |
 | `E002` | Invalid input format | Check file exists and is readable |
 | `E003` | Missing required parameter | Add required CLI argument |
 | `E004` | Schema validation failed | Check output matches expected format |
@@ -368,7 +368,7 @@ find docs/prds/ -name "*.md" -exec /prd2proto {} \;
 ```yaml
 - name: Run UX Evaluation
   run: |
-    npx designos@latest
+    npx <YOUR_INTERNAL_PACKAGE>
     /uxeval screenshots/ --format json
     
 - name: Upload Report
@@ -400,12 +400,12 @@ cat ~/.designos/version.txt
 Install community-contributed skills:
 
 ```bash
-npx designos install <github-repo>
+npx <YOUR_INTERNAL_PACKAGE> install <github-repo>
 ```
 
 Example:
 ```bash
-npx designos install username/my-custom-skill
+npx <YOUR_INTERNAL_PACKAGE> install username/my-custom-skill
 ```
 
 ---

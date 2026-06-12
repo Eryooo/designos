@@ -285,7 +285,7 @@ Organization Memory（组织级，GitHub repo）
 
 ### 3.8 分发：PyPI + GitHub
 
-- **PyPI**：`pip install designos`，版本化分发
+- **PyPI**：`pip install <YOUR_INTERNAL_PACKAGE>`，版本化分发
 - **GitHub**：源码 + Skill 包 + AGENTS.md
 - **GitHub Actions**：tag 触发自动发版（OIDC trusted publishing，免 token）
 
@@ -375,11 +375,11 @@ Organization Memory（组织级，GitHub repo）
 
 #### 弯路 1：把 IDE 和 CLI 当成两条路径（已纠正）
 
-**初版**：要求设计师 `pip install designos` → `designos init` → 配 API Key → `designos run uxeval`，把这叫"CLI 模式"；IDE 里说 `/uxeval` 叫"IDE 模式"。
+**初版**：要求设计师 `pip install <YOUR_INTERNAL_PACKAGE>` → `<YOUR_INTERNAL_PACKAGE> init` → 配 API Key → `<YOUR_INTERNAL_PACKAGE> run uxeval`，把这叫"CLI 模式"；IDE 里说 `/uxeval` 叫"IDE 模式"。
 
 **问题**：本质上做的事完全一样——AI 按 pipeline 逐 stage 执行，需要工具时调工具。区分两条路径是多余的，还让设计师以为必须装 Python 才能用。
 
-**纠正**：只有一套执行流程。`/uxeval`（IDE 对话框）和 `designos run uxeval`（terminal）是同一件事的两个触发入口。设计师用前者，CI/批量用后者。
+**纠正**：只有一套执行流程。`/uxeval`（IDE 对话框）和 `<YOUR_INTERNAL_PACKAGE> run uxeval`（terminal）是同一件事的两个触发入口。设计师用前者，CI/批量用后者。
 
 #### 弯路 2：让设计师 git clone 整个仓库（待纠正）
 
@@ -484,7 +484,7 @@ Organization Memory（组织级，GitHub repo）
 
 1. **从 IDE 视角设计**：设计师在哪、AI 在哪、就在哪交互
 2. **零配置优先**：能从 IDE 拿到的，不要再问用户
-3. **简洁的 Slash Command**：`/uxeval` 比 `designos run uxeval --mode client --auto-confirm` 好 10 倍
+3. **简洁的 Slash Command**：`/uxeval` 比 `<YOUR_INTERNAL_PACKAGE> run uxeval --mode client --auto-confirm` 好 10 倍
 
 #### ❌ 别犯的错
 
@@ -637,7 +637,7 @@ skills/uxeval/eval/failure/
 | `pip install --user` 后 binary 不在 PATH | `command not found: designos` | __main__.py 兜底 + 自动改 .zshrc |
 | Trae 沙箱不能写 `~/.designos` | `PermissionError` | DESIGNOS_HOME env + 项目级降级 |
 | GitHub Actions 推 PyPI 卡住 | environment 没批准 | 第一次推手动批一次，后续自动 |
-| 集团镜像源同步慢 | `pip install designos==0.1.2` 找不到 | 临时用 `-i https://pypi.org/simple/` 强制官方源 |
+| 集团镜像源同步慢 | `pip install <YOUR_INTERNAL_PACKAGE>` 找不到 | 临时用 `-i https://pypi.org/simple/` 强制官方源 |
 
 ### 9.4 IDE 集成相关
 
@@ -683,7 +683,7 @@ DesignOS 不只是工具
 
 ### A. 项目地址
 - GitHub：<YOUR_INTERNAL_PRIVATE_REPO>
-- PyPI：https://pypi.org/project/designos/
+- PyPI：https://<YOUR_INTERNAL_REGISTRY>/
 - 当前版本：v0.1.2（M1 — UXEval 内测版）
 
 ### B. 关键文件索引
@@ -728,8 +728,8 @@ curl -fsSL https://designos.dev/install.sh | bash
 # 安装后在任何项目目录说 /uxeval 即可
 
 # 批量 / CI 场景（同一套流程，另一个触发入口）
-pip install designos
-designos run uxeval --mode client --auto-confirm
+pip install <YOUR_INTERNAL_PACKAGE>
+<YOUR_INTERNAL_PACKAGE> run uxeval --mode client --auto-confirm
 designos --help
 
 # 开发者

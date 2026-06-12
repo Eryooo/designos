@@ -15,7 +15,7 @@ This guide will help you install and use DesignOS in less than 5 minutes.
 Run this command in your terminal:
 
 ```bash
-npx designos@latest
+npx <YOUR_INTERNAL_PACKAGE>
 ```
 
 This will:
@@ -136,13 +136,13 @@ You should see: `ai-analytics`, `brand-creative`, `ip-design`, `prd2proto`, `uxe
 ### Custom Installation Path
 
 ```bash
-DESIGNOS_HOME=~/my-custom-path npx designos@latest
+DESIGNOS_HOME=~/my-custom-path npx <YOUR_INTERNAL_PACKAGE>
 ```
 
 ### Skip IDE Auto-Configuration
 
 ```bash
-npx designos@latest --no-ide-config
+npx <YOUR_INTERNAL_PACKAGE> --no-ide-config
 ```
 
 ## Updating DesignOS
@@ -150,7 +150,7 @@ npx designos@latest --no-ide-config
 To update to the latest version:
 
 ```bash
-npx designos@latest
+npx <YOUR_INTERNAL_PACKAGE>
 ```
 
 DesignOS will detect existing installation and upgrade in-place.

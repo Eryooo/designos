@@ -11,7 +11,7 @@ Common issues and solutions for DesignOS.
 **Solution:**
 1. Install Node.js 16+ from [nodejs.org](https://nodejs.org/)
 2. Verify: `node --version` (should show v16+)
-3. Retry: `npx designos@latest`
+3. Retry: `npx <YOUR_INTERNAL_PACKAGE>`
 
 ---
 
@@ -49,12 +49,12 @@ curl -I https://registry.npmjs.org/
 **Solution 2:** Clear npm cache
 ```bash
 npm cache clean --force
-npx designos@latest
+npx <YOUR_INTERNAL_PACKAGE>
 ```
 
 **Solution 3:** Install with verbose logging
 ```bash
-DEBUG=* npx designos@latest
+DEBUG=* npx <YOUR_INTERNAL_PACKAGE>
 ```
 
 ---
@@ -92,7 +92,7 @@ DEBUG=* npx designos@latest
 chmod -R u+w ~/.designos
 
 # Or reinstall to custom location
-DESIGNOS_HOME=~/my-designos npx designos@latest
+DESIGNOS_HOME=~/my-designos npx <YOUR_INTERNAL_PACKAGE>
 ```
 
 ---
@@ -275,7 +275,7 @@ A: Skills run locally, but some features require internet (AI model calls). Chec
 
 ### Q: How do I update DesignOS?
 
-A: Run `npx designos@latest` — it detects existing installation and upgrades.
+A: Run `npx <YOUR_INTERNAL_PACKAGE>` — it detects existing installation and upgrades.
 
 ### Q: Can I customize skill behavior?
 

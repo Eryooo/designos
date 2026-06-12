@@ -146,7 +146,8 @@ pytest --cov=designos
 2. 更新 CHANGELOG.md
 3. 创建 git tag：`git tag -a v0.x.0 -m "Release v0.x.0"`
 4. 推送 tag：`git push origin v0.x.0`
-5. npm 发布：`cd npm-package && npm publish --access public`
+5. 发布：internal pilot 阶段**不发公网 npm**；改走内部/private/scoped registry
+   （`npm publish --registry=<YOUR_INTERNAL_REGISTRY>` 或 `--access restricted`）
 
 ## 行为准则
 

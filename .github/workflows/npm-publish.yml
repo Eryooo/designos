@@ -1,13 +1,17 @@
-name: Publish to npm
+# ⚠️ 公网 npm 发布已禁用（internal pilot 阶段）
+# 原先 on: push tags v* 会自动发布到公网 registry.npmjs.org，
+# 这与"internal pilot / 不发公网包"冲突，且旧包 designos 待 deprecate。
+# 现改为仅手动触发 + 安全闸 if:false，重新启用前请确认目标为
+# 内部/scoped/private registry，而非公网 unscoped designos。
+name: Publish to npm (DISABLED for internal pilot)
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:   # 仅手动；不再自动监听 tag
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    if: ${{ false }}   # 安全闸：默认不运行，确认 registry 后手动改为 true
     steps:
       - uses: actions/checkout@v4
 
