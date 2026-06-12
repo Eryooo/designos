@@ -272,10 +272,10 @@ output/brand-creative/
 欢迎贡献！查看 [CONTRIBUTING.md](CONTRIBUTING.md) 了解指南。
 
 ```bash
-# 克隆并安装（替换为你的内部私有仓库地址）
-git clone <YOUR_INTERNAL_PRIVATE_REPO_URL>
+# 克隆并安装用于本地开发
+git clone https://github.com/Eryooo/designos.git
 cd designos
-npm install
+pip install -e ".[dev]"
 
 # 运行测试
 npm test

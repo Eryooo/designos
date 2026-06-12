@@ -404,7 +404,7 @@ A: **人工复核**。当前 pilot 阶段，所有设计推理资产都需要人
 ## 12. 联系与反馈
 
 如遇到问题或有改进建议，请：
-- 提交 Issue: <YOUR_INTERNAL_PRIVATE_REPO>/issues
+- 提交 Issue: https://github.com/Eryooo/designos/issues
 - 查看文档: [knowledge/design-work-paradigm](../../knowledge/design-work-paradigm/)
 - 查看 Skill Status: [skills/status.matrix.yaml](../status.matrix.yaml)
 - 查看集成指南: [PIPELINE-INTEGRATION.md](PIPELINE-INTEGRATION.md)

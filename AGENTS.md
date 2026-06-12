@@ -466,4 +466,4 @@ designos/
 ## 版本
 
 - 当前：v0.4.0（V1 Candidate，2026-05-25）
-- 仓库：<YOUR_INTERNAL_PRIVATE_REPO>
+- 仓库：https://github.com/Eryooo/designos

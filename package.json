@@ -1,6 +1,6 @@
 {
   "name": "designos",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "DesignOS - AI-powered design workflow skills (public-safe pilot baseline)",
   "bin": {
     "designos": "bin/cli.mjs"
