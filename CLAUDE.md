@@ -40,6 +40,34 @@
 - 不推送,除非用户明确说推送。
 - 不伪装 production ready:pilot 就标 pilot。
 
+## 3.5 Inventory-before-build（防重复建设硬约束）
+
+> 本条因 S1-0A 而立:统一底座已建成约 90%,却差点因「只查目标文件不存在就开建」而被重复造一套平行真源。详见 `docs/audits/S1-0A-EXISTING-FOUNDATION-INVENTORY.md`。
+
+**任何新增架构 / 新增标准 / 新增契约 / 新增 validator / 新增 methodology 文档之前,必须先盘点现有 source-of-truth。**
+
+必须读取(至少)以下 10 处:
+1. `knowledge/manifest.yaml`
+2. `knowledge/design-work-paradigm/`
+3. `.factory/CONTRACT.md`
+4. `.factory/archetypes/`
+5. `.factory/tools/validate.py`
+6. `kernel/contracts/`
+7. `kernel/quality-gates/`
+8. `kernel/traceability/`
+9. `skills/status.matrix.yaml`
+10. `docs/STATUS-DEFINITION.md`
+
+必须回答 6 个问题:
+- 目标能力是否已经存在?
+- 是否只是文件名不同(同一能力换了名字)?
+- 当前 source-of-truth 在哪里?
+- 是否应扩展现有体系,而不是新建平行体系?
+- 新增文件是否会制造第二套真源?
+- 目标文件不存在,是否真的代表能力不存在?
+
+**硬禁止:只通过「目标文件不存在」来判断「能力不存在」。** 违反即停,重新盘点。
+
 ## 4. 每批强制流程
 
 **每批开始前,必须先运行 governor**(`.claude/skills/designos-governor`):

@@ -7,6 +7,19 @@ description: DesignOS 共享知识资产层的架构守则。在新增、修改�
 
 涉及 `knowledge/` 下任何资产的增改迁，或设计"决策库"内容时调用本 skill。它保证共享知识层不退化成"又一个孤立流程库"。
 
+## 0. Inventory-before-build（新建知识资产前必盘点，硬约束）
+
+> 因 S1-0A 而立。统一底座已存在两套知识体系(`knowledge/manifest.yaml` shared-knowledge + `knowledge/design-work-paradigm/` 41 方法),新建前不盘点极易造第三套平行真源。详见 CLAUDE.md §3.5 与 `docs/audits/S1-0A-EXISTING-FOUNDATION-INVENTORY.md`。
+
+**新增任何方法论 / 标准 / 决策库内容前,必须先确认它是否已存在于:**
+- `knowledge/manifest.yaml`(shared-knowledge 体系,51 资产,`<domain>.<slug>` 命名,各 skill 实际引用)
+- `knowledge/design-work-paradigm/`(方法论引擎,41 方法,编号体系)
+- `knowledge/{design,ux,product,frontend,research}/`(资产正文真源)
+
+必须回答:目标方法是否已有正文?在哪个体系?是否只是名字不同?应扩展现有资产还是新建?新增是否制造第二套真源?
+
+**硬禁止**:只因「manifest 里没登记某 id」就断定「该方法论不存在」——它可能已在 `design-work-paradigm/` 或某 domain 正文里,只是未登记/换了名。
+
 ## 1. 共享知识层架构
 
 ```

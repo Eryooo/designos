@@ -40,6 +40,25 @@ git log --oneline -5             # 确认基线，确认不含已暂停的 accep
 - 本批若涉及知识资产 / 决策库 / 模板 / 方法论 → 先读 `knowledge/manifest.yaml`，确认要动的资产 id、domain、status、do_not_claim。
 - 不涉及知识层 → 跳过，但说明"本批不触碰共享知识层"。
 
+### 5.5 Inventory-before-build（新建前必盘点，硬约束）
+**本批若计划新增任何「标准 / 契约 / methodology 文档 / validator / 架构模块」→ 必须先盘点现有 source-of-truth，禁止只凭「目标文件不存在」就开建。** 详见 CLAUDE.md §3.5 与 `docs/audits/S1-0A-EXISTING-FOUNDATION-INVENTORY.md`。
+
+先读以下 10 处，确认要建的能力是否已存在(可能换了名字)：
+1. `knowledge/manifest.yaml`  2. `knowledge/design-work-paradigm/`  3. `.factory/CONTRACT.md`
+4. `.factory/archetypes/`  5. `.factory/tools/validate.py`  6. `kernel/contracts/`
+7. `kernel/quality-gates/`  8. `kernel/traceability/`  9. `skills/status.matrix.yaml`  10. `docs/STATUS-DEFINITION.md`
+
+逐条回答并汇报：
+- [ ] 目标能力是否已存在?在哪?
+- [ ] 是否只是文件名不同?
+- [ ] 当前 source-of-truth 在哪?
+- [ ] 应扩展现有体系还是新建?
+- [ ] 新增是否会制造第二套真源?
+- [ ] 「目标文件不存在」是否真等于「能力不存在」?(默认否)
+
+**判定**:若发现能力已存在 → **停**,改为「扩展现有体系」方案,不新建平行真源。
+本批不涉及任何新建 → 跳过本项，说明"本批不新增标准/契约/methodology/validator"。
+
 ### 6. 是否可继续（判定）
 输出三选一：
 - **可继续**：scope 清晰、分支正确、无禁区冲突、脏文件可控。
@@ -55,5 +74,6 @@ git log --oneline -5             # 确认基线，确认不含已暂停的 accep
 - 禁止事项：<全部通过 / 列出冲突>
 - 脏文件：<无 / 列出，提交将精确 add>
 - 共享知识层：<不涉及 / 需读 manifest，涉及资产 id：...>
+- Inventory-before-build：<本批不新建 / 已盘点 10 处，目标能力是否已存在：...>
 - 判定：✅ 可继续 | ⚠️ 需澄清：... | ⛔ 必须停：...
 ```
