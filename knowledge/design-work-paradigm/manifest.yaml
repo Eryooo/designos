@@ -323,8 +323,7 @@ quality_gates:
 
 maintainers:
   - role: "DesignOS Core Team"
-    contact: "<YOUR_INTERNAL_PRIVATE_REPO>"
-    # 注: 占位符待 S1-0D 或安全审计时统一清理（非本批次范围）。
+    contact: "<REPOSITORY_CONTACT_PLACEHOLDER>"
 
 last_updated: "2026-06-12"
 changelog:
