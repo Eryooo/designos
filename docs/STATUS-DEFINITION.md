@@ -127,6 +127,58 @@ enterprise_ready
 
 ---
 
+## S1-0B / S1-0C 校准口径（2026-06-12）
+
+> 本节因 S1-0B 实证审计与 S1-0C 修复而立。审计依据见 `docs/audits/S1-0B-DECLARED-VS-IMPLEMENTED-COVERAGE.md`。
+
+### 1. `gate:` ≠ `quality_gates:`（pipeline 字段语义区分）
+
+skills 的 `pipeline.yaml` 中可能出现两种 gate 关键字,**语义完全不同**,不可混用:
+
+| 字段 | 语义 | 执行体 | 当前接入 skill |
+|---|---|---|---|
+| `quality_gates:`(列表) | **真质量门**,kernel/quality-gates 真 blocking 执行(stop_execution + QualityGateBlocked 异常) | runtime 必须 import `kernel/quality-gates/gates.py` 并调用 `QualityGateExecutor` | **仅 prd2proto** |
+| `gate:`(单数) | **pipeline checkpoint / 暂停门**,语义是流程暂停点(供人工或外部决策) | 不接入 kernel/quality-gates | uxeval / ai-analytics / ip-design |
+
+**禁止表述**:
+- ❌ "uxeval / ai-analytics / ip-design 已接入 kernel quality_gates"(它们用的是 `gate:`,无 runtime 执行体)
+- ❌ "DesignOS 全 skills 已实现统一质量门"(实际 1/5)
+
+**正确表述**:
+- ✅ "kernel/quality-gates 真实现 5 个质量门(blocking),目前仅 prd2proto runtime 接入"
+- ✅ "uxeval/ai-analytics/ip-design pipeline 中的 `gate:` 是暂停门(checkpoint)语义,不等同于 kernel quality_gates"
+
+### 2. artifact-base 继承覆盖率(prd2proto)
+
+| 维度 | 现状 |
+|---|---|
+| 继承 `kernel/contracts/artifacts/artifact-base.schema.json` | 3/7 schema(43%) |
+| 已继承 | business-flow / product-archetype / requirement-inventory |
+| 未继承 | design-traceability-map / interaction-rules / page-flow / page-structure |
+
+**禁止表述**:"prd2proto 全部 schema 已继承 artifact-base"(实际仅 3/7)
+
+### 3. shared-knowledge 资产 id 锚定(traceability)
+
+各 skill 的 `knowledge-manifest.yaml` 声明引用的 `<domain>.<slug>` id,在 prompts/reference 中**显式锚定**才算 traceability 有效。当前现状(S1-0B 实证):
+
+| skill | 声明资产 | 显式锚定 | 实现模式 |
+|---|---|---|---|
+| ip-design | 19 | **18** | ✅ 显式 id 锚定(范式) |
+| brand-creative | 14 | 1(仅 tests) | 主线未实现 |
+| prd2proto | 11 | 0 | 隐式(私有 reference/m01-m06,id 未锚定) |
+| uxeval | 7 | 0 | 隐式(私有 reference/m01-m06,id 未锚定) |
+| ai-analytics | 6 | 0 | 隐式(私有 reference/m01-m06,id 未锚定) |
+
+**禁止表述**:"manifest.yaml 的 applicable_skills 字段对各 skill 都已生效"(对 prd2proto/uxeval/ai-analytics 是孤悬声明)
+
+### 4. paradigm manifest 角色(per S1-0B 决策)
+
+`knowledge/manifest.yaml` 是 **active source-of-truth**(各 skill 真引用)。
+`knowledge/design-work-paradigm/manifest.yaml`(40 method 索引,S1-0C 后)是 **Reference Library Index**——不作为 active source-of-truth,但目录与登记完整对齐(S1-0C 修)。
+
+---
+
 ## 当前各 skill 状态（2026-06-10）
 
 | skill | methodology | prompt | runtime | validated | enterprise |

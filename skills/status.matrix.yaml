@@ -29,11 +29,15 @@ skills:
       - "prompts-v2 未建立（仅 1 个 ENHANCED 示范）"
       - "evidence-map / issue-clustering 未形成"
       - "无真实截图/PRD 评估 case"
+      - "（S1-0B 实证）无 runtime/ 目录,pipeline 用 `gate:` 暂停门语义,非 kernel quality_gates;真质量门未接入"
+      - "（S1-0B 实证）声明的 7 个 ux.* 资产 id 在 prompts/reference 全未显式锚定,manifest traceability 断裂(方法论实质实现于私有 reference/m01-m06)"
     not_allowed_claims:
       - "uxeval 已达资深设计师评估水平"
       - "可替代人工 UX 研究"
+      - "（S1-0B 校准）uxeval 已接入统一 kernel quality_gates(实际 pipeline 用 `gate:` 暂停门,无 runtime 执行体)"
     next_required_step:
       - "建立 uxeval prompts-v2 + evidence-map + issue-clustering + real screenshot case（Batch 3）"
+      - "（S1-0B 建议）复核 maturity=beta 是否对一个无 runtime 的 skill 偏乐观;考虑降级或补 runtime"
 
     stable_outputs:
       - journey_map.md
@@ -137,9 +141,11 @@ skills:
 
     production_blockers:
       - "设计推理资产验证逻辑未实现"
-      - "质量门为 warning 模式，不阻塞执行"
+      - "（S1-0B 校准）原表述「质量门为 warning 模式，不阻塞执行」与代码不符:kernel/quality-gates 实为真 blocking(stop_execution + QualityGateBlocked)。实际现状:质量门**真 blocking**,但 5 skill 中**仅 prd2proto runtime 真接入**,uxeval/ai-analytics/ip-design 用的是 `gate:` 暂停门(checkpoint)非 kernel quality_gates。"
       - "traceability 生成为 scaffold"
       - "professional gap report 未自动生成"
+      - "（S1-0B 实证）schemas/ 7 个中仅 3 个 \\$ref artifact-base(business-flow / product-archetype / requirement-inventory);其余 4 个未继承统一基座(design-traceability-map / interaction-rules / page-flow / page-structure)"
+      - "（S1-0B 实证）knowledge-manifest 声明的 11 个共享资产 id 在 prompts/reference 全未显式锚定;方法论实质实现于私有 reference/m01-m06,manifest traceability 断裂"
 
     last_verified_at: "2026-06-09"
     last_major_change: "2026-06-09 (重构为设计推理驱动)"
@@ -365,6 +371,12 @@ global_conventions:
 
 # 更新历史
 changelog:
+  - date: "2026-06-12"
+    batch: "S1-0C"
+    changes:
+      - "uxeval main_blockers / not_allowed_claims / next_required_step 补 S1-0B 实证: 无 runtime, pipeline `gate:` 是暂停门非 kernel quality_gates, 7 个 ux.* 资产 id 未锚定"
+      - "prd2proto production_blockers 校准: 原述「质量门为 warning 模式」与代码不符(kernel/quality-gates 真 blocking);新增 artifact-base 仅 3/7 schema 继承 + 11 个共享资产 id 未锚定"
+      - "未改任何 maturity 数值(uxeval beta 标注'偏乐观需复核'但本批不降级)"
   - date: "2026-06-09"
     changes:
       - "新增 status.matrix.yaml"

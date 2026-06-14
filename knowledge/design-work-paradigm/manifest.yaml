@@ -1,6 +1,11 @@
 name: "Senior Designer Work Paradigm Engine"
-version: "1.0.0"
+version: "1.1.0"
 description: "资深设计师工作范式引擎，定义设计推理的标准流程、质量标准和失败模式"
+
+# Index role (per S1-0B decision):
+#   active source-of-truth = knowledge/manifest.yaml (shared-knowledge layer)
+#   this manifest = Reference Library Index for design-work-paradigm/*.md
+# S1-0C 校准: 修 15 处大小写 + 补 20 个未登记方法 (20-39)，目录与登记完整对齐。
 
 category: knowledge_base
 type: design_methodology
@@ -21,105 +26,105 @@ methods:
 
   - id: "02"
     name: "Objective Decomposition"
-    file: "02-objective-decomposition.md"
+    file: "02-Objective-Decomposition.md"
     category: foundation
     description: "设计目标分解（业务目标、用户目标、体验目标）"
     output_schema: "design-objectives.schema.json"
 
   - id: "03"
     name: "User Task Modeling"
-    file: "03-user-task-modeling.md"
+    file: "03-User-Task-Modeling.md"
     category: user_modeling
     description: "用户任务地图（主要任务、次要任务、边缘任务）"
     output_schema: "user-task-map.schema.json"
 
   - id: "04"
     name: "Scenario Modeling"
-    file: "04-scenario-modeling.md"
+    file: "04-Scenario-Modeling.md"
     category: user_modeling
     description: "场景建模（使用场景、上下文、约束）"
     output_schema: "scenario-map.schema.json"
 
   - id: "05"
     name: "Business Flow Modeling"
-    file: "05-business-flow-modeling.md"
+    file: "05-Business-Flow-Modeling.md"
     category: business_modeling
     description: "业务流程建模（状态转换、权限流、异常流）"
     output_schema: "business-flow.schema.json"
 
   - id: "06"
     name: "User Journey Mapping"
-    file: "06-user-journey-mapping.md"
+    file: "06-User-Journey-Mapping.md"
     category: user_modeling
     description: "用户旅程地图（阶段、触点、情绪、痛点）"
     output_schema: "journey-map.schema.json"
 
   - id: "07"
     name: "Information Architecture"
-    file: "07-information-architecture.md"
+    file: "07-Information-Architecture.md"
     category: structure_design
     description: "信息架构设计（站点地图、导航、路由）"
     output_schema: "information-architecture.schema.json"
 
   - id: "08"
     name: "Page Flow Modeling"
-    file: "08-page-flow-modeling.md"
+    file: "08-Page-Flow-Modeling.md"
     category: interaction_design
     description: "页面流程建模（入口、分支、完成点）"
     output_schema: "page-flow.schema.json"
 
   - id: "09"
     name: "Content Structure"
-    file: "09-content-structure.md"
+    file: "09-Content-Structure.md"
     category: structure_design
     description: "内容结构设计（布局、模块、操作区）"
     output_schema: "page-structure.schema.json"
 
   - id: "10"
     name: "Component Strategy"
-    file: "10-component-strategy.md"
+    file: "10-Component-Strategy.md"
     category: interaction_design
     description: "组件策略（组件库、映射、使用规则）"
     output_schema: "component-strategy.schema.json"
 
   - id: "11"
     name: "State Matrix"
-    file: "11-state-matrix.md"
+    file: "11-State-Matrix.md"
     category: interaction_design
     description: "状态矩阵（页面状态、组件状态、业务状态）"
     output_schema: "state-matrix.schema.json"
 
   - id: "12"
     name: "Interaction Rules"
-    file: "12-interaction-rules.md"
+    file: "12-Interaction-Rules.md"
     category: interaction_design
     description: "交互规则（导航、表单、表格、反馈、错误处理）"
     output_schema: "interaction-rules.schema.json"
 
   - id: "13"
     name: "Visual Translation"
-    file: "13-visual-translation.md"
+    file: "13-Visual-Translation.md"
     category: visual_design
     description: "视觉翻译（设计语言 → 视觉规范）"
     output_schema: "visual-spec.schema.json"
 
   - id: "14"
     name: "Brand Strategy Modeling"
-    file: "14-brand-strategy-modeling.md"
+    file: "14-Brand-Strategy-Modeling.md"
     category: visual_design
     description: "品牌策略建模（定位、调性、差异化）"
     output_schema: "brand-strategy-map.schema.json"
 
   - id: "15"
     name: "IP Character Modeling"
-    file: "15-ip-character-modeling.md"
+    file: "15-IP-Character-Modeling.md"
     category: visual_design
     description: "IP 角色建模（人设、世界观、视觉）"
     output_schema: "ip-persona-map.schema.json"
 
   - id: "16"
     name: "Evaluation Evidence Modeling"
-    file: "16-evaluation-evidence-modeling.md"
+    file: "16-Evaluation-Evidence-Modeling.md"
     category: evaluation
     description: "评估证据建模（问题识别、证据绑定）"
     output_schema: "evaluation-evidence-map.schema.json"
@@ -144,26 +149,151 @@ methods:
     description: "可追溯性机制（输入 → 推理 → 决策 → 输出）"
     output_schema: "traceability-map.schema.json"
 
+  - id: "20"
+    name: "Heuristic Evaluation"
+    file: "20-Heuristic-Evaluation.md"
+    category: evaluation
+    description: "启发式评估（Nielsen 10 原则系统化检查）"
+
+  - id: "21"
+    name: "Severity Rating"
+    file: "21-Severity-Rating.md"
+    category: evaluation
+    description: "严重等级判定（critical / major / minor / suggestion）"
+
+  - id: "22"
+    name: "Issue Attribution"
+    file: "22-Issue-Attribution.md"
+    category: evaluation
+    description: "问题归因（根因分析，避免停留于表象）"
+
+  - id: "23"
+    name: "Research Methodology"
+    file: "23-Research-Methodology.md"
+    category: research
+    description: "研究方法论选择（JTBD / AIPL / PEST 等的适配）"
+
+  - id: "24"
+    name: "Evidence Extraction"
+    file: "24-Evidence-Extraction.md"
+    category: research
+    description: "证据提取与置信度评估"
+
+  - id: "25"
+    name: "Strategy Synthesis"
+    file: "25-Strategy-Synthesis.md"
+    category: research
+    description: "策略综合（市场 / 用户 / 竞品 → 设计策略）"
+
+  - id: "26"
+    name: "Worldview Building"
+    file: "26-Worldview-Building.md"
+    category: ip_design
+    description: "IP 世界观构建（时空 / 规则 / 关系网 / 文化原型）"
+
+  - id: "27"
+    name: "Persona Modeling"
+    file: "27-Persona-Modeling.md"
+    category: ip_design
+    description: "IP 角色人格建模（性格 / 动机 / 成长弧 / 声音边界）"
+
+  - id: "28"
+    name: "Visual Lock Definition"
+    file: "28-Visual-Lock-Definition.md"
+    category: ip_design
+    description: "视觉锁定（IP 多场景一致性约束）"
+
+  - id: "29"
+    name: "Brand Audit"
+    file: "29-Brand-Audit.md"
+    category: brand_creative
+    description: "品牌审计（健康度 / 差距 / 优化建议）"
+
+  - id: "30"
+    name: "Logo Design"
+    file: "30-Logo-Design.md"
+    category: brand_creative
+    description: "Logo 设计（可识别 + 可缩放 + 有意义）"
+
+  - id: "31"
+    name: "Color System"
+    file: "31-Color-System.md"
+    category: brand_creative
+    description: "品牌色彩系统（主色 / 辅色 / 情绪 / 应用）"
+
+  - id: "32"
+    name: "Typography System"
+    file: "32-Typography-System.md"
+    category: brand_creative
+    description: "字体系统（主字体 / 辅助 / 层级 / 排版）"
+
+  - id: "33"
+    name: "Visual Identity Integration"
+    file: "33-Visual-Identity-Integration.md"
+    category: brand_creative
+    description: "VI 整合（Logo / 色彩 / 字体 / 辅助图形 统一规范）"
+
+  - id: "34"
+    name: "Brand Voice"
+    file: "34-Brand-Voice.md"
+    category: brand_creative
+    description: "品牌声音（语调 / 口头禅 / 场景话术 / 内容原则）"
+
+  - id: "35"
+    name: "Content Strategy"
+    file: "35-Content-Strategy.md"
+    category: brand_creative
+    description: "内容策略（支柱 / 渠道矩阵 / 节奏日历）"
+
+  - id: "36"
+    name: "Campaign Creative"
+    file: "36-Campaign-Creative.md"
+    category: brand_creative
+    description: "营销创意（主题 / 视觉方向 / 传播素材）"
+
+  - id: "37"
+    name: "Brand Collateral"
+    file: "37-Brand-Collateral.md"
+    category: brand_creative
+    description: "品牌物料（名片 / 信头 / 包装 / 宣传册）"
+
+  - id: "38"
+    name: "Digital Assets"
+    file: "38-Digital-Assets.md"
+    category: brand_creative
+    description: "数字资产（网站 / 社交 / H5 规范）"
+
+  - id: "39"
+    name: "Brand Guidelines"
+    file: "39-Brand-Guidelines.md"
+    category: brand_creative
+    description: "品牌手册（策略 / VI / 声音 / 内容 / 物料 完整文档）"
+
 skill_integration:
   prd2proto:
     methods: ["01", "02", "03", "05", "06", "07", "08", "09", "10", "11", "12", "17", "18", "19"]
     priority: P0
 
   uxeval:
-    methods: ["01", "06", "16", "17", "18", "19"]
+    methods: ["01", "06", "16", "17", "18", "19", "20", "21", "22"]
     priority: P1
 
   ai-analytics:
-    methods: ["01", "02", "03", "04", "14", "17", "18", "19"]
+    methods: ["01", "02", "03", "04", "14", "17", "18", "19", "23", "24", "25"]
     priority: P1
 
   ip-design:
-    methods: ["01", "15", "13", "17", "18", "19"]
+    methods: ["01", "13", "15", "17", "18", "19", "26", "27", "28"]
     priority: P1
 
   brand-creative:
-    methods: ["01", "14", "13", "17", "18", "19"]
+    methods: ["01", "13", "14", "17", "18", "19", "29", "30", "31", "32", "33", "34", "35", "36", "37", "38", "39"]
     priority: P1
+
+# 注意 (per S1-0B-DECLARED-VS-IMPLEMENTED-COVERAGE.md):
+# 上述 skill_integration 的方法编号映射当前**未被任何 skill 的 knowledge-manifest.yaml 实际引用**。
+# 各 skill 实际引用的是 knowledge/manifest.yaml 的命名空间 id (如 ux.heuristic-principles)。
+# 此映射保留为方法论参考索引，不作为 active source-of-truth。
 
 quality_gates:
   - id: schema_gate
@@ -186,8 +316,26 @@ quality_gates:
     description: "最终产物必须生成 professional_gap_report"
     enforcement: mandatory
 
+# 实施现状 (per S1-0B-DECLARED-VS-IMPLEMENTED-COVERAGE.md §1.3):
+# 上述 5 个 quality gate 在 kernel/quality-gates 中真实实现 (真 blocking, stop_execution + QualityGateBlocked)。
+# 但当前仅 prd2proto runtime 真接入；uxeval/ai-analytics/ip-design 的 pipeline.yaml 用的是 `gate:` 暂停门
+# (checkpoint 语义)，并非这里定义的 quality gates。
+
 maintainers:
   - role: "DesignOS Core Team"
     contact: "<YOUR_INTERNAL_PRIVATE_REPO>"
+    # 注: 占位符待 S1-0D 或安全审计时统一清理（非本批次范围）。
 
-last_updated: "2026-06-09"
+last_updated: "2026-06-12"
+changelog:
+  - date: "2026-06-12"
+    batch: "S1-0C"
+    changes:
+      - "修 15 处方法文件名大小写不一致 (02-16)"
+      - "新增 20 个方法登记 (20-39)，覆盖 evaluation/research/ip-design/brand-creative 领域"
+      - "skill_integration 同步扩展，覆盖新增方法的 skill 归属"
+      - "标注本 manifest 在 S1-0B 决策后的角色：Reference Library Index (非 active source-of-truth)"
+  - date: "2026-06-09"
+    batch: "(初版)"
+    changes:
+      - "登记 00-19 共 20 个 method，定义 5 个 quality_gates"
