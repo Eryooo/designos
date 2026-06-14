@@ -2,6 +2,9 @@
 
 > Stage 06 `review-gate` 约束清单。宪法定义见 `../constitution.md`，动机见 `textbook/code-constitution-rationale.md`。
 
+> **对应 shared knowledge assets**（source of truth 见 `knowledge/manifest.yaml`）:
+> `product.interaction-state-coverage` · `frontend.component-state-rules` · `frontend.code-quality-constitution`
+
 ## 输出 schema 强约束
 
 ```json

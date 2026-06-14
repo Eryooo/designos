@@ -1,5 +1,7 @@
 # M02 — 数据采集（reference）
 
+> **对应 shared knowledge asset**（source of truth 见 `knowledge/manifest.yaml`）: `research.competitor-analysis`
+
 约束清单：
 
 - pilot 不自动爬取，只消费 inputs/competitor-data/ 的用户资料

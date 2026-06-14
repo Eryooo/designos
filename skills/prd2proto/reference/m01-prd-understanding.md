@@ -2,6 +2,9 @@
 
 > Stage 01 `prd-understanding` 约束清单。教学材料见 `textbook/story-mapping.md`。
 
+> **对应 shared knowledge assets**（source of truth 见 `knowledge/manifest.yaml`）:
+> `product.prd-understanding` · `product.user-story-mapping` · `design.design-strategy`
+
 ## 输出 schema 强约束
 
 ```json

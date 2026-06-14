@@ -2,6 +2,9 @@
 
 > Stage 03a `spec-generation` 约束清单。**从模板库选 + 微调**，不从零生成。教学材料见 `textbook/design-tokens-w3c.md`。
 
+> **对应 shared knowledge assets**（source of truth 见 `knowledge/manifest.yaml`）:
+> `design.design-strategy` · `design.design-template-selection` · `design.tone-and-visual-direction`
+
 ## 模板匹配算法（必须严格执行）
 
 ### Step 1：从 PRD 提取 5 个产品定位特征

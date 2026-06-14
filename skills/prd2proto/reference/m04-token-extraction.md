@@ -2,6 +2,9 @@
 
 > Stage 04 `token-extraction` 约束清单。教学材料见 `textbook/design-tokens-w3c.md`。
 
+> **对应 shared knowledge assets**（source of truth 见 `knowledge/manifest.yaml`）:
+> `frontend.design-token-rules`
+
 ## 输出格式强制 W3C DTCG
 
 每个 token：

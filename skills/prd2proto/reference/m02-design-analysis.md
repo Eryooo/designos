@@ -2,6 +2,9 @@
 
 > Stage 02 `design-analysis` 的约束清单。教学材料见 `textbook/atomic-design.md`。
 
+> **对应 shared knowledge assets**（source of truth 见 `knowledge/manifest.yaml`）:
+> `product.information-architecture` · `product.interaction-state-coverage` · `frontend.atomic-design` · `frontend.component-state-rules`
+
 ## 输出 schema 强约束
 
 ```json

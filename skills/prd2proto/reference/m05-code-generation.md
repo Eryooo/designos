@@ -2,6 +2,9 @@
 
 > Stage 05 `code-generation` 约束清单。代码宪法详见 `../constitution.md`，动机见 `textbook/code-constitution-rationale.md`。
 
+> **对应 shared knowledge assets**（source of truth 见 `knowledge/manifest.yaml`）:
+> `frontend.atomic-design` · `frontend.design-token-rules` · `frontend.component-state-rules` · `frontend.code-quality-constitution`
+
 ## 项目骨架（必须存在）
 
 ```

@@ -1,5 +1,7 @@
 # M05 — 策略合成（reference）
 
+> **对应 shared knowledge assets**（source of truth 见 `knowledge/manifest.yaml`）: `research.user-persona-quality` · `research.data-completeness-rubric` · `design.design-strategy` · `design.tone-and-visual-direction`
+
 约束清单（pilot 核心 stage）：
 
 - 输出三个 key：design_strategy / user_persona / data_completeness_assessment

@@ -1,5 +1,7 @@
 # M04 — 竞品分析（reference）
 
+> **对应 shared knowledge asset**（source of truth 见 `knowledge/manifest.yaml`）: `research.competitor-analysis`
+
 约束清单：
 
 - 每条 analysis_findings 必须有 id / methodology / dimension / finding / evidence_refs

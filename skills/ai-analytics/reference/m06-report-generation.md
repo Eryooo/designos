@@ -1,5 +1,7 @@
 # M06 — 报告渲染（reference）
 
+> **对应 shared knowledge asset**（source of truth 见 `knowledge/manifest.yaml`）: `research.competitor-analysis`
+
 约束清单：
 
 - analysis_report / comparison_matrix 当前仅供人读，不承诺机器消费

@@ -1,5 +1,7 @@
 # M03 — 方法论选择（reference）
 
+> **对应 shared knowledge asset**（source of truth 见 `knowledge/manifest.yaml`）: `research.methodology-selection`
+
 约束清单：
 
 - 只选支撑 design_strategy / user_persona 的最小方法论
