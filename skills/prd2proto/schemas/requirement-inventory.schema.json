@@ -20,7 +20,7 @@
                 "file_path": {"type": "string"},
                 "file_size": {"type": "integer"},
                 "format": {"type": "string"},
-                "quality_score": {"type": "number", "minimum": 0.0, "maximum": 1.0"},
+                "quality_score": {"type": "number", "minimum": 0.0, "maximum": 1.0},
                 "readability": {"type": "string", "enum": ["high", "medium", "low"]}
               },
               "required": ["type", "file_path", "quality_score"]
