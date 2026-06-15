@@ -23,9 +23,9 @@
 内部 18 stage 链路:
 
 ```
-requirement_inventory → design_objectives → user_task_map → business_flow → user_journey → 
-information_architecture → page_flow → page_structure → component_strategy → state_matrix → 
-interaction_rules → design_spec → design_tokens → prototype_code → 
+requirement_inventory → design_objectives → user_task_map → business_flow → user_journey →
+information_architecture → page_flow → page_structure → component_strategy → state_matrix →
+interaction_rules → design_spec → design_tokens → prototype_code →
 traceability_map → professional_gap_report → liveness_check
 ```
 

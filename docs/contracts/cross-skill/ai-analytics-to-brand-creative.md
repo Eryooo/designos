@@ -93,7 +93,7 @@ competitor_matrix:
   - competitor: "synthetic-A"
     positioning: "高端企业级"
     visual_style: "深蓝 + 极简"
-    
+
 # brand-creative 正确接入(consistent_with_carried_gaps):
 competitive_analysis:
   source_artifact_id: "analysis-20260612-synth001"
