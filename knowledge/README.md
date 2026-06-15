@@ -42,6 +42,43 @@ knowledge/
 └── research/              # 竞品分析、方法论库、用户画像
 ```
 
+## 两套知识体系的关系(source-of-truth 裁定)
+
+DesignOS 有两个 `manifest.yaml`,职责必须分清(详见 `docs/audits/S1-0B-STANDARD-SOURCE-OF-TRUTH-DECISION.md`):
+
+| | `knowledge/manifest.yaml` | `knowledge/design-work-paradigm/manifest.yaml` |
+|---|---|---|
+| 角色 | ✅ **active source-of-truth** | 📚 methodology reference library |
+| 命名 | stable id(`<domain>.<slug>`) | 编号方法(00–39) |
+| 谁引用 | **各 skill 的 `knowledge-manifest.yaml` 实际按 id 引用这一套** | 无 skill 按编号接入 |
+| 用途 | skill 接入、依赖追溯、`applicable_skills` | 资深设计师工作范式的方法论正文参考 |
+
+**裁定**:
+- 各 skill 接入共享知识,**只认 `knowledge/manifest.yaml` 的 stable id**。
+- `design-work-paradigm/` 是**方法论参考库**(Senior Designer Work Paradigm Engine),供人阅读/方法论沉淀,**不是 skill 接入真源**。它的 manifest 由 `scripts/validate-paradigm-manifest.py` 校验目录一致性,但不充当 skill 依赖锚点。
+- **禁止**让 skill 直接按 `design-work-paradigm` 的编号(如 "method 17")接入——会制造与 stable id 并行的第二套依赖真源。
+
+## 资产类型(type)的真源
+
+资产的**类型**由 `manifest.yaml` 每条资产的 `type` 字段决定,**不是由它所在的物理目录决定**。
+
+- 物理目录按 **domain** 切分(design / ux / product / frontend / research)——回答"属于哪个专家领域"。
+- `type` 字段按**资产种类**标注——回答"这是什么:methodology / rubric / standard / failure_modes / checklist / report / principles / catalog"。
+- 同一个 domain 目录下会混放多种 type(如 `design/quality/` 下同时有 rubric、failure_modes、checklist)——**这是设计如此,不是混乱**。要按类型检索资产,查 `manifest.yaml` 的 `type` 字段(或 `INDEX-BY-TYPE.md` 索引),不要靠目录名猜。
+
+## 四层内容边界(放置规则)
+
+DesignOS 的"知识/方法论/模板/案例"分四层,各有归属,**不可互相搬运正文**:
+
+| 层 | 位置 | 放什么 | 谁是真源 |
+|---|---|---|---|
+| **shared knowledge** | `knowledge/<domain>/` | 跨 skill 复用的通用方法论/原则/标准/rubric/failure_modes | `knowledge/manifest.yaml`(按 id) |
+| **skill reference** | `skills/<skill>/reference/m0x-*.md` | "本 skill 如何在某 stage 应用某共享知识"——绑定 stage/schema/checkpoint | skill 私有;按 id 锚定回 shared |
+| **skill template** | `skills/<skill>/templates/*.md` | 本 skill 的输出模板/golden output 结构 | skill 私有 |
+| **eval case** | `skills/<skill>/eval/golden/` 与 `eval/failure/` | 具体的 synthetic golden case 与 failure case | skill 私有;不放真实业务数据 |
+
+判定:**通用且去掉 skill 名仍成立 → shared;绑定本 skill stage/输出 → reference/template;是具体跑通/跑挂的样例 → eval case。**
+
 ## 状态
 
 本层处于 `pilot`。K0 批次只建**架构基线**:声明结构、边界、stable id,资产正文为 `draft` 占位。内容固化与从旧 skill 的有序迁移,留待后续批次(K1+)。
