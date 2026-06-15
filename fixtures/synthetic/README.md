@@ -44,7 +44,7 @@ skill: prd2proto
 prd_synthetic: |
   [synthetic] Acme Demo 管理后台
   目标用户:[synthetic] IT管理员
-  
+
 # ❌ 错误:含真实项目
 skill: prd2proto
 prd: |

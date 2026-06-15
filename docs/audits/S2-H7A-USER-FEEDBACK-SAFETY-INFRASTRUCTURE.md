@@ -194,7 +194,7 @@ Synthetic replay prevents regression
 
 固定枚举:
 ```
-input_gap / template_gap / rule_gap / prompt_gap / schema_gap / runtime_gap / 
+input_gap / template_gap / rule_gap / prompt_gap / schema_gap / runtime_gap /
 docs_gap / consistency_gap / privacy_gap / evidence_gap / validation_gap
 ```
 
@@ -204,7 +204,7 @@ docs_gap / consistency_gap / privacy_gap / evidence_gap / validation_gap
 
 固定枚举:
 ```
-knowledge / template / prompt / failure_mode / checkpoint / schema / 
+knowledge / template / prompt / failure_mode / checkpoint / schema /
 script / runtime / docs / release / no_code_change
 ```
 
