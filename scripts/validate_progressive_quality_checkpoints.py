@@ -54,6 +54,14 @@ REQUIRED_BLOCKS = [
     "Handoff To H4 Self Review",
 ]
 
+# S2-H7.1: 新增字段检查
+H71_REQUIRED_FIELDS = [
+    "degradation_scope_detail (S2-H7.1)",
+    "affected_outputs (S2-H7.1)",
+    "user_visible_impact (S2-H7.1)",
+    "continue_conditions (S2-H7.1)",
+]
+
 OVERCLAIM_PATTERNS = [
     "完全自动化",
     "生产就绪",
@@ -111,6 +119,11 @@ def main() -> int:
         for blk in REQUIRED_BLOCKS:
             if blk not in text:
                 errors.append(f"{skill}: missing block '{blk}'")
+
+        # 7.1 S2-H7.1 新增字段检查
+        for field in H71_REQUIRED_FIELDS:
+            if field not in text:
+                errors.append(f"{skill}: missing S2-H7.1 field '{field}'")
 
         # 8. 过度声明
         for line in text.splitlines():

@@ -102,6 +102,81 @@
     "created_at": {
       "type": "string",
       "format": "date-time"
+    },
+    "recommended_missing_fields": {
+      "type": "array",
+      "description": "S2-H7.1: Recommended fields to fill input gaps",
+      "items": {
+        "type": "object",
+        "required": ["field_category", "recommended_field", "why_important", "can_continue_without"],
+        "properties": {
+          "field_category": {"type": "string"},
+          "recommended_field": {"type": "string"},
+          "why_important": {"type": "string"},
+          "minimum_needed_to_continue": {"type": "string"},
+          "can_continue_without": {"type": "boolean"}
+        }
+      }
+    },
+    "recommended_user_questions": {
+      "type": "array",
+      "description": "S2-H7.1: Questions to ask user to fill gaps",
+      "items": {
+        "type": "object",
+        "required": ["question_id", "question", "blocking_level"],
+        "properties": {
+          "question_id": {"type": "string"},
+          "question": {"type": "string"},
+          "expected_answer_format": {"type": "string"},
+          "blocking_level": {
+            "type": "string",
+            "enum": ["blocker", "major", "minor"]
+          },
+          "linked_gap": {"type": "string"}
+        }
+      }
+    },
+    "kr_summary": {
+      "type": "object",
+      "description": "S2-H7.1: KR aggregation view",
+      "properties": {
+        "total_kr": {"type": "integer", "minimum": 0},
+        "pass_count": {"type": "integer", "minimum": 0},
+        "warn_count": {"type": "integer", "minimum": 0},
+        "fail_count": {"type": "integer", "minimum": 0},
+        "unknown_count": {"type": "integer", "minimum": 0},
+        "affected_kr": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["kr_id", "status"],
+            "properties": {
+              "kr_id": {"type": "string"},
+              "status": {
+                "type": "string",
+                "enum": ["pass", "warn", "fail", "unknown"]
+              },
+              "linked_gate": {"type": "string"},
+              "impact_level": {
+                "type": "string",
+                "enum": ["high", "medium", "low"]
+              }
+            }
+          }
+        },
+        "most_affected_kr": {
+          "type": "array",
+          "description": "Top 1-3 most affected KR with reasons",
+          "items": {
+            "type": "object",
+            "required": ["kr_id", "reason"],
+            "properties": {
+              "kr_id": {"type": "string"},
+              "reason": {"type": "string"}
+            }
+          }
+        }
+      }
     }
   },
   "additionalProperties": false

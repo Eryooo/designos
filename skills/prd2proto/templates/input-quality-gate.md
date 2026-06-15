@@ -89,6 +89,35 @@
 | GAP-002 | `<填:示例 — edge tasks 未列>` | user-task-modeling | major | yes | "[synthetic] 是否需要覆盖错误/权限/网络异常路径?" | 标 [inferred] 标准 7 状态 |
 | GAP-003 | `<填:示例 — 设计系统未指定>` | component-strategy | minor | no | — | 默认 antd-pro,标 inferred |
 
+### Recommended Missing Fields (S2-H7.1)
+
+> 针对本次 run 的输入缺口，推荐用户补充的字段（按质量影响排序）。
+
+| field_category | recommended_field | why_important | minimum_needed_to_continue | can_continue_without |
+|---|---|---|---|---|
+| `<填:示例 — measurable_goal>` | 可量化的目标 KPI | design-objectives 决策依据 | 至少一句话目标 | no |
+| `<填:示例 — user_roles>` | 完整用户角色清单 | access-control 建模基础 | 至少主要角色 | no |
+| `<填:示例 — edge_cases>` | 边界场景描述 | user-task-modeling 完整性 | 可用标准异常路径 | yes (带 assumption 风险) |
+| `<填:示例 — design_system>` | 设计系统规范或 UI 库 | component-strategy 一致性 | 可默认 antd-pro | yes (降低定制化) |
+
+### Recommended User Questions (S2-H7.1)
+
+> 可以直接问用户的问题，帮助用户快速补充关键输入。
+
+| question_id | question | expected_answer_format | blocking_level | linked_gap |
+|---|---|---|---|---|
+| RQ-001 | `<填:示例 — 本次设计的核心目标 KPI 是什么?>` | 指标名 + 目标值 | blocker | GAP-001 |
+| RQ-002 | `<填:示例 — 有哪些用户角色(管理员/普通用户/...)?>` | 角色名 + 简介 | blocker | GAP-002 |
+| RQ-003 | `<填:示例 — 是否需要覆盖错误/异常路径?>` | yes/no + 场景列表 | major | GAP-003 |
+
+### Minimum Needed to Continue (S2-H7.1)
+
+> 如果用户无法补全所有字段，继续执行的最低要求。
+
+- **blocker 级 gap 必须解决**: GAP-001 (measurable_goal), GAP-002 (user_roles)
+- **major 级 gap 可带 assumption**: GAP-003 (edge_cases) — 使用标准 7 状态模型
+- **minor 级 gap 可降级 scope**: 可减少交互细节或使用默认设计系统
+
 ---
 
 ## 7. Assumption / Inference Ledger

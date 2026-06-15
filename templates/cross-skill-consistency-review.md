@@ -98,6 +98,35 @@ consistency_decision: <consistent | consistent_with_carried_gaps | needs_reconci
 | user_notice | `<填:非 consistent 时的用户说明:冲突在哪 / 影响什么 / 可以怎么做>` |
 | allow_downstream_to_proceed | yes / no |
 
+### Recommended Reconciliation (S2-H7.1)
+
+> 如果 consistency_decision = needs_reconciliation 或 blocked_inconsistent，必须提供推荐裁定方案。
+
+| 字段 | 内容 |
+|---|---|
+| **recommended_reconciliation** | `<填:推荐的裁定方式>` |
+| **reconciliation_options** | `<填:可选方案清单,至少 2 个>` |
+| **preferred_resolution** | `<填:推荐方案及理由>` |
+| **user_confirmation_needed** | yes / no |
+
+#### Reconciliation Options (S2-H7.1)
+
+> 至少提供 2 个可选裁定方案，每个方案说明利弊。
+
+| option_id | resolution_approach | pros | cons | user_action_needed |
+|---|---|---|---|---|
+| OPT-1 | `<填:示例 — 以上游为准>` | 保持上游一致性 | 下游需修改已推断字段 | yes / no |
+| OPT-2 | `<填:示例 — 以下游为准>` | 保持下游已有逻辑 | 可能与上游设计意图不一致 | yes / no |
+| OPT-3 | `<填:示例 — 追问用户裁定>` | 由用户明确决策 | 需要用户介入 | yes |
+
+#### Preferred Resolution (S2-H7.1)
+
+**推荐方案**: `<填:OPT-X>`
+
+**理由**: `<填:为什么推荐这个方案>`
+
+**用户确认需求**: `<填:是否需要用户明确确认>`
+
 ---
 
 ## 10. Handoff To H4 / H5.1

@@ -83,6 +83,35 @@
 | GAP-002 | `<填:示例 — 用户访谈缺 pain_points>` | user_persona | major | yes | "[synthetic] 是否有用户访谈/问卷数据可补充?" | 标 [inferred] 并降级 confidence |
 | GAP-003 | `<填:示例 — 行业平均无来源>` | design_strategy | minor | no | — | 标 [inferred] + risk_if_wrong |
 
+### Recommended Missing Fields (S2-H7.1)
+
+> 针对本次 run 的输入缺口，推荐用户补充的字段（按质量影响排序）。
+
+| field_category | recommended_field | why_important | minimum_needed_to_continue | can_continue_without |
+|---|---|---|---|---|
+| `<填:示例 — business_goal>` | 明确的业务目标(量化 KPI) | design_strategy 核心依据 | 至少一句话目标 | no |
+| `<填:示例 — competitor_list>` | 3-5 个主要竞品清单 | competitive_matrix 基础 | 至少 3 个竞品名 | no |
+| `<填:示例 — user_research>` | 用户访谈/问卷数据 | user_persona 真实性 | 至少简要用户痛点描述 | yes (带 assumption 风险) |
+| `<填:示例 — market_data>` | 行业/市场数据来源 | strategy-synthesis 可信度 | 可用公开数据替代 | yes (降低 coverage) |
+
+### Recommended User Questions (S2-H7.1)
+
+> 可以直接问用户的问题，帮助用户快速补充关键输入。
+
+| question_id | question | expected_answer_format | blocking_level | linked_gap |
+|---|---|---|---|---|
+| RQ-001 | `<填:示例 — 本次分析的核心业务目标是什么?>` | 一句话目标 + 可选 KPI | blocker | GAP-001 |
+| RQ-002 | `<填:示例 — 主要竞品有哪些(至少 3 个)?>` | 竞品名 + 简介 | blocker | GAP-002 |
+| RQ-003 | `<填:示例 — 是否有用户访谈或问卷数据?>` | yes/no + 来源 | major | GAP-003 |
+
+### Minimum Needed to Continue (S2-H7.1)
+
+> 如果用户无法补全所有字段，继续执行的最低要求。
+
+- **blocker 级 gap 必须解决**: GAP-001 (竞品数量), GAP-002 (业务目标)
+- **major 级 gap 可带 assumption**: GAP-003 (用户数据) — 必须在输出标注 [inferred]
+- **minor 级 gap 可降级 scope**: 可减少 methodology 复杂度或降低 coverage 评分
+
 ---
 
 ## 7. Assumption / Inference Ledger

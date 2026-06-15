@@ -104,6 +104,24 @@ traceability_map → professional_gap_report → liveness_check
 | RP-001 | design_objectives 与 PRD 业务目标不符 | "[synthetic] PRD 的核心 KPI 是'转化率 ≥ 20%',design_objectives 未引用此目标 — traceability 将断裂" | 在 design_objectives 显式引用 PRD 业务目标 |
 | RP-002 | prototype_code 含硬编码 | "[synthetic] 代码出现 `color: #1677ff` 而非引用 design token — 违反代码宪法" | 替换为 `var(--color-brand-primary)` 或对应 token |
 
+### Reconciliation Options (S2-H7.1)
+
+> 当 consistency_decision = needs_reconciliation 或 blocked_inconsistent 时，提供至少 2 个可选裁定方案。
+
+#### 通用裁定方案
+
+| option_id | resolution_approach | pros | cons | user_action_needed |
+|---|---|---|---|---|
+| OPT-1 | 以上游为准 | 保持上游一致性 | 下游需修改已推断字段 | no (自动修正) |
+| OPT-2 | 以下游为准 | 保持下游已有逻辑 | 可能与上游设计意图不一致 | yes (需用户确认偏离) |
+| OPT-3 | 追问用户裁定 | 由用户明确决策 | 需要用户介入 | yes |
+
+**推荐方案**: 根据具体冲突类型选择，一般优先 OPT-1 (以上游为准)
+
+**理由**: 上游 skill 产出应作为下游输入的权威来源，除非用户明确要求偏离。
+
+---
+
 ---
 
 ## 9. Synthetic Example

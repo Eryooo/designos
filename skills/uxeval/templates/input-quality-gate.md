@@ -85,6 +85,35 @@
 | GAP-002 | `<填:示例 — 截图无 OCR 识别失败>` | 问题归因 | major | yes | "[synthetic] 关键截图能否补 screens-description.md?" | 标 [证据不足] 移 unverified_issues |
 | GAP-003 | `<填:示例 — 缺主任务清单>` | task-generation | minor | no | — | 推断主任务,标 [inferred] |
 
+### Recommended Missing Fields (S2-H7.1)
+
+> 针对本次 run 的输入缺口，推荐用户补充的字段（按质量影响排序）。
+
+| field_category | recommended_field | why_important | minimum_needed_to_continue | can_continue_without |
+|---|---|---|---|---|
+| `<填:示例 — demo_access>` | 可访问的 demo URL 或截图 | 证据采集基础 | 至少主要页面截图 | no |
+| `<填:示例 — page_states>` | 关键页面状态描述(空/加载/错误) | 完整性评估 | 至少主流程页面 | yes (降级覆盖范围) |
+| `<填:示例 — screen_description>` | 截图文字描述(OCR 失败时) | 问题归因准确性 | 可从截图推断 | yes (标 [inferred]) |
+| `<填:示例 — main_tasks>` | 主任务清单 | task-generation 准确性 | 可从页面推断 | yes (标 [inferred]) |
+
+### Recommended User Questions (S2-H7.1)
+
+> 可以直接问用户的问题，帮助用户快速补充关键输入。
+
+| question_id | question | expected_answer_format | blocking_level | linked_gap |
+|---|---|---|---|---|
+| RQ-001 | `<填:示例 — 本次评估模式(client/web)?web 请提供 demo URL>` | client/web + URL | blocker | GAP-001 |
+| RQ-002 | `<填:示例 — 关键截图能否补充文字描述?>` | 页面名 + 描述 | major | GAP-002 |
+| RQ-003 | `<填:示例 — 主要用户任务有哪些?>` | 任务清单 | minor | GAP-003 |
+
+### Minimum Needed to Continue (S2-H7.1)
+
+> 如果用户无法补全所有字段，继续执行的最低要求。
+
+- **blocker 级 gap 必须解决**: GAP-001 (demo_access) — 至少主要页面截图
+- **major 级 gap 可带 assumption**: GAP-002 (screen_description) — 标 [证据不足]
+- **minor 级 gap 可降级 scope**: 可减少边界场景覆盖或降低问题密度
+
 ---
 
 ## 7. Assumption / Inference Ledger

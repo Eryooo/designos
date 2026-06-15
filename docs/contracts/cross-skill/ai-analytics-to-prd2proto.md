@@ -95,6 +95,31 @@ prd2proto 的 `pipeline.yaml` upstream_refs:
 | RP-001 | 用户角色不一致 | "[synthetic] ai-analytics 定义目标人群为 IT 管理员,prd2proto 即将按运营人员做页面 — 这会导致任务建模全部偏移" | 以上游 IT 管理员为准 / 提供新的角色输入 |
 | RP-002 | [inferred] 被去掉 | "[synthetic] ai-analytics 把'行业转化率 12%'标为推断,prd2proto 当成事实使用 — 会造成置信度虚高" | 在 design_objectives 保留 [inferred] 标注 |
 
+### Reconciliation Options (S2-H7.1)
+
+> 当 consistency_decision = needs_reconciliation 或 blocked_inconsistent 时，提供至少 2 个可选裁定方案。
+
+#### 场景 1: 用户角色不一致
+
+| option_id | resolution_approach | pros | cons | user_action_needed |
+|---|---|---|---|---|
+| OPT-1 | 以上游 ai-analytics target_audience 为准 | 保持分析结论一致性 | prd2proto 需修改已推断的用户任务 | no (自动修正) |
+| OPT-2 | 以下游 prd2proto user_role 为准 | 保持 PRD 原始意图 | 与 ai-analytics 结论不一致 | yes (需用户确认偏离) |
+| OPT-3 | 追问用户明确目标用户 | 由用户给出权威输入 | 需要用户介入 | yes |
+
+**推荐方案**: OPT-1 (以上游为准)
+**理由**: ai-analytics 基于用户调研，应作为权威来源；prd2proto 的用户任务应从目标用户推导，不应反向改变目标用户。
+
+#### 场景 2: [inferred] 标注被去掉
+
+| option_id | resolution_approach | pros | cons | user_action_needed |
+|---|---|---|---|---|
+| OPT-1 | 保留 [inferred] 标注，降级相关产出置信度 | 保持透明度，不虚高置信度 | 下游需接受置信度降级 | no |
+| OPT-2 | 去掉 [inferred]，当真实数据使用 | 简化下游逻辑 | 隐藏数据质量问题，可能误导 | no (但风险高) |
+
+**推荐方案**: OPT-1 (保留标注)
+**理由**: [inferred] 是数据质量边界，下游不得静默去除，否则违反 H6 契约。
+
 ---
 
 ## 9. Synthetic Example

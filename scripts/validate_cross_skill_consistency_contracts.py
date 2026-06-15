@@ -46,12 +46,23 @@ CONSISTENCY_ENUMS = [
 ]
 
 REQUIRED_BLOCKS = [
+
     "Required Field Mapping",
     "Gap / Assumption",
     "Conflict Rules",
     "User Reconciliation Prompts",
     "Related Gates",
 ]
+
+# S2-H7.1: 新增字段检查
+H71_REQUIRED_FIELDS = [
+    "Recommended Reconciliation (S2-H7.1)",
+    "recommended_reconciliation",
+    "reconciliation_options",
+    "preferred_resolution",
+    "user_confirmation_needed",
+]
+
 
 OVERCLAIM_PATTERNS = [
     "完全自动化",

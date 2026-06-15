@@ -29,6 +29,16 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 
 MASTER_REPORT = "docs/audits/S2-H7A-USER-FEEDBACK-SAFETY-INFRASTRUCTURE.md"
 
+# S2-H7.1: diagnostic-summary 新增字段检查
+H71_DIAGNOSTIC_FIELDS = [
+    "recommended_missing_fields",
+    "recommended_user_questions",
+    "kr_summary",
+    "affected_kr",
+    "most_affected_kr",
+]
+
+
 ISSUE_TEMPLATES = [
     ".github/ISSUE_TEMPLATE/bug_report.yml",
     ".github/ISSUE_TEMPLATE/skill_quality_report.yml",

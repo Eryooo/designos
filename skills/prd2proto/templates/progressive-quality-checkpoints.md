@@ -69,6 +69,10 @@ stop_blocked
 | checkpoint_decision | `<填>` |
 | user_notice | `<填>` |
 | carry_forward_items | `<填>` |
+| **degradation_scope_detail (S2-H7.1)** | `<填:若 decision = degrade_scope,具体降级了什么范围>` |
+| **affected_outputs (S2-H7.1)** | `<填:哪些产物受影响>` |
+| **user_visible_impact (S2-H7.1)** | `<填:用户会看到什么质量变化>` |
+| **continue_conditions (S2-H7.1)** | `<填:什么条件下仍可继续>` |
 
 ### CP-P3 — design_objectives / user_task_map 后
 | 字段 | 值 |
@@ -80,6 +84,10 @@ stop_blocked
 | checkpoint_decision | `<填>` |
 | user_notice | `<填>` |
 | carry_forward_items | `<填>` |
+| **degradation_scope_detail (S2-H7.1)** | `<填:若 decision = degrade_scope,具体降级了什么范围>` |
+| **affected_outputs (S2-H7.1)** | `<填:哪些产物受影响>` |
+| **user_visible_impact (S2-H7.1)** | `<填:用户会看到什么质量变化>` |
+| **continue_conditions (S2-H7.1)** | `<填:什么条件下仍可继续>` |
 
 ### CP-P4 — state_matrix / traceability 前
 | 字段 | 值 |
@@ -91,6 +99,10 @@ stop_blocked
 | checkpoint_decision | `<填>` |
 | user_notice | `<填>` |
 | carry_forward_items | `<填>` |
+| **degradation_scope_detail (S2-H7.1)** | `<填:若 decision = degrade_scope,具体降级了什么范围>` |
+| **affected_outputs (S2-H7.1)** | `<填:哪些产物受影响>` |
+| **user_visible_impact (S2-H7.1)** | `<填:用户会看到什么质量变化>` |
+| **continue_conditions (S2-H7.1)** | `<填:什么条件下仍可继续>` |
 
 ### CP-P5 — constrained-code-generation 前
 | 字段 | 值 |
@@ -102,6 +114,10 @@ stop_blocked
 | checkpoint_decision | `<填>` |
 | user_notice | `<填>` |
 | carry_forward_items | `<填>` |
+| **degradation_scope_detail (S2-H7.1)** | `<填:若 decision = degrade_scope,具体降级了什么范围>` |
+| **affected_outputs (S2-H7.1)** | `<填:哪些产物受影响>` |
+| **user_visible_impact (S2-H7.1)** | `<填:用户会看到什么质量变化>` |
+| **continue_conditions (S2-H7.1)** | `<填:什么条件下仍可继续>` |
 
 ---
 

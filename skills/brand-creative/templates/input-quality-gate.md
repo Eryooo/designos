@@ -84,6 +84,35 @@
 | GAP-002 | `<填:示例 — 商标禁区未提供>` | logo_spec.legal_check | blocker | yes | "[synthetic] 是否有需规避的商标/竞品视觉/文化禁区?" | 标 [待法务确认],高风险阻断 |
 | GAP-003 | `<填:示例 — 所选 sub-skill 无 pipeline>` | 对应 phase 产出 | major | no | — | degrade,标"该 sub-skill alpha 未实装" |
 
+### Recommended Missing Fields (S2-H7.1)
+
+> 针对本次 run 的输入缺口，推荐用户补充的字段（按质量影响排序）。
+
+| field_category | recommended_field | why_important | minimum_needed_to_continue | can_continue_without |
+|---|---|---|---|---|
+| `<填:示例 — brand_positioning>` | 差异化品牌定位(非形容词) | brand_brief 核心 | 至少一句话定位 | no |
+| `<填:示例 — legal_taboos>` | 商标/法务/文化禁区清单 | legal_check 合规性 | 至少通用禁忌 | yes (标 [待法务确认]) |
+| `<填:示例 — sub_skill_choice>` | 选定的 sub-skill | phase 产出范围 | 至少指定一项 | no |
+| `<填:示例 — visual_references>` | 视觉参考(moodboard/竞品) | creative_translation 准确性 | 可从定位推断 | yes (标 [inferred]) |
+
+### Recommended User Questions (S2-H7.1)
+
+> 可以直接问用户的问题，帮助用户快速补充关键输入。
+
+| question_id | question | expected_answer_format | blocking_level | linked_gap |
+|---|---|---|---|---|
+| RQ-001 | `<填:示例 — 品牌的差异化定位是什么(为谁解决什么)?>` | 一句话定位 | blocker | GAP-001 |
+| RQ-002 | `<填:示例 — 是否有需规避的商标/文化禁区?>` | yes/no + 禁区清单 | blocker | GAP-002 |
+| RQ-003 | `<填:示例 — 本次需要哪些创意产出(logo/slogan/...)?>` | sub-skill 清单 | major | GAP-003 |
+
+### Minimum Needed to Continue (S2-H7.1)
+
+> 如果用户无法补全所有字段，继续执行的最低要求。
+
+- **blocker 级 gap 必须解决**: GAP-001 (brand_positioning), GAP-002 (legal_taboos)
+- **major 级 gap 可带 assumption**: GAP-003 (sub_skill_choice) — 可降级为单一产出
+- **minor 级 gap 可降级 scope**: 可减少创意方案数量或降低视觉复杂度
+
 ---
 
 ## 7. Assumption / Inference Ledger

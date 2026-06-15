@@ -100,6 +100,24 @@ competitive-analysis → brand-strategy → {logo-design, color-system, typograp
 | RP-001 | logo 风格与策略矛盾 | "[synthetic] brand_brief 强调'稳重专业',logo 设计出现大量装饰性元素 — 品牌一致性(D1)失守" | 回 logo-design 调整形态方向 |
 | RP-002 | vi_manual 缺 typography | "[synthetic] visual-identity 缺 typography_spec — 品牌手册不完整" | 补充 typography-system 子技能或标 gap |
 
+### Reconciliation Options (S2-H7.1)
+
+> 当 consistency_decision = needs_reconciliation 或 blocked_inconsistent 时，提供至少 2 个可选裁定方案。
+
+#### 通用裁定方案
+
+| option_id | resolution_approach | pros | cons | user_action_needed |
+|---|---|---|---|---|
+| OPT-1 | 以上游为准 | 保持上游一致性 | 下游需修改已推断字段 | no (自动修正) |
+| OPT-2 | 以下游为准 | 保持下游已有逻辑 | 可能与上游设计意图不一致 | yes (需用户确认偏离) |
+| OPT-3 | 追问用户裁定 | 由用户明确决策 | 需要用户介入 | yes |
+
+**推荐方案**: 根据具体冲突类型选择，一般优先 OPT-1 (以上游为准)
+
+**理由**: 上游 skill 产出应作为下游输入的权威来源，除非用户明确要求偏离。
+
+---
+
 ---
 
 ## 9. Synthetic Example

@@ -64,6 +64,10 @@
 | checkpoint_decision | `<填 5 枚举>` |
 | user_notice | `<填:非 continue 决策的用户说明,见 §5>` |
 | carry_forward_items | `<填:带入后续阶段的 gap/assumption>` |
+| **degradation_scope_detail (S2-H7.1)** | `<填:若 decision = degrade_scope,具体降级了什么范围>` |
+| **affected_outputs (S2-H7.1)** | `<填:哪些产物受影响>` |
+| **user_visible_impact (S2-H7.1)** | `<填:用户会看到什么质量变化>` |
+| **continue_conditions (S2-H7.1)** | `<填:什么条件下仍可继续>` |
 
 *(CP-X2 ~ CP-X5 同结构,实际运行时按 skill 的 5 个 checkpoint 填写)*
 

@@ -60,6 +60,44 @@
 | gaps | `<填>` |
 | assumptions | `<填>` |
 
+### Recommended Missing Fields (S2-H7.1)
+
+> 如果本次 run 存在输入缺口，推荐用户补充的字段。
+
+| field_category | recommended_field | why_important | blocking_level |
+|---|---|---|---|
+| `<填>` | `<填>` | `<填>` | blocker / major / minor |
+
+### Recommended User Questions (S2-H7.1)
+
+> 可以直接问用户的问题，帮助用户快速补充关键输入。
+
+| question_id | question | blocking_level |
+|---|---|---|
+| `<填>` | `<填>` | blocker / major / minor |
+
+---
+
+## 6.1 KR Aggregation View (S2-H7.1)
+
+> 本次 run 涉及的 KR 聚合视图，显示哪些 KR 被影响、状态如何。
+
+| kr_id | status | linked_gate | impact_level |
+|---|---|---|---|
+| `<填>` | pass / warn / fail / unknown | `<填:H5/H5.1/H4/H6>` | high / medium / low |
+
+### KR Summary
+
+- Total KR: `<填>`
+- Pass: `<填>`
+- Warn: `<填>`
+- Fail: `<填>`
+- Unknown: `<填>`
+
+### Most Affected KR
+
+`<填:影响最大的 1-3 个 KR,说明原因>`
+
 ---
 
 ## 7. Consistency Summary

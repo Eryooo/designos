@@ -98,6 +98,24 @@ M01 brand_brief → M02 worldview → M03 persona_profile → M04 visual_spec + 
 | RP-001 | M04 未完成 M03 即开始 | "[synthetic] 人格建模(M03)尚未完成即进行视觉转化(M04) — 这将触发'视觉先行'一票否决" | 先完成 M03 再进 M04 |
 | RP-002 | visual_spec 色彩与北极星矛盾 | "[synthetic] 北极星强调'稳重可靠',视觉规范出现大量鲜艳跳色 — D1 品牌一致性失守" | 回 M04 调整主色方向 |
 
+### Reconciliation Options (S2-H7.1)
+
+> 当 consistency_decision = needs_reconciliation 或 blocked_inconsistent 时，提供至少 2 个可选裁定方案。
+
+#### 通用裁定方案
+
+| option_id | resolution_approach | pros | cons | user_action_needed |
+|---|---|---|---|---|
+| OPT-1 | 以上游为准 | 保持上游一致性 | 下游需修改已推断字段 | no (自动修正) |
+| OPT-2 | 以下游为准 | 保持下游已有逻辑 | 可能与上游设计意图不一致 | yes (需用户确认偏离) |
+| OPT-3 | 追问用户裁定 | 由用户明确决策 | 需要用户介入 | yes |
+
+**推荐方案**: 根据具体冲突类型选择，一般优先 OPT-1 (以上游为准)
+
+**理由**: 上游 skill 产出应作为下游输入的权威来源，除非用户明确要求偏离。
+
+---
+
 ---
 
 ## 9. Synthetic Example

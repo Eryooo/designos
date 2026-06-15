@@ -62,6 +62,15 @@ INPUT_DECISION_ENUMS = [
 
 LEDGER_KEYWORDS = ["Gap Ledger", "Assumption", "Clarification Questions"]
 
+# S2-H7.1: 新增字段检查
+H71_REQUIRED_FIELDS = [
+    "Recommended Missing Fields (S2-H7.1)",
+    "recommended_field",
+    "minimum_needed_to_continue",
+    "Recommended User Questions (S2-H7.1)",
+    "Minimum Needed to Continue (S2-H7.1)",
+]
+
 # 过度承诺(作为正向断言算违规,出现在"禁止"清单语境豁免)
 OVERCLAIM_PATTERNS = [
     "完全自动化",
@@ -110,6 +119,11 @@ def main() -> int:
         for kw in LEDGER_KEYWORDS:
             if kw not in text:
                 errors.append(f"{skill}: missing '{kw}'")
+
+        # 6.1 S2-H7.1 新增字段检查
+        for field in H71_REQUIRED_FIELDS:
+            if field not in text:
+                errors.append(f"{skill}: missing S2-H7.1 field '{field}'")
 
         # 7. 过度承诺检查(豁免禁止清单语境)
         for line in text.splitlines():

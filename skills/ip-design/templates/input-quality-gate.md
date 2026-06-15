@@ -85,6 +85,35 @@
 | GAP-002 | `<填:示例 — 禁忌项未提供>` | visual_spec.strict_avoidance | blocker | yes | "[synthetic] 是否有文化/法务/品牌禁忌需规避?" | 用通用禁忌占位并标 [待确认] |
 | GAP-003 | `<填:示例 — 视觉风格未指定>` | visual-translation | minor | no | — | 按北极星推断风格,标 [inferred] |
 
+### Recommended Missing Fields (S2-H7.1)
+
+> 针对本次 run 的输入缺口，推荐用户补充的字段（按质量影响排序）。
+
+| field_category | recommended_field | why_important | minimum_needed_to_continue | can_continue_without |
+|---|---|---|---|---|
+| `<填:示例 — competitor_ips>` | 3-5 个竞品 IP 视觉/定位 | differentiation 基础 | 至少 3 个竞品 | no |
+| `<填:示例 — brand_taboos>` | 文化/法务/品牌禁忌清单 | strict_avoidance 合规性 | 至少通用禁忌 | yes (标 [待确认]) |
+| `<填:示例 — visual_style>` | 期望视觉风格描述 | visual-translation 准确性 | 可从北极星推断 | yes (标 [inferred]) |
+| `<填:示例 — target_emotion>` | 目标情感调性 | emotional_quality 决策 | 可从品牌基因推断 | yes (标 [inferred]) |
+
+### Recommended User Questions (S2-H7.1)
+
+> 可以直接问用户的问题，帮助用户快速补充关键输入。
+
+| question_id | question | expected_answer_format | blocking_level | linked_gap |
+|---|---|---|---|---|
+| RQ-001 | `<填:示例 — 主要竞品 IP 有哪些(至少 3 个)?>` | 竞品名 + 视觉风格 | blocker | GAP-001 |
+| RQ-002 | `<填:示例 — 是否有文化/法务/品牌禁忌需规避?>` | yes/no + 禁忌清单 | blocker | GAP-002 |
+| RQ-003 | `<填:示例 — 期望的视觉风格(简约/热闹/科技/...)?>` | 风格关键词 | minor | GAP-003 |
+
+### Minimum Needed to Continue (S2-H7.1)
+
+> 如果用户无法补全所有字段，继续执行的最低要求。
+
+- **blocker 级 gap 必须解决**: GAP-001 (competitor_ips), GAP-002 (brand_taboos)
+- **major 级 gap 可带 assumption**: 可从品牌基因推断部分属性
+- **minor 级 gap 可降级 scope**: 可降低视觉方案数量或减少变体
+
 ---
 
 ## 7. Assumption / Inference Ledger
