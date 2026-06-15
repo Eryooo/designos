@@ -1,0 +1,76 @@
+name: Skill Quality Report
+description: Report output quality issues for a specific skill
+title: "[QUALITY] "
+labels: ["quality", "skill"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **⚠️ Privacy Notice**
+
+        Do not paste real PRD, screenshots, URLs, credentials, customer names, local paths, full run workspace archives, or business confidential text.
+
+  - type: dropdown
+    id: skill
+    attributes:
+      label: Skill
+      options:
+        - prd2proto
+        - uxeval
+        - ai-analytics
+        - ip-design
+        - brand-creative
+    validations:
+      required: true
+
+  - type: textarea
+    id: task
+    attributes:
+      label: What were you trying to do?
+      placeholder: e.g., "Generate prototype from PRD"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What went wrong with the output?
+      description: Describe the quality issue (sanitized)
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected output
+    validations:
+      required: true
+
+  - type: input
+    id: stage
+    attributes:
+      label: Stage (if known)
+      placeholder: e.g., "design_objectives" or "CP-P2"
+
+  - type: textarea
+    id: diagnostic-summary
+    attributes:
+      label: Diagnostic Summary (optional)
+      render: yaml
+
+  - type: dropdown
+    id: synthetic-replay
+    attributes:
+      label: Can you provide a synthetic replay case?
+      options:
+        - "Yes"
+        - "No"
+        - "Need help creating one"
+
+  - type: checkboxes
+    id: privacy-confirmation
+    attributes:
+      label: Privacy Confirmation
+      options:
+        - label: I have not included real PRD, screenshots with sensitive content, URLs, credentials, customer names, local paths, full run workspace archives, or business confidential text
+          required: true

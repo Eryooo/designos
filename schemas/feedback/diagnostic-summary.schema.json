@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/feedback/diagnostic-summary.schema.json",
+  "title": "Diagnostic Summary",
+  "description": "Sanitized diagnostic summary for user feedback, must not contain original input, PRD text, screenshot OCR, URLs, credentials, local paths, or business confidential text.",
+  "type": "object",
+  "required": [
+    "run_id",
+    "run_workspace_id",
+    "skill",
+    "designos_version",
+    "skill_version",
+    "mode",
+    "input_decision",
+    "delivery_decision",
+    "triggered_failure_modes",
+    "linked_kr",
+    "gap_count",
+    "assumption_count",
+    "sanitized_error_message",
+    "created_at"
+  ],
+  "properties": {
+    "run_id": {
+      "type": "string",
+      "description": "Run ID, e.g. RUN-YYYYMMDD-001-skill"
+    },
+    "run_workspace_id": {
+      "type": "string",
+      "description": "Run workspace ID (not path), e.g. RUN-YYYYMMDD-001-prd2proto"
+    },
+    "skill": {
+      "type": "string",
+      "enum": ["prd2proto", "uxeval", "ai-analytics", "ip-design", "brand-creative"]
+    },
+    "designos_version": {
+      "type": "string"
+    },
+    "skill_version": {
+      "type": "string"
+    },
+    "mode": {
+      "type": "string"
+    },
+    "input_decision": {
+      "type": "string",
+      "enum": ["ready", "ready_with_assumptions", "needs_user_clarification", "blocked_insufficient_input"]
+    },
+    "checkpoint_decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["checkpoint_id", "decision"],
+        "properties": {
+          "checkpoint_id": {"type": "string"},
+          "decision": {
+            "type": "string",
+            "enum": ["continue", "continue_with_gaps", "ask_user", "degrade_scope", "stop_blocked"]
+          }
+        }
+      }
+    },
+    "delivery_decision": {
+      "type": "string",
+      "enum": ["pass", "pass_with_minor_warnings", "degrade_with_gaps", "block"]
+    },
+    "consistency_decision": {
+      "type": "string",
+      "enum": ["consistent", "consistent_with_carried_gaps", "needs_reconciliation", "blocked_inconsistent"]
+    },
+    "triggered_failure_modes": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "linked_kr": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "gap_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "assumption_count": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "error_type": {
+      "type": "string"
+    },
+    "sanitized_error_message": {
+      "type": "string",
+      "description": "Error message with sensitive content removed"
+    },
+    "reproduction_hint_sanitized": {
+      "type": "string",
+      "description": "Reproduction hint with paths, names, and business content removed"
+    },
+    "evidence_ref": {
+      "type": "string",
+      "description": "Optional evidence reference ID only (not path), e.g. PRIVATE-EVIDENCE-YYYYMMDD-001"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

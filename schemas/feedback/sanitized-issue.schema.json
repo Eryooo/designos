@@ -1,0 +1,112 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://designos.dev/schemas/feedback/sanitized-issue.schema.json",
+  "title": "Sanitized Issue",
+  "description": "Internal sanitized issue record for maintainer triage and root cause analysis.",
+  "type": "object",
+  "required": [
+    "issue_id",
+    "skill",
+    "observed_problem_sanitized",
+    "expected_behavior",
+    "severity",
+    "root_cause_type",
+    "fix_target",
+    "privacy_status",
+    "status",
+    "created_at"
+  ],
+  "properties": {
+    "issue_id": {
+      "type": "string"
+    },
+    "public_issue_ref": {
+      "type": "string",
+      "description": "GitHub issue URL or number"
+    },
+    "diagnostic_summary_ref": {
+      "type": "string"
+    },
+    "evidence_ref": {
+      "type": "string",
+      "description": "Optional evidence reference ID only (not path)"
+    },
+    "skill": {
+      "type": "string",
+      "enum": ["prd2proto", "uxeval", "ai-analytics", "ip-design", "brand-creative"]
+    },
+    "observed_problem_sanitized": {
+      "type": "string"
+    },
+    "expected_behavior": {
+      "type": "string"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["blocker", "major", "minor"]
+    },
+    "linked_kr": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "linked_failure_mode": {
+      "type": "array",
+      "items": {"type": "string"}
+    },
+    "root_cause_type": {
+      "type": "string",
+      "enum": [
+        "input_gap",
+        "template_gap",
+        "rule_gap",
+        "prompt_gap",
+        "schema_gap",
+        "runtime_gap",
+        "docs_gap",
+        "consistency_gap",
+        "privacy_gap",
+        "evidence_gap",
+        "validation_gap"
+      ]
+    },
+    "fix_target": {
+      "type": "string",
+      "enum": [
+        "knowledge",
+        "template",
+        "prompt",
+        "failure_mode",
+        "checkpoint",
+        "schema",
+        "script",
+        "runtime",
+        "docs",
+        "release",
+        "no_code_change"
+      ]
+    },
+    "proposed_fix": {
+      "type": "string"
+    },
+    "synthetic_replay_case_ref": {
+      "type": "string"
+    },
+    "privacy_status": {
+      "type": "string",
+      "enum": ["synthetic_only", "sanitized", "unsafe_detected", "needs_manual_redaction"]
+    },
+    "status": {
+      "type": "string",
+      "enum": ["open", "triaged", "fixed", "verified", "wontfix"]
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}
