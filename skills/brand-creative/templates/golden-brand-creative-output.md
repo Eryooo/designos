@@ -290,7 +290,7 @@ cross_subskill_consistency:
 current_status:
   maturity: alpha
   pipeline_coverage:
-    has_pipeline: ["brand-strategy", "competitive-analysis", "logo-design", 
+    has_pipeline: ["brand-strategy", "competitive-analysis", "logo-design",
                    "color-system", "typography-system", "visual-identity"]
     no_pipeline: ["brand-voice", "content-strategy", "campaign-creative",
                   "brand-collateral", "digital-assets", "brand-guidelines", "brand-audit"]

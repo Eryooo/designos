@@ -278,7 +278,7 @@ visual_spec:
     D9_cross_stage_evidence:
       tier: "中阶可用"
       rationale: "多数有依据,部分跨阶段关键词推断处已标 [inferred]"
-  
+
   one_strike_check:
     D2_status: "中阶可用 ✅(未触发)"
     D6_status: "中阶可用(待法务确认) ✅(未触发不合格)"
