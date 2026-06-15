@@ -106,15 +106,30 @@ def test_checkpoint_policy_defaults_to_continue_in_chat_mode() -> None:
 
 
 def test_only_review_gate_hard_stops() -> None:
-    """Of all checkpoints, only the review gate may pause the run, and only when
-    there are real constitution violations."""
+    """v2 reality: pipeline v2 replaces the legacy ``gate:`` field on
+    review-gate with kernel-driven ``quality_gates:`` lists on individual
+    stages. The new hard-stop mechanism is ``code_constraint_gate`` on
+    ``constrained-code-generation`` (see kernel/quality-gates/gates.py
+    QualityGateExecutor + QualityGateBlocked, which raises on violations).
+
+    Replaces the old assertion that exactly 1 stage had a ``gate:`` block.
+    See docs/STATUS-DEFINITION.md §S1-0B/0C calibration on
+    `gate:` vs `quality_gates:` distinction.
+    """
     pipeline = _pipeline()
-    gated = [s for s in pipeline["stages"] if s.get("gate")]
-    assert len(gated) == 1, "exactly one hard gate expected (review-gate)"
-    gate = gated[0]["gate"]
-    assert gate["action"] == "pause"
-    assert gate["when"] == "constitution_violations.count > 0"
-    assert gate["resume_from_stage"] == "code-generation"
+    # No legacy `gate:` field on any stage in v2
+    legacy_gated = [s for s in pipeline["stages"] if s.get("gate")]
+    assert legacy_gated == [], (
+        "v2 should not use legacy `gate:` field; use kernel `quality_gates:` "
+        f"instead. Found legacy gate on: {[s['id'] for s in legacy_gated]}"
+    )
+    # The hard-blocking quality gate for code generation is code_constraint_gate
+    by_id = {s["id"]: s for s in pipeline["stages"]}
+    code_stage = by_id["constrained-code-generation"]
+    assert "code_constraint_gate" in code_stage.get("quality_gates", []), (
+        "constrained-code-generation must declare code_constraint_gate as a "
+        "quality_gate (kernel/quality-gates real-blocking enforcement)"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -212,13 +227,27 @@ def test_no_fully_automated_overclaim() -> None:
 
 
 def test_pipeline_marks_mock_dependent_stage_as_tool_only_for_dsl() -> None:
-    """dsl-fetch is the only real tool stage and it's designer-dsl only; the
-    LLM-driven token/code stages must be type: llm, not type: tool."""
+    """v2 reality: ``dsl-fetch`` was removed from pipeline v2 (P1 Senior
+    Designer Work Paradigm refactor). The new tool-typed stage is
+    ``liveness-check`` (final dev-server probe). LLM-driven stages
+    (token-extraction, constrained-code-generation) remain type=llm.
+
+    Replaces the old assertion about dsl-fetch type=tool, which no longer
+    exists in the v2 18-stage topology.
+    """
     pipeline = _pipeline()
     by_id = {s["id"]: s for s in pipeline["stages"]}
-    assert by_id["dsl-fetch"]["type"] == "tool"
-    assert by_id["dsl-fetch"]["only_when"] == 'mode == "designer-dsl"'
+
+    # dsl-fetch was removed in v2 — assert it is NOT in the pipeline
+    assert "dsl-fetch" not in by_id, (
+        "dsl-fetch was removed in v2 paradigm refactor; expected it absent"
+    )
+
+    # liveness-check is the only type=tool stage in v2
+    assert by_id["liveness-check"]["type"] == "tool"
+
+    # LLM-driven stages remain type=llm
     assert by_id["token-extraction"]["type"] == "llm"
-    assert by_id["code-generation"]["type"] == "llm"
+    assert by_id["constrained-code-generation"]["type"] == "llm"
 
 
