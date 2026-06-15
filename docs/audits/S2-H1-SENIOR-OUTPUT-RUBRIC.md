@@ -350,7 +350,155 @@
 
 ---
 
-## 6. 核心原则(本报告内化)
+## 6. Senior Output OKR / KPI 指标体系
+
+> **本节性质**:把第 1–5 节的资深输出 rubric 转化为可度量、可对账的 OKR/KR 指标体系。
+> **使用纪律**:所有阈值默认是「目标阈值」或「待验证阈值」,**禁止写成"已达成"**——除非有 §6.1 明确列出的实证证据。
+> **下游服务对象**:S2-H2 Golden Output Templates、S2-H3 Failure Modes、S2-H4 Self Review Gate 都基于本节指标自检。
+
+### 6.0 阈值标记口径(统一)
+
+每个 KR 的「当前状态」字段只能用三种标记:
+
+| 标记 | 含义 |
+|---|---|
+| `[目标阈值]` | 该 KR 是 MVP trial 的设计目标,**当前无任何实证测量数据** |
+| `[待验证阈值]` | 该 KR 已设计但需要 S2-H2 golden case 跑过后才能填实测值 |
+| `[已有证据]` | 该 KR 在前面批次(如 S2-1/S2-2)已有可引用的实证 |
+
+---
+
+### 6.1 DesignOS 全局 OKR
+
+#### O1 — 稳定产出资深设计师级结构化成果
+
+> Objective:DesignOS 的核心交付价值是结构化设计推理资产链,不是无格式自然语言。
+
+| KR | 类型 | 度量方式 | 最低线(MVP trial) | 目标线(资深) | 数据来源 | 未达标处理 | 当前状态 |
+|---|---|---|---|---|---|---|---|
+| **KR1.1** 最低交付线覆盖率 | 量化 | 5 skill 各自的"中阶可用"档自评全过率 | ≥ 80% | 100% | 各 skill rubric self-eval + S2-H2 golden case | 列入 professional_gap_report,标 gap | `[目标阈值]` |
+| **KR1.2** 一票否决项命中数 | 量化 | §5 表中 22 项(19 skill-specific + 3 全局底座)累计触发数 | **= 0**(硬约束) | **= 0**(硬约束) | rubric self-eval + scan-sensitive + schema 校验 | 直接拒绝交付,返工 | `[目标阈值]`(各项已定义,无累计实测) |
+| **KR1.3** Shared knowledge id 锚定覆盖率 | 量化 | manifest 声明的 asset id 在 prompt/reference 显式 grep 命中比例 | ≥ 90% | 100% | grep skills/{prd2proto,uxeval,ai-analytics}/reference + ip-design prompts | 在 reference 头部补「对应 shared knowledge asset」 | `[已有证据]` S2-1 commit `3feb01f`:prd2proto 11/11、uxeval 7/7、ai-analytics 6/6、ip-design 18/19、brand-creative 1/14(主线未成型)→ 当前已锚定占比 = 43/57 ≈ 75%(主线-only:43/43=100%) |
+| **KR1.4** artifact-base schema 继承率 | 量化 | 有 schemas/ 目录的 skill 中,$ref artifact-base 的 schema 占比 | ≥ 80% | 100% | grep `kernel/contracts/artifacts/artifact-base.schema.json` in skills/*/schemas/*.json + 传递 $ref 解析 | 补 $ref 或显式标"非 artifact 类型"豁免 | `[已有证据]` S2-2 commit `d6da72c`:prd2proto 7/7(3 direct + 4 transitive),其他 4 skill 无 schemas/ 目录(N/A) |
+
+#### O2 — 替代中低阶重复工作,并辅助高阶判断
+
+> Objective:DesignOS 不是"AI 设计师",是"中低阶替代 + 高阶辅助"工具。
+
+| KR | 类型 | 度量方式 | 最低线 | 目标线 | 数据来源 | 未达标处理 | 当前状态 |
+|---|---|---|---|---|---|---|---|
+| **KR2.1** "资深愿意评审而非推倒重来"率 | 定性 + 量化 | golden case 上资深评审打"中阶可用"或更高的比例 | ≥ 60% | ≥ 80% | S2-H2 golden case + S2-H4 self review gate | 标注"未达资深线",列入下一轮迭代 | `[待验证阈值]`(待 H2 golden case 落地) |
+| **KR2.2** 中低阶工时节省率 | 量化 | 内部 trial 中"AI 起草 vs 人工从零"的耗时对比 | ≥ 30% | ≥ 50% | 内部 MVP trial 反馈 + 时间日志 | 在 PILOT-BOUNDARY 标注"trial 实测低于预期" | `[目标阈值]`(无 trial 数据) |
+| **KR2.3** 资深评审通过率(≥ 中阶可用) | 量化 | 资深评审"中阶可用以上"档比例 | ≥ 50% | ≥ 70% | S2-H4 senior review report | 列 gap,补强失败维度 | `[待验证阈值]` |
+| **KR2.4** 高阶决策辅助有效率 | 定性 | 资深主动采用 AI 输出某部分作为最终方案的比例(主观打分) | ≥ 30% | ≥ 50% | trial 反馈问卷 | 在 maturity 中标注"辅助价值有限" | `[目标阈值]` |
+
+#### O3 — 稳定、诚实、可追溯
+
+> Objective:不假装、不自动认领能力边界外的事,所有产物可被资深审计。
+
+| KR | 类型 | 度量方式 | 最低线 | 目标线 | 数据来源 | 未达标处理 | 当前状态 |
+|---|---|---|---|---|---|---|---|
+| **KR3.1** 不可宣称项命中数 | 量化 | §2 各 skill「不可宣称」清单出现在 README/AGENTS/SKILL.md/PILOT-BOUNDARY 的次数 | **= 0**(硬约束) | **= 0** | grep 全仓 + S2-2B test_no_fully_automated_overclaim 等防过度声明测试 | 立即修文档 | `[已有证据]` S2-2B/2C 已修 prd2proto PILOT-BOUNDARY,test 通过 |
+| **KR3.2** evidence / assumption / gap 标注覆盖率 | 量化 | artifact-base 的 `gaps` / `warnings` / `assumptions` / `inferred_fields` 字段非空 + 覆盖应当存在场景的比例 | ≥ 70% | ≥ 90% | artifact 字段扫描 + golden case 反向核验(应有 gap 的字段是否标了) | 在 gap_transparency_gate 拦截 | `[目标阈值]`(实际产出未运行真 LLM 链路统计) |
+| **KR3.3** 关键决策可追溯率 | 量化 | `traceability_map` 中 `decision_trace[].evidence` 非空的比例 | ≥ 85% | 100% | prd2proto runtime 真接入 kernel/traceability(其他 skill 无 runtime) | 标 inferred 或返工 | `[已有证据]` prd2proto runtime 真接 kernel/traceability(commit 来源已实装);其他 4 skill 因无 runtime 当前 N/A |
+| **KR3.4** Schema 真 blocking 触发后修正率 | 量化 | kernel/quality-gates `QualityGateBlocked` 异常触发后,经修正再次 pass 的比例 | ≥ 95% | 100% | kernel/quality-gates/gates.py + prd2proto runtime 日志 | 列入产出 gap,人工介入 | `[已有证据]` 真 blocking 机制实装(prd2proto runtime + kernel/quality-gates),但**仅 prd2proto 接入**;uxeval/ai-analytics/ip-design 用 `gate:` 暂停门(checkpoint),不计入此 KR |
+| **KR3.5** 输出格式跨执行一致性 | 量化 | 同一输入跑多次后,关键字段集合(`required` 字段)的稳定性 | ≥ 70% | ≥ 85% | golden case 多次运行 diff | 在 unstable_capabilities 标注 | `[目标阈值]`(待 H2 golden case 跑出基线) |
+
+---
+
+### 6.2 Skill-Specific OKR
+
+> 每个 skill 1 个 Objective,5 个 KR。所有 KR 默认是「目标阈值」/「待验证阈值」,标注 `[已有证据]` 才表示前批次已实证。
+
+#### 6.2.1 prd2proto(maturity: pilot,runtime-grade)
+
+**O**:18-stage 推理资产链按资深交互设计师能力要求稳定产出,作为 DesignOS 的 seniorization 样板。
+
+| KR | 类型 | 度量方式 | 最低线 | 目标线 | 数据来源 | 未达标处理 | 当前状态 |
+|---|---|---|---|---|---|---|---|
+| **KR-P1** 18 stage 全产出率 | 量化 | pipeline run 完整跑完 18 stage(designer-dsl 17)且无 stage 缺失 | ≥ 80% | 100% | runtime run-report | 列入 production_blockers | `[待验证阈值]`(S1-0B 述 prd2proto runtime 已通跑前 5+,非全 18) |
+| **KR-P2** Schema 真 blocking 通过率 | 量化 | 18 stage 中带 `quality_gates:` 的 stage,QualityGateBlocked 触发占总跑数比例 | < 20%(高于此说明 prompt 质量不稳) | < 5% | kernel/quality-gates 异常日志 | 修 prompt 或调阈值 | `[已有证据]` 真 blocking 已接入(commit `116b8f8`);触发率无 trial 实测 |
+| **KR-P3** code_constraint_gate 触发后修正率 | 量化 | constrained-code-generation 阶段被 gate 拦截后,修正再过的比例 | ≥ 80% | 100% | runtime 日志 | 标 gap,人工 review 代码 | `[目标阈值]` |
+| **KR-P4** traceability_map 关键决策追溯率 | 量化 | `decision_trace` 中 IA / page-flow / state-matrix / component-strategy 的 `evidence` 非空率 | ≥ 80% | 100% | traceability-generation stage 输出 | gap_transparency_gate 拦截 | `[已有证据]` runtime 真接 kernel/traceability(`fc2311b`);具体覆盖率待 H2 |
+| **KR-P5** artifact-base 继承覆盖率 | 量化 | `skills/prd2proto/schemas/*.json` 中 `$ref` artifact-base 的比例(直接或传递) | 100% | 100% | grep + 传递解析 | 补 $ref | `[已有证据]` S2-2 commit `d6da72c`:7/7(3 direct + 4 transitive) |
+
+#### 6.2.2 uxeval(maturity: beta,prompt-grade,**无 runtime**)
+
+**O**:体验评估输出按资深 UX 评估专家能力要求,形成「证据 → 问题 → 根因 → 影响 → 优先级 → 建议」闭环。
+
+| KR | 类型 | 度量方式 | 最低线 | 目标线 | 数据来源 | 未达标处理 | 当前状态 |
+|---|---|---|---|---|---|---|---|
+| **KR-U1** 每条 issue 的 evidence_refs 非空率 | 量化 | 输出 issue 列表中 `evidence_refs` 非空的比例(constitution #1) | 100% | 100% | issue artifact 字段扫描 | 拒绝交付该 issue | `[目标阈值]`(无 runtime,人工依靠 prompt 自约束) |
+| **KR-U2** 严重等级用 4 档枚举的合规率 | 量化 | 出现 `severity` 字段的 issue 中,值 ∈ `{critical, major, minor, suggestion}` 的比例(constitution #3) | 100% | 100% | schema 校验 + 全文 grep | 直接修正 | `[目标阈值]` |
+| **KR-U3** 建议方案"可执行三要素"覆盖率 | 定性 + 量化 | 改什么 / 改成什么 / 为什么 三要素齐全的 issue 比例(constitution #5) | ≥ 80% | ≥ 90% | golden case 评审 + LLM 自检 | 标"建议不可执行",列入 gap | `[待验证阈值]` |
+| **KR-U4** 敏感信息泄露数 | 量化 | 真实账号 / 密码 / Token / 真实姓名 / 内部 URL 全路径 出现次数(constitution #2) | **= 0**(硬约束) | **= 0** | scan-sensitive + 人工抽审 | 立即返工 | `[已有证据]` 全仓 scan-sensitive 持续 0 命中 |
+| **KR-U5** Pipeline `gate:` 暂停门接入率 | 量化 | pipeline.yaml 中 `gate:` 字段使用比例(checkpoint 暂停门,**非 kernel quality_gates**) | ≥ 70% | 100% | grep `gate:` in pipeline.yaml | 评估是否补 checkpoint | `[已有证据]` 当前 4 处 `gate:`(S1-0B 实证);⚠️ 仅是 checkpoint 暂停门,**不等同于 kernel 真 blocking** |
+
+#### 6.2.3 ai-analytics(maturity: pilot,prompt-grade,**无 runtime**)
+
+**O**:分析输出按资深产品/策略分析师能力要求,产出可被 prd2proto 消费的 design_strategy + user_persona,每条结论可追溯。
+
+| KR | 类型 | 度量方式 | 最低线 | 目标线 | 数据来源 | 未达标处理 | 当前状态 |
+|---|---|---|---|---|---|---|---|
+| **KR-A1** 编造数据触发数 | 量化 | findings 中无 evidence_refs 指向 collected_data 的条目数(constitution #1) | **= 0**(硬约束) | **= 0** | findings.evidence_refs ↔ collected_data ID 反向校验 | 拒绝交付 | `[目标阈值]` |
+| **KR-A2** 下游必填字段非空率 | 量化 | `design_strategy.target_audience` / `business_goal` / `user_persona[].role / goals / pain_points` 非空比例(constitution #2) | 100% | 100% | schema 校验 | 拒绝交付 | `[目标阈值]` |
+| **KR-A3** data_completeness coverage 准确率 | 量化 | 实际 coverage 与 reported coverage 的偏差(constitution #3) | < 10% 偏差 | < 5% 偏差 | 抽审 | QG1 准确性损坏即 critical | `[目标阈值]` |
+| **KR-A4** 越界产出数(代码/问题清单) | 量化 | 产出中含代码片段 / 问题清单(uxeval/prd2proto 职责)的次数(constitution #4) | **= 0**(硬约束) | **= 0** | 全文 grep 关键词 | 拒绝交付 | `[目标阈值]` |
+| **KR-A5** `[inferred]` 标注覆盖率 | 量化 | 推断字段 / 行业类比字段标 `[inferred]` 的比例 | ≥ 80% | ≥ 95% | grep + 抽审 | 补标 | `[待验证阈值]` |
+
+#### 6.2.4 ip-design(maturity: pilot,prompt-grade,**无 runtime**)
+
+**O**:IP 6 阶段产物按资深 IP 设计师能力要求,达到 9 维 rubric 中阶可用以上,中阶设计师可接手微调。
+
+| KR | 类型 | 度量方式 | 最低线 | 目标线 | 数据来源 | 未达标处理 | 当前状态 |
+|---|---|---|---|---|---|---|---|
+| **KR-I1** 9 维 rubric 自评中阶以上比例 | 量化 | 9 维中"中阶可用"+ "高阶可评审"档占比 | ≥ 7/9 | 9/9 | rubric_self_eval(`design.quality.ip-design-quality-rubric`) | 短板优先返工 | `[目标阈值]` |
+| **KR-I2** 一票否决项命中数(D2/D6/D8 + 视觉先行) | 量化 | 4 项任一不合格的次数 | **= 0**(硬约束) | **= 0** | rubric_self_eval + constitution #1 检查 | 整方案返工 | `[目标阈值]` |
+| **KR-I3** image_prompt_pack 含负向提示词率 | 量化 | `image_prompt_pack` 中含 negative_prompt / `--no` / 严格避免清单的比例(constitution #6) | 100% | 100% | image_prompt_pack 字段扫描 | Stage 4 QG1 不放行 | `[目标阈值]` |
+| **KR-I4** professional_gap_report 完整生成率 | 量化 | 6 阶段产物输出后,gap report 是否完整覆盖 9 维 + 失败模式自检 | 100% | 100% | gap report artifact 字段扫描 | 拒绝交付 | `[目标阈值]` |
+| **KR-I5** 关键决策 `[inferred]` 标注覆盖率 | 量化 | 北极星 / 人格关键词 / 主形选择 / 色彩配比 等关键决策中 `[inferred]` 标注的比例(constitution #2) | ≥ 90% | 100% | artifact 字段扫描 | 写入 gap report | `[待验证阈值]` |
+
+#### 6.2.5 brand-creative(maturity: alpha,group skill,**主线未成型**)
+
+**O**:Skill Group 主线建成 — 13 个 sub-skill 中至少一半实装 pipeline + brief/规范产出 + rubric 中阶可用以上。
+
+| KR | 类型 | 度量方式 | 最低线 | 目标线 | 数据来源 | 未达标处理 | 当前状态 |
+|---|---|---|---|---|---|---|---|
+| **KR-B1** sub-skill 有 pipeline 比例 | 量化 | `skills/brand-creative/sub-skills/*/pipeline.yaml` 存在比例 | ≥ 50%(7/13) | 100% | find sub-skills/*/pipeline.yaml | 列入 production_blockers | `[已有证据]` 当前 6/13(46%,S1-0B 实证) — 未达最低线,本 skill 仍 alpha |
+| **KR-B2** brand-identity rubric 自评中阶以上比例 | 量化 | 已实装 sub-skill 的 rubric self-eval 各维度中阶以上占比 | ≥ 70% | ≥ 90% | rubric_self_eval(`design.quality.brand-identity-quality-rubric`) | 标 gap,补强 | `[目标阈值]` |
+| **KR-B3** 一票否决项命中数(策略空心 / 法务 / 跨子 skill 不一致) | 量化 | 3 项任一不合格的次数 | **= 0**(硬约束) | **= 0** | failure-modes 自检 + 跨 sub-skill 关键词链路审查 | 整方案返工 | `[目标阈值]` |
+| **KR-B4** 跨 sub-skill 关键词链路一致性 | 量化 | 策略关键词 → VI → 内容 → 物料 的关键词追溯链路无漂移比例 | ≥ 70% | ≥ 85% | brand-creative-failure-modes 自检 + 跨 artifact diff | 标"跨子 skill 不一致"返工 | `[目标阈值]` |
+| **KR-B5** failure-modes 严重级命中数 | 量化 | `design.quality.brand-creative-failure-modes` 严重级失败模式被触发的次数 | **= 0** | **= 0** | failure-modes 自检 | 列入 gap | `[目标阈值]` |
+
+---
+
+### 6.3 OKR 体系如何服务下游批次
+
+| 下游批次 | 本 OKR 体系的支撑 |
+|---|---|
+| **S2-H2 Golden Output Templates** | 每个 golden case 必须按各 skill KR 的"最低线 / 目标线"自评,作为 golden case 通过条件 |
+| **S2-H3 Failure Modes** | 一票否决项 + KR 未达目标 = failure mode 触发条件;KR 阈值即"failure 检测信号" |
+| **S2-H4 Self Review Gate** | self review gate 跑的就是 KR 自评:KR 全通过 = gate 通过,任一一票否决 = gate 阻塞 |
+| **maturity 推进** | KR 从 `[目标阈值]` → `[待验证阈值]` → `[已有证据]` 是 maturity 升级(`prompt_ready` → `runtime_ready` → `validated`)的客观信号 |
+
+---
+
+### 6.4 当前可声明状态(基于本 OKR)
+
+| 声明 | 是否可宣称 |
+|---|---|
+| "DesignOS 已建立 5 skill 的 OKR/KR 指标体系" | ✅ 可(本批次产出) |
+| "全局 OKR 包含 3 Objective × 13 KR;skill OKR 5 × 5 KR = 25 KR" | ✅ 可(事实) |
+| "shared knowledge id 锚定主线-only 已达 100%(43/43)" | ✅ 可(S2-1 证据) |
+| "prd2proto schemas artifact-base 继承 100%(7/7)" | ✅ 可(S2-2 证据) |
+| "DesignOS 已稳定达到资深设计师水准" | ❌ **不可** — 全局 KR1.1/2.1/2.3/3.5 等多项处于 `[目标阈值]`/`[待验证阈值]` |
+| "uxeval / ai-analytics / ip-design 已接入 kernel quality_gates" | ❌ **不可** — 实际是 `gate:` 暂停门,无 runtime |
+| "brand-creative 已可用" | ❌ **不可** — KR-B1 当前 46%,未达最低线 50% |
+| "trial 节省工时 50%" | ❌ **不可** — KR2.2 是目标阈值,无 trial 实测数据 |
+
+---
+
+## 7. 核心原则(本报告内化)
 
 | 原则 | 含义 |
 |---|---|
@@ -363,7 +511,7 @@
 
 ---
 
-## 7. 后续(S2-H2 / S2-H3 候选,不在本批)
+## 8. 后续(S2-H2 / S2-H3 候选,不在本批)
 
 **S2-H2(Golden Output Templates)**:
 - 为每个 skill 写 1 份"中阶可用"档样板(synthetic golden case),不引入真实业务数据
