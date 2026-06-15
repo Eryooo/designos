@@ -30,6 +30,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得声称"已生成完整推理资产链"
 - **traceability_requirement**: schema 校验结果须记入 stage run-report，失败 stage id 可追溯
+- **self_review_question**: 当前 stage 的 artifact 是否通过对应 `*.schema.json` 校验，且校验失败时已阻断进入下一 stage？
 
 ---
 
@@ -49,6 +50,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得声称"每个设计决策都可追溯"
 - **traceability_requirement**: traceability_map 必须覆盖全部 P0 决策点
+- **self_review_question**: 每个关键设计决策（IA/页面/组件/状态）是否在 traceability_map 中链接到上游 artifact_id，而非孤立存在？
 
 ---
 
@@ -68,6 +70,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得声称"生成生产级代码"
 - **traceability_requirement**: 每处样式值可追溯到 design_tokens.json 条目
+- **self_review_question**: 生成代码是否全部引用 design token 与组件库，无任何硬编码颜色/尺寸或非组件库 div？若有则是否已被 code-constraint-gate 阻断？
 
 ---
 
@@ -87,6 +90,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 见 detection_signal 全部禁词
 - **traceability_requirement**: 能力声明须与 status.matrix maturity 一致
+- **self_review_question**: 当前文档/输出是否命中任一 not_allowed_claims（完全自动化/生产就绪/已达资深），若命中是否已改为诚实边界表述并阻断发布？
 
 ---
 
@@ -106,6 +110,7 @@
 - **delivery_decision**: gap
 - **not_allowed_claims**: 不得声称"输入完整"
 - **traceability_requirement**: 每个 gap 链接到受影响的下游 stage
+- **self_review_question**: PRD 缺失的信息是否已全部记入 requirement_inventory 的 gaps，而不是被静默脑补？若有脑补是否需 gap/rework？
 
 ---
 
@@ -125,6 +130,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得把推断当事实陈述
 - **traceability_requirement**: 推断字段可追溯到推断依据
+- **self_review_question**: 所有推断内容是否已进入 inferred_fields 列表、assumptions 是否带 risk_if_wrong，而非以确定语气陈述？若缺标注是否需 degrade？
 
 ---
 
@@ -144,6 +150,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得声称"完整 18-stage 推理链"（除非真跑完）
 - **traceability_requirement**: run-report 记录每个 stage 完成状态
+- **self_review_question**: 18 stage（designer-dsl 17）是否全部产出对应 artifact，若有跳过/提前终止的 stage 是否已标 gap 并降级"完整推理链"声明？
 
 ---
 
@@ -163,6 +170,7 @@
 - **delivery_decision**: warn
 - **not_allowed_claims**: 不得声称"状态全覆盖"
 - **traceability_requirement**: 每个状态可追溯到 interaction-state-coverage 规则
+- **self_review_question**: 关键页面/组件的状态矩阵是否覆盖 loading/empty/error/权限态等边缘态，缺失的是否已标 gap 并 warn？
 
 ---
 

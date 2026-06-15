@@ -31,6 +31,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得把无证据主观判断当作正式 issue
 - **traceability_requirement**: evidence path 必须实际存在于 evidence/ 目录
+- **self_review_question**: 每条 issue 是否至少绑定 1 条实际存在的 evidence，无证据的 issue 是否已移入 unverified_issues 而非当正式 issue 阻断交付？
 
 ---
 
@@ -50,6 +51,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: —
 - **traceability_requirement**: 敏感信息打码记录可审计
+- **self_review_question**: 报告与截图证据是否经 scan-sensitive 0 命中，无真实账号/PII/完整内部 URL，若有则是否已打码并阻断交付？
 
 ---
 
@@ -69,6 +71,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得自定义严重等级体系
 - **traceability_requirement**: 每个 severity 可追溯到 severity-rubric 判定依据
+- **self_review_question**: 所有 issue 的 severity 是否都在 `critical/major/minor/suggestion` 4 档枚举内，存在"高/中/P0"等非法值是否已阻断？
 
 ---
 
@@ -88,6 +91,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得把吐槽当建议
 - **traceability_requirement**: 建议链接到对应 issue 与 heuristic 原则
+- **self_review_question**: 每条 recommendation 是否含改什么/改成什么/为什么三要素，仅有"需优化"类空话的是否已阻断？
 
 ---
 
@@ -107,6 +111,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得把需求覆盖度当体验评估结论
 - **traceability_requirement**: 每条 issue 链接到 heuristic principle_id
+- **self_review_question**: 是否存在把"功能缺失/需求未实现"当体验问题的 issue？这类是否已标 out_of_scope 而非污染体验结论？
 
 ---
 
@@ -126,6 +131,7 @@
 - **delivery_decision**: gap
 - **not_allowed_claims**: 不得把场景错配的 issue 当确认问题
 - **traceability_requirement**: 场景-证据匹配结果记入 scene_evidence_validation
+- **self_review_question**: 每条 issue 描述的场景是否与其 evidence 截图内容一致，不匹配的是否已删除或标 [需现场验证] 移入 unverified_issues？
 
 ---
 
@@ -145,6 +151,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得在证据不足时声称"评估完整"
 - **traceability_requirement**: 交付状态可追溯到 evidence coverage 计算
+- **self_review_question**: 在 evidence 覆盖不足时,delivery 状态是否已按证据充分性降级为 fallback_safe/supplement_required，而非虚标 final_delivery_ready？
 
 ---
 
@@ -164,6 +171,7 @@
 - **delivery_decision**: warn
 - **not_allowed_claims**: 不得把无原则依据的主观偏好当 issue
 - **traceability_requirement**: 每条 issue ≥1 个 principle_id
+- **self_review_question**: 每条 issue 是否映射到至少 1 个 heuristic principle_id，无原则依据的主观偏好是否已 warn 并复核其有效性？
 
 ---
 

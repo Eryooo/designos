@@ -31,6 +31,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得声称 IP 方案"具有差异化定位"当 D2 不合格
 - **traceability_requirement**: differentiation 须链接竞品分析证据
+- **self_review_question**: 差异化是否基于竞品空白且无贬损语，D2 评为不合格时是否已阻断整方案交付？
 
 ---
 
@@ -50,6 +51,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得声称"已通过商标审查"或"无版权风险"
 - **traceability_requirement**: 风险信号链接到具体竞品/商标参考
+- **self_review_question**: 核心符号/世界观的潜在商标/版权/敏感映射风险是否已标 [待法务确认]，D6 不合格时是否已阻断且未声称"无版权风险"？
 
 ---
 
@@ -69,6 +71,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得声称"已建立完整 IP 人格"
 - **traceability_requirement**: 每个人格要素链接到品牌策略或用户洞察
+- **self_review_question**: persona_profile 是否含行为模式/动机/恐惧/成长弧/关系网五要素，仅有 MBTI 标签或口头禅（D8 不合格）时是否已阻断？
 
 ---
 
@@ -88,6 +91,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得把"先画图"包装为创意流程
 - **traceability_requirement**: 视觉决策须可追溯到上游策略 artifact
+- **self_review_question**: visual_spec 是否能回溯到 brand_brief 与 persona_profile（先策略后视觉），而非先画图再反推策略？若视觉先行是否已阻断返工？
 
 ---
 
@@ -107,6 +111,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得声称"提示词包可控"
 - **traceability_requirement**: 禁忌清单链接到 visual_spec.strict_avoidance
+- **self_review_question**: image_prompt_pack 是否含 ≥5 条 negative_prompt 且与 visual_spec.strict_avoidance 同步，缺负向控制时是否需 degrade？
 
 ---
 
@@ -126,6 +131,7 @@
 - **delivery_decision**: gap
 - **not_allowed_claims**: 不得在跨阶段不一致时声称"完整 IP 系统"
 - **traceability_requirement**: 每阶段产出含 keyword_lineage 链接前一阶段
+- **self_review_question**: 北极星→人格→视觉→内容的关键词链路是否环环相扣无漂移，跨阶段不一致是否已标 gap 并在 professional gap report 显式？
 
 ---
 
@@ -145,6 +151,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得把推断当确定结论
 - **traceability_requirement**: 每个推断有依据来源（用户研究/竞品/品牌资产/参考案例）
+- **self_review_question**: 关键决策（北极星/人格关键词/主形/色彩配比）的推断是否都标 [inferred] 并记入 inferences[]，标注覆盖率不足是否需 degrade？
 
 ---
 
@@ -164,6 +171,7 @@
 - **delivery_decision**: warn
 - **not_allowed_claims**: 不得在识别度不达标时声称"可商用"
 - **traceability_requirement**: 识别度测试结果记入 visual_spec.recognition_test
+- **self_review_question**: 核心符号是否通过 32px 识别度测试并含四级简化，D4 低阶时是否已 warn 并标 gap（未声称可商用）？
 
 ---
 

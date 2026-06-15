@@ -29,6 +29,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得把推断包装为已验证事实
 - **traceability_requirement**: 每条结论可追溯到 collected_data 具体条目
+- **self_review_question**: 每条 finding/数据是否有 evidence_refs 指向真实存在的 collected_data 条目，无来源的具体数据是否已删除或标 [inferred] 并阻断交付？
 
 ---
 
@@ -48,6 +49,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得在 schema 不合规时声称"上游产出已交付"
 - **traceability_requirement**: 必填字段值可追溯到 collected_data 或 inferred 依据
+- **self_review_question**: design_strategy.target_audience/business_goal 与 user_persona 的 role/goals/pain_points 是否全部非空且符合 schema，缺失是否已阻断交付（下游注入会失效）？
 
 ---
 
@@ -67,6 +69,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得把虚高 coverage 当通过判据
 - **traceability_requirement**: coverage 计算过程可审计
+- **self_review_question**: data_completeness_assessment.coverage 是否真实反映已采集资料量，coverage<0.70 是否已触发 QG1 硬停而非被虚标过线？
 
 ---
 
@@ -86,6 +89,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得声称 ai-analytics 可产出代码或评估结论
 - **traceability_requirement**: 输出类型须与 SKILL.md outputs 声明一致
+- **self_review_question**: 输出是否仅含分析与上游策略，未越界产出代码/原型/问题清单+严重度（下游 prd2proto/uxeval 职责）？若越界是否已阻断？
 
 ---
 
@@ -105,6 +109,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得把推断当事实
 - **traceability_requirement**: 推断可追溯到推断依据（行业数据/类比/用户访谈）
+- **self_review_question**: 所有推断内容是否已标 [inferred] 并附依据，把推断写成确定陈述的是否需 degrade？
 
 ---
 
@@ -124,6 +129,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得把空泛画像当用户研究产物
 - **traceability_requirement**: 每条 pain_point 可追溯到 collected_data
+- **self_review_question**: user_persona 的 goals/pain_points 是否场景化且有证据来源，仅有"效率低/体验差"类口号的是否需 degrade 并补充？
 
 ---
 
@@ -143,6 +149,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得把单维度对比当深度竞品分析
 - **traceability_requirement**: 每个 cell 可追溯到 collected_data
+- **self_review_question**: comparison_matrix 是否覆盖 ≥4 个关键维度（定价/功能/视觉/传播），维度过少或大量 TBD 是否需 degrade 并标 gap？
 
 ---
 
@@ -162,6 +169,7 @@
 - **delivery_decision**: warn
 - **not_allowed_claims**: 不得使用数据不足以支撑的方法论结论
 - **traceability_requirement**: methodology 选择有 why+applies_to 记录
+- **self_review_question**: 所选 methodology（如 KANO/JTBD）是否有对应输入数据支撑，数据不足以支撑的是否已 warn 并改选低数据要求方法？
 
 ---
 

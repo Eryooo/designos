@@ -31,6 +31,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得把形容词堆砌当品牌策略
 - **traceability_requirement**: 策略字段链接到 competitive-analysis 与用户洞察
+- **self_review_question**: brand_brief 是否含可消费的差异化定位+目标人群+品牌承诺，仅有形容词堆砌（策略空心化）时是否已阻断交付？
 
 ---
 
@@ -50,6 +51,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得声称"已通过商标审查"或"无法务风险"
 - **traceability_requirement**: 风险信号链接到具体竞品/已注册商标参考
+- **self_review_question**: logo/名称的商标冲突风险是否已标 [待法务确认]，存在明显冲突信号未标注时是否已阻断且未声称"无法务风险"？
 
 ---
 
@@ -69,6 +71,7 @@
 - **delivery_decision**: block
 - **not_allowed_claims**: 不得在跨 sub-skill 不一致时声称"完整品牌系统"
 - **traceability_requirement**: 每个 sub-skill 产出含 keyword_lineage 引用 brand-strategy
+- **self_review_question**: 各 sub-skill（logo/VI/voice）关键词是否与 brand-strategy 一致，跨 sub-skill 漂移 ≥30%（如策略"高端简约"vs logo 大量装饰）时是否已阻断并回 brand-strategy 对齐？
 
 ---
 
@@ -88,6 +91,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得声称"brand-creative 全链路可用"或"13 sub-skill 全部 pipeline-ready"
 - **traceability_requirement**: status.matrix 与实际 pipeline 数一致
+- **self_review_question**: 13 sub-skill 中实际有 pipeline 的比例是否 ≥50%（KR-B1 最低线），未达时是否已 degrade 声明（不冒充更高 maturity / 未声称"全链路可用"）？
 
 ---
 
@@ -107,6 +111,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得用浅竞品分析支撑"差异化已验证"
 - **traceability_requirement**: differentiation 必须链接 ≥ 4 维 competitive_matrix
+- **self_review_question**: competitor_matrix 是否覆盖 ≥4 个关键维度（visual_style/tone/positioning/pricing），维度过浅或大量 TBD 时是否需 degrade 并标 gap？
 
 ---
 
@@ -126,6 +131,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得把推断当已验证结论
 - **traceability_requirement**: 推断可追溯到推断依据
+- **self_review_question**: 推断字段是否标 [inferred] 且 differentiation.basis 准确（基于真实 matrix 还是 inferred），未标注或伪装已验证的是否需 degrade？
 
 ---
 
@@ -145,6 +151,7 @@
 - **delivery_decision**: degrade
 - **not_allowed_claims**: 不得把不完整 VI 当"品牌识别系统"
 - **traceability_requirement**: vi_manual 各模块链接到上游 sub-skill 产出
+- **self_review_question**: vi_manual 是否覆盖 logo/颜色/字体/辅助图形/场景应用 5 大模块（≥80% 完整度），缺模块时是否需 degrade 并标 gap？
 
 ---
 
@@ -164,6 +171,7 @@
 - **delivery_decision**: warn
 - **not_allowed_claims**: 不得在 FM 自检命中时声称"无失败模式"
 - **traceability_requirement**: 自检结果可审计
+- **self_review_question**: brand-creative-failure-modes 自检命中的严重级 FM 是否已记入 gaps，未记录时是否需 warn 并复核 maturity 声明？
 
 ---
 
