@@ -30,6 +30,46 @@
 | S-003 | existing_artifact | `<填:ai-analytics 上游 design_strategy(可选)>` | yes / no | high / medium / low / unknown | `<填>` |
 | S-004 | design_file | `<填:Figma/MasterGo DSL(designer-dsl 模式必需)>` | yes / no | high / medium / low / unknown | `<填>` |
 
+### 2a. Input Document Type Classification (S2-H9 FB-01)
+
+> **目的**:显式识别输入文档类型,区分 PRD / MRD / roadmap / strategy brief,早期判定能否支撑完整 prd2proto 产出。roadmap / MRD 可用于 design_objectives / requirement_inventory 初稿,但不可宣称可生成完整 prototype。
+
+| 字段 | 取值(枚举) | 说明 |
+|---|---|---|
+| input_document_type | prd | 含功能规格、页面布局、状态、验收口径的产品需求文档 |
+|  | mrd | 市场需求文档(定位/竞品/策略),未到功能/页面级 |
+|  | roadmap | 执行 roadmap / 项目台账(里程碑+条目名+负责人+状态),缺需求正文 |
+|  | strategy_brief | 业务简报/战略文档,缺详细需求 |
+|  | mixed | 混合(部分 PRD 正文 + 部分 roadmap / MRD) |
+|  | unknown | 无法判定 |
+| document_type_confidence | high / medium / low | 判定置信度 |
+| document_type_reason | `<填:为何判定为此类型,关键特征>` | 推理依据 |
+| minimum_prd_requirements_missing | `<填:缺哪类 PRD 内容,如页面清单/流程步骤/状态枚举/验收口径>` | 与 prd2proto 必需输入比对 |
+| can_generate_prototype_from_input | yes | 可生成完整 prototype(页面+交互+状态) |
+|  | partial | 可生成 design_objectives / requirement_inventory,但不可完整 prototype |
+|  | no | 当前输入不足以产出任何 prd2proto 产物 |
+
+### 规则(Trial-001 FB-01 护栏)
+
+- 若 `input_document_type = roadmap`,且缺页面清单/流程步骤/需求正文 → `can_generate_prototype_from_input = partial`(最多 → needs_user_clarification)。
+- 若 `input_document_type = mrd | strategy_brief` → `can_generate_prototype_from_input = no`(除非同步提供 PRD 正文)。
+- 若 `input_document_type = mixed`,必须在 `document_type_reason` 列出"哪部分是 PRD(页面/流程),哪部分只是 roadmap/MRD"。
+- 若 `can_generate_prototype_from_input = partial | no`,必须填写 `minimum_prd_requirements_missing`(对齐 §7 Gap Ledger 与 §8 Recommended Missing Fields)。
+- **守门规则**(关联 §9 input_decision):
+  - `input_document_type = prd` 且 `can_generate_prototype_from_input = yes` → 允许 `input_decision = ready | ready_with_assumptions`。
+  - `input_document_type ∈ {roadmap, mrd, strategy_brief}` → `input_decision` 不得为 `ready`;至多 `needs_user_clarification`。
+  - `can_generate_prototype_from_input = no` → `input_decision = blocked_insufficient_input`。
+
+### 示例(synthetic only)
+
+```
+input_document_type: roadmap
+document_type_confidence: high
+document_type_reason: 文档含季度里程碑、需求条目名称("某组件 PRD")、负责人、状态,但无页面布局、流程步骤、状态枚举、验收口径等 PRD 正文内容。
+minimum_prd_requirements_missing: 页面清单/IA、核心流程端到端步骤、需求功能点正文、交互状态枚举、验收口径。
+can_generate_prototype_from_input: partial (可产 design_objectives 与 requirement_inventory 条目级,但不可完整 prototype)
+```
+
 ---
 
 ## 3. Required Input Check
