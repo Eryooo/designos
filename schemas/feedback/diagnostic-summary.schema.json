@@ -60,20 +60,6 @@
       "description": "S2-H9 FB-01: prd2proto 是否可从当前输入生成完整 prototype",
       "enum": ["yes", "partial", "no"]
     },
-    "evidence_type": {
-      "type": "string",
-      "description": "S2-H9 FB-02: uxeval 证据类型分类",
-      "enum": ["product_ui_screenshot", "web_capture", "prototype_capture", "document_screenshot", "pdf_page_image", "prd_text", "mixed", "unknown"]
-    },
-    "evidence_type_confidence": {
-      "type": "string",
-      "enum": ["high", "medium", "low"]
-    },
-    "can_support_ux_evaluation": {
-      "type": "string",
-      "description": "S2-H9 FB-02: uxeval 当前证据是否可支持完整 UX 评估",
-      "enum": ["yes", "partial", "no"]
-    },
     "checkpoint_decisions": {
       "type": "array",
       "items": {

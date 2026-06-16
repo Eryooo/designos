@@ -30,49 +30,6 @@
 | S-003 | url | `<填:web 模式 sanitized demo URL>` | yes / no | high / medium / low / unknown | `<填:严禁真实生产 URL>` |
 | S-004 | text_brief | `<填:scope_md / screens-description.md>` | yes / no | high / medium / low / unknown | `<填>` |
 
-### 2a. Evidence Type Classification (S2-H9 FB-02)
-
-> **目的**:显式识别证据类型,区分产品 UI 截图 / web capture / 文档位图 / PRD 文本,确保 uxeval 只在有真实界面证据时启动评估。文档截图/PDF 位图/PRD 文本可用于需求理解,但不可作为 UX 问题的证据。
-
-| 字段 | 取值(枚举) | 说明 |
-|---|---|---|
-| evidence_type | product_ui_screenshot | 产品真实界面截图(client 模式:桌面/移动端/Web 应用) |
-|  | web_capture | Web 模式实时采集(浏览器 DOM / 页面截图) |
-|  | prototype_capture | 原型工具/Figma 高保真原型截图 |
-|  | document_screenshot | 文档页面截图(需求文档/PPT/Word) |
-|  | pdf_page_image | PDF 分页位图(文档插图) |
-|  | prd_text | PRD / 需求说明纯文本 |
-|  | mixed | 混合(部分 UI 截图 + 部分文档位图) |
-|  | unknown | 无法判定 |
-| evidence_type_confidence | high / medium / low | 判定置信度 |
-| evidence_type_reason | `<填:为何判定为此类型,关键特征(如截图含应用 chrome/浏览器地址栏 vs 文档页眉页脚)>` | 推理依据 |
-| can_support_ux_evaluation | yes | 可支持完整 UX 启发式评估(有真实界面+状态) |
-|  | partial | 可用于需求理解/评估准备,但不可作为 UX 问题证据 |
-|  | no | 当前证据不足以启动任何 UX 评估 |
-| missing_ui_evidence | `<填:需补哪些页面/状态截图,如核心流程关键页+空/错/加载态>` | 与 uxeval 必需证据比对 |
-
-### 规则(Trial-001 FB-02 护栏)
-
-- 若 `evidence_type ∈ {product_ui_screenshot, web_capture, prototype_capture}` 且含关键页状态 → `can_support_ux_evaluation = yes`。
-- 若 `evidence_type ∈ {document_screenshot, pdf_page_image, prd_text}` → `can_support_ux_evaluation = partial`(仅需求理解,不可作 UX 问题证据)。
-- 若 `evidence_type = mixed`,必须在 `evidence_type_reason` 列出"哪部分是 UI 截图(可评估),哪部分只是文档位图(不可评估)"。
-- 若 `can_support_ux_evaluation = partial | no`,必须填写 `missing_ui_evidence`(对齐 §7 Gap Ledger 与 §8 Recommended Missing Fields)。
-- **守门规则**(关联 §9 input_decision / FM-UXEVAL-001 / FM-UXEVAL-003):
-  - `evidence_type ∈ {product_ui_screenshot, web_capture, prototype_capture}` 且含状态 → 允许 `input_decision = ready | ready_with_assumptions`。
-  - `evidence_type ∈ {document_screenshot, pdf_page_image, prd_text}` → `input_decision` 不得为 `ready`;至多 `needs_user_clarification`;若无其他 UI 证据 → `blocked_insufficient_input`(输出 `delivery_state = supplement_required`)。
-  - `can_support_ux_evaluation = no` → `input_decision = blocked_insufficient_input`(FM-UXEVAL-001 预防,禁止产出无证据 issue)。
-  - **禁止**:把 PRD 推断/文档位图当作界面证据产出 UX issue(FM-UXEVAL-003 守门)。
-
-### 示例(synthetic only)
-
-```
-evidence_type: pdf_page_image
-evidence_type_confidence: high
-evidence_type_reason: 现有图像为 PDF 分页位图(文档页眉页脚/文档排版样式),无应用 chrome/UI 控件,判定为文档截图而非产品界面。
-can_support_ux_evaluation: no
-missing_ui_evidence: 核心流程(如统一待办处理/出差报销/全局搜索)关键页截图;关键页空态/错误态/加载态/无权限态截图;至少 1 条核心流程的端到端截图序列。
-```
-
 ---
 
 ## 3. Required Input Check

@@ -30,9 +30,10 @@
 
 ---
 
-## 2a. Input Type / Evidence Type Classification (S2-H9 FB-01/FB-02, 可选)
+## 2a. Input Document Type Classification (S2-H9 FB-01, prd2proto only)
 
-> **仅适用于 prd2proto / uxeval**。显式记录输入文档类型(prd2proto)或证据类型(uxeval),帮助诊断"为何不可完整产出"。
+> **仅适用于 prd2proto**。显式记录输入文档类型,帮助诊断"为何不可完整产出 prototype"(如输入是 roadmap/MRD 而非 PRD 正文)。
+> uxeval 的 evidence_type 分类已 defer 至 backlog(见 `docs/audits/S2-H9.1-SCOPE-CORRECTION.md`),当前 PRD-only 测试路径不处理。
 
 ### prd2proto (FB-01)
 
@@ -42,15 +43,6 @@
 | document_type_confidence | `<填:high / medium / low>` |
 | can_generate_prototype_from_input | `<填:yes / partial / no>` |
 | minimum_prd_requirements_missing | `<填:缺哪类 PRD 内容,如页面清单/流程步骤/状态枚举>` |
-
-### uxeval (FB-02)
-
-| 字段 | 值 |
-|---|---|
-| evidence_type | `<填:product_ui_screenshot / web_capture / prototype_capture / document_screenshot / pdf_page_image / prd_text / mixed / unknown>` |
-| evidence_type_confidence | `<填:high / medium / low>` |
-| can_support_ux_evaluation | `<填:yes / partial / no>` |
-| missing_ui_evidence | `<填:需补哪些页面/状态截图>` |
 
 ---
 
