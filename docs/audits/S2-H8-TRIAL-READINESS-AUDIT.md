@@ -160,7 +160,7 @@ git ls-files | grep -E "(designos-workspace|private|evidence|\.pdf|\.zip|\.har|t
 
 ### 3.6 External Workspace Isolation
 
-**Workspace path**: `/Users/young/Documents/Codex/designos-workspace/`
+**Workspace path**: `<DESIGNOS_WORKSPACE_ROOT>/`
 
 **Result**: ✅ **外部 workspace 存在，且未进入 git**
 

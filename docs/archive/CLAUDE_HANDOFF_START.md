@@ -7,23 +7,23 @@
 把下面整段作为 Claude Code 新会话的第一条消息：
 
 ```text
-请在 /Users/young/Documents/Codex/Agent-design-webmode 中接管后续工作，但不要重新发散分析，也不要从头定义方向。你当前接手的是一个已经完成 client mode V1.5 冻结的 DesignOS/UXEval 平台项目。
+请在 <DESIGNOS_REPO_ROOT> 中接管后续工作，但不要重新发散分析，也不要从头定义方向。你当前接手的是一个已经完成 client mode V1.5 冻结的 DesignOS/UXEval 平台项目。
 
 先读取这些本地真源文件：
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/handoff/governance/01-claude-code-opus-governor-spec.md
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/handoff/governance/02-skills-factory-template-master-spec.md
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/handoff/governance/03-skills-development-best-practices-and-anti-patterns.md
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/handoff/theory/01-client-mode-90pct-metric-tree.md
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/handoff/governance/04-designos-phase-order-and-stop-conditions.md
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/handoff/theory/03-skills-factory-roadmap.md
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/handoff/history/01-agent-design-master-repair-charter.md
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/handoff/next-skills/01-six-skills-deep-analysis.md
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/handoff/next-skills/02-ADR-003-skill-matrix-convergence-and-groups.md
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/handoff/next-skills/03-ADR-002-skill-matrix-playwright-sharing.md
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/handoff/next-skills/04-output-types.md
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md
-- /Users/young/Documents/Codex/Agent-design-webmode/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md
+- <DESIGNOS_REPO_ROOT>/docs/handoff/governance/01-claude-code-opus-governor-spec.md
+- <DESIGNOS_REPO_ROOT>/docs/handoff/governance/02-skills-factory-template-master-spec.md
+- <DESIGNOS_REPO_ROOT>/docs/handoff/governance/03-skills-development-best-practices-and-anti-patterns.md
+- <DESIGNOS_REPO_ROOT>/docs/handoff/theory/01-client-mode-90pct-metric-tree.md
+- <DESIGNOS_REPO_ROOT>/docs/handoff/governance/04-designos-phase-order-and-stop-conditions.md
+- <DESIGNOS_REPO_ROOT>/docs/handoff/theory/03-skills-factory-roadmap.md
+- <DESIGNOS_REPO_ROOT>/docs/handoff/history/01-agent-design-master-repair-charter.md
+- <DESIGNOS_REPO_ROOT>/docs/handoff/next-skills/01-six-skills-deep-analysis.md
+- <DESIGNOS_REPO_ROOT>/docs/handoff/next-skills/02-ADR-003-skill-matrix-convergence-and-groups.md
+- <DESIGNOS_REPO_ROOT>/docs/handoff/next-skills/03-ADR-002-skill-matrix-playwright-sharing.md
+- <DESIGNOS_REPO_ROOT>/docs/handoff/next-skills/04-output-types.md
+- <DESIGNOS_REPO_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json
+- <DESIGNOS_REPO_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md
+- <DESIGNOS_REPO_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md
 
 然后遵守以下规则：
 1. 不要重新发散产品方向。以上本地文件是单一真源。

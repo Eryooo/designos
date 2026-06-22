@@ -6,7 +6,7 @@
 
 ## 0. 当前坐标（每批必读）
 
-- **工作区**:`/Users/young/Documents/Codex/Agent-design-webmode`
+- **工作区**:`<DESIGNOS_REPO_ROOT>`
 - **当前分支**:`feature/senior-designer-paradigm-engine`(从远端干净基线分出,不含已暂停的 acceptance archetype)
 - **当前路线**:`K0 → K1 → I0 → I1`
   - K0 = 共享知识资产层架构基线(已完成)

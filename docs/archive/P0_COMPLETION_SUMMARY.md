@@ -151,7 +151,7 @@ quality reports
 
 ```bash
 # 等 VPN 连接后执行：
-cd /Users/young/Documents/Codex/Agent-design-webmode
+cd <DESIGNOS_REPO_ROOT>
 git checkout .claude/settings.local.json  # 清理临时文件
 git push -u origin feature/senior-designer-paradigm-engine
 ```

@@ -18,7 +18,7 @@
 10. `next-skills/01-six-skills-deep-analysis.md`
 11. `next-skills/02-ADR-003-skill-matrix-convergence-and-groups.md`
 12. `next-skills/04-output-types.md`
-13. `/Users/young/Documents/Codex/Agent-design-webmode/CLAUDE_HANDOFF_START.md`
+13. `<DESIGNOS_REPO_ROOT>/CLAUDE_HANDOFF_START.md`
 
 ## 目录说明
 

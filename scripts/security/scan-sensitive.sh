@@ -18,6 +18,10 @@
 #   - 公开仓库不含真实敏感词（避免脚本本身成为污染源）
 #   - 真实词表 .designos-private-evidence/sensitive-words.txt 在 .gitignore
 #   - 通用正则规则内置（公开可见，不损隐私）
+#
+# S2-SEC-1 修复：
+#   - macOS BSD grep 不支持 -P (PCRE)，改用 Python 3 re 模块作为跨平台正则引擎
+#   - 正则引擎错误必须返回 exit 2，不得静默吞掉
 
 set -uo pipefail
 
@@ -27,19 +31,35 @@ PRIVATE_WORDLIST=".designos-private-evidence/sensitive-words.txt"
 # 这些是**结构性规则**，不含具体业务词，所以可以公开
 GENERIC_PATTERNS=(
   # 凭证/密钥结构（不论上下文）
-  '(?i)(api[_-]?key|secret|token|password|access[_-]?token)\s*[:=]\s*["'\''][a-zA-Z0-9_\-]{16,}["'\'']'
+  '(?i)(api[_-]?key|secret|token|password|access[_-]?token)\s*[:=]\s*["'"'"'][a-zA-Z0-9_\-]{16,}["'"'"']'
   # 内部 URL / 内部代理（结构）
-  # 注意：具体的真实内部域名只放在私有词表 .designos-private-evidence/，
-  # 公开脚本仅保留通用结构正则，不硬编码任何真实域名。
   'http://[a-z]+\.internal'
   '(?i)internal[_-](corp|company|domain)\.com'
   # 本地绝对路径（暴露环境）
   '/Users/[a-zA-Z]+/Documents/'
   '/home/[a-zA-Z]+/'
-  '\bC:\\\\Users\\\\'
+  '\\bC:\\\\Users\\\\'
   # Git LFS large binary 不该提交的扩展（潜在数据泄露）
   '\.(pem|key|p12|pfx|kdb|kdbx)$'
 )
+
+# === Python 3 正则引擎（跨平台）===
+python_regex_scanner() {
+  local pattern="$1"
+  local file="$2"
+  python3 - "$pattern" "$file" <<'EOFPY'
+import sys, re
+pattern, filepath = sys.argv[1], sys.argv[2]
+try:
+    with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+        for i, line in enumerate(f, 1):
+            if re.search(pattern, line):
+                print(f"{i}:{line.rstrip()}")
+except Exception as e:
+    print(f"[SCANNER-ERROR] {e}", file=sys.stderr)
+    sys.exit(2)
+EOFPY
+}
 
 # === 用户私有词表加载 ===
 USER_WORDLIST_LINES=""
@@ -72,9 +92,15 @@ scan_text() {
   local tmpf=$(mktemp)
   eval "$content_cmd" > "$tmpf" 2>/dev/null
 
-  # 通用正则（公开规则）
+  # 通用正则（公开规则）- 用 Python re 替代 grep -P
   for pat in "${GENERIC_PATTERNS[@]}"; do
-    matches=$(grep -EnP "$pat" "$tmpf" 2>/dev/null || true)
+    matches=$(python_regex_scanner "$pat" "$tmpf" 2>&1)
+    scan_exit=$?
+    if [ $scan_exit -eq 2 ]; then
+      echo "[ERROR] 正则引擎错误 (pattern: ${pat:0:40}...): $matches" >&2
+      rm -f "$tmpf"
+      exit 2
+    fi
     if [ -n "$matches" ]; then
       echo "$matches" | while IFS= read -r line; do
         echo "[GENERIC] $label: $line" >> "$hits_file_tmp"
@@ -84,10 +110,9 @@ scan_text() {
 
   # 用户私有词表：用 grep -F 一次扫所有词（fast-grep）
   if [ -n "$USER_WORDLIST_LINES" ]; then
-    # 把词表临时存文件，用 grep -F -f 一次性扫
     local wfile=$(mktemp)
     echo "$USER_WORDLIST_LINES" > "$wfile"
-    matches=$(grep -nFf "$wfile" "$tmpf" 2>/dev/null || true)
+    matches=$(grep -nF -f "$wfile" "$tmpf" 2>/dev/null || true)
     if [ -n "$matches" ]; then
       echo "$matches" | while IFS= read -r line; do
         # 不输出原词，避免日志污染
@@ -104,7 +129,6 @@ case "$mode" in
   working)
     echo "🔍 扫描当前 working tree（git ls-files）..."
     [ -z "$USER_WORDLIST_LINES" ] && echo "⚠️  $PRIVATE_WORDLIST 不存在，仅用通用规则扫描"
-    # 用 -z（NUL 分隔）避免 git 对非 ASCII（中文）文件名加引号转义而被静默跳过
     while IFS= read -r -d '' f; do
       [ -f "$f" ] || continue
       scan_text "$f" "cat \"$f\""
@@ -125,10 +149,9 @@ case "$mode" in
   history)
     echo "🔍 扫描整个 git history（耗时）..."
     [ -z "$USER_WORDLIST_LINES" ] && echo "⚠️  $PRIVATE_WORDLIST 不存在，仅用通用规则扫描"
-    # 用 git log -p 拿全部 diff 内容
     while IFS= read -r line; do
       for pat in "${GENERIC_PATTERNS[@]}"; do
-        if echo "$line" | grep -EqP "$pat"; then
+        if echo "$line" | python3 -c "import sys,re; sys.exit(0 if re.search(r'$pat', sys.stdin.read()) else 1)" 2>/dev/null; then
           echo "[GENERIC-HIST] $line" | head -c 200 >> "$hits_file_tmp"
           echo "" >> "$hits_file_tmp"
         fi
