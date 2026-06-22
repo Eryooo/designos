@@ -74,13 +74,13 @@
 
 证据：
 
-- `README.md` 仍写 `v0.2.0`，[README.md](/Users/young/.designos/skills/uxeval/README.md:4)
-- `pipeline.yaml` 已是 `0.3.1`，[pipeline.yaml](/Users/young/.designos/skills/uxeval/pipeline.yaml:2)
-- `README.md` 说是 `7 条评估宪法`，[README.md](/Users/young/.designos/skills/uxeval/README.md:104)
-- `SKILL.md` 写 `核心 8 条`，[SKILL.md](/Users/young/.designos/skills/uxeval/SKILL.md:129)
-- `constitution.md` 也明确是 `8 条规则`，[constitution.md](/Users/young/.designos/skills/uxeval/constitution.md:3)
-- 测试却只校验 `1-7`，[test_pipeline_integration.py](/Users/young/.designos/skills/uxeval/tests/test_pipeline_integration.py:40)
-- `README.md` 的输出编号仍停留在 `04-问题报告`，[README.md](/Users/young/.designos/skills/uxeval/README.md:82)
+- `README.md` 仍写 `v0.2.0`，[README.md](<DESIGNOS_HOME>/skills/uxeval/README.md:4)
+- `pipeline.yaml` 已是 `0.3.1`，[pipeline.yaml](<DESIGNOS_HOME>/skills/uxeval/pipeline.yaml:2)
+- `README.md` 说是 `7 条评估宪法`，[README.md](<DESIGNOS_HOME>/skills/uxeval/README.md:104)
+- `SKILL.md` 写 `核心 8 条`，[SKILL.md](<DESIGNOS_HOME>/skills/uxeval/SKILL.md:129)
+- `constitution.md` 也明确是 `8 条规则`，[constitution.md](<DESIGNOS_HOME>/skills/uxeval/constitution.md:3)
+- 测试却只校验 `1-7`，[test_pipeline_integration.py](<DESIGNOS_HOME>/skills/uxeval/tests/test_pipeline_integration.py:40)
+- `README.md` 的输出编号仍停留在 `04-问题报告`，[README.md](<DESIGNOS_HOME>/skills/uxeval/README.md:82)
 - 本次真实运行实际产物已经到 `07-问题报告`，[run.yaml](<LEGACY_DESIGONOS_ROOT>/runs/20260521-uxeval-client-01/run.yaml:20)
 
 影响：
@@ -100,12 +100,12 @@
 证据：
 
 - 当前环境直接运行测试失败：`No module named pytest`
-- `test_pipeline_integration.py` 仍依赖不存在的 stage `heuristic-detection`，[test_pipeline_integration.py](/Users/young/.designos/skills/uxeval/tests/test_pipeline_integration.py:170)
-- 同一测试还断言 `heuristic-detection` 是 tool stage，[test_pipeline_integration.py](/Users/young/.designos/skills/uxeval/tests/test_pipeline_integration.py:189)
-- `pipeline.yaml` 里根本没有这个 stage，[pipeline.yaml](/Users/young/.designos/skills/uxeval/pipeline.yaml:26)
-- 测试断言 `skill.config.version == "1.0.0"`，[test_pipeline_integration.py](/Users/young/.designos/skills/uxeval/tests/test_pipeline_integration.py:160)
-- 实际 pipeline 版本是 `0.3.1`，[pipeline.yaml](/Users/young/.designos/skills/uxeval/pipeline.yaml:2)
-- Promptfoo 配置引用的 `eval/judges/parse_json.js` 文件缺失，[promptfoo.yaml](/Users/young/.designos/skills/uxeval/eval/promptfoo.yaml:26)
+- `test_pipeline_integration.py` 仍依赖不存在的 stage `heuristic-detection`，[test_pipeline_integration.py](<DESIGNOS_HOME>/skills/uxeval/tests/test_pipeline_integration.py:170)
+- 同一测试还断言 `heuristic-detection` 是 tool stage，[test_pipeline_integration.py](<DESIGNOS_HOME>/skills/uxeval/tests/test_pipeline_integration.py:189)
+- `pipeline.yaml` 里根本没有这个 stage，[pipeline.yaml](<DESIGNOS_HOME>/skills/uxeval/pipeline.yaml:26)
+- 测试断言 `skill.config.version == "1.0.0"`，[test_pipeline_integration.py](<DESIGNOS_HOME>/skills/uxeval/tests/test_pipeline_integration.py:160)
+- 实际 pipeline 版本是 `0.3.1`，[pipeline.yaml](<DESIGNOS_HOME>/skills/uxeval/pipeline.yaml:2)
+- Promptfoo 配置引用的 `eval/judges/parse_json.js` 文件缺失，[promptfoo.yaml](<DESIGNOS_HOME>/skills/uxeval/eval/promptfoo.yaml:26)
 
 影响：
 
@@ -122,12 +122,12 @@
 
 证据：
 
-- `constitution.md` 定义了 8 条规则，[constitution.md](/Users/young/.designos/skills/uxeval/constitution.md:8)
-- 但示例 `verify_constitution` 只检查 1、2、3、5、6、7，未覆盖规则 4 和 8，[constitution.md](/Users/young/.designos/skills/uxeval/constitution.md:177)
-- `SKILL.md` 要求 Stage 6 执行 8 条宪法校验，[SKILL.md](/Users/young/.designos/skills/uxeval/SKILL.md:114)
-- `constitution.md` 下方又写成 `7 步检查`，[constitution.md](/Users/young/.designos/skills/uxeval/constitution.md:205)
-- Prompt 05b 说敏感信息检测后“不阻塞流程，让 heuristic-detection 决定是否打码”，但 `heuristic-detection` stage 并不存在，[05b-screenshot-analysis.md](/Users/young/.designos/skills/uxeval/prompts/05b-screenshot-analysis.md:112)
-- 宪法要求 evidence 路径不能包含真实用户名，[constitution.md](/Users/young/.designos/skills/uxeval/constitution.md:45)
+- `constitution.md` 定义了 8 条规则，[constitution.md](<DESIGNOS_HOME>/skills/uxeval/constitution.md:8)
+- 但示例 `verify_constitution` 只检查 1、2、3、5、6、7，未覆盖规则 4 和 8，[constitution.md](<DESIGNOS_HOME>/skills/uxeval/constitution.md:177)
+- `SKILL.md` 要求 Stage 6 执行 8 条宪法校验，[SKILL.md](<DESIGNOS_HOME>/skills/uxeval/SKILL.md:114)
+- `constitution.md` 下方又写成 `7 步检查`，[constitution.md](<DESIGNOS_HOME>/skills/uxeval/constitution.md:205)
+- Prompt 05b 说敏感信息检测后“不阻塞流程，让 heuristic-detection 决定是否打码”，但 `heuristic-detection` stage 并不存在，[05b-screenshot-analysis.md](<DESIGNOS_HOME>/skills/uxeval/prompts/05b-screenshot-analysis.md:112)
+- 宪法要求 evidence 路径不能包含真实用户名，[constitution.md](<DESIGNOS_HOME>/skills/uxeval/constitution.md:45)
 - 本次评测包和运行清单仍直接暴露 `/Users/young/...`，[for-skill-review-manifest.json](<LEGACY_DESIGONOS_ROOT>/outputs/for-skill-review-manifest.json:6)
 - `06-问题清单.json` 没有 `unverified_issues` 和 `out_of_scope_issues` 段，说明“附录迁移规则”没有被结构化保留
 
@@ -146,10 +146,10 @@
 
 证据：
 
-- `SKILL.md` 明确要求不要跳过模式选择，[SKILL.md](/Users/young/.designos/skills/uxeval/SKILL.md:36)
-- `SKILL.md` 明确要求 3 个 checkpoint 用户不回复就等待，[SKILL.md](/Users/young/.designos/skills/uxeval/SKILL.md:120)
-- `README.md` 也把 3 个 checkpoint 作为固定工作流，[README.md](/Users/young/.designos/skills/uxeval/README.md:75)
-- `pipeline.yaml` 只有 checkpoint，没有 `strict / semi-auto / autonomous` 三种正式策略，[pipeline.yaml](/Users/young/.designos/skills/uxeval/pipeline.yaml:59)
+- `SKILL.md` 明确要求不要跳过模式选择，[SKILL.md](<DESIGNOS_HOME>/skills/uxeval/SKILL.md:36)
+- `SKILL.md` 明确要求 3 个 checkpoint 用户不回复就等待，[SKILL.md](<DESIGNOS_HOME>/skills/uxeval/SKILL.md:120)
+- `README.md` 也把 3 个 checkpoint 作为固定工作流，[README.md](<DESIGNOS_HOME>/skills/uxeval/README.md:75)
+- `pipeline.yaml` 只有 checkpoint，没有 `strict / semi-auto / autonomous` 三种正式策略，[pipeline.yaml](<DESIGNOS_HOME>/skills/uxeval/pipeline.yaml:59)
 - 本次自动运行只能在运行清单中标记 `bypassed_by_user_request`，[run.yaml](<LEGACY_DESIGONOS_ROOT>/runs/20260521-uxeval-client-01/run.yaml:5)
 
 影响：
@@ -167,10 +167,10 @@
 
 证据：
 
-- `pipeline.yaml` 的 client 分支是 `screenshot-loading`，[pipeline.yaml](/Users/young/.designos/skills/uxeval/pipeline.yaml:106)
-- Prompt 05b 仍把自己描述为给 `image-analyzer` 的内部模板，[05b-screenshot-analysis.md](/Users/young/.designos/skills/uxeval/prompts/05b-screenshot-analysis.md:8)
-- 模板里还保留 `--from heuristic-detection` 的恢复命令，[任务清单-简洁版.md](/Users/young/.designos/skills/uxeval/templates/任务清单-简洁版.md:60)
-- Stage 06 顶部写“把 heuristic-engine 输出的 raw_issues 转成 Issue”，但同一 prompt 的 Step 1 又要求自己遍历截图并生成 `raw_issues`，[06-issue-attribution.md](/Users/young/.designos/skills/uxeval/prompts/06-issue-attribution.md:6)
+- `pipeline.yaml` 的 client 分支是 `screenshot-loading`，[pipeline.yaml](<DESIGNOS_HOME>/skills/uxeval/pipeline.yaml:106)
+- Prompt 05b 仍把自己描述为给 `image-analyzer` 的内部模板，[05b-screenshot-analysis.md](<DESIGNOS_HOME>/skills/uxeval/prompts/05b-screenshot-analysis.md:8)
+- 模板里还保留 `--from heuristic-detection` 的恢复命令，[任务清单-简洁版.md](<DESIGNOS_HOME>/skills/uxeval/templates/任务清单-简洁版.md:60)
+- Stage 06 顶部写“把 heuristic-engine 输出的 raw_issues 转成 Issue”，但同一 prompt 的 Step 1 又要求自己遍历截图并生成 `raw_issues`，[06-issue-attribution.md](<DESIGNOS_HOME>/skills/uxeval/prompts/06-issue-attribution.md:6)
 
 影响：
 
@@ -187,8 +187,8 @@
 
 证据：
 
-- `SKILL.md` 说“用户只需丢 PRD，AI 自动完成目录创建、scope 推断”，[SKILL.md](/Users/young/.designos/skills/uxeval/SKILL.md:76)
-- `INPUT.md` 却要求用户预先准备 `inputs/prd.pdf`、`inputs/scope.md`、规范命名截图，[INPUT.md](/Users/young/.designos/skills/uxeval/INPUT.md:12)
+- `SKILL.md` 说“用户只需丢 PRD，AI 自动完成目录创建、scope 推断”，[SKILL.md](<DESIGNOS_HOME>/skills/uxeval/SKILL.md:76)
+- `INPUT.md` 却要求用户预先准备 `inputs/prd.pdf`、`inputs/scope.md`、规范命名截图，[INPUT.md](<DESIGNOS_HOME>/skills/uxeval/INPUT.md:12)
 - 本次真实输入是 `00_input/数据挖掘V3.9.4.pdf` + 时间戳截图目录，而不是标准 `inputs/`
 
 影响：
@@ -226,8 +226,8 @@
 
 证据：
 
-- `06-issue-attribution.md` 示例直接使用“平均 8 秒”“实测平均 11s”“5 名用户 20 次点击”的数字，[06-issue-attribution.md](/Users/young/.designos/skills/uxeval/prompts/06-issue-attribution.md:184)
-- 同文件还把“高频操作需滚动扫读，平均耗时 8-12 秒”作为系统问题正例，[06-issue-attribution.md](/Users/young/.designos/skills/uxeval/prompts/06-issue-attribution.md:160)
+- `06-issue-attribution.md` 示例直接使用“平均 8 秒”“实测平均 11s”“5 名用户 20 次点击”的数字，[06-issue-attribution.md](<DESIGNOS_HOME>/skills/uxeval/prompts/06-issue-attribution.md:184)
+- 同文件还把“高频操作需滚动扫读，平均耗时 8-12 秒”作为系统问题正例，[06-issue-attribution.md](<DESIGNOS_HOME>/skills/uxeval/prompts/06-issue-attribution.md:160)
 - 但当前 skill 的静态截图模式并没有用户实验数据源、trace timing 或埋点输入
 
 影响：
@@ -267,7 +267,7 @@
 
 证据：
 
-- `pipeline.yaml` 直接依赖 `playwright-driver`、`image-analyzer`、`excel-builder`，[pipeline.yaml](/Users/young/.designos/skills/uxeval/pipeline.yaml:95)
+- `pipeline.yaml` 直接依赖 `playwright-driver`、`image-analyzer`、`excel-builder`，[pipeline.yaml](<DESIGNOS_HOME>/skills/uxeval/pipeline.yaml:95)
 - 但 skill 中没有描述“这些工具不可用时的标准降级路径”
 - 本次真实成功运行，实际上是靠通用文件能力、Python 库和本地视觉能力兜底，而不是按 pipeline 原样落地
 

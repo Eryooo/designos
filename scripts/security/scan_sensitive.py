@@ -34,6 +34,7 @@ from pathlib import Path
 PRIVATE_WORDLIST = ".designos-private-evidence/sensitive-words.txt"
 
 # === 通用正则规则(公开可见的结构性规则,不含具体业务词)===
+# S2-SEC-1.2: 扩展覆盖所有用户目录形式
 GENERIC_PATTERNS = [
     # 凭证/密钥结构
     (r'(?i)(api[_-]?key|secret|token|password|access[_-]?token)\s*[:=]\s*["\'][a-zA-Z0-9_\-]{16,}["\']',
@@ -41,10 +42,14 @@ GENERIC_PATTERNS = [
     # 内部 URL / 域名结构(具体真实域名只放私有词表)
     (r'http://[a-z]+\.internal', 'internal_url'),
     (r'(?i)internal[_-](corp|company|domain)\.com', 'internal_domain'),
-    # 本地绝对路径(暴露环境)
-    (r'/Users/[a-zA-Z]+/Documents/', 'macos_path'),
-    (r'/home/[a-zA-Z]+/', 'linux_path'),
-    (r'\bC:\\Users\\', 'windows_path'),
+    # 本地绝对路径(暴露环境) — S2-SEC-1.2 扩展
+    (r'/Users/[a-zA-Z]+/Documents/', 'macos_user_documents'),
+    (r'/Users/[a-zA-Z]+/Downloads/', 'macos_user_downloads'),
+    (r'/Users/[a-zA-Z]+/Desktop/', 'macos_user_desktop'),
+    (r'/Users/[a-zA-Z]+/\.designos/', 'macos_designos_home'),
+    (r'/Users/[a-zA-Z]+/\.codex/', 'macos_codex_home'),
+    (r'/home/[a-zA-Z]+/', 'linux_home'),
+    (r'\bC:\\Users\\', 'windows_home'),
     # 不该提交的敏感扩展名
     (r'\.(pem|key|p12|pfx|kdb|kdbx)$', 'sensitive_extension'),
 ]

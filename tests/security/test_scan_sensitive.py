@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 """
-tests/security/test_scan_sensitive.py — 扫描器自动化回归测试 (S2-SEC-1.1)
+tests/security/test_scan_sensitive.py — 扫描器自动化回归测试 (S2-SEC-1.2)
 
 覆盖:
-- macOS / Linux / Windows path
+- macOS / Linux / Windows path (含 Documents/Downloads/Desktop/.designos/.codex)
 - API key / token / password / internal domain / sensitive extension
 - clean file
-- invalid regex → exit 2(通过 monkey-patch GENERIC_PATTERNS 验证)
+- invalid regex → exit 2
 - private wordlist redaction(命中只输出位置,不输出词/原文)
 - 中文/空格文件名
 - working / staged / file / history 四种模式
 - history 中的正则错误
 - history 中的私有词命中
+
+S2-SEC-1.2:测试源码不得含硬编码敏感字符串,必须运行时拼接生成。
 """
 
 import os
@@ -47,8 +49,39 @@ def run_shell_wrapper(args, cwd=None):
     return result.returncode, result.stdout, result.stderr
 
 
+# === 敏感模式生成器(运行时拼接,避免测试源码自身被扫描器命中) ===
+def _sensitive_path(category):
+    """生成敏感路径模式,运行时拼接避免源码命中。"""
+    base = {'macos_docs': '/Users/', 'macos_dl': '/Users/', 'macos_desktop': '/Users/',
+            'macos_designos': '/Users/', 'macos_codex': '/Users/',
+            'linux': '/home/', 'windows': 'C:\\'}
+    suffix = {'macos_docs': '/Documents/', 'macos_dl': '/Downloads/', 'macos_desktop': '/Desktop/',
+              'macos_designos': '/.designos/', 'macos_codex': '/.codex/',
+              'linux': '/', 'windows': 'Users\\'}
+    user = 'example'
+    if category == 'windows':
+        return base[category] + suffix[category] + 'test\\Desktop'
+    return base[category] + user + suffix[category] + ('file.md' if 'docs' in category else 'data')
+
+
+def _sensitive_credential(cred_type):
+    """生成敏感凭证模式。"""
+    key_part = {'api': 'api_key', 'token': 'token', 'pwd': 'password'}[cred_type]
+    val = 'abcd1234567890' + ('efgh' if cred_type == 'api' else ('efghij' if cred_type == 'token' else 'xyz'))
+    quote = '"' if cred_type in ('api', 'pwd') else "'"
+    sep = '=' if cred_type == 'pwd' else ':'
+    return f'{key_part} {sep} {quote}{val}{quote}'
+
+
+def _sensitive_internal(internal_type):
+    """生成内部域名/URL模式。"""
+    if internal_type == 'url':
+        return 'proxy ' + 'http://' + 'acme.internal/api'
+    return 'host: foo.internal-corp' + '.com'
+
+
 class TestGenericPatterns(unittest.TestCase):
-    """通用正则规则覆盖测试。"""
+    """通用正则规则覆盖测试(含 S2-SEC-1.2 扩展用户目录)。"""
 
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix='scanner-test-')
@@ -61,50 +94,86 @@ class TestGenericPatterns(unittest.TestCase):
         p.write_text(content, encoding='utf-8')
         return str(p)
 
-    def test_macos_path(self):
-        f = self._make_file('macos.txt', 'config: /Users/example/Documents/file.md\n')
+    def test_macos_documents(self):
+        content = 'config: ' + _sensitive_path('macos_docs') + '\n'
+        f = self._make_file('macos_docs.txt', content)
         rc, out, _ = run_scanner(['--file', f])
         self.assertEqual(rc, 1)
-        self.assertIn('macos_path', out)
+        self.assertIn('macos_user_documents', out)
+
+    def test_macos_downloads(self):
+        content = 'file: ' + _sensitive_path('macos_dl') + '\n'
+        f = self._make_file('macos_dl.txt', content)
+        rc, out, _ = run_scanner(['--file', f])
+        self.assertEqual(rc, 1)
+        self.assertIn('macos_user_downloads', out)
+
+    def test_macos_desktop(self):
+        content = 'path: ' + _sensitive_path('macos_desktop') + '\n'
+        f = self._make_file('macos_desktop.txt', content)
+        rc, out, _ = run_scanner(['--file', f])
+        self.assertEqual(rc, 1)
+        self.assertIn('macos_user_desktop', out)
+
+    def test_macos_designos_home(self):
+        content = 'cache: ' + _sensitive_path('macos_designos') + '\n'
+        f = self._make_file('macos_designos.txt', content)
+        rc, out, _ = run_scanner(['--file', f])
+        self.assertEqual(rc, 1)
+        self.assertIn('macos_designos_home', out)
+
+    def test_macos_codex_home(self):
+        content = 'data: ' + _sensitive_path('macos_codex') + '\n'
+        f = self._make_file('macos_codex.txt', content)
+        rc, out, _ = run_scanner(['--file', f])
+        self.assertEqual(rc, 1)
+        self.assertIn('macos_codex_home', out)
 
     def test_linux_path(self):
-        f = self._make_file('linux.txt', 'home /home/example/data\n')
+        content = 'home ' + _sensitive_path('linux') + '\n'
+        f = self._make_file('linux.txt', content)
         rc, out, _ = run_scanner(['--file', f])
         self.assertEqual(rc, 1)
-        self.assertIn('linux_path', out)
+        self.assertIn('linux_home', out)
 
     def test_windows_path(self):
-        f = self._make_file('win.txt', 'path C:\\Users\\test\\Desktop\n')
+        content = 'path ' + _sensitive_path('windows') + '\n'
+        f = self._make_file('win.txt', content)
         rc, out, _ = run_scanner(['--file', f])
         self.assertEqual(rc, 1)
-        self.assertIn('windows_path', out)
+        self.assertIn('windows_home', out)
 
     def test_api_key(self):
-        f = self._make_file('cred.txt', 'api_key="abcd1234567890efgh"\n')
+        content = _sensitive_credential('api') + '\n'
+        f = self._make_file('cred.txt', content)
         rc, out, _ = run_scanner(['--file', f])
         self.assertEqual(rc, 1)
         self.assertIn('credential', out)
 
     def test_token(self):
-        f = self._make_file('token.txt', "token: 'abcd1234567890efghij'\n")
+        content = _sensitive_credential('token') + '\n'
+        f = self._make_file('token.txt', content)
         rc, out, _ = run_scanner(['--file', f])
         self.assertEqual(rc, 1)
         self.assertIn('credential', out)
 
     def test_password(self):
-        f = self._make_file('pwd.txt', 'password = "supersecret1234567890"\n')
+        content = _sensitive_credential('pwd') + '\n'
+        f = self._make_file('pwd.txt', content)
         rc, out, _ = run_scanner(['--file', f])
         self.assertEqual(rc, 1)
         self.assertIn('credential', out)
 
     def test_internal_url(self):
-        f = self._make_file('url.txt', 'proxy http://acme.internal/api\n')
+        content = _sensitive_internal('url') + '\n'
+        f = self._make_file('url.txt', content)
         rc, out, _ = run_scanner(['--file', f])
         self.assertEqual(rc, 1)
         self.assertIn('internal_url', out)
 
     def test_internal_domain(self):
-        f = self._make_file('dom.txt', 'host: foo.internal-corp.com\n')
+        content = _sensitive_internal('domain') + '\n'
+        f = self._make_file('dom.txt', content)
         rc, out, _ = run_scanner(['--file', f])
         self.assertEqual(rc, 1)
         self.assertIn('internal_domain', out)
@@ -133,21 +202,24 @@ class TestEdgeCases(unittest.TestCase):
 
     def test_chinese_filename(self):
         p = Path(self.tmp) / '中文文件名.txt'
-        p.write_text('/Users/example/Documents/test\n', encoding='utf-8')
+        content = _sensitive_path('macos_docs') + '\n'
+        p.write_text(content, encoding='utf-8')
         rc, out, _ = run_scanner(['--file', str(p)])
         self.assertEqual(rc, 1)
-        self.assertIn('macos_path', out)
+        self.assertIn('macos_user_documents', out)
 
     def test_space_filename(self):
         p = Path(self.tmp) / 'name with spaces.txt'
-        p.write_text('/home/example/x\n', encoding='utf-8')
+        content = _sensitive_path('linux') + '\n'
+        p.write_text(content, encoding='utf-8')
         rc, out, _ = run_scanner(['--file', str(p)])
         self.assertEqual(rc, 1)
 
     def test_binary_skipped(self):
         # 二进制文件不应触发 hits(扫描器跳过)
         p = Path(self.tmp) / 'bin.dat'
-        p.write_bytes(b'\x00\x01\x02/Users/example/Documents/x\n')
+        leak = _sensitive_path('macos_docs').encode('utf-8')
+        p.write_bytes(b'\x00\x01\x02' + leak + b'\n')
         rc, out, _ = run_scanner(['--file', str(p)])
         # 二进制文件应安全处理(跳过 → 0,而非崩溃)
         self.assertEqual(rc, 0)
@@ -190,13 +262,15 @@ class TestPrivateWordRedaction(unittest.TestCase):
             evidence_dir = Path(tmp) / '.designos-private-evidence'
             evidence_dir.mkdir()
             wordlist = evidence_dir / 'sensitive-words.txt'
-            wordlist.write_text("SECRET_TEST_TOKEN_XYZ\n", encoding='utf-8')
+            # 运行时拼接,避免硬编码
+            secret = 'SECRET_TEST' + '_TOKEN_XYZ'
+            wordlist.write_text(secret + "\n", encoding='utf-8')
 
             # 建一个含私有词 + 上下文 的文件
             test_file = Path(tmp) / 'test.txt'
             test_file.write_text(
                 "before line\n"
-                "this line has SECRET_TEST_TOKEN_XYZ in middle\n"
+                f"this line has {secret} in middle\n"
                 "after line\n",
                 encoding='utf-8'
             )
@@ -207,7 +281,7 @@ class TestPrivateWordRedaction(unittest.TestCase):
             # 必须显示位置和 PRIVATE-WORD 标签
             self.assertIn('PRIVATE-WORD', out)
             # 绝不能输出私有词本身
-            self.assertNotIn('SECRET_TEST_TOKEN_XYZ', out)
+            self.assertNotIn(secret, out)
             # 绝不能输出原文行内容
             self.assertNotIn('this line has', out)
             self.assertNotIn('in middle', out)
@@ -224,7 +298,6 @@ class TestModes(unittest.TestCase):
         subprocess.run(['git', 'init', '-q'], cwd=self.tmp, check=True)
         subprocess.run(['git', 'config', 'user.email', 'test@example.com'], cwd=self.tmp, check=True)
         subprocess.run(['git', 'config', 'user.name', 'Test'], cwd=self.tmp, check=True)
-        # 复制 scanner 到测试仓库内可访问位置(用绝对路径调用即可)
 
     def tearDown(self):
         shutil.rmtree(self.tmp, ignore_errors=True)
@@ -241,14 +314,16 @@ class TestModes(unittest.TestCase):
         self.assertEqual(rc, 0)
 
     def test_working_mode_hit(self):
-        self._commit('dirty.md', '/Users/example/Documents/leak\n')
+        leak = _sensitive_path('macos_docs')
+        self._commit('dirty.md', leak + '\n')
         rc, out, _ = run_scanner([], cwd=self.tmp)
         self.assertEqual(rc, 1)
-        self.assertIn('macos_path', out)
+        self.assertIn('macos_user_documents', out)
 
     def test_file_mode(self):
         f = Path(self.tmp) / 'x.txt'
-        f.write_text('/home/example/leak\n', encoding='utf-8')
+        leak = _sensitive_path('linux')
+        f.write_text(leak + '\n', encoding='utf-8')
         rc, out, _ = run_scanner(['--file', str(f)])
         self.assertEqual(rc, 1)
 
@@ -256,11 +331,12 @@ class TestModes(unittest.TestCase):
         # 先建干净仓库,然后 stage 一个有泄露的文件
         self._commit('init.md', 'init\n')
         f = Path(self.tmp) / 'staged.md'
-        f.write_text('/Users/example/Documents/x\n', encoding='utf-8')
+        leak = _sensitive_path('macos_docs')
+        f.write_text(leak + '\n', encoding='utf-8')
         subprocess.run(['git', 'add', 'staged.md'], cwd=self.tmp, check=True)
         rc, out, _ = run_scanner(['--staged'], cwd=self.tmp)
         self.assertEqual(rc, 1)
-        self.assertIn('macos_path', out)
+        self.assertIn('macos_user_documents', out)
 
     def test_staged_mode_clean(self):
         self._commit('init.md', 'init\n')
@@ -272,7 +348,8 @@ class TestModes(unittest.TestCase):
 
     def test_history_mode_hit(self):
         # 提交一个含路径的文件,然后改干净
-        self._commit('hist.md', '/Users/example/Documents/old-leak\n')
+        leak = _sensitive_path('macos_docs')
+        self._commit('hist.md', leak + '\n')
         f = Path(self.tmp) / 'hist.md'
         f.write_text('cleaned now\n', encoding='utf-8')
         subprocess.run(['git', 'add', 'hist.md'], cwd=self.tmp, check=True)
@@ -283,23 +360,25 @@ class TestModes(unittest.TestCase):
         # history 应仍命中
         rc_h, out_h, _ = run_scanner(['--history'], cwd=self.tmp)
         self.assertEqual(rc_h, 1)
-        self.assertIn('macos_path', out_h)
+        self.assertIn('macos_user_documents', out_h)
 
     def test_history_private_word_redacted(self):
         # 历史模式下私有词命中也必须脱敏
         evidence_dir = Path(self.tmp) / '.designos-private-evidence'
         evidence_dir.mkdir()
         wordlist = evidence_dir / 'sensitive-words.txt'
-        wordlist.write_text("HIST_PRIVATE_WORD_ABC\n", encoding='utf-8')
-        # 词表本身不进 git(仿真 .gitignore;此处写入 .git/info/exclude)
-        with open(Path(self.tmp) / '.git' / 'info' / 'exclude', 'a') as f:
-            f.write('.designos-private-evidence/\n')
+        # 运行时拼接
+        secret = 'HIST_PRIVATE' + '_WORD_ABC'
+        wordlist.write_text(secret + "\n", encoding='utf-8')
+        # 词表本身不进 git
+        with open(Path(self.tmp) / '.git' / 'info' / 'exclude', 'a') as fh:
+            fh.write('.designos-private-evidence/\n')
 
-        self._commit('private.md', 'data HIST_PRIVATE_WORD_ABC end\n')
+        self._commit('private.md', f'data {secret} end\n')
         rc, out, _ = run_scanner(['--history'], cwd=self.tmp)
         self.assertEqual(rc, 1)
         self.assertIn('PRIVATE-WORD', out)
-        self.assertNotIn('HIST_PRIVATE_WORD_ABC', out)
+        self.assertNotIn(secret, out)
         self.assertNotIn('data ', out)
 
 

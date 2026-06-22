@@ -240,7 +240,7 @@ output/ai-analytics/
 ```json
 {
   "version": "0.6.2",
-  "skills_dir": "/Users/you/.designos/skills/",
+  "skills_dir": "<DESIGNOS_HOME>/skills/",
   "output_dir": "./output/",
   "default_language": "en",
   "ai_assistant": "claude-code",
