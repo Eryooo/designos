@@ -4,7 +4,7 @@
 
 目标项目：
 
-- `/Users/young/Documents/Codex/Agent-design`
+- `<LEGACY_AGENT_DESIGN_ROOT>`
 
 用途：
 
@@ -44,21 +44,21 @@
 
 ### 核心审计文件
 
-- [agent-design-production-audit.md](/Users/young/Documents/Codex/desigonos/outputs/agent-design-production-audit.md)
-- [uxeval-production-readiness-audit.md](/Users/young/Documents/Codex/desigonos/outputs/uxeval-production-readiness-audit.md)
-- [unified-uxeval-skill-blueprint.md](/Users/young/Documents/Codex/desigonos/outputs/unified-uxeval-skill-blueprint.md)
+- [agent-design-production-audit.md](<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-production-audit.md)
+- [uxeval-production-readiness-audit.md](<LEGACY_DESIGONOS_ROOT>/outputs/uxeval-production-readiness-audit.md)
+- [unified-uxeval-skill-blueprint.md](<LEGACY_DESIGONOS_ROOT>/outputs/unified-uxeval-skill-blueprint.md)
 
 ### 运行结果与评审清单
 
-- [for-skill-review-manifest.json](/Users/young/Documents/Codex/desigonos/outputs/for-skill-review-manifest.json)
-- [auto-run-quality-review.md](/Users/young/Documents/Codex/desigonos/outputs/auto-run-quality-review.md)
-- [judge_me.md](/Users/young/Documents/Codex/desigonos/outputs/judge_me.md)
+- [for-skill-review-manifest.json](<LEGACY_DESIGONOS_ROOT>/outputs/for-skill-review-manifest.json)
+- [auto-run-quality-review.md](<LEGACY_DESIGONOS_ROOT>/outputs/auto-run-quality-review.md)
+- [judge_me.md](<LEGACY_DESIGONOS_ROOT>/outputs/judge_me.md)
 
 ### 真实产物样本
 
-- [07-问题报告.md](/Users/young/Documents/Codex/desigonos/runs/20260521-uxeval-client-01/07-问题报告.md)
-- [07-问题报告.xlsx](/Users/young/Documents/Codex/desigonos/runs/20260521-uxeval-client-01/07-问题报告.xlsx)
-- [06-问题清单.json](/Users/young/Documents/Codex/desigonos/runs/20260521-uxeval-client-01/06-问题清单.json)
+- [07-问题报告.md](<LEGACY_DESIGONOS_ROOT>/runs/20260521-uxeval-client-01/07-问题报告.md)
+- [07-问题报告.xlsx](<LEGACY_DESIGONOS_ROOT>/runs/20260521-uxeval-client-01/07-问题报告.xlsx)
+- [06-问题清单.json](<LEGACY_DESIGONOS_ROOT>/runs/20260521-uxeval-client-01/06-问题清单.json)
 
 ## 4. 在 Agent-design 项目里优先修什么
 
@@ -92,10 +92,10 @@
 
 ## 5. 在 Agent-design 新线程里建议直接使用的启动提示词
 
-可直接复制下面这句到 `/Users/young/Documents/Codex/Agent-design` 的新线程：
+可直接复制下面这句到 `<LEGACY_AGENT_DESIGN_ROOT>` 的新线程：
 
 ```text
-请基于 /Users/young/Documents/Codex/desigonos/outputs/agent-design-optimization-handoff.md、/Users/young/Documents/Codex/desigonos/outputs/agent-design-production-audit.md、/Users/young/Documents/Codex/desigonos/outputs/uxeval-production-readiness-audit.md，对当前 Agent-design 仓库进行系统性整改。目标不是修补单次 demo，而是把 uxeval 和底层 runtime 一起提升到生产级可用。先从 P0 平台问题开始，直接修改代码、补测试、跑验证。
+请基于 <LEGACY_DESIGONOS_ROOT>/outputs/agent-design-optimization-handoff.md、<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-production-audit.md、<LEGACY_DESIGONOS_ROOT>/outputs/uxeval-production-readiness-audit.md，对当前 Agent-design 仓库进行系统性整改。目标不是修补单次 demo，而是把 uxeval 和底层 runtime 一起提升到生产级可用。先从 P0 平台问题开始，直接修改代码、补测试、跑验证。
 ```
 
 ## 6. 对新线程的执行建议

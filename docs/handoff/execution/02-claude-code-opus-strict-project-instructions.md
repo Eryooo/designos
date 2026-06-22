@@ -1,7 +1,7 @@
 # Claude Code Opus Strict Project Instructions
 
 适用项目：
-- `/Users/young/Documents/Codex/Agent-design`
+- `<LEGACY_AGENT_DESIGN_ROOT>`
 
 用途：
 - 作为 Claude Code 的项目级长期约束
@@ -27,18 +27,18 @@
 开始任何工作前，先读取这些本地文件，不要先凭聊天上下文猜：
 
 ### 主控真源
-- `/Users/young/Documents/Codex/desigonos/outputs/agent-design-master-repair-charter.md`
+- `<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-master-repair-charter.md`
 
 ### client mode 冻结真源
-- `/Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json`
-- `/Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md`
-- `/Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md`
+- `<LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json`
+- `<LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md`
+- `<LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md`
 
 ### 后续路线真源
-- `/Users/young/Documents/Codex/desigonos/outputs/client-mode-90pct-upgrade-roadmap.md`
-- `/Users/young/Documents/Codex/desigonos/outputs/client-mode-90pct-metric-tree.md`
-- `/Users/young/Documents/Codex/desigonos/outputs/skills-factory-roadmap.md`
-- `/Users/young/Documents/Codex/desigonos/outputs/claude-code-opus-handoff-pack.md`
+- `<LEGACY_DESIGONOS_ROOT>/outputs/client-mode-90pct-upgrade-roadmap.md`
+- `<LEGACY_DESIGONOS_ROOT>/outputs/client-mode-90pct-metric-tree.md`
+- `<LEGACY_DESIGONOS_ROOT>/outputs/skills-factory-roadmap.md`
+- `<LEGACY_DESIGONOS_ROOT>/outputs/claude-code-opus-handoff-pack.md`
 
 ---
 
@@ -94,7 +94,7 @@
 
 - `docs/plans/...`
 - `docs/releases/...`
-- `/Users/young/Documents/Codex/desigonos/outputs/...`
+- `<LEGACY_DESIGONOS_ROOT>/outputs/...`
 
 不允许只留在会话中。
 
@@ -167,7 +167,7 @@
 
 ## 8. 默认环境要求
 
-- 工作目录固定为 `/Users/young/Documents/Codex/Agent-design`
+- 工作目录固定为 `<LEGACY_AGENT_DESIGN_ROOT>`
 - Python 优先使用 repo-local `.venv`
 - 验证命令默认使用：
   - `./.venv/bin/python -m pytest ...`

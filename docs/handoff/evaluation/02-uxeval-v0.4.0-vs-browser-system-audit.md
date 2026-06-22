@@ -2,8 +2,8 @@
 
 日期：2026-05-25  
 对比对象：
-- Trae IDE 客户端运行的 `uxeval v0.4.0`：`/Users/young/Documents/Codex/designosv0.4.0`
-- Codex 浏览器自动化历史结果：`/Users/young/Documents/Codex/data-design-review`
+- Trae IDE 客户端运行的 `uxeval v0.4.0`：`<DESIGNOS_CODEX_ROOT>/designosv0.4.0`
+- Codex 浏览器自动化历史结果：`<DESIGNOS_CODEX_ROOT>/data-design-review`
 
 ## 一句话结论
 
@@ -50,7 +50,7 @@
 
 最关键的问题不是代码，而是这次真实运行结果本身。
 
-在 `/Users/young/Documents/Codex/designosv0.4.0/uxeval_run/outputs/README.md` 里，当前结论明确是：
+在 `<DESIGNOS_CODEX_ROOT>/designosv0.4.0/uxeval_run/outputs/README.md` 里，当前结论明确是：
 - `Delivery Status: supplement_required`
 - `Confidence: Low`
 - `截图覆盖率: 16.7%`
@@ -91,7 +91,7 @@
 
 ### P1. 相比之前浏览器自动化结果，当前 client 模式在真实运行态问题发现上明显偏弱
 
-在 `/Users/young/Documents/Codex/data-design-review/outputs/数据挖掘V3.9.4_启发式评估问题汇总_全量版.md` 里，之前浏览器自动化结果做到的是：
+在 `<DESIGNOS_CODEX_ROOT>/data-design-review/outputs/数据挖掘V3.9.4_启发式评估问题汇总_全量版.md` 里，之前浏览器自动化结果做到的是：
 - 31 个问题
 - 19 个高优先级
 - 17 个真实环境确认问题

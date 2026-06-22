@@ -1,6 +1,6 @@
 # Claude Code Opus 接管包
 
-目标：让 Claude Code Opus 在接手 `/Users/young/Documents/Codex/Agent-design` 后，尽量保持当前这条线程已经建立的质量标准、交付标准、路线规划和收口节奏，而不是重新发散。
+目标：让 Claude Code Opus 在接手 `<LEGACY_AGENT_DESIGN_ROOT>` 后，尽量保持当前这条线程已经建立的质量标准、交付标准、路线规划和收口节奏，而不是重新发散。
 
 ---
 
@@ -26,7 +26,7 @@
 
 Claude Code 必须工作在：
 
-- `/Users/young/Documents/Codex/Agent-design`
+- `<LEGACY_AGENT_DESIGN_ROOT>`
 
 不要让它在旧路径、复制仓库、镜像仓库或 UI stale cwd 里工作。
 
@@ -34,7 +34,7 @@ Claude Code 必须工作在：
 
 必须优先使用 repo-local `.venv`：
 
-- `/Users/young/Documents/Codex/Agent-design/.venv`
+- `<LEGACY_AGENT_DESIGN_ROOT>/.venv`
 
 后续所有验证命令，默认都走：
 
@@ -61,8 +61,8 @@ Claude Code 至少要能稳定执行这些命令：
 
 必须确保 Claude Code 能稳定读取这些目录：
 
-- `/Users/young/Documents/Codex/Agent-design`
-- `/Users/young/Documents/Codex/desigonos/outputs`
+- `<LEGACY_AGENT_DESIGN_ROOT>`
+- `<LEGACY_DESIGONOS_ROOT>/outputs`
 - `/private/tmp`
 
 因为当前很多 benchmark / freeze / sweep 样例都落在这几个位置。
@@ -75,27 +75,27 @@ Claude Code 接手时，不要让它重新从聊天里理解世界观，先读�
 
 ### 3.1 主控真源
 
-- [`/Users/young/Documents/Codex/desigonos/outputs/agent-design-master-repair-charter.md`](/Users/young/Documents/Codex/desigonos/outputs/agent-design-master-repair-charter.md)
+- [`<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-master-repair-charter.md`](<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-master-repair-charter.md)
 
 这是总章程。
 
 ### 3.2 client mode 冻结结论
 
-- [`/Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json`](/Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json)
-- [`/Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md`](/Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md)
-- [`/Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md`](/Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md)
+- [`<LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json`](<LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json)
+- [`<LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md`](<LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md)
+- [`<LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md`](<LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md)
 
 这 3 个文件是当前 client mode 的冻结边界。
 
 ### 3.3 后续路线真源
 
-- [`/Users/young/Documents/Codex/desigonos/outputs/client-mode-90pct-upgrade-roadmap.md`](/Users/young/Documents/Codex/desigonos/outputs/client-mode-90pct-upgrade-roadmap.md)
-- [`/Users/young/Documents/Codex/desigonos/outputs/client-mode-90pct-metric-tree.md`](/Users/young/Documents/Codex/desigonos/outputs/client-mode-90pct-metric-tree.md)
-- [`/Users/young/Documents/Codex/desigonos/outputs/skills-factory-roadmap.md`](/Users/young/Documents/Codex/desigonos/outputs/skills-factory-roadmap.md)
-- [`/Users/young/Documents/Codex/desigonos/outputs/designos-phase-order-and-stop-conditions.md`](/Users/young/Documents/Codex/desigonos/outputs/designos-phase-order-and-stop-conditions.md)
-- [`/Users/young/Documents/Codex/desigonos/outputs/skills-factory-template-master-spec.md`](/Users/young/Documents/Codex/desigonos/outputs/skills-factory-template-master-spec.md)
-- [`/Users/young/Documents/Codex/desigonos/outputs/claude-code-opus-governor-spec.md`](/Users/young/Documents/Codex/desigonos/outputs/claude-code-opus-governor-spec.md)
-- [`/Users/young/Documents/Codex/desigonos/outputs/skills-development-best-practices-and-anti-patterns.md`](/Users/young/Documents/Codex/desigonos/outputs/skills-development-best-practices-and-anti-patterns.md)
+- [`<LEGACY_DESIGONOS_ROOT>/outputs/client-mode-90pct-upgrade-roadmap.md`](<LEGACY_DESIGONOS_ROOT>/outputs/client-mode-90pct-upgrade-roadmap.md)
+- [`<LEGACY_DESIGONOS_ROOT>/outputs/client-mode-90pct-metric-tree.md`](<LEGACY_DESIGONOS_ROOT>/outputs/client-mode-90pct-metric-tree.md)
+- [`<LEGACY_DESIGONOS_ROOT>/outputs/skills-factory-roadmap.md`](<LEGACY_DESIGONOS_ROOT>/outputs/skills-factory-roadmap.md)
+- [`<LEGACY_DESIGONOS_ROOT>/outputs/designos-phase-order-and-stop-conditions.md`](<LEGACY_DESIGONOS_ROOT>/outputs/designos-phase-order-and-stop-conditions.md)
+- [`<LEGACY_DESIGONOS_ROOT>/outputs/skills-factory-template-master-spec.md`](<LEGACY_DESIGONOS_ROOT>/outputs/skills-factory-template-master-spec.md)
+- [`<LEGACY_DESIGONOS_ROOT>/outputs/claude-code-opus-governor-spec.md`](<LEGACY_DESIGONOS_ROOT>/outputs/claude-code-opus-governor-spec.md)
+- [`<LEGACY_DESIGONOS_ROOT>/outputs/skills-development-best-practices-and-anti-patterns.md`](<LEGACY_DESIGONOS_ROOT>/outputs/skills-development-best-practices-and-anti-patterns.md)
 
 这些文件共同构成：
 - 阶段顺序真源
@@ -143,7 +143,7 @@ Claude Code 接手时，不要让它重新从聊天里理解世界观，先读�
 
 ### 4.4 指标体系是理论依据，不是附属文档
 
-[`/Users/young/Documents/Codex/desigonos/outputs/client-mode-90pct-metric-tree.md`](/Users/young/Documents/Codex/desigonos/outputs/client-mode-90pct-metric-tree.md) 不只是参考材料，而是后续判断“为什么这个 batch 值得做、为什么这次提升是真的”的理论依据。
+[`<LEGACY_DESIGONOS_ROOT>/outputs/client-mode-90pct-metric-tree.md`](<LEGACY_DESIGONOS_ROOT>/outputs/client-mode-90pct-metric-tree.md) 不只是参考材料，而是后续判断“为什么这个 batch 值得做、为什么这次提升是真的”的理论依据。
 
 Claude Code 后续每一批都必须明确回答：
 - 当前主攻哪些关键指标
@@ -193,12 +193,12 @@ Claude Code 后续每一批都必须明确回答：
 
 - `docs/plans/...`
 - 或 `docs/releases/...`
-- 或 `/Users/young/Documents/Codex/desigonos/outputs/...`
+- 或 `<LEGACY_DESIGONOS_ROOT>/outputs/...`
 
 ### 5.6 必须继承已有工程经验，不允许重复踩坑
 
 Claude Code 必须阅读并遵守：
-- [`/Users/young/Documents/Codex/desigonos/outputs/skills-development-best-practices-and-anti-patterns.md`](/Users/young/Documents/Codex/desigonos/outputs/skills-development-best-practices-and-anti-patterns.md)
+- [`<LEGACY_DESIGONOS_ROOT>/outputs/skills-development-best-practices-and-anti-patterns.md`](<LEGACY_DESIGONOS_ROOT>/outputs/skills-development-best-practices-and-anti-patterns.md)
 
 它的作用是避免：
 - 重新出现假成功 / 假配置 / 假闭环 / 假证据
@@ -245,10 +245,10 @@ Claude Code 必须阅读并遵守：
 
 必须遵守：
 1. 先读本地真源文件，再行动：
-   - /Users/young/Documents/Codex/desigonos/outputs/agent-design-master-repair-charter.md
-   - /Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json
-   - /Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md
-   - /Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md
+   - <LEGACY_DESIGONOS_ROOT>/outputs/agent-design-master-repair-charter.md
+   - <LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json
+   - <LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md
+   - <LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md
 2. normal mode 主结论必须接近 99%-100% 可信；fallback 正向断言也必须 >= 85%
 3. client mode 当前已冻结为 V1.5 pilot baseline，不要继续无边界深挖 client mode
 4. 后续重点转向 web mode 封装，再转向 Skills Factory Template
@@ -264,15 +264,15 @@ Claude Code 必须阅读并遵守：
 这是你最应该直接给 Claude Code Opus 的主提示词：
 
 ```text
-请接管 /Users/young/Documents/Codex/Agent-design 的后续工作，但不要重新发散分析，也不要从头定义方向。先读取这些本地真源文件：
+请接管 <LEGACY_AGENT_DESIGN_ROOT> 的后续工作，但不要重新发散分析，也不要从头定义方向。先读取这些本地真源文件：
 
-- /Users/young/Documents/Codex/desigonos/outputs/agent-design-master-repair-charter.md
-- /Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json
-- /Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md
-- /Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md
-- /Users/young/Documents/Codex/desigonos/outputs/client-mode-90pct-upgrade-roadmap.md
-- /Users/young/Documents/Codex/desigonos/outputs/client-mode-90pct-metric-tree.md
-- /Users/young/Documents/Codex/desigonos/outputs/skills-factory-roadmap.md
+- <LEGACY_DESIGONOS_ROOT>/outputs/agent-design-master-repair-charter.md
+- <LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json
+- <LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md
+- <LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md
+- <LEGACY_DESIGONOS_ROOT>/outputs/client-mode-90pct-upgrade-roadmap.md
+- <LEGACY_DESIGONOS_ROOT>/outputs/client-mode-90pct-metric-tree.md
+- <LEGACY_DESIGONOS_ROOT>/outputs/skills-factory-roadmap.md
 
 然后遵守以下工作规则：
 
@@ -285,7 +285,7 @@ Claude Code 必须阅读并遵守：
    - 然后抽 Skills Factory Template
 5. 一次只做一个 batch，不要扩 scope。
 6. 先用产品/用户语言说明问题，再讲技术实现。
-7. 任何重要结论都要落盘到仓库或 /Users/young/Documents/Codex/desigonos/outputs。
+7. 任何重要结论都要落盘到仓库或 <LEGACY_DESIGONOS_ROOT>/outputs。
 
 如果当前任务没有明确指定，请默认从“web mode 封装”的最小可执行 batch 开始，并先做仓库真相检查、最小验证、再给出一个单批次推进方案。
 ```

@@ -33,7 +33,7 @@
 
 ### C. 对照组：`web/playwright` 真实环境执行结果
 
-路径：`/Users/young/Documents/Codex/data-design-review`
+路径：`<DESIGNOS_CODEX_ROOT>/data-design-review`
 
 重点对照：
 
@@ -81,7 +81,7 @@
 - `constitution.md` 也明确是 `8 条规则`，[constitution.md](/Users/young/.designos/skills/uxeval/constitution.md:3)
 - 测试却只校验 `1-7`，[test_pipeline_integration.py](/Users/young/.designos/skills/uxeval/tests/test_pipeline_integration.py:40)
 - `README.md` 的输出编号仍停留在 `04-问题报告`，[README.md](/Users/young/.designos/skills/uxeval/README.md:82)
-- 本次真实运行实际产物已经到 `07-问题报告`，[run.yaml](/Users/young/Documents/Codex/desigonos/runs/20260521-uxeval-client-01/run.yaml:20)
+- 本次真实运行实际产物已经到 `07-问题报告`，[run.yaml](<LEGACY_DESIGONOS_ROOT>/runs/20260521-uxeval-client-01/run.yaml:20)
 
 影响：
 
@@ -128,7 +128,7 @@
 - `constitution.md` 下方又写成 `7 步检查`，[constitution.md](/Users/young/.designos/skills/uxeval/constitution.md:205)
 - Prompt 05b 说敏感信息检测后“不阻塞流程，让 heuristic-detection 决定是否打码”，但 `heuristic-detection` stage 并不存在，[05b-screenshot-analysis.md](/Users/young/.designos/skills/uxeval/prompts/05b-screenshot-analysis.md:112)
 - 宪法要求 evidence 路径不能包含真实用户名，[constitution.md](/Users/young/.designos/skills/uxeval/constitution.md:45)
-- 本次评测包和运行清单仍直接暴露 `/Users/young/...`，[for-skill-review-manifest.json](/Users/young/Documents/Codex/desigonos/outputs/for-skill-review-manifest.json:6)
+- 本次评测包和运行清单仍直接暴露 `/Users/young/...`，[for-skill-review-manifest.json](<LEGACY_DESIGONOS_ROOT>/outputs/for-skill-review-manifest.json:6)
 - `06-问题清单.json` 没有 `unverified_issues` 和 `out_of_scope_issues` 段，说明“附录迁移规则”没有被结构化保留
 
 影响：
@@ -150,7 +150,7 @@
 - `SKILL.md` 明确要求 3 个 checkpoint 用户不回复就等待，[SKILL.md](/Users/young/.designos/skills/uxeval/SKILL.md:120)
 - `README.md` 也把 3 个 checkpoint 作为固定工作流，[README.md](/Users/young/.designos/skills/uxeval/README.md:75)
 - `pipeline.yaml` 只有 checkpoint，没有 `strict / semi-auto / autonomous` 三种正式策略，[pipeline.yaml](/Users/young/.designos/skills/uxeval/pipeline.yaml:59)
-- 本次自动运行只能在运行清单中标记 `bypassed_by_user_request`，[run.yaml](/Users/young/Documents/Codex/desigonos/runs/20260521-uxeval-client-01/run.yaml:5)
+- 本次自动运行只能在运行清单中标记 `bypassed_by_user_request`，[run.yaml](<LEGACY_DESIGONOS_ROOT>/runs/20260521-uxeval-client-01/run.yaml:5)
 
 影响：
 
@@ -208,7 +208,7 @@
 
 - `06-问题清单.json` 有 `source_basis`，但没有 `confidence`
 - 也没有 `unverified_issues`、`out_of_scope_issues`
-- 本次最终报告虽然写出 `4 项 PRD 核心能力未被截图覆盖`，[07-问题报告.md](/Users/young/Documents/Codex/desigonos/runs/20260521-uxeval-client-01/07-问题报告.md:8)
+- 本次最终报告虽然写出 `4 项 PRD 核心能力未被截图覆盖`，[07-问题报告.md](<LEGACY_DESIGONOS_ROOT>/runs/20260521-uxeval-client-01/07-问题报告.md:8)
 - 但主报告仍把 16 条问题作为统一强度输出，没有显式“高置信 / 中置信 / 需补证”的分层
 
 影响：

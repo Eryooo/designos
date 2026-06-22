@@ -140,7 +140,7 @@ def main():
         errors.append(f"❌ 缺少 SYNTHETIC/SANITIZED 标记: {', '.join(missing_marker)}")
 
     # 3. 检查不含真实路径
-    forbidden_path = "/Users/young/Documents/Codex/designos-workspace"
+    forbidden_path = "<DESIGNOS_WORKSPACE_ROOT>"
     violations = check_no_real_path(NO_REAL_PATH_FILES, forbidden_path)
     if violations:
         errors.append(f"❌ 包含真实路径: {', '.join(violations)}")

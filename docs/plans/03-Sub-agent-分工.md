@@ -283,7 +283,7 @@ mcp-servers/pdf-parser/
 
 **实现策略**：
 - 内部 LLM 调用（视觉模型分析截图）+ 规则引擎（DOM 数据规则匹配）
-- 参考 `/Users/young/Documents/trae_projects/design-review/scripts/build_heuristic_*.mjs` 现有逻辑
+- 参考 `/Users/<USER>/Documents/trae_projects/design-review/scripts/build_heuristic_*.mjs` 现有逻辑
 
 **验收标准**：
 - [ ] 给定 5 张截图 + 10 条原则，能输出结构化问题清单
@@ -350,7 +350,7 @@ skills/uxeval/
 **素材来源**：
 - `legacy/agent-prototypes/uxeval-agent.html` 提取方法论框架
 - `legacy/sharing-materials/体验评估分享内容.md` 提取宪法和评估口径
-- `/Users/young/Documents/trae_projects/design-review/outputs/` 真实评估产物作 golden 样本
+- `/Users/<USER>/Documents/trae_projects/design-review/outputs/` 真实评估产物作 golden 样本
 
 **验收标准**：
 - [ ] SKILL.md 通过 Skill 加载器校验

@@ -59,7 +59,7 @@
 
 ### Source
 
-基于 `legacy/agent-prototypes/uxeval-agent.html` 与 `legacy/sharing-materials/体验评估分享内容.md` 方法论框架，参考 `/Users/young/Documents/trae_projects/design-review/outputs/` 真实评估产物结构。
+基于 `legacy/agent-prototypes/uxeval-agent.html` 与 `legacy/sharing-materials/体验评估分享内容.md` 方法论框架，参考 `/Users/<USER>/Documents/trae_projects/design-review/outputs/` 真实评估产物结构。
 
 ### Note
 

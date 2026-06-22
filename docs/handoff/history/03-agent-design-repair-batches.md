@@ -6,7 +6,7 @@
 
 目标仓库：
 
-- `/Users/young/Documents/Codex/Agent-design`
+- `<LEGACY_AGENT_DESIGN_ROOT>`
 
 原则：
 
@@ -180,13 +180,13 @@
 ### 做 Batch 1
 
 ```text
-请在 /Users/young/Documents/Codex/Agent-design 中只做 Batch 1：修复 runtime 状态聚合问题。基于 /Users/young/Documents/Codex/desigonos/outputs/agent-design-production-audit.md 和 /Users/young/Documents/Codex/desigonos/outputs/agent-design-repair-batches.md，直接改代码、补测试、跑验证。目标是让失败 skill 不再返回 COMPLETED，checkpoint 返回 PAUSED。
+请在 <LEGACY_AGENT_DESIGN_ROOT> 中只做 Batch 1：修复 runtime 状态聚合问题。基于 <LEGACY_DESIGONOS_ROOT>/outputs/agent-design-production-audit.md 和 <LEGACY_DESIGONOS_ROOT>/outputs/agent-design-repair-batches.md，直接改代码、补测试、跑验证。目标是让失败 skill 不再返回 COMPLETED，checkpoint 返回 PAUSED。
 ```
 
 ### 做 Batch 2
 
 ```text
-请在 /Users/young/Documents/Codex/Agent-design 中只做 Batch 2：打通 SKILL.md frontmatter 到 preflight 和 MCP registry 的运行时链路。基于 /Users/young/Documents/Codex/desigonos/outputs/agent-design-production-audit.md 和 /Users/young/Documents/Codex/desigonos/outputs/agent-design-repair-batches.md，直接修改代码并补验证。
+请在 <LEGACY_AGENT_DESIGN_ROOT> 中只做 Batch 2：打通 SKILL.md frontmatter 到 preflight 和 MCP registry 的运行时链路。基于 <LEGACY_DESIGONOS_ROOT>/outputs/agent-design-production-audit.md 和 <LEGACY_DESIGONOS_ROOT>/outputs/agent-design-repair-batches.md，直接修改代码并补验证。
 ```
 
 ## 5. 最后建议

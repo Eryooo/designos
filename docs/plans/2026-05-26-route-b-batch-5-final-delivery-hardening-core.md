@@ -38,7 +38,7 @@ Commands run:
 
 ./.venv/bin/python -m pytest -q mcp-servers/image-analyzer/tests/test_core.py
 cd mcp-servers/excel-builder && ../../.venv/bin/python -m pytest -q tests/test_core.py
-cd /Users/young/Documents/Codex/Agent-design && ./.venv/bin/python -m pytest -q tests/integration/test_kernel_mcp_integration.py
+cd <LEGACY_AGENT_DESIGN_ROOT> && ./.venv/bin/python -m pytest -q tests/integration/test_kernel_mcp_integration.py
 ./.venv/bin/python -m pytest -q
 ./.venv/bin/python -m ruff check .
 ./.venv/bin/python -m pyright

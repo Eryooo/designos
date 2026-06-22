@@ -6,9 +6,9 @@ Date: 2026-05-21
 
 Single source of truth used for this batch:
 
-- `/Users/young/Documents/Codex/desigonos/outputs/agent-design-master-repair-charter.md`
-- `/Users/young/Documents/Codex/desigonos/outputs/agent-design-production-audit.md`
-- `/Users/young/Documents/Codex/desigonos/outputs/agent-design-repair-batches.md`
+- `<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-master-repair-charter.md`
+- `<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-production-audit.md`
+- `<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-repair-batches.md`
 
 Batch target:
 

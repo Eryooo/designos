@@ -246,10 +246,10 @@ skill 必须把这些做成硬规则，而不是建议：
 
 ### 7.1 可以直接复用
 
-- [scripts/playwright_bridge.mjs](/Users/young/Documents/Codex/data-design-review/scripts/playwright_bridge.mjs)
-- [scripts/render_markdown_pdf_reportlab.py](/Users/young/Documents/Codex/data-design-review/scripts/render_markdown_pdf_reportlab.py)
-- [templates/问题清单字段规范.md](/Users/young/Documents/Codex/data-design-review/templates/问题清单字段规范.md)
-- [docs/浏览器自动化启发式评估技术方案.md](/Users/young/Documents/Codex/data-design-review/docs/浏览器自动化启发式评估技术方案.md)
+- [scripts/playwright_bridge.mjs](<DESIGNOS_CODEX_ROOT>/data-design-review/scripts/playwright_bridge.mjs)
+- [scripts/render_markdown_pdf_reportlab.py](<DESIGNOS_CODEX_ROOT>/data-design-review/scripts/render_markdown_pdf_reportlab.py)
+- [templates/问题清单字段规范.md](<DESIGNOS_CODEX_ROOT>/data-design-review/templates/问题清单字段规范.md)
+- [docs/浏览器自动化启发式评估技术方案.md](<DESIGNOS_CODEX_ROOT>/data-design-review/docs/浏览器自动化启发式评估技术方案.md)
 
 ### 7.2 只适合参考，不要直接当 skill 逻辑
 

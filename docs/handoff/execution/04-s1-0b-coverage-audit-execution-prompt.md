@@ -1,9 +1,9 @@
 # S1-0B Execution Prompt — Source-of-Truth Decision + Declared-vs-Implemented Audit
 
-> Owner: Codex planning / Claude Code execution  
-> Repo: `/Users/young/Documents/Codex/Agent-design-webmode`  
-> Branch: `feature/senior-designer-paradigm-engine`  
-> Status: execute only after S1-0A is reviewed and committed locally  
+> Owner: Codex planning / Claude Code execution
+> Repo: `<DESIGNOS_REPO_ROOT>`
+> Branch: `feature/senior-designer-paradigm-engine`
+> Status: execute only after S1-0A is reviewed and committed locally
 > Scope: governance / audit / source-of-truth calibration only; no runtime feature development
 
 ---
@@ -130,7 +130,7 @@ Do not use "complete", "enterprise-ready", "production-ready", or "fully impleme
 Run these at minimum:
 
 ```bash
-cd /Users/young/Documents/Codex/Agent-design-webmode
+cd <DESIGNOS_REPO_ROOT>
 
 git status --short
 git diff --check
@@ -155,7 +155,7 @@ PY
 If tests are run, keep them limited to non-invasive validation:
 
 ```bash
-cd /Users/young/Documents/Codex/Agent-design-webmode/.factory
+cd <DESIGNOS_REPO_ROOT>/.factory
 python3 -m pytest tests/ -q
 ```
 
@@ -186,7 +186,7 @@ Copy the following prompt into Claude Code:
 你是 DesignOS 工程治理与架构审计执行者。当前任务是 S1-0B，不是功能开发。
 
 工作目录:
-/Users/young/Documents/Codex/Agent-design-webmode
+<DESIGNOS_REPO_ROOT>
 
 当前分支:
 feature/senior-designer-paradigm-engine
@@ -262,7 +262,7 @@ S1-0B 目标:
 
 验证:
 必须运行:
-cd /Users/young/Documents/Codex/Agent-design-webmode
+cd <DESIGNOS_REPO_ROOT>
 git status --short
 git diff --check
 bash scripts/security/scan-sensitive.sh

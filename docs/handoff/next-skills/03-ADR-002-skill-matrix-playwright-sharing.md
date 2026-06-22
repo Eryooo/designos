@@ -3,7 +3,7 @@
 > 日期：2026-05-15
 > 状态：已批准
 > 决策人：young
-> 触发：研读 `/Users/young/Documents/trae_projects/design-review` 和 `DVT Agent` 参考项目后修正认知
+> 触发：研读 `/Users/<USER>/Documents/trae_projects/design-review` 和 `DVT Agent` 参考项目后修正认知
 
 ---
 

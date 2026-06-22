@@ -12,7 +12,7 @@
 
 适用项目：
 
-- `/Users/young/Documents/Codex/Agent-design`
+- `<LEGACY_AGENT_DESIGN_ROOT>`
 
 ## 2. 最终目标
 
@@ -267,11 +267,11 @@ DesignOS 要宣称“生产级可替代低阶工作”，至少满足：
 
 按顺序：
 
-1. `/Users/young/Documents/Codex/desigonos/outputs/agent-design-master-repair-charter.md`
-2. `/Users/young/Documents/Codex/desigonos/outputs/agent-design-production-audit.md`
-3. `/Users/young/Documents/Codex/desigonos/outputs/uxeval-production-readiness-audit.md`
-4. `/Users/young/Documents/Codex/desigonos/outputs/agent-design-repair-batches.md`
-5. `/Users/young/Documents/Codex/desigonos/outputs/agent-design-optimization-handoff.md`
+1. `<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-master-repair-charter.md`
+2. `<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-production-audit.md`
+3. `<LEGACY_DESIGONOS_ROOT>/outputs/uxeval-production-readiness-audit.md`
+4. `<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-repair-batches.md`
+5. `<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-optimization-handoff.md`
 
 ## 11. 新线程执行原则
 
@@ -285,4 +285,4 @@ DesignOS 要宣称“生产级可替代低阶工作”，至少满足：
 
 见：
 
-- `/Users/young/Documents/Codex/desigonos/outputs/agent-design-next-thread-prompt.md`
+- `<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-next-thread-prompt.md`

@@ -10,12 +10,12 @@
 
 Claude Code Opus 必须先读这些文件，再开始任何后续工作：
 
-1. `/Users/young/Documents/Codex/desigonos/outputs/agent-design-master-repair-charter.md`
-2. `/Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json`
-3. `/Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md`
-4. `/Users/young/Documents/Codex/Agent-design/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md`
-5. `/Users/young/Documents/Codex/desigonos/outputs/designos-phase-order-and-stop-conditions.md`
-6. `/Users/young/Documents/Codex/desigonos/outputs/skills-factory-template-master-spec.md`
+1. `<LEGACY_DESIGONOS_ROOT>/outputs/agent-design-master-repair-charter.md`
+2. `<LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_manifest.json`
+3. `<LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_freeze_notes.md`
+4. `<LEGACY_AGENT_DESIGN_ROOT>/docs/releases/client-mode-v1.5-freeze/client_mode_validation_baseline.md`
+5. `<LEGACY_DESIGONOS_ROOT>/outputs/designos-phase-order-and-stop-conditions.md`
+6. `<LEGACY_DESIGONOS_ROOT>/outputs/skills-factory-template-master-spec.md`
 
 如果这些文件与聊天内容冲突，以文件为准。
 
@@ -83,7 +83,7 @@ Claude Code Opus 必须先读这些文件，再开始任何后续工作：
 至少写到：
 - `docs/plans/...`
 - 或 `docs/releases/...`
-- 或 `/Users/young/Documents/Codex/desigonos/outputs/...`
+- 或 `<LEGACY_DESIGONOS_ROOT>/outputs/...`
 
 不允许只在聊天里宣布完成。
 

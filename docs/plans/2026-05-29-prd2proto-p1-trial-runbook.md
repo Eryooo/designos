@@ -7,7 +7,7 @@
 ## 0. 前置检查
 
 ```bash
-cd /Users/young/Documents/Codex/Agent-design-webmode
+cd <DESIGNOS_REPO_ROOT>
 
 # 确认 P1 测试基线还过
 python3 -m pytest skills/prd2proto/tests/test_p1_smoke.py -v

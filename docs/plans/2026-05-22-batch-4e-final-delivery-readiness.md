@@ -47,10 +47,10 @@ Turn `uxeval` client mode from a coarse “can continue / cannot continue” flo
 Commands run:
 
 ```bash
-cd /Users/young/Documents/Codex/Agent-design/mcp-servers/image-analyzer
+cd <LEGACY_AGENT_DESIGN_ROOT>/mcp-servers/image-analyzer
 ../../.venv/bin/python -m pytest -q tests/test_core.py
 
-cd /Users/young/Documents/Codex/Agent-design
+cd <LEGACY_AGENT_DESIGN_ROOT>
 ./.venv/bin/python -m pytest -q \
   skills/uxeval/tests/test_frontmatter_runtime.py \
   skills/uxeval/tests/test_pipeline_integration.py \
