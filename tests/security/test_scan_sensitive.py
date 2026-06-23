@@ -190,6 +190,61 @@ class TestGenericPatterns(unittest.TestCase):
         self.assertEqual(rc, 0)
         self.assertIn('0 命中', out)
 
+    # === S2-SEC-1.3: Extended username patterns (运行时拼接避免源码命中) ===
+    def test_username_underscore_digits(self):
+        # /Users/user<underscore>01/Documents/
+        user = 'user' + '_01'  # 拼接避免命中
+        content = '/Users/' + user + '/Documents/file\n'
+        f = self._make_file('user_underscore.txt', content)
+        rc, out, _ = run_scanner(['--file', f])
+        self.assertEqual(rc, 1)
+        self.assertIn('macos_user_documents', out)
+
+    def test_username_hyphen(self):
+        # /Users/john<hyphen>doe/Downloads/
+        user = 'john' + '-doe'
+        content = '/Users/' + user + '/Downloads/archive.zip\n'
+        f = self._make_file('user_hyphen.txt', content)
+        rc, out, _ = run_scanner(['--file', f])
+        self.assertEqual(rc, 1)
+        self.assertIn('macos_user_downloads', out)
+
+    def test_username_dot(self):
+        # /Users/john<dot>smith/.codex/
+        user = 'john' + '.smith'
+        content = '/Users/' + user + '/.codex/cache\n'
+        f = self._make_file('user_dot.txt', content)
+        rc, out, _ = run_scanner(['--file', f])
+        self.assertEqual(rc, 1)
+        self.assertIn('macos_codex_home', out)
+
+    def test_username_digits_only(self):
+        # /Users/user<digits>/.designos/
+        user = 'user' + '123'
+        content = '/Users/' + user + '/.designos/config\n'
+        f = self._make_file('user_digits.txt', content)
+        rc, out, _ = run_scanner(['--file', f])
+        self.assertEqual(rc, 1)
+        self.assertIn('macos_designos_home', out)
+
+    def test_linux_username_underscore(self):
+        # /home/user<underscore>01/
+        user = 'user' + '_01'
+        content = '/home/' + user + '/data\n'
+        f = self._make_file('linux_user_underscore.txt', content)
+        rc, out, _ = run_scanner(['--file', f])
+        self.assertEqual(rc, 1)
+        self.assertIn('linux_home', out)
+
+    def test_windows_username_underscore(self):
+        # C:\Users\user<underscore>01\
+        user = 'user' + '_01'
+        content = 'C:\\Users\\' + user + '\\Desktop\\file.txt\n'
+        f = self._make_file('win_user_underscore.txt', content)
+        rc, out, _ = run_scanner(['--file', f])
+        self.assertEqual(rc, 1)
+        self.assertIn('windows_home', out)
+
 
 class TestEdgeCases(unittest.TestCase):
     """边界 case:中文/空格文件名,二进制,等。"""
