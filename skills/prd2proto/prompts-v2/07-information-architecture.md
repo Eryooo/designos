@@ -216,7 +216,159 @@
   ],
   "assumptions": [
     "<assumption_made>"
-  ]
+  ],
+
+  // S2-H12.2A: Senior Design Execution Domain 7 (IA/Navigation/Surface) - Deep Hardening
+  "ia_rationale": {
+    "why_this_organization": "<为何选择这个组织维度(task/role/status/module)?>",
+    "based_on_what": "<基于哪些上游推导(goal/task/product_model/journey)?不得空缺>",
+    "alternative_considered": "<考虑过哪些其他方案?为何不选?>",
+    "trade_offs": "<本方案牺牲了什么?换来了什么?>",
+    "confidence": 0.0-1.0
+  },
+
+  "experience_surfaces": {
+    "shell": {
+      "name": "<宿主平台层,如系统级导航/全局搜索/通知中心>",
+      "scope": "<覆盖哪些能力>",
+      "rationale": "<为何需要这层>"
+    },
+    "product_navigation": {
+      "name": "<产品导航层,如主sidebar/主tab>",
+      "scope": "<覆盖哪些模块/功能域>",
+      "rationale": "<为何这样组织主导航>"
+    },
+    "context_history": {
+      "name": "<历史上下文层,如breadcrumb/recent/favorites>",
+      "scope": "<覆盖哪些场景>",
+      "rationale": "<用户如何利用历史和上下文>"
+    },
+    "workspace": {
+      "name": "<当前工作区,如详情页/编辑器/dashboard>",
+      "scope": "<用户主要操作空间>",
+      "rationale": "<工作区如何服务任务>"
+    },
+    "identified": true | false,
+    "rationale_if_not_identified": "<如未识别多层体验表面,说明为何单层足够>"
+  },
+
+  "route_hierarchy": {
+    "levels": [
+      {
+        "level": 1,
+        "grouping_principle": "task | role | domain_object | module",
+        "grouping_rationale": "<为何在这层按此维度分组>",
+        "examples": ["<group_name>", "..."]
+      },
+      {
+        "level": 2,
+        "grouping_principle": "...",
+        "grouping_rationale": "...",
+        "examples": ["..."]
+      }
+    ],
+    "max_depth": "<int>",
+    "depth_rationale": "<为何是这个深度?P0任务是否≤3级可达?>"
+  },
+
+  "page_grouping_rationale": [
+    {
+      "group_name": "<分组名>",
+      "pages": ["PAGE-001", "PAGE-002"],
+      "rationale": "<为何这些页面分在一组?服务哪些任务/目标/对象?>",
+      "evidence": "task_model | product_foundation | journey | inferred"
+    }
+  ],
+
+  "task_to_navigation_mapping": {
+    "PT-001": {
+      "navigation_path": "NAV-001 → NAV-001-2 → PAGE-005",
+      "clicks": 3,
+      "rationale": "<任务PT-001为何走这条路径?>"
+    },
+    "PT-002": {
+      "navigation_path": "NAV-002 → PAGE-010",
+      "clicks": 2,
+      "rationale": "..."
+    }
+  },
+
+  "domain_object_to_surface_mapping": {
+    "User": {
+      "surfaces": ["PAGE-001", "PAGE-002"],
+      "rationale": "<User对象为何在这些页面出现?支撑哪些任务?>"
+    },
+    "Document": {
+      "surfaces": ["PAGE-005", "PAGE-006"],
+      "rationale": "..."
+    }
+  },
+
+  "flat_function_to_page_check": {
+    "is_flat_1_to_1": true | false,
+    "rationale_exists": true | false,
+    "evidence_from": "task_priority | product_model | journey | inferred",
+    "if_flat_why": "<如is_flat=true,说明为何功能1:1页面是合理的(简单工具/单一任务产品)>",
+    "risk_if_flat": "<如is_flat=true,说明风险:扩展性/可发现性/认知负担>"
+  },
+
+  "representative_scenario_influence_check": {
+    "has_detailed_example": true | false,
+    "example_influences_ia": true | false,
+    "example_id": "<引用stage 03 example_dominance_check>",
+    "mitigation": "<如example影响IA,如何防止其主导?>"
+  },
+
+  "inferred_ia_items": [
+    {
+      "item": "<推断的IA元素,如某个导航分组/页面分类>",
+      "inferred_from": "<推断依据>",
+      "confidence": 0.0-1.0,
+      "risk_if_wrong": "critical | high | medium | low",
+      "validation_method": "<如何验证?>"
+    }
+  ],
+
+  "ia_gaps": [
+    {
+      "gap": "<缺失的信息,如某模块的导航位置/某任务的入口>",
+      "impact": "critical | high | medium | low",
+      "affects": ["<受影响的页面/任务>"],
+      "recommendation": "<如何补?>",
+      "workaround": "<临时方案?>"
+    }
+  ],
+
+  "ia_confidence_score": {
+    "overall": 0.0-1.0,
+    "rationale_confidence": 0.0-1.0,
+    "task_mapping_confidence": 0.0-1.0,
+    "evidence_support": "strong | moderate | weak",
+    "inferred_ratio": 0.0-1.0,
+    "risk_assessment": "low | medium | high"
+  },
+
+  "upstream_consumed": {
+    "problem_statement_exists": true | false,
+    "goal_tree_exists": true | false,
+    "product_foundation_map_exists": true | false,
+    "domain_objects_exists": true | false,
+    "role_model_exists": true | false,
+    "task_model_exists": true | false,
+    "business_flow_map_exists": true | false,
+    "journey_stages_exists": true | false,
+    "ia_navigation_surface_readiness": "<从stage 01 ten_domain_readiness.7获取>"
+  },
+
+  "execution_constraints": {
+    "can_proceed_without_ia_rationale": false,  // FM-013
+    "can_flat_function_to_page": false,
+    "can_let_example_dominate_ia": false,  // FM-010
+    "can_proceed_without_task_mapping": false,
+    "missing_ia_rationale_action": "degrade",
+    "missing_experience_surfaces_action": "warn",
+    "flat_1_to_1_action": "gap_and_warn"
+  }
 }
 ```
 
@@ -233,11 +385,62 @@
 
 ## 5. Decision Rules
 
+**S2-H12.2A Senior Design Execution Constraints (Domain 7) - Deep Hardening**:
+
+**Mandatory Outputs**:
+- ✅ **MUST output `ia_rationale`** (why_this_organization / based_on_what / alternative_considered / trade_offs)
+- ✅ **MUST output `experience_surfaces`** (识别并说明shell/product/context/workspace四层,或解释为何单层足够)
+- ✅ **MUST output `route_hierarchy`** (分层分组原理 + 深度合理性)
+- ✅ **MUST output `page_grouping_rationale`** (每个分组为何这样划分)
+- ✅ **MUST output `task_to_navigation_mapping`** (每个primary task的导航路径 + clicks + rationale)
+- ✅ **MUST output `domain_object_to_surface_mapping`** (每个domain object在哪些surface出现 + rationale)
+- ✅ **MUST output `flat_function_to_page_check`** 并判定是否flat 1:1映射
+
+**Upstream Consumption**:
+- ✅ 必须消费 `problem_statement` (stage 02)
+- ✅ 必须消费 `goal_tree` (stage 02)
+- ✅ 必须消费 `product_foundation_map` + `domain_objects` + `role_model` (stage 03)
+- ✅ 必须消费 `task_model` + `primary_tasks` (stage 04)
+- ✅ 必须消费 `business_flow_map` (stage 05)
+- ✅ 必须消费 `journey_stages` + `user_intent_by_stage` (stage 06)
+
+**Anti-Patterns (Blockers)**:
+- ❌ **BLOCKER**: 缺 `ia_rationale` → degrade + 触发 FM-013
+- ❌ **BLOCKER**: `flat_function_to_page_check.is_flat_1_to_1=true` 且无合理rationale → gap + warn
+- ❌ **BLOCKER**: `representative_scenario_influence_check.example_influences_ia=true` → gap + 触发 FM-010
+- ❌ **BLOCKER**: 功能列表1:1映射为页面,无任务/目标/产品模型支撑 → degrade
+- ❌ **BLOCKER**: IA分组无evidence,纯推断但未标inferred + confidence → gap
+
+**Quality Standards**:
+- ✅ IA是信息组织和决策模型,不是页面清单
+- ✅ `route_hierarchy`必须解释为什么这么分层、这么分组
+- ✅ `navigation_design`必须区分primary/secondary/admin/utility navigation
+- ✅ 每个页面/路由必须说明服务哪个task/goal/domain object
+- ✅ Inferred IA元素必须标`confidence` + `risk_if_wrong` + `validation_method`
+- ✅ 缺evidence时必须进入`ia_gaps`,不得脑补成verified
+
+**IA Organization Rules**:
 1. **组织维度**：优先task，其次role/status，最后module
 2. **导航选择**：层级深→sidebar，平级切换→tab
 3. **3级规则**：P0任务必须≤3次点击可达
 4. **命名**：用户语言，禁用系统术语
 5. **扩展性**：预留slot，新功能不破坏结构
+
+**Failure Mode Binding**:
+- FM-009 (PRD-to-Page Shortcut): 禁止跳过 problem framing / goal / task model 直接生成 IA
+- FM-010 (Example Dominance): `representative_scenario_influence_check` 命中时 degrade
+- FM-013 (IA Unsupported By Evidence): 缺 `ia_rationale` 时 degrade
+
+**Quality Gate Binding**:
+- Input-Quality-Gate §8.1 Ten-Domain Readiness: 消费 `ten_domain_readiness.7_ia_navigation_surface`
+- Self-Review-Gate §9.1 Ten-Domain Self Critique: 输出 IA 必须满足 Domain 7 pass 标准
+- Self-Review-Gate §9.1 Verdict Calibration: IA 质量决定 `clickable_prototype_ready` vs `senior_review_ready`
+
+**Input Readiness Constraints**:
+- `input_document_type=mrd | roadmap` → IA 只能 reasoning / concept，不得 detailed route
+- `input_document_type=functional_prd` → IA 可 route_hierarchy，但 page 细节需 inferred
+- `input_document_type=flow_detailed_prd | page_spec_prd` → IA 可 detailed route + page
+- `can_generate_prototype_from_input ≤ reasoning_only` → 不得生成 clickable IA
 
 ---
 

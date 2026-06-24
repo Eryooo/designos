@@ -2,7 +2,7 @@
 
 **批次**: S2-H12  
 **时间**: 2026-06-24  
-**状态**: PARTIAL (Phase 1 + Phase 2A Complete; Phase 2B/2C Remaining)  
+**状态**: PARTIAL (Phase 1 + Phase 2A-前段 + Phase 2A-IA深化 Complete; Phase 2B/2C Remaining)  
 **性质**: prompts-v2 强制10域推导链路
 
 ---
@@ -14,22 +14,24 @@ S2-H11-B 已完成 knowledge-manifest / reference / gate / failure mode / test �
 **Phase 1 Scope (已完成 - commit 8085a73)**:
 - ✅ 01-input-diagnosis.md schema 补充 input_document_type / can_generate_prototype / ten_domain_readiness / forced_degradation_triggers
 
-**Phase 2A Scope (已完成 - 本批)**:
+**Phase 2A-前段 Scope (已完成 - commit 2e461ba)**:
 - ✅ 02-design-objectives.md: 补充 problem_statement / goal_tree / success_criteria
 - ✅ 03-product-archetype.md: 补充 product_foundation_map / example_dominance_check
 - ✅ 04-user-task-modeling.md: 补充 task_to_goal_mapping / edge_tasks_gap_check
 - ✅ 05-business-flow-modeling.md: 补充 flow_coverage_check / unsupported_flow_gaps
 - ✅ 06-user-journey-mapping.md: 补充 user_intent_by_stage / journey_gaps
 
-**Phase 2B Scope (留待 S2-H12.2)**:
-- ⚠️ 07-information-architecture.md: 需补充 ia_rationale / experience_surfaces
-- ⚠️ 08-page-flow.md: 需补充 page_prerequisites
-- ⚠️ 09-page-structure.md: 需补充 state_coverage
-- ⚠️ 10-component-strategy.md: 需补充 component_traceability
-- ⚠️ 11-state-matrix.md: 需补充 state_coverage (7态)
-- ⚠️ 12-interaction-rules.md: 需补充 interaction_coverage
+**Phase 2A-IA深化 Scope (已完成 - 本批)**:
+- ✅ 07-information-architecture.md: 深度强化 IA 推导链路,5层约束全覆盖
 
-**Phase 2C Scope (留待 S2-H12.3)**:
+**Phase 2B Scope (留待 S2-H12.2B)**:
+- ⚠️ 08-page-flow.md: 深度强化页面流推导
+- ⚠️ 09-page-structure.md: 深度强化页面结构推导
+- ⚠️ 10-component-strategy.md: 深度强化组件策略推导
+- ⚠️ 11-state-matrix.md: 深度强化状态矩阵推导
+- ⚠️ 12-interaction-rules.md: 深度强化交互规则推导
+
+**Phase 2C Scope (留待 S2-H12.2C)**:
 - ⚠️ 13-design-spec-generation.md: 需补充 visual_source_status
 - ⚠️ 14-token-extraction.md: 需补充 visual_source_status
 - ⚠️ 15-constrained-code-generation.md: 需补充 prototype_scope + coverage
@@ -218,19 +220,149 @@ execution_constraints:
 
 ---
 
-## 4. Phase 2A Impact Assessment
+## 3B. Phase 2A-IA深化 Changes (本批)
 
-**Improved (Phase 1 + 2A)**:
+### 3B.1 Modified: 07-information-architecture.md (Deep Hardening)
+
+**深度强化策略**: 不追求文件数量,追求 IA 推导质量。5层约束全覆盖。
+
+**新增 schema 字段 (11项强制输出)**:
+
+```yaml
+ia_rationale:
+  why_this_organization: "<为何选择这个组织维度>"
+  based_on_what: "<基于哪些上游推导,不得空缺>"
+  alternative_considered: "<考虑过哪些其他方案>"
+  trade_offs: "<本方案牺牲了什么,换来了什么>"
+  confidence: 0.0-1.0
+
+experience_surfaces:
+  shell: {name, scope, rationale}
+  product_navigation: {name, scope, rationale}
+  context_history: {name, scope, rationale}
+  workspace: {name, scope, rationale}
+  identified: true | false
+  rationale_if_not_identified: "<如未识别多层,说明为何单层足够>"
+
+route_hierarchy:
+  levels: [{level, grouping_principle, grouping_rationale, examples}]
+  max_depth: "<int>"
+  depth_rationale: "<为何是这个深度?P0任务是否≤3级可达?>"
+
+page_grouping_rationale: [
+  {group_name, pages, rationale, evidence}
+]
+
+task_to_navigation_mapping: {
+  "PT-001": {navigation_path, clicks, rationale}
+}
+
+domain_object_to_surface_mapping: {
+  "User": {surfaces, rationale}
+}
+
+flat_function_to_page_check: {
+  is_flat_1_to_1: true | false,
+  rationale_exists: true | false,
+  evidence_from: "task_priority | product_model | journey | inferred",
+  if_flat_why: "<如flat,说明为何合理>",
+  risk_if_flat: "<如flat,说明风险>"
+}
+
+representative_scenario_influence_check: {
+  has_detailed_example: true | false,
+  example_influences_ia: true | false,
+  example_id: "<引用stage 03>",
+  mitigation: "<如example影响IA,如何防止?>"
+}
+
+inferred_ia_items: [
+  {item, inferred_from, confidence, risk_if_wrong, validation_method}
+]
+
+ia_gaps: [
+  {gap, impact, affects, recommendation, workaround}
+]
+
+ia_confidence_score: {
+  overall: 0.0-1.0,
+  rationale_confidence: 0.0-1.0,
+  task_mapping_confidence: 0.0-1.0,
+  evidence_support: "strong | moderate | weak",
+  inferred_ratio: 0.0-1.0,
+  risk_assessment: "low | medium | high"
+}
+
+upstream_consumed: {
+  problem_statement_exists,
+  goal_tree_exists,
+  product_foundation_map_exists,
+  domain_objects_exists,
+  role_model_exists,
+  task_model_exists,
+  business_flow_map_exists,
+  journey_stages_exists,
+  ia_navigation_surface_readiness: "<从stage 01获取>"
+}
+
+execution_constraints: {
+  can_proceed_without_ia_rationale: false,  // FM-013
+  can_flat_function_to_page: false,
+  can_let_example_dominate_ia: false,  // FM-010
+  can_proceed_without_task_mapping: false,
+  missing_ia_rationale_action: "degrade",
+  missing_experience_surfaces_action: "warn",
+  flat_1_to_1_action: "gap_and_warn"
+}
+```
+
+**Decision Rules 补充 (5层约束)**:
+
+1. **Mandatory Outputs**: 11项强制输出
+2. **Upstream Consumption**: 必须消费 problem_statement / goal_tree / product_foundation_map / domain_objects / role_model / task_model / business_flow_map / journey_stages
+3. **Anti-Patterns (Blockers)**:
+   - 缺 ia_rationale → degrade + FM-013
+   - flat_function_to_page_check.is_flat_1_to_1=true 且无合理rationale → gap + warn
+   - representative_scenario_influence_check.example_influences_ia=true → gap + FM-010
+   - 功能列表1:1映射为页面,无任务/目标/产品模型支撑 → degrade
+   - IA分组无evidence,纯推断但未标inferred + confidence → gap
+4. **Quality Standards**: IA是信息组织和决策模型,不是页面清单
+5. **Failure Mode Binding**: FM-009/010/013
+6. **Quality Gate Binding**: Input-Quality-Gate / Self-Review-Gate
+7. **Input Readiness Constraints**: input_document_type 决定 IA 详细程度
+
+**影响**:
+- ✅ IA 必须来自 problem/goal/product/task/flow/journey,不得功能列表1:1页面
+- ✅ IA 必须有 rationale (why/based_on_what/alternative/trade_offs),否则 degrade
+- ✅ IA 必须识别 experience_surfaces (shell/product/context/workspace 四层)
+- ✅ IA 必须有 route_hierarchy (分层分组原理 + 深度合理性)
+- ✅ IA 每个分组必须说明 rationale + evidence
+- ✅ IA 每个 task 必须映射到 navigation path + clicks + rationale
+- ✅ IA 每个 domain object 必须映射到 surfaces + rationale
+- ✅ IA 必须检查 flat_function_to_page (如flat,说明为何合理 + 风险)
+- ✅ IA 必须检查 representative_scenario_influence (防止 example 主导 IA)
+- ✅ IA inferred 项必须标 confidence + risk_if_wrong + validation_method
+- ✅ IA 必须输出 ia_confidence_score (overall / rationale / task_mapping / evidence_support / inferred_ratio / risk_assessment)
+
+---
+
+## 4. Phase 2A-前段+IA深化 Impact Assessment
+
+**Improved (Phase 1 + 2A-前段 + 2A-IA深化)**:
 - ✅ 01-input-diagnosis 输出10域 readiness 判定
 - ✅ 02-design-objectives 强制 problem_statement + goal_tree
 - ✅ 03-product-archetype 防止 example dominance (FM-010)
 - ✅ 04-user-task-modeling 强制 task_to_goal_mapping + edge_tasks_gap
 - ✅ 05-business-flow 强制 flow_coverage_check (FM-014)
 - ✅ 06-user-journey 强制 user_intent_by_stage + journey_gaps
+- ✅ 07-IA 深度强化:5层约束 + 11项强制输出 + FM-009/010/013绑定 + IA来自推导而非功能列表
 
 **Still Weak (Phase 2B/2C 待办)**:
-- ⚠️ 07-IA 尚未强制 ia_rationale (仍可能 flat 功能1:1页面)
-- ⚠️ 09/11 尚未强制 state_coverage (仍可能只有 happy path)
+- ⚠️ 08-page-flow 尚未深度强化 (仍可能缺 entry/exit/exception paths)
+- ⚠️ 09-page-structure 尚未强化 (仍可能堆功能卡片)
+- ⚠️ 10-component-strategy 尚未强化 (仍可能 Antd 默认拼装)
+- ⚠️ 11-state-matrix 尚未强化 (仍可能只有 happy path)
+- ⚠️ 12-interaction-rules 尚未强化 (仍可能只写点击行为)
 - ⚠️ 13/14 尚未强制 visual_source_status (仍可能 visual overclaim)
 - ⚠️ 15 尚未强制 prototype_scope (仍可能超出 evidence)
 - ⚠️ 17 尚未强制 verdict_calibration (仍可能 liveness=quality)
