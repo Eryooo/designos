@@ -4,9 +4,9 @@
 > 本索引从 manifest 的 `type` 字段汇总而来,方便按资产种类检索。manifest 变更后需同步重生成。
 > 生成方式:遍历 `manifest.yaml` 的 `assets[].type`,按 type 分组。
 
-当前共 **51** 个资产,**8** 种 type。
+当前共 **52** 个资产,**8** 种 type。
 
-## `methodology` (30)
+## `methodology` (31)
 
 | id | domain | applicable_skills | source_of_truth |
 |---|---|---|---|
@@ -33,6 +33,7 @@
 | `frontend.atomic-design` | frontend | prd2proto | `knowledge/frontend/atomic-design.md` |
 | `product.information-architecture` | product | prd2proto | `knowledge/product/information-architecture.md` |
 | `product.prd-understanding` | product | prd2proto | `knowledge/product/prd-understanding.md` |
+| `product.senior-design-execution` | product | prd2proto, ai-analytics, uxeval, ip-design, brand-creative | `knowledge/product/senior-design-execution.md` |
 | `product.user-story-mapping` | product | prd2proto | `knowledge/product/user-story-mapping.md` |
 | `research.competitor-analysis` | research | ai-analytics | `knowledge/research/competitor-analysis.md` |
 | `research.methodology-selection` | research | ai-analytics | `knowledge/research/methodology-selection.md` |
