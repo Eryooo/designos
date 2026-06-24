@@ -178,10 +178,171 @@
 
 | severity | 数量 | FM id |
 |---|---|---|
-| blocker | 4 | 001, 002, 003, 004 |
-| major | 3 | 005, 006, 007 |
-| minor | 1 | 008 |
-| **合计** | **8** | |
+| blocker | 7 | 001, 002, 003, 004, 009, 011, 015 |
+| major | 6 | 005, 006, 007, 010, 013, 016 |
+| minor | 3 | 008, 012, 014 |
+| **合计** | **16** | |
 
-**一票否决覆盖**：4 个 prd2proto 一票否决项（Schema/Traceability/代码宪法/Honesty）= FM-001~004 全覆盖。
+**一票否决覆盖**：4 个原有 prd2proto 一票否决项（Schema/Traceability/代码宪法/Honesty）= FM-001~004。
+**S2-H11 资深设计执行一票否决**：PRD直转页面(009)、缺Problem Framing(011)、Verdict Inflation(015)。
 **KR 未达标覆盖**：KR-P1(007/008) · KR-P2(001) · KR-P3(003) · KR-P4(002) · KR3.1(004) · KR3.2(005/006)。
+
+---
+
+## FM-PRD2PROTO-009
+
+- **id**: FM-PRD2PROTO-009
+- **name**: PRD直转页面（跳过问题定义与设计推导）
+- **applies_to**: design-objectives, product-archetype, information-architecture, page-structure
+- **related_kr**: KR-P1; S2-H11-0 Domain 1/3/5/7
+- **related_golden_template_section**: §必填章节（problem_statement, goal_tree, product_foundation_map, ia_rationale）
+- **source_reference**: knowledge/product/senior-design-execution.md Domain 1/3/5/7; skills/prd2proto/reference/senior-design-execution-adaptation.md §2.2
+- **severity**: blocker
+- **detection_signal**: design_objectives缺problem_statement; product_archetype缺foundation/core_module区分; information_architecture无rationale直接输出flat功能页面清单
+- **trigger_condition**: 任一中间推理资产(problem/goal/product model/IA rationale)缺失或直接从PRD功能清单生成页面
+- **examples_synthetic_only**: PRD含10个功能点,直接生成10个flat sidebar页面,无IA rationale/product foundation/goal tree
+- **remediation**: 补problem framing/goal decomposition/product model/IA rationale; 若PRD不支持则标gap并降级
+- **delivery_decision**: block
+- **not_allowed_claims**: 不得声称"资深产品设计推导""完整设计推理链"
+- **traceability_requirement**: IA → product model → goal → problem 可追溯
+- **self_review_question**: 是否从PRD直接生成页面,跳过problem framing/goal decomposition/product model/IA rationale? 若跳过则block。
+
+---
+
+## FM-PRD2PROTO-010
+
+- **id**: FM-PRD2PROTO-010
+- **name**: Example Flow Dominance（详细示例流程主导整个产品架构）
+- **applies_to**: product-archetype, information-architecture, page-flow
+- **related_kr**: KR-P1; S2-H11-0 Domain 5/7
+- **related_golden_template_section**: §product_foundation_map, §information_architecture.experience_surfaces
+- **source_reference**: knowledge/product/senior-design-execution.md Domain 5; skills/prd2proto/reference/senior-design-execution-adaptation.md §2.2 Trigger 1
+- **severity**: major
+- **detection_signal**: PRD含1个详细example + N个产品基础能力,但IA/导航/首页围绕example设计,基础能力被边缘化或缺失
+- **trigger_condition**: representative_scenario因描述详细而被错误提升为product_foundation或main navigation
+- **examples_synthetic_only**: 企业AI助理PRD含"费用申请详细流程"示例,系统把费用申请作为主导航和首页,压过对话/技能/记忆等产品基础能力
+- **remediation**: 区分product_foundation/core_module/representative_scenario; example用于验证能力,不主导架构; 标注example_dominance_risk
+- **delivery_decision**: degrade
+- **not_allowed_claims**: 不得声称"完整产品架构""主导航准确"
+- **traceability_requirement**: IA → product_foundation_map, representative_scenario标注为proof-of-flow
+- **self_review_question**: 是否因某个流程描述详细就让它主导IA/导航/首页? 产品基础能力是否被example压倒? 若是则degrade并标example_dominance_risk。
+
+---
+
+## FM-PRD2PROTO-011
+
+- **id**: FM-PRD2PROTO-011
+- **name**: Missing Problem Framing（缺业务问题/用户问题定义）
+- **applies_to**: input-diagnosis, design-objectives
+- **related_kr**: KR-P1; S2-H11-0 Domain 1
+- **related_golden_template_section**: §design_objectives.problem_statement
+- **source_reference**: knowledge/product/senior-design-execution.md Domain 1; skills/prd2proto/reference/senior-design-execution-adaptation.md §1 Domain 1
+- **severity**: blocker
+- **detection_signal**: design_objectives缺problem_statement或只有功能清单无问题定义
+- **trigger_condition**: PRD缺业务问题/用户问题/成功指标,且未标注inferred_problem并降低confidence
+- **examples_synthetic_only**: PRD直接列功能清单,无"要解决什么业务问题""用户痛点是什么""成功指标是什么",输出也无problem_statement
+- **remediation**: 补problem_statement(业务问题/用户问题/成功指标); PRD不支持时标inferred+assumption+low confidence
+- **delivery_decision**: block(若完全缺失); degrade(若inferred但未标注)
+- **not_allowed_claims**: 不得声称"基于明确问题定义的设计"
+- **traceability_requirement**: goal_tree → problem_statement 可追溯
+- **self_review_question**: design_objectives是否含problem_statement(业务问题/用户问题/成功指标)? PRD缺失时是否标inferred+assumption? 若无则block。
+
+---
+
+## FM-PRD2PROTO-012
+
+- **id**: FM-PRD2PROTO-012
+- **name**: Missing Product/Domain Model（缺产品对象模型与模块边界）
+- **applies_to**: product-archetype, information-architecture
+- **related_kr**: KR-P1; S2-H11-0 Domain 5
+- **related_golden_template_section**: §product_archetype.product_foundation_map, §product_archetype.domain_objects
+- **source_reference**: knowledge/product/senior-design-execution.md Domain 5; skills/prd2proto/reference/senior-design-execution-adaptation.md §1 Domain 5
+- **severity**: minor
+- **detection_signal**: product_archetype缺product_foundation/core_module/domain_objects,或IA无法追溯到product model
+- **trigger_condition**: PRD缺业务对象/权限/状态描述,product_archetype未建模或IA直接从功能清单生成
+- **examples_synthetic_only**: CRM PRD缺"客户/线索/商机对象关系",product_archetype未建模,IA直接平铺功能页面
+- **remediation**: 补product_foundation_map/domain_objects/module_boundaries; PRD不支持时标inferred并在IA中标ia_inferred_from_features
+- **delivery_decision**: warn(可推断); degrade(若IA unsupported)
+- **not_allowed_claims**: 不得声称"基于产品模型的IA"
+- **traceability_requirement**: IA → product model → domain objects 可追溯
+- **self_review_question**: product_archetype是否含product_foundation_map/domain_objects? IA是否可追溯到product model? 若无则warn并标inferred。
+
+---
+
+## FM-PRD2PROTO-013
+
+- **id**: FM-PRD2PROTO-013
+- **name**: IA Unsupported By Evidence（IA无rationale或flat功能映射）
+- **applies_to**: information-architecture, page-flow
+- **related_kr**: KR-P1; S2-H11-0 Domain 7
+- **related_golden_template_section**: §information_architecture.ia_rationale, §information_architecture.experience_surfaces
+- **source_reference**: knowledge/product/senior-design-execution.md Domain 7; skills/prd2proto/reference/senior-design-execution-adaptation.md §1 Domain 7
+- **severity**: major
+- **detection_signal**: information_architecture缺ia_rationale; 功能域1:1映射为页面; 单层sidebar覆盖所有功能; 缺experience_surfaces/shell/context/history区分
+- **trigger_condition**: IA直接从PRD功能清单生成,无product model/task priority/user journey支撑
+- **examples_synthetic_only**: 多体验表面产品(宿主平台+产品导航+历史上下文+工作区)被压平成单层sidebar
+- **remediation**: 补ia_rationale(为何这样组织?); 识别experience_surfaces/shell/context; 区分product foundation/management/scenarios; 标ia_inferred_from_features
+- **delivery_decision**: degrade
+- **not_allowed_claims**: 不得声称"资深IA决策""经过架构推导"
+- **traceability_requirement**: IA → product model → user tasks → journey
+- **self_review_question**: IA是否有rationale? 是否识别experience_surfaces? 是否flat功能1:1页面? 若flat则degrade并标ia_inferred_from_features。
+
+---
+
+## FM-PRD2PROTO-014
+
+- **id**: FM-PRD2PROTO-014
+- **name**: State Coverage Illusion（状态覆盖不全却宣称完整）
+- **applies_to**: state-matrix, page-structure, interaction-rules
+- **related_kr**: KR-P1; S2-H11-0 Domain 6/8
+- **related_golden_template_section**: §state_matrix.states, §page_structure.state_coverage
+- **source_reference**: knowledge/product/senior-design-execution.md Domain 6/8; skills/prd2proto/reference/senior-design-execution-adaptation.md §1 Domain 6/8
+- **severity**: minor
+- **detection_signal**: state_matrix只有happy path; page_structure缺loading/empty/error/permission描述
+- **trigger_condition**: PRD缺异常流程/权限流程/中断状态,state_matrix未标gap却宣称"状态完整"
+- **examples_synthetic_only**: 列表页只设计"有数据"态,缺空态/加载失败/无权限态,未标gap
+- **remediation**: 补loading/empty/error/permission/retry/interruption; PRD不支持时标state_coverage_gaps
+- **delivery_decision**: warn
+- **not_allowed_claims**: 不得声称"状态全覆盖""交互完整"
+- **traceability_requirement**: state_matrix → business_flow → user_journey
+- **self_review_question**: state_matrix是否覆盖loading/empty/error/permission等边缘态? 缺失的是否标gap? 若只有happy path则warn并标state_coverage_gaps。
+
+---
+
+## FM-PRD2PROTO-015
+
+- **id**: FM-PRD2PROTO-015
+- **name**: Clickable Prototype Verdict Inflation（可点击≠资深可评审）
+- **applies_to**: professional-gap-assessment, self-review-gate
+- **related_kr**: KR-P1; S2-H11-0 Domain 10
+- **related_golden_template_section**: §self_review_gate.delivery_decision, §professional_gap_report.verdict
+- **source_reference**: knowledge/product/senior-design-execution.md Domain 10; skills/prd2proto/reference/senior-design-execution-adaptation.md §3 Absolute Rules
+- **severity**: blocker
+- **detection_signal**: liveness/smoke pass被当作design quality证明; coverage<80%或critical gaps>0时判定review-ready; 缺visual evidence时判定visual_review_ready
+- **trigger_condition**: verdict与evidence/coverage/gap不匹配,过度声明prototype质量
+- **examples_synthetic_only**: PRD-only输入,prototype可点击且smoke pass,但缺IA rationale/状态覆盖/visual evidence,判定为"senior_review_ready"
+- **remediation**: 校准verdict: liveness≠quality; clickable≠senior-reviewable; 按coverage/gap/visual evidence判定; 降级为partial_clickable_prototype或clickable_prototype_ready_with_gaps
+- **delivery_decision**: block
+- **not_allowed_claims**: 不得声称"资深可评审""visual review ready""production candidate"(除非evidence支持)
+- **traceability_requirement**: verdict → coverage → gap → evidence 可追溯
+- **self_review_question**: verdict是否与coverage/gap/visual evidence匹配? liveness pass是否被当作design quality? coverage<80%或critical gaps>0时是否仍判review-ready? 若是则block并降级verdict。
+
+---
+
+## FM-PRD2PROTO-016
+
+- **id**: FM-PRD2PROTO-016
+- **name**: Visual Polish Overclaim（无视觉证据却宣称视觉可评审）
+- **applies_to**: design-spec-generation, token-extraction, professional-gap-assessment
+- **related_kr**: KR-P1; S2-H11-0 Domain 9
+- **related_golden_template_section**: §design_spec.visual_source_status, §design_tokens.extraction_method
+- **source_reference**: knowledge/product/senior-design-execution.md Domain 9; skills/prd2proto/reference/senior-design-execution-adaptation.md §1 Domain 9
+- **severity**: major
+- **detection_signal**: 无screenshots/design system/brand tokens/reference UI,但design_spec声称"视觉已确立"或token_extraction输出"品牌token"; component library default被当成visual direction
+- **trigger_condition**: visual_source_status=none,但visual_fidelity_mode≠structural_only或verdict=visual_review_ready
+- **examples_synthetic_only**: PRD-only输入,选择Ant Design默认主题,输出token并声称"已提取品牌设计语言"
+- **remediation**: 标visual_source_status=none, visual_fidelity_mode=structural_only; component library标为implementation_constraint而非visual direction; 降级verdict; 请求screenshots/design system/tokens
+- **delivery_decision**: degrade
+- **not_allowed_claims**: 不得声称"视觉可评审""品牌语言已确立""design tokens extracted"(除非有visual source)
+- **traceability_requirement**: design_tokens → visual_source(screenshots/design system/brand assets)
+- **self_review_question**: 是否有visual source(screenshots/design system/tokens/brand assets)? 若无,visual_fidelity_mode是否为structural_only? component library是否被误认为visual direction? 若overclaim则degrade。

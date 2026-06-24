@@ -37,6 +37,40 @@ shared_knowledge:
   - id: design.tone-and-visual-direction
     used_by: spec-generation
     use: tone keywords 与视觉方向推导
+  - id: product.senior-design-execution
+    used_by: all-stages, input-diagnosis, design-objectives, product-archetype, user-task-modeling, business-flow-modeling, user-journey-mapping, information-architecture, page-flow, page-structure, component-strategy, state-matrix, interaction-rules, design-spec-generation, constrained-code-generation, traceability-generation, professional-gap-assessment
+    use: 资深产品设计执行标准(10域):Problem Framing/Input Critique/Goal Decomposition/User-Task Modeling/Domain-Product Model/Journey-Flow-State/IA-Navigation-Surface/Page-Interaction Design/Visual-Design System-Accessibility/Prototype-Traceability-Critique;防止PRD直转页面/example dominance/clickable=senior-reviewable等过度声明
+    stage_mapping:
+      - domain: "1. Problem Framing"
+        stages: [input-diagnosis, design-objectives]
+        reference: skills/prd2proto/reference/senior-design-execution-adaptation.md
+      - domain: "2. Input / PRD Critique"
+        stages: [input-diagnosis]
+        reference: skills/prd2proto/reference/senior-design-execution-adaptation.md
+      - domain: "3. Goal Decomposition"
+        stages: [design-objectives]
+        reference: skills/prd2proto/reference/senior-design-execution-adaptation.md
+      - domain: "4. User / Task Modeling"
+        stages: [user-task-modeling]
+        reference: skills/prd2proto/reference/senior-design-execution-adaptation.md
+      - domain: "5. Domain / Product Model"
+        stages: [product-archetype]
+        reference: skills/prd2proto/reference/senior-design-execution-adaptation.md
+      - domain: "6. Journey / Flow / State"
+        stages: [business-flow-modeling, user-journey-mapping, state-matrix]
+        reference: skills/prd2proto/reference/senior-design-execution-adaptation.md
+      - domain: "7. IA / Navigation / Surface Model"
+        stages: [information-architecture, page-flow]
+        reference: skills/prd2proto/reference/senior-design-execution-adaptation.md
+      - domain: "8. Page / Interaction Design"
+        stages: [page-structure, component-strategy, interaction-rules]
+        reference: skills/prd2proto/reference/senior-design-execution-adaptation.md
+      - domain: "9. Visual / Design System / Accessibility"
+        stages: [design-spec-generation, token-extraction]
+        reference: skills/prd2proto/reference/senior-design-execution-adaptation.md
+      - domain: "10. Prototype / Traceability / Critique"
+        stages: [constrained-code-generation, traceability-generation, professional-gap-assessment]
+        reference: skills/prd2proto/reference/senior-design-execution-adaptation.md
 
 private_reference_boundary: |
   skills/prd2proto/reference/ 继续保留 stage 输出约束、schema 约束、prompt 消费方式；

@@ -121,11 +121,73 @@
 delivery_decision: <pass | pass_with_minor_warnings | degrade_with_gaps | block>
 ```
 
-判定理由(按 §4 规则):
+判定理由(按 §4 + §9.1 规则):
 - `<填:命中的 blocker/veto → block;major → degrade_with_gaps;仅 minor → pass_with_minor_warnings;全过 → pass>`
 
 next_actions:
 - `<填:需返工/补充的具体动作清单>`
+
+---
+
+## 9.1. Ten-Domain Self Critique (S2-H11-B)
+
+> 引用 `knowledge/product/senior-design-execution.md` 10个资深产品设计执行域,检查产出是否覆盖各域及质量标准。
+> 对应 `skills/prd2proto/reference/senior-design-execution-adaptation.md` §5.2 Self Review Gate Enhancement。
+
+| Domain | Delivered Artifact | Quality Check Question | Pass Criteria | Evidence | Blocker If Failed |
+|---|---|---|---|---|---|
+| 1. Problem Framing | `design_objectives.problem_statement` | 是否明确业务问题/用户问题/成功指标? | 有且可追溯 | `<填>` | yes |
+| 2. Input / PRD Critique | `input_diagnosis.readiness_decision` | 是否判断PRD type/completeness/can_generate_prototype? | 有decision + missing_for_X | `<填>` | yes |
+| 3. Goal Decomposition | `design_objectives.goal_tree` | 是否拆解BG/PG/UG? 推断的是否标inferred? | 有且标inferred+assumption | `<填>` | no(标gap) |
+| 4. User / Task Modeling | `user_task_map.roles/tasks` | 是否建模用户角色与主任务? edge tasks是否标gap? | 有且edge gap标注 | `<填>` | no(标gap) |
+| 5. Domain / Product Model | `product_archetype.foundation/modules` | 是否区分product_foundation/core_module/representative_scenario/example? example是否主导IA? | 有且example未主导IA | `<填>` | yes |
+| 6. Journey / Flow / State | `state_matrix.states` | 是否覆盖异常/权限/中断/边缘态? 只有happy path的是否标gap? | 至少标state_coverage_gaps | `<填>` | no(标gap) |
+| 7. IA / Navigation / Surface | `information_architecture.ia_rationale` | 是否有IA rationale? 是否识别experience_surfaces? 是否flat功能1:1页面? | 有rationale且非flat 1:1 | `<填>` | yes |
+| 8. Page / Interaction Design | `page_structure.state_coverage` | 是否覆盖loading/error/empty/permission? 组件选择是否可追溯? | 至少标gap | `<填>` | no(标gap) |
+| 9. Visual / Design System / Accessibility | `design_spec.visual_source_status` | 是否有visual evidence(screenshots/design system/tokens)? 无时是否标structural_only? component library是否被误认为visual direction? | 有visual source 或 标structural_only | `<填>` | yes(若over-claim) |
+| 10. Prototype / Traceability / Critique | `traceability_map.coverage`, `professional_gap_report.verdict` | 是否有coverage/gap report? verdict是否≤evidence? liveness pass是否被当作design quality? | 有且verdict≤evidence | `<填>` | yes |
+
+**Verdict Calibration Matrix (基于10域)**:
+
+| Verdict | Domain 1-5 | Domain 6-8 | Domain 9 | Domain 10 | Coverage | Critical Gaps | Allowed? |
+|---|---|---|---|---|---|---|---|
+| `partial_clickable_prototype` | any | any | any | any | any | any | ✅ always(诚实边界) |
+| `clickable_prototype_ready_with_gaps` | pass | pass | structural_only | has traceability | ≥60% | ≤3 | ✅ |
+| `clickable_prototype_ready_with_minor_gaps` | pass | pass | partial | complete | ≥80% | 0 | ✅ |
+| `clickable_prototype_review_ready_with_minor_gaps` | pass | pass | partial | complete | ≥90% | 0 | ✅ (P0 only) |
+| `senior_review_ready` | pass | pass | has visual evidence | complete | ≥80% | 0 | ✅ |
+| `visual_review_ready` | pass | pass | has visual evidence | complete | ≥90% | 0 | ✅ |
+| `production_candidate` | N/A | N/A | N/A | N/A | N/A | N/A | ❌ forbidden(prd2proto=pilot) |
+
+**Blocker Detection (来自 senior-design-execution-adaptation.md §3 Absolute Rules + FM-009/011/015)**:
+
+| Blocker Condition | Detection Signal | Delivery Decision | Remediation |
+|---|---|---|---|
+| PRD直转页面(FM-009) | design_objectives缺problem_statement; product_archetype缺foundation; IA无rationale | block | 补problem framing/goal/product model/IA rationale |
+| 缺Problem Framing(FM-011) | design_objectives缺problem_statement且未标inferred | block | 补problem_statement或标inferred+low confidence |
+| Example主导IA(FM-010) | representative_scenario被提升为main navigation; product_foundation被边缘化 | degrade | 区分foundation/example; 标example_dominance_risk |
+| IA无rationale(FM-013) | IA直接从功能清单生成; 缺experience_surfaces; flat 1:1 | degrade | 补ia_rationale; 识别experience_surfaces |
+| Verdict Inflation(FM-015) | liveness pass→quality pass; coverage<80%且critical gaps>0→review-ready; 缺visual evidence→visual_review_ready | block | 校准verdict; liveness≠quality; clickable≠senior-reviewable |
+| Visual Overclaim(FM-016) | 无screenshots/tokens但声称visual_review_ready; component library→visual direction | degrade | 标visual_source_status=none, structural_only |
+
+**Not-Allowed Claims (补充 §8)**:
+
+- 不得在Domain 1缺失时宣称"基于明确问题定义的设计"
+- 不得在Domain 5缺失时宣称"完整产品架构"
+- 不得在Domain 7 flat 1:1时宣称"资深IA决策"
+- 不得在Domain 9缺visual evidence时宣称"visual review ready"
+- 不得在Domain 10 liveness pass时宣称"design quality pass"
+- 不得在coverage<80%或critical gaps>0时宣称"senior review ready"
+
+**Ten-Domain Summary**:
+
+| Field | Value |
+|---|---|
+| ten_domain_pass_count | `<填:1-10域中pass数量>` / 10 |
+| blocker_domains | `<填:failed且blocker=yes的域,如"1,5,7,10">` |
+| gap_domains | `<填:failed但可标gap的域,如"3,4,6,8">` |
+| verdict_supported_by_evidence | yes / no |
+| verdict_inflation_detected | yes / no(若liveness→quality/clickable→senior/缺visual→visual ready) |
 
 ---
 

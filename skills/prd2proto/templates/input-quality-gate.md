@@ -181,6 +181,53 @@ can_generate_prototype_from_input: partial (可产 design_objectives 与 require
 
 ---
 
+## 8.1. Ten-Domain Readiness Assessment (S2-H11-B)
+
+> 引用 `knowledge/product/senior-design-execution.md` 10个资深产品设计执行域,判断输入是否足以支撑各域推导。
+> 对应 `skills/prd2proto/reference/senior-design-execution-adaptation.md` §2.1 Input Type vs. Output Capability。
+
+| Domain | Input Evidence Required | Input Available | Can Infer | Readiness | Degradation If Missing |
+|---|---|---|---|---|---|
+| 1. Problem Framing | 业务问题/用户问题/成功指标 | yes / partial / no | partial | ready / partial / missing | 降低confidence,标inferred_problem |
+| 2. Input / PRD Critique | PRD type(MRD/functional/flow/page/visual) / completeness / granularity | yes / partial / no | no | ready / partial / missing | block if missing; 输出missing_for_X |
+| 3. Goal Decomposition | 业务目标/产品目标/用户目标/体验目标 | yes / partial / no | partial | ready / partial / missing | 标inferred_goals + assumption + risk_if_wrong |
+| 4. User / Task Modeling | 用户角色/主任务/edge tasks | yes / partial / no | yes | ready / partial / missing | edge tasks标gap; 推断角色标inferred_roles |
+| 5. Domain / Product Model | 产品类型/核心对象/模块关系/product foundation vs. example | yes / partial / no | yes | ready / partial / missing | example不得主导IA; 标product_foundation_inferred |
+| 6. Journey / Flow / State | 主流程/异常流程/权限流程/中断状态/边缘态 | yes / partial / no | partial | ready / partial / missing | 只有happy path→标state_coverage_gaps; 不得称完整 |
+| 7. IA / Navigation / Surface Model | sitemap rationale / 导航层级 / experience surfaces / shell / context | yes / partial / no | yes | ready / partial / missing | flat功能清单→标ia_inferred_from_features; 不得称资深IA |
+| 8. Page / Interaction Design | 页面结构/组件/交互/loading-empty-error-permission覆盖 | yes / partial / no | yes | ready / partial / missing | 边缘态标gap; 组件选择标implementation_constraint |
+| 9. Visual / Design System / Accessibility | screenshots / design system / brand tokens / reference UI | yes / partial / no | no | ready / partial / missing | 缺失→visual_fidelity_mode=structural_only; 不得visual_review_ready |
+| 10. Prototype / Traceability / Critique | 可追溯性要求 / coverage threshold / verdict calibration | yes / partial / no | yes | ready / partial / missing | 无→降级verdict; liveness≠quality |
+
+**Readiness Decision Matrix (基于10域)**:
+
+| Input Completeness | Domain 1-5 | Domain 6-8 | Domain 9 | Domain 10 | Output Capability | Allowed Verdict |
+|---|---|---|---|---|---|---|
+| MRD/Roadmap/Strategy Brief | partial | missing | missing | partial | problem framing + goal tree + product model skeleton | blocked_insufficient_input_for_prototype |
+| Functional PRD | ready | partial | missing | partial | above + IA skeleton + user tasks | design_reasoning_ready |
+| Flow-Detailed PRD | ready | ready | missing | partial | above + clickable flows + state coverage | clickable_prototype_ready_with_gaps |
+| Page-Spec PRD | ready | ready | partial | ready | above + component strategy + interaction rules | clickable_prototype_ready_with_minor_gaps |
+| Visual-Ready Input | ready | ready | ready | ready | above + visual tokens + brand language | senior_review_ready_with_gaps |
+
+**Forced Degradation Triggers (来自 senior-design-execution-adaptation.md §2.2)**:
+
+| Trigger | Action | Output Flag | Verdict Impact |
+|---|---|---|---|
+| PRD缺product foundation,只有1个详细example flow | 不得让example主导IA | example_dominance_risk | degrade to partial_clickable_prototype |
+| PRD缺visual evidence(screenshots/design system/tokens/reference UI) | 不得宣称visual_review_ready | visual_source_status=none, visual_fidelity_mode=structural_only, missing_visual_evidence | block visual_review_ready |
+| PRD缺异常流程/权限流程/中断状态/empty state | state-matrix标inferred_states | state_coverage_gaps | warn; 不得称interaction_complete |
+| PRD缺IA rationale,只有flat功能清单 | IA标inferred_from_features | navigation_rationale_missing, ia_inferred_from_features | warn; 不得称senior_reviewable_ia |
+
+**Decision Rules**:
+
+1. Domain 1-2 `missing` → `blocked_insufficient_input`(无法启动)
+2. Domain 3-5 `partial` → `ready_with_assumptions`(可推断但需标注)
+3. Domain 6-8 `partial` → `ready_with_gaps`(可生成但coverage不完整)
+4. Domain 9 `missing` → `structural_only`(不得visual_review_ready)
+5. Domain 10 `partial` → `verdict_calibration_required`(liveness≠quality)
+
+---
+
 ## 9. Input Decision
 
 ```
@@ -189,11 +236,13 @@ input_decision: <ready | ready_with_assumptions | needs_user_clarification | blo
 
 | 字段 | 内容 |
 |---|---|
-| decision | `<填 §5 规则结论>` |
+| decision | `<填 §5 + §8.1 规则结论>` |
 | rationale | `<填:命中的 blocker/必需缺失 → blocked;少量追问可补 → needs_clarification;含推断 → ready_with_assumptions;完整 → ready>` |
 | required_before_execution | `<填:需用户答 Q-001/Q-002 等>` |
 | allowed_to_proceed | yes / no |
 | conditions_if_proceed | `<填:如"必须在输出标注 ASM-001~003 + GAP-002">` |
+| ten_domain_readiness_summary | `<填:Domain 1-10 readiness状态汇总,如"1-5 ready, 6-8 partial, 9 missing, 10 partial">` |
+| forced_degradation_triggers | `<填:命中的 §8.1 degradation trigger,如"example_dominance_risk, visual_source_status=none">` |
 
 ---
 
