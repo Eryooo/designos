@@ -81,7 +81,7 @@
 - "视觉可评审"(visual_review_ready)
 - "资深设计师可评审"(senior_reviewable,除非10域全覆盖+有visual evidence)
 - "生产就绪"(production_candidate)
-- "完全自动化生成"(prompt-grade需人工复核)
+- 全自动无人值守生成(prompt-grade需人工复核)
 
 **禁止行为**:
 - PRD直转页面,跳过problem framing / goal decomposition / product model

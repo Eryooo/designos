@@ -197,7 +197,7 @@ self_eval:
 - ❌ "可生成可直接用于生产的代码"
 - ❌ "无需人工复核"
 - ❌ "可替代资深设计师"
-- ❌ "production ready" / "fully automated" / "完全自动化" / "无人值守自动化"
+- ❌ "production ready" / 全自动无人值守 / 无需人工干预的自动化
 - ❌ "已稳定通过真实业务多 case 验证"(除非有实证 commit)
 
 允许声明:

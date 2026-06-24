@@ -83,14 +83,14 @@
 - **related_golden_template_section**: §禁止声明
 - **source_reference**: 全局底座 F-OverClaim; S2-H1 §1.3 通用一票否决底座; PILOT-BOUNDARY.md
 - **severity**: blocker
-- **detection_signal**: 文档/输出含"完全自动化/生产就绪/已达资深水准"；mock 路径标"已跑通"
+- **detection_signal**: 文档/输出含全自动无人值守/生产就绪/已达资深水准等过度声明；mock 路径标"已跑通"
 - **trigger_condition**: 任一产出声明超出 prompt-grade / pilot 真实能力
 - **examples_synthetic_only**: README 写"prd2proto 全自动生成可上线原型"
 - **remediation**: 改为诚实边界表述（pilot / 需人工复核 / prompt-grade）
 - **delivery_decision**: block
 - **not_allowed_claims**: 见 detection_signal 全部禁词
 - **traceability_requirement**: 能力声明须与 status.matrix maturity 一致
-- **self_review_question**: 当前文档/输出是否命中任一 not_allowed_claims（完全自动化/生产就绪/已达资深），若命中是否已改为诚实边界表述并阻断发布？
+- **self_review_question**: 当前文档/输出是否命中任一 not_allowed_claims（全自动无人值守/生产就绪/已达资深等过度声明），若命中是否已改为诚实边界表述并阻断发布？
 
 ---
 

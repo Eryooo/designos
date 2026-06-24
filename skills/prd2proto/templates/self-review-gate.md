@@ -108,7 +108,7 @@
 |---|---|---|
 | "已达资深交互设计师水平" | yes / no | 命中 → block |
 | "生成可直接用于生产的代码" | yes / no | 命中 → block |
-| "完全自动化 / fully automated / 无需人工复核" | yes / no | 命中 → block |
+| 全自动无人值守 / 无需人工复核 | yes / no | 命中 → block |
 | "production ready" | yes / no | 命中 → block |
 
 > 任一命中 → delivery_decision = block。
