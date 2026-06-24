@@ -1,9 +1,9 @@
 # Prompt: 01 Input Diagnosis
 
-**状态**: ✅ COMPLETE (Capability Pilot v1.0 - Senior Designer Reasoning Model)  
-**Stage**: input-diagnosis  
-**Method**: knowledge/design-work-paradigm/01-input-diagnosis.md  
-**Output**: requirement_inventory.json  
+**状态**: ✅ COMPLETE (Capability Pilot v1.0 - Senior Designer Reasoning Model)
+**Stage**: input-diagnosis
+**Method**: knowledge/design-work-paradigm/01-input-diagnosis.md
+**Output**: requirement_inventory.json
 **Quality Gates**: gap_transparency_gate
 
 ---
@@ -100,7 +100,7 @@
   "artifact_id": "req-inv-YYYYMMDD-NNN",
   "artifact_type": "requirement_inventory",
   "created_at": "ISO 8601 timestamp",
-  
+
   "input_materials": {
     "primary": {
       "type": "prd | user_story | design_brief",
@@ -112,7 +112,7 @@
     },
     "secondary": [...]
   },
-  
+
   "completeness_assessment": {
     "overall_score": 0.0-1.0,
     "dimensions": {
@@ -123,7 +123,7 @@
       "constraints_clarity": 0.0-1.0
     }
   },
-  
+
   "functional_requirements": [
     {
       "req_id": "FR-001",
@@ -132,7 +132,7 @@
       "source": "PRD 章节引用"
     }
   ],
-  
+
   "non_functional_requirements": [
     {
       "category": "performance | security | scalability | compatibility | usability",
@@ -140,7 +140,7 @@
       "metric": "可量化指标"
     }
   ],
-  
+
   "ambiguities": [
     {
       "ambiguity_id": "AMB-001",
@@ -151,7 +151,7 @@
       "risk_if_wrong": "critical | high | medium | low"
     }
   ],
-  
+
   "conflicts": [
     {
       "conflict_id": "CONF-001",
@@ -161,7 +161,7 @@
       "requires_stakeholder_decision": true | false
     }
   ],
-  
+
   "gaps": [
     {
       "gap_id": "GAP-001",
@@ -172,7 +172,7 @@
       "mitigation": "缓解方案"
     }
   ],
-  
+
   "assumptions": [
     {
       "assumption_id": "ASM-001",
@@ -183,14 +183,40 @@
       "affected_downstream": ["影响的下游资产"]
     }
   ],
-  
+
+  "input_document_type": "mrd | roadmap | strategy_brief | functional_prd | flow_detailed_prd | page_spec_prd | visual_ready_package | mixed",
+  "input_document_type_rationale": "基于PRD粒度和完整性判断的输入类型",
+
+  "can_generate_prototype_from_input": "none | reasoning_only | partial_clickable | clickable_with_gaps | clickable_with_minor_gaps | senior_reviewable",
+  "can_generate_prototype_rationale": "基于10域readiness判断的原型生成能力上限",
+
+  "ten_domain_readiness": {
+    "1_problem_framing": "ready | partial | missing",
+    "2_input_critique": "ready | partial | missing",
+    "3_goal_decomposition": "ready | partial | missing",
+    "4_user_task_modeling": "ready | partial | missing",
+    "5_domain_product_model": "ready | partial | missing",
+    "6_journey_flow_state": "ready | partial | missing",
+    "7_ia_navigation_surface": "ready | partial | missing",
+    "8_page_interaction_design": "ready | partial | missing",
+    "9_visual_design_system": "ready | partial | missing",
+    "10_prototype_traceability": "ready | partial | missing"
+  },
+
+  "forced_degradation_triggers": [
+    "example_dominance_risk | visual_source_missing | state_coverage_gaps | ia_rationale_missing | product_foundation_unclear"
+  ],
+
+  "missing_for_clickable_prototype": ["缺失的输入,如visual_source/异常流程/IA rationale"],
+  "missing_for_senior_reviewable": ["缺失的输入,如visual_evidence/complete_state_coverage"],
+
   "readiness_decision": {
     "decision": "proceed | fallback_safe | blocked",
     "rationale": "决策理由（必须基于 overall_score 和 critical gaps）",
     "blockers": ["如果是 blocked，列出阻塞原因"],
     "mitigation_strategy": "如果是 fallback_safe，说明降级策略"
   },
-  
+
   "confidence": 0.9,
   "warnings": [],
   "inferred_fields": [],
