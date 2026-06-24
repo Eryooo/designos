@@ -2,7 +2,7 @@
 
 **批次**: S2-H12  
 **时间**: 2026-06-24  
-**状态**: PARTIAL (Phase 1: Schema Enhancement Only)  
+**状态**: PARTIAL (Phase 1 + Phase 2A Complete; Phase 2B/2C Remaining)  
 **性质**: prompts-v2 强制10域推导链路
 
 ---
@@ -11,18 +11,34 @@
 
 S2-H11-B 已完成 knowledge-manifest / reference / gate / failure mode / test 接入,但未修改 prompts-v2。本批开始强化 prompts-v2,确保生成过程真正按10个资深产品设计执行域推导,而不是 PRD 直转页面。
 
-**Phase 1 Scope (本批完成)**:
+**Phase 1 Scope (已完成 - commit 8085a73)**:
 - ✅ 01-input-diagnosis.md schema 补充 input_document_type / can_generate_prototype / ten_domain_readiness / forced_degradation_triggers
-- ⚠️ 其他16个 prompts 的完整强化留待 Phase 2 (S2-H12.1)
 
-**原因**:
-- 17个 prompt 文件完整修改需要大量 token
-- Phase 1 先强化入口 stage (input-diagnosis),为后续 stage 提供10域 readiness 判定基础
-- Phase 2 将逐个强化02~17,确保每个 stage 真正消费10域约束
+**Phase 2A Scope (已完成 - 本批)**:
+- ✅ 02-design-objectives.md: 补充 problem_statement / goal_tree / success_criteria
+- ✅ 03-product-archetype.md: 补充 product_foundation_map / example_dominance_check
+- ✅ 04-user-task-modeling.md: 补充 task_to_goal_mapping / edge_tasks_gap_check
+- ✅ 05-business-flow-modeling.md: 补充 flow_coverage_check / unsupported_flow_gaps
+- ✅ 06-user-journey-mapping.md: 补充 user_intent_by_stage / journey_gaps
+
+**Phase 2B Scope (留待 S2-H12.2)**:
+- ⚠️ 07-information-architecture.md: 需补充 ia_rationale / experience_surfaces
+- ⚠️ 08-page-flow.md: 需补充 page_prerequisites
+- ⚠️ 09-page-structure.md: 需补充 state_coverage
+- ⚠️ 10-component-strategy.md: 需补充 component_traceability
+- ⚠️ 11-state-matrix.md: 需补充 state_coverage (7态)
+- ⚠️ 12-interaction-rules.md: 需补充 interaction_coverage
+
+**Phase 2C Scope (留待 S2-H12.3)**:
+- ⚠️ 13-design-spec-generation.md: 需补充 visual_source_status
+- ⚠️ 14-token-extraction.md: 需补充 visual_source_status
+- ⚠️ 15-constrained-code-generation.md: 需补充 prototype_scope + coverage
+- ⚠️ 16-traceability-generation.md: 需补充 traceability_completeness
+- ⚠️ 17-professional-gap-assessment.md: 需补充 verdict_calibration
 
 ---
 
-## 2. Phase 1 Changes
+## 2. Phase 1 Changes (commit 8085a73)
 
 ### 2.1 Modified: 01-input-diagnosis.md
 
@@ -66,7 +82,160 @@ S2-H11-B 已完成 knowledge-manifest / reference / gate / failure mode / test �
 
 ---
 
-## 3. Phase 2 Remaining Work (留待 S2-H12.1)
+## 3. Phase 2A Changes (本批)
+
+### 3.1 Modified: 02-design-objectives.md
+
+**新增 schema 字段**:
+```yaml
+problem_statement:
+  business_problem: "<要解决什么业务问题?必填,PRD缺失时标inferred>"
+  user_problem: "<用户痛点是什么?必填,PRD缺失时标inferred>"
+  success_criteria: "<成功指标是什么?必填,PRD缺失时标inferred>"
+  problem_statement_confidence: 0.0-1.0
+  inferred: true | false
+
+input_readiness_consumed:
+  input_document_type: "<从stage 01获取>"
+  can_generate_prototype_from_input: "<从stage 01获取>"
+  problem_framing_readiness: "<从stage 01 ten_domain_readiness.1获取>"
+  goal_decomposition_readiness: "<从stage 01 ten_domain_readiness.3获取>"
+
+execution_constraints:
+  can_proceed_to_ia_without_problem_statement: false
+  can_proceed_to_page_structure_without_goal_tree: false
+  missing_problem_statement_action: "block"  # FM-011
+```
+
+**Decision Rules 补充**:
+- ✅ MUST output problem_statement (business_problem / user_problem / success_criteria)
+- ❌ BLOCKER: 完全缺 problem_statement → block (FM-011)
+- ✅ 必须消费 input_document_type 和 problem_framing_readiness
+
+### 3.2 Modified: 03-product-archetype.md
+
+**新增 schema 字段**:
+```yaml
+product_foundation_map:
+  core_capabilities: ["<核心能力,不是功能列表>"]
+  core_modules: ["<核心模块,不是页面列表>"]
+  domain_objects: ["<业务对象>"]
+  role_model: ["<角色>"]
+  permission_model: "<权限模式>"
+  lifecycle_model: "<对象生命周期>"
+  product_boundary: "<产品边界>"
+  representative_scenarios: ["<代表性场景,用于验证能力,不主导IA>"]
+
+example_dominance_check:
+  has_detailed_example_in_prd: true | false
+  example_dominates_foundation: true | false  # 如true,触发FM-010
+  example_used_as: "proof_of_capability | main_navigation_driver | ignored"
+  mitigation_if_dominance: "<如example主导,如何防止其主导IA>"
+
+execution_constraints:
+  can_claim_full_product_architecture_without_foundation: false
+  can_let_example_dominate_ia: false  # FM-010
+```
+
+**Decision Rules 补充**:
+- ✅ MUST output product_foundation_map
+- ✅ MUST output example_dominance_check
+- ❌ BLOCKER: example_dominates_foundation=true → degrade + 触发 FM-010
+- ❌ 不得把 representative_scenario 提升为 product_foundation
+
+### 3.3 Modified: 04-user-task-modeling.md
+
+**新增 schema 字段**:
+```yaml
+task_to_goal_mapping:
+  "PT-001": "UG-001"
+
+edge_tasks_gap_check:
+  edge_tasks_identified: true | false
+  missing_edge_tasks: ["<推断缺失的edge task>"]
+  edge_task_coverage_confidence: 0.0-1.0
+
+execution_constraints:
+  can_proceed_to_page_map_without_task_model: false
+  can_proceed_to_ia_without_completion_criteria: false
+```
+
+**Decision Rules 补充**:
+- ✅ MUST output task_to_goal_mapping (每个 primary_task 映射到 user_goal)
+- ✅ MUST output edge_tasks_gap_check
+- ❌ 缺 task_model 不得生成 page map
+
+### 3.4 Modified: 05-business-flow-modeling.md
+
+**新增 schema 字段**:
+```yaml
+flow_coverage_check:
+  happy_path_covered: true | false
+  exception_paths_covered: true | false
+  permission_paths_covered: true | false
+  interruption_paths_covered: true | false
+  state_coverage_gaps: ["<缺失的状态或路径>"]
+
+unsupported_flow_gaps: [
+  {"gap": "<PRD未描述的关键流程>", "impact": "critical | high | medium"}
+]
+
+execution_constraints:
+  can_claim_complete_flow_without_exception_paths: false  # FM-014
+  can_proceed_to_state_matrix_without_permission_model: false
+```
+
+**Decision Rules 补充**:
+- ✅ MUST output flow_coverage_check 并标注 state_coverage_gaps
+- ❌ 只有 happy path 不得称"完整流程" (触发 FM-014)
+- ❌ 缺 exception_paths 必须标 state_coverage_gaps
+
+### 3.5 Modified: 06-user-journey-mapping.md
+
+**新增 schema 字段**:
+```yaml
+user_intent_by_stage:
+  "JS-001": "<该阶段用户真正想要什么>"
+  "JS-002": "<不是功能列表,是用户意图>"
+
+journey_assumptions: [
+  {"assumption": "<推断的情绪/痛点/意图>", "confidence": 0.0-1.0}
+]
+
+journey_gaps: [
+  {"gap": "<PRD未描述但关键的阶段/痛点>", "impact": "critical | high | medium"}
+]
+
+execution_constraints:
+  can_proceed_to_page_structure_without_user_intent: false
+  can_treat_journey_as_feature_steps: false
+```
+
+**Decision Rules 补充**:
+- ✅ MUST output user_intent_by_stage (每个阶段用户真正想要什么)
+- ❌ journey 不得等同功能步骤
+- ❌ 未定义 user_intent 不得进入 page structure
+
+---
+
+## 4. Phase 2A Impact Assessment
+
+**Improved (Phase 1 + 2A)**:
+- ✅ 01-input-diagnosis 输出10域 readiness 判定
+- ✅ 02-design-objectives 强制 problem_statement + goal_tree
+- ✅ 03-product-archetype 防止 example dominance (FM-010)
+- ✅ 04-user-task-modeling 强制 task_to_goal_mapping + edge_tasks_gap
+- ✅ 05-business-flow 强制 flow_coverage_check (FM-014)
+- ✅ 06-user-journey 强制 user_intent_by_stage + journey_gaps
+
+**Still Weak (Phase 2B/2C 待办)**:
+- ⚠️ 07-IA 尚未强制 ia_rationale (仍可能 flat 功能1:1页面)
+- ⚠️ 09/11 尚未强制 state_coverage (仍可能只有 happy path)
+- ⚠️ 13/14 尚未强制 visual_source_status (仍可能 visual overclaim)
+- ⚠️ 15 尚未强制 prototype_scope (仍可能超出 evidence)
+- ⚠️ 17 尚未强制 verdict_calibration (仍可能 liveness=quality)
+
+---
 
 ### 3.1 02-design-objectives.md
 

@@ -200,7 +200,29 @@
   ],
   "assumptions": [
     "<assumption_made>"
-  ]
+  ],
+
+  // S2-H12.1: Senior Design Execution Domain 6 (Journey/Flow/State)
+  "journey_assumptions": [
+    {"assumption": "<推断的情绪/痛点/意图>", "confidence": 0.0-1.0, "rationale": "<推断依据>"}
+  ],
+  "journey_gaps": [
+    {"gap": "<PRD未描述的关键阶段或痛点>", "impact": "critical | high | medium", "mitigation": "<如何补>"}
+  ],
+  "user_intent_by_stage": {
+    "JS-001": "<该阶段用户真正想要什么>",
+    "JS-002": "<不是功能列表,是用户意图>"
+  },
+  "upstream_consumed": {
+    "task_model_exists": true | false,
+    "business_flow_exists": true | false,
+    "journey_flow_state_readiness": "<从stage 01 ten_domain_readiness.6获取>"
+  },
+  "execution_constraints": {
+    "can_proceed_to_page_structure_without_user_intent": false,
+    "can_treat_journey_as_feature_steps": false,
+    "missing_moments_of_truth_action": "warn"
+  }
 }
 ```
 
@@ -216,6 +238,16 @@
 
 ## 5. Decision Rules
 
+**S2-H12.1 Senior Design Execution Constraints (Domain 6)**:
+- ✅ **MUST output `user_intent_by_stage`** (每个阶段用户真正想要什么,不是功能列表)
+- ✅ **MUST output `journey_assumptions`** (推断的情绪/痛点标注 confidence)
+- ✅ **MUST output `journey_gaps`** (PRD未描述但关键的阶段/痛点)
+- ❌ journey 不得等同功能步骤 (journey=体验视角,不是操作流程)
+- ❌ 未定义 user_intent 不得进入 page structure
+- ❌ 推断情绪/痛点必须标 inferred + confidence
+- ✅ 必须消费 `task_model` 和 `business_flow`
+
+**Journey Mapping Rules**:
 1. **阶段划分**：用AIDA/5A模型，覆盖认知→忠诚全程
 2. **触点跨渠道**：线上+线下+客服+公告
 3. **情绪基于痛点**：情绪曲线由pain_points推断，不拍脑袋

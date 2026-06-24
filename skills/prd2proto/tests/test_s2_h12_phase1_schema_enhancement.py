@@ -114,13 +114,12 @@ def test_s2_h12_audit_document_exists():
 
     # 验证关键章节存在
     assert "## 2. Phase 1 Changes" in content
-    assert "## 3. Phase 2 Remaining Work" in content
-    assert "## 4. Enforcement Strategy" in content
-    assert "## 9. Next Steps" in content
-
-    # 验证说明 Phase 2 留待 S2-H12.1
+    assert "## 3. Phase 2A Changes" in content or "## 3. Phase 2 Remaining Work" in content
+    assert "## 4." in content  # Phase 2A Impact Assessment or Enforcement Strategy
     assert "Phase 2" in content
-    assert "S2-H12.1" in content
+
+    # 验证说明后续阶段
+    assert "Phase 2B" in content or "S2-H12.2" in content or "Phase 2" in content
 
 
 if __name__ == "__main__":

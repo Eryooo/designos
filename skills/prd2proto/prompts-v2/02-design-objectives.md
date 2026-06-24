@@ -218,6 +218,15 @@ Conform to `kernel/contracts/artifacts/design-objectives.schema.json`.
 Required top-level keys:
 
 ```yaml
+# S2-H12.1: Senior Design Execution Domain 1+3 (Problem Framing + Goal Decomposition)
+problem_statement:
+  business_problem: "<要解决什么业务问题?必填,PRD缺失时标inferred>"
+  user_problem: "<用户痛点是什么?必填,PRD缺失时标inferred>"
+  success_criteria: "<成功指标是什么?必填,PRD缺失时标inferred>"
+  problem_statement_confidence: 0.0-1.0  # PRD明确=1.0,部分推断=0.6-0.8,完全推断=0.3-0.5
+  inferred: true | false
+  rationale: "<如inferred=true,说明推断依据>"
+
 business_goals: []        # min 1
 product_goals: []         # min 1
 user_goals: []            # min 1
@@ -226,12 +235,35 @@ goal_derivation_map: {}   # required, non-empty
 experience_methodology: {}
 archetype_priorities: {}
 goal_conflicts: []        # may be empty list, not omitted
+
+# S2-H12.1: 消费 input-diagnosis 产出
+input_readiness_consumed:
+  input_document_type: "<从stage 01获取>"
+  can_generate_prototype_from_input: "<从stage 01获取>"
+  problem_framing_readiness: "<从stage 01 ten_domain_readiness.1_problem_framing获取>"
+  goal_decomposition_readiness: "<从stage 01 ten_domain_readiness.3_goal_decomposition获取>"
+
+# S2-H12.1: 阻断 PRD 直转页面 (FM-009/011)
+execution_constraints:
+  can_proceed_to_ia_without_problem_statement: false  # 硬约束
+  can_proceed_to_page_structure_without_goal_tree: false  # 硬约束
+  missing_problem_statement_action: "block"  # block | degrade | warn
+  missing_success_criteria_action: "gap"  # gap | infer | block
 ```
 
 ---
 
 ## 10. Decision Rules
 
+**S2-H12.1 Senior Design Execution Constraints (Domain 1+3)**:
+- ✅ **MUST output `problem_statement`** (business_problem / user_problem / success_criteria)
+- ✅ PRD 缺业务问题时标 `inferred: true` + `problem_statement_confidence ≤ 0.8`
+- ✅ 缺 success_criteria 时必须进入 gaps 数组
+- ❌ **BLOCKER**: 完全缺 problem_statement → block (FM-011)
+- ❌ 不得把功能列表直接当成 business_goal / product_goal
+- ✅ 必须消费 `input_document_type` 和 `problem_framing_readiness` (from stage 01)
+
+**Goal Derivation Rules**:
 - ✅ Every PG must `serves_business_goal` → exactly one BG
 - ✅ Every UG must `supports_product_goal` → exactly one PG
 - ✅ Every EG must `supports_user_goal` → exactly one UG

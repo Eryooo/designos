@@ -327,7 +327,29 @@ PRD功能: "<entity_management_feature>"
   ],
   "assumptions": [
     "<assumption_made>"
-  ]
+  ],
+
+  // S2-H12.1: Senior Design Execution Domain 4 (User/Task Modeling)
+  "task_to_goal_mapping": {
+    "PT-001": "UG-001",
+    "PT-002": "UG-002"
+  },
+  "edge_tasks_gap_check": {
+    "edge_tasks_identified": true | false,
+    "missing_edge_tasks": ["<推断缺失的edge task>"],
+    "edge_task_coverage_confidence": 0.0-1.0
+  },
+  "upstream_consumed": {
+    "problem_statement_exists": true | false,
+    "goal_tree_exists": true | false,
+    "product_foundation_exists": true | false,
+    "user_task_modeling_readiness": "<从stage 01 ten_domain_readiness.4获取>"
+  },
+  "execution_constraints": {
+    "can_proceed_to_page_map_without_task_model": false,
+    "can_proceed_to_ia_without_completion_criteria": false,
+    "missing_task_to_goal_mapping_action": "warn"
+  }
 }
 ```
 
@@ -343,6 +365,17 @@ PRD功能: "<entity_management_feature>"
 ---
 
 ## 5. Decision Rules
+
+**S2-H12.1 Senior Design Execution Constraints (Domain 4)**:
+- ✅ **MUST output `task_to_goal_mapping`** (每个 primary_task 映射到 user_goal)
+- ✅ **MUST output `edge_tasks_gap_check`** 并标注缺失的 edge tasks
+- ✅ 每个 task 必须有 `completion_criteria` (隐式或显式)
+- ❌ 缺 task_model 不得生成 page map (因无法判定页面服务哪个任务)
+- ❌ 不得把 CRUD 操作直接当作用户任务
+- ✅ 必须消费 `problem_statement` 和 `goal_tree` (from stage 02)
+- ✅ 必须消费 `product_foundation_map` (from stage 03)
+
+**Task Modeling Rules**:
 
 1. **任务 vs 功能判断**：如果描述是"系统能做什么"（增删改查），继续追问"用户为什么要做"直到找到真实目标
 2. **优先级公式**：频率×价值/成本，明确说明rationale

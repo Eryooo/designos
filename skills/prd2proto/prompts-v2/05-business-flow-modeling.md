@@ -173,7 +173,29 @@
       "scenario": "<concurrent_conflict_scenario>",
       "rule": "<conflict_resolution_rule>"
     }
-  ]
+  ],
+
+  // S2-H12.1: Senior Design Execution Domain 6 (Journey/Flow/State)
+  "flow_coverage_check": {
+    "happy_path_covered": true | false,
+    "exception_paths_covered": true | false,
+    "permission_paths_covered": true | false,
+    "interruption_paths_covered": true | false,
+    "state_coverage_gaps": ["<缺失的状态或路径>"]
+  },
+  "unsupported_flow_gaps": [
+    {"gap": "<PRD未描述的关键流程>", "impact": "critical | high | medium", "mitigation": "<如何补>"}
+  ],
+  "upstream_consumed": {
+    "task_model_exists": true | false,
+    "product_foundation_exists": true | false,
+    "journey_flow_state_readiness": "<从stage 01 ten_domain_readiness.6获取>"
+  },
+  "execution_constraints": {
+    "can_claim_complete_flow_without_exception_paths": false,
+    "can_proceed_to_state_matrix_without_permission_model": false,
+    "missing_exception_paths_action": "gap"
+  }
 }
 ```
 
@@ -181,6 +203,15 @@
 
 ## 5. Decision Rules
 
+**S2-H12.1 Senior Design Execution Constraints (Domain 6)**:
+- ✅ **MUST output `flow_coverage_check`** 并标注 state_coverage_gaps
+- ✅ **MUST output `unsupported_flow_gaps`** (PRD未描述但关键的流程)
+- ❌ 只有 happy path 不得称"完整流程" (触发 FM-014)
+- ❌ 缺 exception_paths 必须标 state_coverage_gaps
+- ❌ 缺 permission_paths 不得进入 state_matrix
+- ✅ 必须消费 `task_model` 和 `product_foundation_map`
+
+**Flow Modeling Rules**:
 1. **业务对象识别**：找PRD中的"主语"（即承载状态流转的 `<business_object>`）
 2. **状态完整性**：Happy Path + 异常状态 + 终止状态
 3. **权限三维**：状态 × 角色 × 操作

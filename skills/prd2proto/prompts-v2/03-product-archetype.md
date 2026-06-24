@@ -105,6 +105,36 @@ archetype_specific_priorities:        # quoted/derived from archetypes/README.md
 archetype_specific_risks: [...]       # anti-patterns to avoid
 ambiguity_gaps: [...]                 # required when hybrid-ambiguous
 do_not_apply_patterns: [...]          # explicit "do not apply X archetype's logic"
+
+# S2-H12.1: Senior Design Execution Domain 5 (Domain/Product Model)
+product_foundation_map:
+  core_capabilities: ["<核心能力,不是功能列表>"]
+  core_modules: ["<核心模块,不是页面列表>"]
+  domain_objects: ["<业务对象,如User/Document/Order/Conversation>"]
+  role_model: ["<角色,如Admin/Editor/Viewer>"]
+  permission_model: "<简述权限模式,如RBAC/ABAC/owner-based>"
+  lifecycle_model: "<简述对象生命周期,如draft→review→published>"
+  product_boundary: "<产品边界,什么在内什么在外>"
+  representative_scenarios: ["<代表性场景,用于验证能力,不主导IA>"]
+
+example_dominance_check:
+  has_detailed_example_in_prd: true | false
+  example_dominates_foundation: true | false  # 如true,触发FM-010
+  example_used_as: "proof_of_capability | main_navigation_driver | ignored"
+  mitigation_if_dominance: "<如example主导,如何防止其主导IA>"
+
+# S2-H12.1: 消费 stage 01+02 产出
+upstream_consumed:
+  problem_statement_exists: true | false
+  goal_tree_exists: true | false
+  input_document_type: "<从stage 01获取>"
+  domain_product_model_readiness: "<从stage 01 ten_domain_readiness.5获取>"
+
+# S2-H12.1: 阻断过度声明 (FM-010/012)
+execution_constraints:
+  can_claim_full_product_architecture_without_foundation: false  # 硬约束
+  can_let_example_dominate_ia: false  # 硬约束,触发FM-010
+  missing_domain_objects_action: "warn_and_infer"  # warn_and_infer | block
 ```
 
 ### Field constraints
@@ -139,6 +169,15 @@ Follow `archetypes/README.md` §6 verbatim. Summary:
 
 ## 6. Decision Rules (anti-patterns)
 
+**S2-H12.1 Senior Design Execution Constraints (Domain 5)**:
+- ✅ **MUST output `product_foundation_map`** (core_capabilities / core_modules / domain_objects / role_model)
+- ✅ **MUST output `example_dominance_check`** 并判定 example 是否主导 foundation
+- ❌ **BLOCKER**: example_dominates_foundation=true → degrade + 触发 FM-010
+- ❌ 不得把 representative_scenario 提升为 product_foundation 或 main_navigation
+- ❌ 缺 domain_objects / role_model 时,不得声称 "full product architecture"
+- ✅ 必须消费 `problem_statement` 和 `goal_tree` (from stage 02)
+
+**Archetype Anti-patterns**:
 - ❌ **Do not** default to b2b just because the input mentions enterprise.
   Internal-tool, b2b2c, and ai-agent products often masquerade as "B2B".
 - ❌ **Do not** force product-page generation for pure brand briefs.
