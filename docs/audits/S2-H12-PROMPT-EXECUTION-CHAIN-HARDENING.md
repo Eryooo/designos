@@ -2,7 +2,7 @@
 
 **批次**: S2-H12  
 **时间**: 2026-06-24  
-**状态**: PARTIAL (Phase 1 + Phase 2A-前段 + Phase 2A-IA深化 Complete; Phase 2B/2C Remaining)  
+**状态**: PARTIAL (Phase 1 + Phase 2A-前段 + Phase 2A-IA深化 + Phase 2B-PageFlow深化 Complete; Phase 2B/2C Remaining)  
 **性质**: prompts-v2 强制10域推导链路
 
 ---
@@ -21,13 +21,17 @@ S2-H11-B 已完成 knowledge-manifest / reference / gate / failure mode / test �
 - ✅ 05-business-flow-modeling.md: 补充 flow_coverage_check / unsupported_flow_gaps
 - ✅ 06-user-journey-mapping.md: 补充 user_intent_by_stage / journey_gaps
 
-**Phase 2A-IA深化 Scope (已完成 - 本批)**:
+**Phase 2A-IA深化 Scope (已完成 - commit 929b358)**:
 - ✅ 07-information-architecture.md: 深度强化 IA 推导链路,5层约束全覆盖
 
-**Phase 2B Scope (留待 S2-H12.2B)**:
-- ⚠️ 08-page-flow.md: 深度强化页面流推导
+**Phase 2B-PageFlow深化 Scope (已完成 - 本批)**:
+- ✅ 08-page-flow.md: 深度强化页面流推导链路,5层约束全覆盖
+
+**Phase 2B 剩余 Scope (留待后续)**:
 - ⚠️ 09-page-structure.md: 深度强化页面结构推导
 - ⚠️ 10-component-strategy.md: 深度强化组件策略推导
+- ⚠️ 11-state-matrix.md: 深度强化状态矩阵推导
+- ⚠️ 12-interaction-rules.md: 深度强化交互规则推导
 - ⚠️ 11-state-matrix.md: 深度强化状态矩阵推导
 - ⚠️ 12-interaction-rules.md: 深度强化交互规则推导
 
@@ -346,9 +350,157 @@ execution_constraints: {
 
 ---
 
-## 4. Phase 2A-前段+IA深化 Impact Assessment
+## 3C. Phase 2B-PageFlow深化 Changes (本批)
 
-**Improved (Phase 1 + 2A-前段 + 2A-IA深化)**:
+### 3C.1 Modified: 08-page-flow.md (Deep Hardening)
+
+**深度强化策略**: 单 prompt 深度强化,不追求文件数量。5层约束全覆盖。让 page flow 真正来自 task/business_flow/journey/IA,而不是 sitemap 或页面猜测。
+
+**新增 schema 字段 (16项强制输出)**:
+
+```yaml
+page_flow_rationale:
+  why_this_flow: "<为何这样设计页面流?>"
+  based_on_what: "<基于task_model/business_flow/journey哪些?>"
+  alternative_considered: "<考虑过哪些其他流程?>"
+  trade_offs: "<牺牲什么,换来什么?>"
+  confidence: 0.0-1.0
+
+page_flow_map:
+  total_flows: int
+  happy_path_only: true | false
+  exception_path_coverage: "full | partial | missing"
+  permission_path_coverage: "full | partial | missing"
+  recovery_path_coverage: "full | partial | missing"
+  interruption_path_coverage: "full | partial | missing"
+  flow_completeness_assessment: "complete | partial | happy_path_only"
+
+entry_points: [
+  {entry_id, entry_name, source, serves_task, serves_journey_stage,
+   is_primary, trigger_condition, user_intent, rationale}
+]
+
+exit_points: [
+  {exit_id, exit_name, trigger, destination, user_intent, system_action, rationale}
+]
+
+cross_page_transitions: [
+  {transition_id, from_page, to_page, trigger, trigger_condition,
+   user_intent, system_response, data_passed, state_change, rationale}
+]
+
+decision_points: [
+  {decision_id, page, decision, options, consequences, default_if_any,
+   reversible, rationale}
+]
+
+permission_paths: [
+  {permission_id, required_permission, check_point, check_timing,
+   if_granted, if_denied, error_message, recovery_option, rationale}
+]
+
+exception_paths: [
+  {exception_id, exception_type, trigger, detection_point, user_message,
+   system_log, recovery_options, data_preservation, fallback_path, rationale}
+]
+
+recovery_paths: [
+  {recovery_id, failure_scenario, detection, recovery_steps, data_preservation,
+   user_guidance, auto_retry, max_retry, rationale}
+]
+
+interruption_paths: [
+  {interruption_id, interruption_scenario, detection, save_strategy,
+   recovery_behavior, data_TTL, rationale}
+]
+
+flow_to_task_mapping: {
+  "FLOW-001": {task_id, task_name, flow_completeness, flow_coverage, rationale}
+}
+
+flow_to_route_mapping: {
+  "FLOW-001": {routes, rationale, ia_reference}
+}
+
+transition_trigger_conditions: [
+  {trigger_id, transition, condition, precondition, postcondition, timing, rationale}
+]
+
+page_flow_gaps: [
+  {gap, impact, affects, recommendation, workaround, blocking_prototype}
+]
+
+inferred_flow_items: [
+  {item, inferred_from, confidence, risk_if_wrong, validation_method, why_inferred}
+]
+
+page_flow_confidence_score: {
+  overall, rationale_confidence, task_mapping_confidence,
+  exception_coverage_confidence, permission_coverage_confidence,
+  recovery_coverage_confidence, evidence_support, inferred_ratio, risk_assessment
+}
+
+upstream_consumed: {
+  problem_statement_exists, goal_tree_exists, product_foundation_map_exists,
+  task_model_exists, business_flow_map_exists, journey_stages_exists,
+  ia_rationale_exists, route_hierarchy_exists, task_to_navigation_mapping_exists,
+  domain_object_to_surface_mapping_exists, input_document_type,
+  can_generate_prototype_from_input
+}
+
+execution_constraints: {
+  can_proceed_without_entry_points: false,
+  can_proceed_without_exit_points: false,
+  can_proceed_without_exception_paths: false,
+  can_proceed_without_permission_paths: false,
+  can_claim_complete_flow_with_happy_path_only: false,  // FM-014
+  can_proceed_to_prototype_without_entry_exit: false,
+  can_generate_flow_without_ia_rationale: false,  // FM-013
+  missing_entry_exit_action: "block_prototype_scope",
+  missing_exception_paths_action: "degrade",
+  missing_permission_paths_action: "gap",
+  happy_path_only_action: "degrade_and_FM014"
+}
+```
+
+**Decision Rules 补充 (5层约束)**:
+
+1. **Core Principle**: page flow 不是 sitemap; page flow 必须表达用户如何完成任务/失败如何恢复/权限如何阻断/状态如何变化
+2. **Mandatory Outputs (16项)**: page_flow_rationale / page_flow_map / entry_points / exit_points / cross_page_transitions / decision_points / permission_paths / exception_paths / recovery_paths / interruption_paths / flow_to_task_mapping / flow_to_route_mapping / transition_trigger_conditions / page_flow_gaps / inferred_flow_items / page_flow_confidence_score
+3. **Upstream Consumption (12项)**: 必须消费 problem_statement / goal_tree / product_foundation_map / task_model / business_flow_map / journey_stages / ia_rationale / route_hierarchy / task_to_navigation_mapping / domain_object_to_surface_mapping / input_document_type / can_generate_prototype_from_input
+4. **Anti-Patterns (Blockers)**:
+   - 缺 page_flow_rationale → degrade
+   - 缺 entry_points 或 exit_points → block_prototype_scope
+   - 缺 exception_paths → degrade + gap
+   - page_flow_map.happy_path_only=true → degrade + FM-014
+   - page flow 来自页面猜测而非 task/business_flow/journey → degrade + FM-009
+   - 缺 ia_rationale 时生成完整 page flow → degrade + FM-013
+   - transition 无 trigger_condition / user_intent → gap
+   - inferred flow 元素未标 confidence + risk_if_wrong → gap
+5. **Quality Standards**: page flow 不是 sitemap; 必须表达用户如何完成任务/失败如何恢复/权限如何阻断; 每条 transition 必须说明 trigger condition / user intent / system response; 每个 exception 必须有 recovery options; Inferred flow 元素必须标 confidence + risk_if_wrong + validation_method; 只覆盖 happy path 必须 degrade
+6. **Failure Mode Binding**: FM-009 / FM-013 / FM-014
+7. **Quality Gate Binding**: Input-Quality-Gate §8.1 / Self-Review-Gate §9.1
+8. **Input Readiness Constraints**: input_document_type 决定 page flow 详细程度
+
+**影响**:
+- ✅ Page flow 必须来自 task_model + business_flow + journey + IA,不得来自页面猜测
+- ✅ Page flow 必须有 rationale (why/based_on_what/alternative/trade_offs),否则 degrade
+- ✅ Page flow 必须有 entry_points + exit_points,否则 block_prototype_scope
+- ✅ Page flow 必须有 exception_paths,否则 degrade
+- ✅ Page flow 必须有 permission_paths (如产品含权限)
+- ✅ Page flow 必须有 recovery_paths + interruption_paths
+- ✅ Page flow 每个 transition 必须说明 trigger_condition / user_intent / system_response / state_change
+- ✅ Page flow 必须映射到 task (flow_to_task_mapping + flow_completeness)
+- ✅ Page flow 必须映射到 route (flow_to_route_mapping + ia_reference)
+- ✅ Page flow inferred 项必须标 confidence + risk_if_wrong + validation_method
+- ✅ Page flow 必须输出 page_flow_confidence_score (9维评估)
+- ✅ Page flow happy_path_only=true → degrade + FM-014
+
+---
+
+## 4. Phase 2A-前段+IA深化+PageFlow深化 Impact Assessment
+
+**Improved (Phase 1 + 2A-前段 + 2A-IA深化 + 2B-PageFlow深化)**:
 - ✅ 01-input-diagnosis 输出10域 readiness 判定
 - ✅ 02-design-objectives 强制 problem_statement + goal_tree
 - ✅ 03-product-archetype 防止 example dominance (FM-010)
@@ -356,13 +508,13 @@ execution_constraints: {
 - ✅ 05-business-flow 强制 flow_coverage_check (FM-014)
 - ✅ 06-user-journey 强制 user_intent_by_stage + journey_gaps
 - ✅ 07-IA 深度强化:5层约束 + 11项强制输出 + FM-009/010/013绑定 + IA来自推导而非功能列表
+- ✅ 08-page-flow 深度强化:5层约束 + 16项强制输出 + FM-009/013/014绑定 + page flow来自task/business_flow/journey/IA而非sitemap
 
 **Still Weak (Phase 2B/2C 待办)**:
-- ⚠️ 08-page-flow 尚未深度强化 (仍可能缺 entry/exit/exception paths)
-- ⚠️ 09-page-structure 尚未强化 (仍可能堆功能卡片)
-- ⚠️ 10-component-strategy 尚未强化 (仍可能 Antd 默认拼装)
-- ⚠️ 11-state-matrix 尚未强化 (仍可能只有 happy path)
-- ⚠️ 12-interaction-rules 尚未强化 (仍可能只写点击行为)
+- ⚠️ 09-page-structure 尚未深度强化 (仍可能堆功能卡片)
+- ⚠️ 10-component-strategy 尚未深度强化 (仍可能 Antd 默认拼装)
+- ⚠️ 11-state-matrix 尚未深度强化 (仍可能只有 happy path)
+- ⚠️ 12-interaction-rules 尚未深度强化 (仍可能只写点击行为)
 - ⚠️ 13/14 尚未强制 visual_source_status (仍可能 visual overclaim)
 - ⚠️ 15 尚未强制 prototype_scope (仍可能超出 evidence)
 - ⚠️ 17 尚未强制 verdict_calibration (仍可能 liveness=quality)
