@@ -1,8 +1,8 @@
 # S2-H12 — prd2proto Prompt Execution Chain Hardening
 
-**批次**: S2-H12  
-**时间**: 2026-06-24  
-**状态**: PARTIAL (Phase 1 + Phase 2A-前段 + Phase 2A-IA深化 + Phase 2B-PageFlow深化 + Phase 2B-PageStructure深化 Complete; Phase 2B/2C Remaining)  
+**批次**: S2-H12
+**时间**: 2026-06-24
+**状态**: PARTIAL (Phase 1 + Phase 2A-前段 + Phase 2A-IA深化 + Phase 2B-PageFlow深化 + Phase 2B-PageStructure深化 + Phase 2B-ComponentStrategy深化 Complete; Phase 2B/2C Remaining)
 **性质**: prompts-v2 强制10域推导链路
 
 ---
@@ -27,13 +27,13 @@ S2-H11-B 已完成 knowledge-manifest / reference / gate / failure mode / test �
 **Phase 2B-PageFlow深化 Scope (已完成 - commit 079a386)**:
 - ✅ 08-page-flow.md: 深度强化页面流推导链路,5层约束全覆盖
 
-**Phase 2B-PageStructure深化 Scope (已完成 - 本批)**:
+**Phase 2B-PageStructure深化 Scope (已完成 - commit 4849e66)**:
 - ✅ 09-page-structure.md: 深度强化页面结构推导链路,5层约束全覆盖
 
+**Phase 2B-ComponentStrategy深化 Scope (已完成 - 本批)**:
+- ✅ 10-component-strategy.md: 深度强化组件策略推导链路,5层约束全覆盖
+
 **Phase 2B 剩余 Scope (留待后续)**:
-- ⚠️ 10-component-strategy.md: 深度强化组件策略推导
-- ⚠️ 11-state-matrix.md: 深度强化状态矩阵推导
-- ⚠️ 12-interaction-rules.md: 深度强化交互规则推导
 - ⚠️ 11-state-matrix.md: 深度强化状态矩阵推导
 - ⚠️ 12-interaction-rules.md: 深度强化交互规则推导
 
@@ -56,10 +56,10 @@ S2-H11-B 已完成 knowledge-manifest / reference / gate / failure mode / test �
 {
   "input_document_type": "mrd | roadmap | strategy_brief | functional_prd | flow_detailed_prd | page_spec_prd | visual_ready_package | mixed",
   "input_document_type_rationale": "基于PRD粒度和完整性判断的输入类型",
-  
+
   "can_generate_prototype_from_input": "none | reasoning_only | partial_clickable | clickable_with_gaps | clickable_with_minor_gaps | senior_reviewable",
   "can_generate_prototype_rationale": "基于10域readiness判断的原型生成能力上限",
-  
+
   "ten_domain_readiness": {
     "1_problem_framing": "ready | partial | missing",
     "2_input_critique": "ready | partial | missing",
@@ -72,11 +72,11 @@ S2-H11-B 已完成 knowledge-manifest / reference / gate / failure mode / test �
     "9_visual_design_system": "ready | partial | missing",
     "10_prototype_traceability": "ready | partial | missing"
   },
-  
+
   "forced_degradation_triggers": [
     "example_dominance_risk | visual_source_missing | state_coverage_gaps | ia_rationale_missing | product_foundation_unclear"
   ],
-  
+
   "missing_for_clickable_prototype": ["缺失的输入,如visual_source/异常流程/IA rationale"],
   "missing_for_senior_reviewable": ["缺失的输入,如visual_evidence/complete_state_coverage"]
 }
@@ -519,7 +519,37 @@ execution_constraints: {
 
 ---
 
-## 4. Phase 2A-前段+IA+PageFlow+PageStructure深化 Impact Assessment
+## 3E. Phase 2B-ComponentStrategy深化 Changes (本批)
+
+### 3E.1 Modified: 10-component-strategy.md (Deep Hardening)
+
+**深度强化策略**: 单prompt深度强化。让component strategy真正来自page_goal/task/state/data dependency,而不是Antd默认组件拼装。
+
+**新增18项强制输出**: component_strategy_rationale / component_inventory / component_to_task_mapping / component_to_page_goal_mapping / component_to_state_mapping / component_to_data_dependency_mapping / component_reuse_rationale / component_variant_matrix / interaction_component_contract / feedback_component_contract / accessibility_considerations / design_system_dependency / visual_dependency_boundary / custom_component_candidates / component_risk_assessment / component_gaps / inferred_component_items / component_strategy_confidence_score
+
+**上游消费18项**: 消费01-09全链路推导产物(problem/goal/product/task/flow/journey/IA/page_flow/page_structure全栈)
+
+**5层约束**: Core Principle (component strategy≠UI library selection / 禁止Antd默认拼装) / Mandatory Outputs (18项) / Upstream Consumption (18项) / Anti-Patterns (9项blockers) / Quality Standards + FM绑定(009/014/015/016) + Gate绑定 + Visual Dependency Boundary
+
+**Visual Dependency Boundary (Critical)**:
+- Stage 10 scope: structural + behavioral + state contract
+- NOT in scope: visual style / color palette / typography scale / spacing system
+- Visual deferred to: Stage 13/14 based on visual context 8-layer model
+- Current visual references: Antd default style for structural reference only, not final visual
+- Prohibited: 自由发挥视觉风格 / 把Antd默认样式当最终视觉
+
+**影响**:
+- 每个组件必须映射到task/page_goal/state/data dependency
+- 禁止Antd默认拼装=组件策略
+- 必须有accessibility_considerations
+- 无design_system source时只能structural strategy,不得visual-ready
+- Custom component必须说明为何现有组件不足
+- Visual风格留给13/14,10不生成视觉
+- Inferred项必须标confidence + risk_if_wrong
+
+---
+
+## 4. Phase 2A-前段+IA+PageFlow+PageStructure+ComponentStrategy深化 Impact Assessment
 
 **Improved (Phase 1 + 2A-前段 + 2A-IA深化 + 2B-PageFlow深化)**:
 - ✅ 01-input-diagnosis 输出10域 readiness 判定
@@ -531,8 +561,9 @@ execution_constraints: {
 - ✅ 07-IA 深度强化:5层约束 + 11项强制输出 + FM-009/010/013绑定 + IA来自推导而非功能列表
 - ✅ 08-page-flow 深度强化:5层约束 + 16项强制输出 + FM-009/013/014绑定 + page flow来自task/business_flow/journey/IA而非sitemap
 - ✅ 09-page-structure 深度强化:5层约束 + 19项强制输出 + FM-009/013/014/015绑定 + page structure来自IA/page_flow/task/state而非功能堆叠
+- ✅ 10-component-strategy 深度强化:5层约束 + 18项强制输出 + FM-009/014/015/016绑定 + component strategy来自task/state/goal而非Antd默认拼装 + visual留给13/14
+
 **Still Weak (Phase 2B/2C 待办)**:
-- ⚠️ 10-component-strategy 尚未深度强化 (仍可能 Antd 默认拼装)
 - ⚠️ 11-state-matrix 尚未深度强化 (仍可能只有 happy path)
 - ⚠️ 12-interaction-rules 尚未深度强化 (仍可能只写点击行为)
 - ⚠️ 13/14 尚未强制 visual_source_status (仍可能 visual overclaim)
