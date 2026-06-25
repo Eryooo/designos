@@ -237,9 +237,237 @@
 }
 ```
 
-### Schema关键约束
+---
 
-- **Required顶层字段**：page_states / component_states / business_states / ai_execution_states / permission_states / data_states / boundary_states / state_transitions
+**S2-H12.2E: Senior Design Execution - Deep State Matrix Hardening**
+
+以下字段必须与上述JSON schema合并输出。为避免JSON注释问题,下方用YAML格式说明结构:
+
+```yaml
+# 22项强制输出 (S2-H12.2E)
+
+state_matrix_rationale:
+  why_this_matrix: "<为何这样设计状态矩阵?基于哪些page_flow/exception_paths?>"
+  based_on_what: "<基于page_flow哪些exception?component_strategy哪些state?permission_paths哪些场景?>"
+  alternative_considered: "<考虑过哪些其他状态设计?>"
+  trade_offs: "<本矩阵牺牲了什么(如状态数量/复杂度),换来了什么(如覆盖度/可靠性)>"
+  confidence: 0.0-1.0
+
+state_taxonomy:
+  user_visible_states: ["loading","empty","error","success","disabled","readonly"]
+  system_states: ["pending","processing","completed","failed","timeout"]
+  permission_states: ["granted","denied","restricted","expired"]
+  exception_recovery_states: ["detecting","notifying","recovering","recovered","unrecoverable"]
+  data_states: ["no_data","partial_data","full_data","stale_data","invalid_data"]
+  interaction_feedback_states: ["default","hover","focus","active","pressed","dragging"]
+
+page_state_matrix:
+  "PAGE-001":
+    page_goal: "<页面目标>"
+    mandatory_states: ["loading","empty","error","success"]
+    optional_states: ["permission_denied","offline","first_visit"]
+    state_coverage_score: 0.0-1.0
+    missing_states: ["<缺失的状态>"]
+    rationale: "<为何这些状态?>"
+
+component_state_matrix:
+  "Button":
+    mandatory_states: ["default","hover","focus","disabled","loading"]
+    optional_states: ["success","error"]
+    state_coverage_score: 0.0-1.0
+    rationale: "<为何这些状态?>"
+
+flow_state_matrix:
+  "FLOW-001":
+    flow_states: ["entry","in_progress","completed","abandoned","error"]
+    recovery_states: ["retry","rollback","fallback"]
+    rationale: "<flow如何处理状态?>"
+
+loading_state_specs:
+  - state: "initial_loading"
+    trigger: "<什么触发>"
+    visual: "<骨架屏/spinner/进度条>"
+    message: "<加载提示>"
+    max_duration: "<int秒>"
+    timeout_behavior: "<超时后做什么>"
+    rationale: "<为何这样设计loading?>"
+
+empty_state_specs:
+  - state: "no_data"
+    trigger: "<什么触发>"
+    visual: "<空状态插图/图标>"
+    message: "<友好提示>"
+    actions: ["<引导操作>"]
+    rationale: "<为何这样设计empty?>"
+
+error_state_specs:
+  - state: "network_error"
+    trigger: "<什么触发>"
+    detection: "<如何检测>"
+    visual: "<错误图标/颜色>"
+    message: "<具体错误提示,非'系统错误'>"
+    user_actions: ["<重试>","<返回>"]
+    system_log: "<记录什么>"
+    recovery_path: "<如何恢复>"
+    rationale: "<为何这样处理error?>"
+
+disabled_state_specs:
+  - component: "<组件>"
+    disabled_reason: "<为何禁用>"
+    visual: "<置灰/不可点击>"
+    tooltip: "<悬停提示禁用原因>"
+    enable_condition: "<什么条件恢复>"
+    rationale: "<为何这样设计disabled?>"
+
+permission_state_specs:
+  - permission: "<权限名>"
+    granted_state: "<有权限时状态>"
+    denied_state: "<无权限时状态>"
+    restricted_state: "<受限时状态>"
+    expired_state: "<过期时状态>"
+    detection: "<如何检测权限>"
+    user_message: "<提示用户>"
+    recovery_options: ["<申请权限>","<联系管理员>"]
+    rationale: "<为何这样处理权限?>"
+
+success_state_specs:
+  - state: "operation_success"
+    trigger: "<什么触发>"
+    visual: "<成功图标/颜色>"
+    message: "<成功提示>"
+    duration: "<显示多久>"
+    next_action: "<成功后做什么>"
+    rationale: "<为何这样设计success?>"
+
+conflict_state_specs:
+  - conflict: "<冲突场景:并发编辑/数据过期>"
+    detection: "<如何检测冲突>"
+    visual: "<冲突提示>"
+    message: "<告诉用户冲突>"
+    resolution_options: ["<保留我的>","<使用最新>","<合并>"]
+    rationale: "<为何这样处理冲突?>"
+
+recovery_state_specs:
+  - failure_scenario: "<失败场景>"
+    detection: "<如何检测失败>"
+    recovery_steps: ["<步骤1>","<步骤2>"]
+    data_preservation: "<数据如何保留>"
+    user_guidance: "<给用户什么指引>"
+    auto_retry: true | false
+    max_retry: "<int or null>"
+    fallback: "<最终兜底方案>"
+    rationale: "<为何这样恢复?>"
+
+latency_feedback_states:
+  - operation: "<操作>"
+    instant_feedback: "<0-100ms:立即反馈>"
+    short_wait_feedback: "<100ms-1s:短等待反馈>"
+    long_wait_feedback: "<1s-3s:loading>"
+    timeout_feedback: "<>3s:超时处理>"
+    rationale: "<为何这样设计延迟反馈?>"
+
+offline_or_retry_states:
+  - scenario: "offline"
+    detection: "<如何检测离线>"
+    visual: "<离线提示>"
+    cached_behavior: "<缓存数据如何用>"
+    retry_strategy: "<重连策略>"
+    rationale: "<为何这样处理离线?>"
+
+state_to_component_mapping:
+  loading: {components: ["Spinner","Skeleton","ProgressBar"], rationale: "<为何这些组件?>"}
+  empty: {components: ["EmptyState","Illustration"], rationale: "<为何这些组件?>"}
+  error: {components: ["ErrorMessage","Alert"], rationale: "<为何这些组件?>"}
+
+state_to_interaction_mapping:
+  hover: {interaction: "mouse_over", feedback: "visual_highlight", latency: "<100ms"}
+  focus: {interaction: "tab_or_click", feedback: "outline", latency: "instant"}
+  disabled: {interaction: "block_all", feedback: "tooltip", lationale: "<为何block?>"}
+
+state_transition_rules:
+  - from_state: "loading"
+    to_state: "success"
+    trigger: "data_loaded"
+    animation: "fade_in"
+    duration: "300ms"
+    rationale: "<为何这样转换?>"
+  - from_state: "error"
+    to_state: "loading"
+    trigger: "retry_clicked"
+    animation: "fade_out"
+    duration: "200ms"
+    rationale: "<为何允许重试?>"
+
+state_coverage_score:
+  overall: 0.0-1.0
+  page_state_coverage: 0.0-1.0
+  component_state_coverage: 0.0-1.0
+  exception_recovery_coverage: 0.0-1.0
+  permission_coverage: 0.0-1.0
+  latency_feedback_coverage: 0.0-1.0
+  offline_retry_coverage: 0.0-1.0
+  happy_path_only: true | false
+  assessment: "<覆盖度评估>"
+
+state_coverage_gaps:
+  - gap: "<缺失的状态:某个页面的empty/某个组件的disabled/某个permission的denied>"
+    impact: "critical | high | medium | low"
+    affects: ["<受影响的页面/组件/flow>"]
+    recommendation: "<如何补?>"
+    workaround: "<临时方案?>"
+    blocking_high_fidelity: true | false
+
+inferred_state_items:
+  - item: "<推断的状态:某个error/某个loading/某个permission>"
+    inferred_from: "<推断依据:exception_paths/component_strategy/通用模式>"
+    confidence: 0.0-1.0
+    risk_if_wrong: "critical | high | medium | low"
+    validation_method: "<如何验证?>"
+    why_inferred: "<为何需要推断?page_flow/component_strategy缺什么?>"
+
+state_matrix_confidence_score:
+  overall: 0.0-1.0
+  rationale_confidence: 0.0-1.0
+  coverage_confidence: 0.0-1.0
+  exception_recovery_confidence: 0.0-1.0
+  permission_handling_confidence: 0.0-1.0
+  latency_feedback_confidence: 0.0-1.0
+  evidence_support: "strong | moderate | weak"
+  inferred_ratio: 0.0-1.0
+  risk_assessment: "low | medium | high"
+
+upstream_consumed:
+  task_model_exists: true | false
+  business_flow_map_exists: true | false
+  page_flow_map_exists: true | false
+  permission_paths_exists: true | false
+  exception_paths_exists: true | false
+  recovery_paths_exists: true | false
+  page_structure_spec_exists: true | false
+  page_goal_exists: true | false
+  state_requirements_exists: true | false
+  empty_error_permission_requirements_exists: true | false
+  component_strategy_exists: true | false
+  component_to_state_mapping_exists: true | false
+  interaction_component_contract_exists: true | false
+  feedback_component_contract_exists: true | false
+  input_document_type: "<从stage 01获取>"
+  can_generate_prototype_from_input: "<从stage 01获取>"
+
+execution_constraints:
+  can_proceed_with_happy_path_only: false  # FM-014
+  can_claim_state_coverage_sufficient_with_happy_path: false  # FM-014
+  can_proceed_to_high_fidelity_without_state_matrix: false  # FM-015
+  can_generate_visual_style_in_stage_11: false  # visual deferred to 13/14
+  missing_loading_empty_error_action: "degrade"
+  missing_permission_states_action: "gap"
+  low_state_coverage_score_action: "degrade"
+  happy_path_only_action: "degrade_and_FM014"
+```
+
+---
+
+### Schema关键约束
 - **page state_type枚举**：loading / empty / error / success
 - **component state枚举**：default / hover / active / focused / disabled / loading / readonly
 - **每个状态必须有**：trigger + visual + message（如适用）+ actions（如适用）
@@ -249,12 +477,46 @@
 
 ## 5. Decision Rules
 
+**S2-H12.2E Senior Design Execution Constraints - Deep State Matrix Hardening**:
+
+**Core Principle**:
+- ✅ **State matrix 不是状态名列表**
+- ✅ **只有 happy path 不得称 state coverage sufficient**
+- ✅ **状态定义语义/触发条件/反馈,不定义视觉样式(视觉留给13/14)**
+
+**Mandatory Outputs (22项)**:
+- state_matrix_rationale / state_taxonomy / page_state_matrix / component_state_matrix / flow_state_matrix / loading_state_specs / empty_state_specs / error_state_specs / disabled_state_specs / permission_state_specs / success_state_specs / conflict_state_specs / recovery_state_specs / latency_feedback_states / offline_or_retry_states / state_to_component_mapping / state_to_interaction_mapping / state_transition_rules / state_coverage_score / state_coverage_gaps / inferred_state_items / state_matrix_confidence_score
+
+**Upstream Consumption (16项)**: 消费task/flow/page_flow/permission/exception/recovery/page_structure/component_strategy全链路
+
+**Anti-Patterns (Blockers)**:
+- ❌ 只有happy path → degrade + FM-014
+- ❌ 缺loading/empty/error → degrade
+- ❌ 缺permission states → gap
+- ❌ 低state_coverage_score → degrade
+- ❌ 缺state_to_component_mapping → 不得进入high fidelity
+- ❌ 在stage 11生成视觉样式 → block (视觉留给13/14)
+
+**Quality Standards**: 每页≥loading/empty/error/success / 每组件≥default/hover/focus/disabled/loading / 每permission≥granted/denied/restricted/expired / 每exception≥detection/message/recovery / inferred必须标confidence+risk_if_wrong
+
+**Failure Mode Binding**:
+- FM-014 (State Coverage Illusion / Happy Path Only): happy_path_only=true → degrade
+- FM-015 (Clickable Prototype Verdict Inflation): 缺state_matrix不得称high fidelity
+- FM-016 (Visual Polish Overclaim): 11不生成视觉样式
+
+**Quality Gate Binding**:
+- Input-Quality-Gate §8.1 Ten-Domain Readiness: 消费 `ten_domain_readiness.10_state_feedback_rules`
+- Self-Review-Gate §9.1: 输出state matrix必须满足Domain 10 pass标准
+
+**State Coverage Rules**:
 1. **6维状态全覆盖**：page/component/business/permission/data/AI执行
 2. **每页≥4态**：loading/empty/error/success
 3. **每组件≥5态**：default/hover/active/focused/disabled
 4. **错误必有恢复**：具体提示+可操作
 5. **边界态必检查**：首次/无权限/离线/极端值
 6. **AI态必显式**：思考中/流式/中断/失败
+7. **只有happy path不得称coverage sufficient**
+8. **缺state_to_component_mapping不得进入high fidelity**
 
 ---
 
