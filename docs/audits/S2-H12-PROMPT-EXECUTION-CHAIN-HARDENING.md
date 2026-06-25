@@ -2,7 +2,7 @@
 
 **批次**: S2-H12  
 **时间**: 2026-06-24  
-**状态**: PARTIAL (Phase 1 + Phase 2A-前段 + Phase 2A-IA深化 + Phase 2B-PageFlow深化 Complete; Phase 2B/2C Remaining)  
+**状态**: PARTIAL (Phase 1 + Phase 2A-前段 + Phase 2A-IA深化 + Phase 2B-PageFlow深化 + Phase 2B-PageStructure深化 Complete; Phase 2B/2C Remaining)  
 **性质**: prompts-v2 强制10域推导链路
 
 ---
@@ -24,11 +24,13 @@ S2-H11-B 已完成 knowledge-manifest / reference / gate / failure mode / test �
 **Phase 2A-IA深化 Scope (已完成 - commit 929b358)**:
 - ✅ 07-information-architecture.md: 深度强化 IA 推导链路,5层约束全覆盖
 
-**Phase 2B-PageFlow深化 Scope (已完成 - 本批)**:
+**Phase 2B-PageFlow深化 Scope (已完成 - commit 079a386)**:
 - ✅ 08-page-flow.md: 深度强化页面流推导链路,5层约束全覆盖
 
+**Phase 2B-PageStructure深化 Scope (已完成 - 本批)**:
+- ✅ 09-page-structure.md: 深度强化页面结构推导链路,5层约束全覆盖
+
 **Phase 2B 剩余 Scope (留待后续)**:
-- ⚠️ 09-page-structure.md: 深度强化页面结构推导
 - ⚠️ 10-component-strategy.md: 深度强化组件策略推导
 - ⚠️ 11-state-matrix.md: 深度强化状态矩阵推导
 - ⚠️ 12-interaction-rules.md: 深度强化交互规则推导
@@ -498,7 +500,26 @@ execution_constraints: {
 
 ---
 
-## 4. Phase 2A-前段+IA深化+PageFlow深化 Impact Assessment
+
+---
+
+## 3D. Phase 2B-PageStructure深化 Changes (本批)
+
+### 3D.1 Modified: 09-page-structure.md (Deep Hardening)
+
+**深度强化策略**: 单prompt深度强化。让page structure真正来自IA/page flow/task model/state needs,而不是功能卡片堆叠。
+
+**新增19项强制输出**: page_structure_rationale / page_goal / primary_task_supported / secondary_tasks_supported / route_context / information_priority / content_hierarchy / action_hierarchy / decision_area_mapping / state_requirements / empty_error_permission_requirements / data_dependency_map / page_entry_exit_contract / layout_sections / component_intent_map / page_assumptions / page_gaps / inferred_page_items / page_structure_confidence_score
+
+**上游消费17项**: problem_statement / goal_tree / product_foundation_map / task_model / business_flow_map / journey_stages / ia_rationale / route_hierarchy / page_flow_map + entry/exit/transitions/permission/exception/recovery paths / input_document_type / can_generate_prototype_from_input
+
+**5层约束**: Core Principle (page structure≠功能堆叠) / Mandatory Outputs (19项) / Upstream Consumption (17项) / Anti-Patterns (11项blockers) / Quality Standards + FM绑定(009/013/014/015) + Gate绑定 + Input Readiness Constraints
+
+**影响**: 每页必须有page_goal + primary_task_supported / 必须有content_hierarchy + action_hierarchy / 必须有state_requirements(loading/empty/error/permission等) / 缺state_requirements不得进入high fidelity/senior review / inferred项必须标confidence + risk_if_wrong
+
+---
+
+## 4. Phase 2A-前段+IA+PageFlow+PageStructure深化 Impact Assessment
 
 **Improved (Phase 1 + 2A-前段 + 2A-IA深化 + 2B-PageFlow深化)**:
 - ✅ 01-input-diagnosis 输出10域 readiness 判定
@@ -509,9 +530,8 @@ execution_constraints: {
 - ✅ 06-user-journey 强制 user_intent_by_stage + journey_gaps
 - ✅ 07-IA 深度强化:5层约束 + 11项强制输出 + FM-009/010/013绑定 + IA来自推导而非功能列表
 - ✅ 08-page-flow 深度强化:5层约束 + 16项强制输出 + FM-009/013/014绑定 + page flow来自task/business_flow/journey/IA而非sitemap
-
+- ✅ 09-page-structure 深度强化:5层约束 + 19项强制输出 + FM-009/013/014/015绑定 + page structure来自IA/page_flow/task/state而非功能堆叠
 **Still Weak (Phase 2B/2C 待办)**:
-- ⚠️ 09-page-structure 尚未深度强化 (仍可能堆功能卡片)
 - ⚠️ 10-component-strategy 尚未深度强化 (仍可能 Antd 默认拼装)
 - ⚠️ 11-state-matrix 尚未深度强化 (仍可能只有 happy path)
 - ⚠️ 12-interaction-rules 尚未深度强化 (仍可能只写点击行为)
