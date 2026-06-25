@@ -2,7 +2,7 @@
 
 **批次**: S2-H12
 **时间**: 2026-06-24
-**状态**: PARTIAL (Phase 1 + Phase 2A-前段 + Phase 2A-IA深化 + Phase 2B-PageFlow深化 + Phase 2B-PageStructure深化 + Phase 2B-ComponentStrategy深化 + Phase 2B-StateMatrix深化 Complete; Phase 2B/2C Remaining)
+**状态**: PARTIAL (Phase 1 + Phase 2A-前段 + Phase 2A-IA深化 + Phase 2B-PageFlow深化 + Phase 2B-PageStructure深化 + Phase 2B-ComponentStrategy深化 + Phase 2B-StateMatrix深化 + Phase 2B-InteractionRules深化 Complete; Phase 2B/2C Remaining)
 **性质**: prompts-v2 强制10域推导链路
 
 ---
@@ -33,11 +33,9 @@ S2-H11-B 已完成 knowledge-manifest / reference / gate / failure mode / test �
 **Phase 2B-ComponentStrategy深化 Scope (已完成 - 本批)**:
 
 **Phase 2B-StateMatrix深化 Scope (已完成 - 本批)**:
-- ✅ 11-state-matrix.md: 深度强化状态矩阵推导链路,5层约束全覆盖- ✅ 10-component-strategy.md: 深度强化组件策略推导链路,5层约束全覆盖
 
-**Phase 2B 剩余 Scope (留待后续)**:
-- ⚠️ 12-interaction-rules.md: 深度强化交互规则推导
-- ⚠️ 12-interaction-rules.md: 深度强化交互规则推导
+**Phase 2B-InteractionRules深化 Scope (已完成 - 本批)**:
+- ✅ 12-interaction-rules.md: 深度强化交互规则推导链路,5层约束全覆盖- ✅ 11-state-matrix.md: 深度强化状态矩阵推导链路,5层约束全覆盖- ✅ 10-component-strategy.md: 深度强化组件策略推导链路,5层约束全覆盖
 
 **Phase 2C Scope (留待 S2-H12.2C)**:
 - ⚠️ 13-design-spec-generation.md: 需补充 visual_source_status
@@ -567,7 +565,23 @@ execution_constraints: {
 
 ---
 
-## 4. Phase 2A-前段+IA+PageFlow+PageStructure+ComponentStrategy+StateMatrix深化 Impact Assessment
+## 3G. Phase 2B-InteractionRules深化 Changes (本批)
+
+### 3G.1 Modified: 12-interaction-rules.md (Deep Hardening)
+
+**深度强化策略**: 单prompt深度强化。让interaction rules真正来自task/page_flow/component_strategy/state_matrix,而不是只写"点击按钮跳转"。
+
+**新增21项强制输出**: interaction_rules_rationale / interaction_rule_inventory / trigger_feedback_mapping / validation/error_recovery/confirmation/irreversible_action/permission_interaction/latency_feedback_rules / keyboard_accessibility/focus_management/gesture_shortcut/form/navigation/state_transition_interaction_rules / interaction_to_state_mapping / interaction_to_component_mapping / interaction_risk_assessment / interaction_gaps / inferred_interaction_items / interaction_rules_confidence_score
+
+**上游消费21项**: task/flow/page_flow/permission/exception/recovery/page_structure/component_strategy/state_matrix全链路
+
+**5层约束**: Core Principle (interaction rules≠点击跳转/必须有trigger/feedback/validation/success/failure/recovery) / Mandatory Outputs(21项) / Upstream Consumption(21项) / Anti-Patterns(6项blockers) / Quality Standards + FM绑定(009/014/015/016) + Gate绑定
+
+**影响**: 每个关键action≥trigger/feedback/validation/success/failure/recovery / 每个error path≥recovery rule / 每个irreversible≥confirmation / 每个permission≥denied/restricted/expired handling / 每个long latency≥loading/progress/timeout/retry / 表单≥validation timing/error placement/submit states / 必须keyboard accessibility/focus management / 缺interaction_to_state_mapping不得clickable prototype / 交互定义行为不定义视觉(视觉留给13/14)
+
+---
+
+## 4. Phase 2A-前段+IA+PageFlow+PageStructure+ComponentStrategy+StateMatrix+InteractionRules深化 Impact Assessment
 
 **Improved (Phase 1 + 2A-前段 + 2A-IA深化 + 2B-PageFlow深化)**:
 - ✅ 01-input-diagnosis 输出10域 readiness 判定
@@ -581,7 +595,7 @@ execution_constraints: {
 - ✅ 09-page-structure 深度强化:5层约束 + 19项强制输出 + FM-009/013/014/015绑定 + page structure来自IA/page_flow/task/state而非功能堆叠
 - ✅ 10-component-strategy 深度强化:5层约束 + 18项强制输出 + FM-009/014/015/016绑定 + component strategy来自task/state/goal而非Antd默认拼装 + visual留给13/14
 - ✅ 11-state-matrix 深度强化:5层约束 + 22项强制输出 + FM-014/015/016绑定 + state matrix来自page_flow/exception/permission/recovery而非happy path only
-**Still Weak (Phase 2B/2C 待办)**:
+- ✅ 12-interaction-rules 深度强化:5层约束 + 21项强制输出 + FM-009/014/015/016绑定 + interaction rules来自task/state/component而非点击跳转**Still Weak (Phase 2B/2C 待办)**:
 - ⚠️ 12-interaction-rules 尚未深度强化 (仍可能只写点击行为)
 - ⚠️ 13/14 尚未强制 visual_source_status (仍可能 visual overclaim)
 - ⚠️ 15 尚未强制 prototype_scope (仍可能超出 evidence)
