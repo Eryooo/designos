@@ -581,6 +581,132 @@ execution_constraints: {
 
 ---
 
+## 3H. Phase 2B-DesignSpec深化 Changes (本批 — S2-H12.3A)
+
+### 3H.1 Batch 名称
+
+**S2-H12.3A — Deep Design Spec / Visual Context Prompt Hardening**
+
+### 3H.2 修改范围
+
+- ✅ 只深度强化 `skills/prd2proto/prompts-v2/13-design-spec-generation.md`
+- ✅ 新增对应测试 `skills/prd2proto/tests/test_s2_h12_3a_deep_design_spec_prompt.py`(17 assertions)
+- ❌ 未修改 `14-token-extraction.md` / `15-constrained-code-generation.md` / `16-traceability-generation.md` / `17-professional-gap-assessment.md`
+- ❌ 未修改 runtime / kernel / factory / release / npm / install / version
+
+### 3H.3 13 的能力升级摘要
+
+从 **"设计规范文档汇总器"** 升级为 **"视觉执行与设计规范推导器"**。
+
+不再把 tokens / 组件 / 交互规则机械拼成 design-spec.md,而是基于前 12 阶段产品推导,形成"视觉执行方向 (visual direction) + 设计规范 (design spec)"的资深判断:在什么业务/用户/平台/任务/信息密度/品牌成熟度上下文下,该产品的视觉语言应该往哪个方向走、为什么、边界在哪、缺什么。
+
+### 3H.4 8 层视觉上下文模型 (visual_context_model)
+
+每层强制 `context_value + visual_implication + source` 三元组:
+
+| Layer | 名称 | 影响维度 |
+|-------|------|---------|
+| 1 | `business_model_context` | B2B/B2C/B2B2C/internal enterprise tool/marketplace/creator tool/operations platform → 可信度、效率感、情绪表达、信息密度、品牌温度 |
+| 2 | `user_group_context` | 专业用户/普通消费者/管理者/运营人员/审批人员/创作者/开发者/一线执行人员/混合角色 → 学习成本、操作密度、解释性、容错性、视觉情绪 |
+| 3 | `carrier_platform_context` | desktop web/mobile web/iOS/Android/tablet/large screen/hardware-integrated/multi-device workflow → 导航模式、布局密度、触控目标、断点、可达性 |
+| 4 | `task_frequency_context` | 高频任务/低频配置/审批流/数据分析/内容创作/协作流/异常处理/管理配置 → 信息优先级、快捷操作、状态反馈、默认值策略 |
+| 5 | `information_density_context` | 表单密集/数据密集/卡片聚合/内容浏览/流程向导/命令式工作台/对话式 agent → 空间、分组、字体层级、表格/卡片选择、视觉噪音控制 |
+| 6 | `brand_and_emotion_context` | 强品牌/弱品牌/内部工具/新产品探索/严肃可信/轻量友好/专业高效/创意表达 → 色彩克制程度、插画/图形使用、圆角、动效、语气 |
+| 7 | `design_system_maturity_context` | 已有设计系统/只有组件库/只有品牌色/无规范/需继承 Antd → 能否 claim visual-ready、是否只能 structural、是否需要 gap 标注 |
+| 8 | `implementation_constraint_context` | Antd/Tailwind/自研组件库/多端一致/accessibility/performance/theming/token pipeline → 规范可执行性、token 输出、组件状态、代码实现边界 |
+
+> 缺某层来源 → 降低 `design_spec_confidence_score`,写入 `visual_gaps`。
+
+### 3H.5 新增 18 项强制输出字段
+
+- `design_spec_rationale`(整体推导)
+- `visual_context_model`(8 层上下文推导,4.4 节)
+- `visual_direction_rationale`(由 8 层推导出的视觉方向,禁止空泛词)
+- `product_tone_and_visual_principles`(每条 principle 必须可追溯 `derived_from`/`inferred`)
+- `information_density_strategy`(消费 Stage 09 信息优先级)
+- `platform_adaptation_strategy`(target_platforms / breakpoints / touch_targets / responsive_rationale)
+- `user_group_visual_implications`(消费 Stage 03/04)
+- `component_visual_contract`(消费 Stage 10 `component_strategy` / `visual_dependency_boundary`)
+- `state_visual_contract`(消费 Stage 11 `state_matrix` / `state_to_component_mapping`)
+- `interaction_feedback_visual_contract`(消费 Stage 12 `interaction_rules` / feedback rules)
+- `accessibility_visual_requirements`(消费 Stage 12 a11y hooks + Domain 9,含 WCAG ref)
+- `design_system_dependency_assessment`(`antd_is_structural_reference_only: true` / `can_claim_design_system_ready: false`)
+- `visual_source_status`(`visual_fidelity_mode: structural | visual_direction | visual_ready` / `can_claim_visual_ready: false`)
+- `token_rationale_for_stage_14`(color/typography/spacing/radius_motion rationale + mapping_target,**不替代 Stage 14**)
+- `visual_assumptions`
+- `visual_gaps`(blocks_visual_ready + degrade_action)
+- `inferred_visual_items`(confidence + risk_if_wrong + validation_method)
+- `design_spec_confidence_score`(overall / evidence_support / context_completeness / risk_assessment)
+
+并配套 `upstream_consumption_check` + `execution_constraints` 两组开关。
+
+### 3H.6 上游消费(Stage 01-12 全链路)
+
+| Stage | 必须消费字段 |
+|-------|-----------|
+| 01 | `input_document_type` / `ten_domain_readiness` / `can_generate_prototype_from_input` |
+| 02 | `problem_statement` / `goal_tree` / `success_criteria` |
+| 03 | `product_foundation_map` / archetype / role / `permission_model` |
+| 04 | `task_model` / `task_to_goal_mapping` |
+| 05 | `business_flow_map` / `flow_coverage_check` |
+| 06 | `user_intent_by_stage` / `journey_gaps` |
+| 07 | IA / `route_hierarchy` / `experience_surfaces` |
+| 08 | `page_flow_map` / `exception_paths` / `recovery_paths` |
+| 09 | `page_structure` / `information_priority` / `action_hierarchy` / `state_requirements` |
+| 10 | `component_strategy` / `component_to_task_mapping` / `component_to_state_mapping` / `visual_dependency_boundary` |
+| 11 | `state_matrix` / `state_to_component_mapping` / `state_coverage_gaps` |
+| 12 | `interaction_rules` / feedback rules / accessibility hooks |
+
+断链规则:任一缺失 → 对应视觉契约标 `gap`,该维度不得宣称 visual-ready;10/11/12 约束必须显式消费进入三大视觉契约,不得跳过直接拼装页面(否则触发 FM-009)。
+
+### 3H.7 质量边界(明确登记)
+
+- **Stage 13 不生成最终视觉**:无 brand/design-system source 时,只能输出 **structural visual direction + 风险边界**。
+- **Stage 13 不替代 Stage 14 token extraction**:13 只给 `token_rationale_for_stage_14`(rationale + mapping_target),`replace_stage14_token_extraction: false` 写入 execution_constraints。
+- **无 visual source 不得称 visual-ready**:`can_claim_visual_ready: false` 默认值;`visual_fidelity_mode` 限制为 `structural | visual_direction`;`missing_visual_source_action: "structural_or_visual_direction_only"`。
+- **Antd 默认样式只能作为 structural reference**:`antd_is_structural_reference_only: true` / `treat_antd_default_as_final_visual: false`;Anti-Pattern 首条 block。
+- **visual_gaps / inferred_visual_items 必须保留并传递**:每条 inferred 必带 confidence + risk_if_wrong + validation_method;每条 gap 必带 blocks_visual_ready + degrade_action;由 §9 Self-Check 兜底,不得在下游被悄悄"补齐"。
+
+### 3H.8 Failure Mode & Quality Gate 绑定
+
+**Failure Mode**:
+- **FM-015** (Clickable Prototype Verdict Inflation): 缺上游契约/state visual contract 不得抬高 clickable/visual verdict (`can_inflate_clickable_verdict: false`)
+- **FM-016** (Visual Polish Overclaim): 无 visual / design-system source 时禁止 visual-ready / design-system-ready / production-ready 宣称
+- **FM-009** (PRD-to-Page Shortcut): design spec 必须消费 Stage 01-12 推导,禁止绕过上游直接服务页面拼装
+- **FM-014** (State Coverage Illusion): 缺 `state_visual_contract` / Stage 11 state matrix 时不得 high-fidelity / 不得宣称状态视觉完整
+
+**Quality Gate**:
+- **Input Quality Gate**: 消费 `ten_domain_readiness.9_visual` + visual / design-system input readiness;输入不足 → 降级 fidelity mode
+- **Self Review Gate**: visual / source / verdict calibration —— `visual_source_status` 与 `design_spec_confidence_score` 必须自洽,不得 source 缺失却高 confidence
+- **Progressive Checkpoints**: `visual_source_status` / `design_spec_confidence_score` / gap honesty 作为推进检查点;越权宣称即 fail
+
+### 3H.9 测试摘要 (S2-H12.3A closeout)
+
+- 新测试 `test_s2_h12_3a_deep_design_spec_prompt.py`: **17 passed**(8 层模型/禁止自由发挥/禁止 Antd 默认当最终/visual_source_status/design_system_dependency_assessment/token_rationale_for_stage_14/上游 10/11/12 消费/不替代 14/诚实台账/FM 绑定/Gate 绑定/非粗糙分类/无未否定过度声明 + 18 项强制字段 + Decision Rules 链路完整)
+- prd2proto 全量 (`--import-mode=importlib`): **204 passed, 1 xfailed**
+- shared knowledge layer (`tests/unit/test_shared_knowledge_layer.py`): **9 passed**
+- security unittest (`tests.security.test_scan_sensitive`): **33 OK**
+- `scripts/security/scan_sensitive.py`: **0 命中**
+- `git diff --check`: **clean**(已修复 EOF 空行)
+
+S2-H12.3A commit hash: **`a24f7d5`**
+
+### 3H.10 当前仍未证明的能力(诚实登记)
+
+- 本批只证明 **prompt 结构和约束已硬化**(字段 / 推导链路 / FM-Gate 绑定 / 边界声明)。
+- **不证明**真实 HTML Demo 视觉已经变好:13 只产出 design_spec artifact + design-spec.md,真实视觉落地仍依赖下游。
+- 后续仍需 **`14-token-extraction`** 把 `token_rationale_for_stage_14` 转成可用 token、**`15-constrained-code-generation`** 把 design spec 转成 HTML Demo,才能闭环验证视觉执行方向是否真的落地。
+- 后续仍需重新跑 **PRD-only / clickable prototype replay** 多 case 验证,才能从"prompt 硬化"上升为 stable senior output。
+- 视觉证据 / brand source 等 input quality 取决于外部输入,prompt 硬化不会自动补齐 input。
+
+### 3H.11 下一步建议
+
+**S2-H12.3B — Deep Token Extraction Prompt Hardening Only**:
+- 强化 `14-token-extraction.md`,使其消费 13 输出的 `token_rationale_for_stage_14` + `visual_context_model` + `design_system_dependency_assessment`,做真正的可追溯 token 推导,而不是凭空给 hex。
+- 范围:只 14 prompt + 对应测试;不动 15/16/17、不动 runtime、不补审计文档(留 S2-H12.3B.1)。
+
+---
+
 ## 4. Phase 2A-前段+IA+PageFlow+PageStructure+ComponentStrategy+StateMatrix+InteractionRules深化 Impact Assessment
 
 **Improved (Phase 1 + 2A-前段 + 2A-IA深化 + 2B-PageFlow深化)**:
